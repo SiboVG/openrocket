@@ -2050,15 +2050,17 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 	 * @return	The Stage component this component belongs to.
 	 * @throws	IllegalStateException   if we cannot find an AxialStage above <code>this</code> 
 	 */
-	public final ComponentAssembly getAssembly() {
+	public final ComponentAssembly getParentAssembly() {
 		checkState();
 
 		RocketComponent curComponent = this;
-		while ( null != curComponent ) {
-			if( ComponentAssembly.class.isAssignableFrom( curComponent.getClass()))
+		while (curComponent != null) {
+			if (curComponent instanceof ComponentAssembly) {
 				return (ComponentAssembly) curComponent;
+			}
+			curComponent = curComponent.getParent();
 		}
-		throw new IllegalStateException("getAssembly() called on hierarchy without a ComponentAssembly.");
+		throw new IllegalStateException("getParentAssembly() called on hierarchy without a ComponentAssembly.");
 	}
 
 	/**
