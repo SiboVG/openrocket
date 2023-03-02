@@ -19,8 +19,6 @@ public abstract class AbstractRocketLoader implements RocketLoader {
 		
 		try {
 			loadFromStream(context, source);
-		} catch (RocketLoadException e) {
-			throw e;
 		} catch (IOException e) {
 			throw new RocketLoadException("I/O error: " + e.getMessage(), e);
 		}
