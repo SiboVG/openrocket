@@ -1,5 +1,6 @@
 package net.sf.openrocket.rocketcomponent;
 
+import net.sf.openrocket.simulation.customexpression.CustomExpression;
 import net.sf.openrocket.util.Coordinate;
 import net.sf.openrocket.util.Transformation;
 
@@ -14,6 +15,9 @@ public class InstanceContext {
 	
 	@Override
 	public boolean equals(Object obj) {
+		if (!(obj instanceof InstanceContext)) {
+			return false;
+		}
 		if (this == obj)
 			return true;
 		

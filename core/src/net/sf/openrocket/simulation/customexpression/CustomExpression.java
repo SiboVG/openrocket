@@ -534,6 +534,9 @@ public class CustomExpression implements Cloneable {
 	
 	@Override
 	public boolean equals(Object obj) {
+		if (!(obj instanceof CustomExpression)) {
+			return false;
+		}
 		CustomExpression other = (CustomExpression) obj;
 		
 		return (this.getName().equals(other.getName()) &&

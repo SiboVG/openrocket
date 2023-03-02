@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 
 import net.sf.openrocket.rocketcomponent.FlightConfiguration;
 import net.sf.openrocket.rocketcomponent.Rocket;
+import net.sf.openrocket.simulation.customexpression.CustomExpression;
 import net.sf.openrocket.util.StringUtil;
 
 
@@ -633,6 +634,9 @@ public class UnitGroup {
 	
 	@Override
 	public boolean equals(Object o) {
+		if (!(o instanceof UnitGroup)) {
+			return false;
+		}
 		UnitGroup u = (UnitGroup) o;
 		int size = units.size();
 		if (size != u.units.size()) {
