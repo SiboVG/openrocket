@@ -288,7 +288,6 @@ public class RotationLogger {
 	private static int unsign(byte b) {
 		if (b >= 0)
 			return b;
-		else
 		return 256 + b;
 	}
 	
