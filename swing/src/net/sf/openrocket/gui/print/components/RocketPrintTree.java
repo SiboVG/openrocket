@@ -16,6 +16,7 @@ import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -247,9 +248,7 @@ class NamedVector extends Vector<CheckBoxNode> {
 	
 	public NamedVector(String theName, CheckBoxNode[] elements) {
 		name = theName;
-		for (CheckBoxNode element : elements) {
-			add(element);
-		}
+		this.addAll(Arrays.asList(elements));
 	}
 	
 	@Override
