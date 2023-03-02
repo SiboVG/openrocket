@@ -51,12 +51,9 @@ public class PrintableComponent extends JPanel implements Printable, Comparable<
      * @return PAGE_EXISTS if the page is rendered successfully or NO_SUCH_PAGE if <code>pageIndex</code> specifies a
      *         non-existent page.
      *
-     * @throws java.awt.print.PrinterException
-     *          thrown when the print job is terminated.
      */
     @Override
-    public int print (final Graphics graphics, final PageFormat pageFormat, final int pageIndex)
-            throws PrinterException {
+    public int print (final Graphics graphics, final PageFormat pageFormat, final int pageIndex) {
 
         Graphics2D g2d = (Graphics2D) graphics;
         PrintUtilities.translateToJavaOrigin(g2d, pageFormat);

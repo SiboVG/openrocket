@@ -75,7 +75,7 @@ public class IntegrationTest {
 	private String massComponentID = null;
 	
 	@BeforeClass
-	public static void setUp() throws Exception {
+	public static void setUp() {
 		Module applicationModule = new CoreServicesModule();
 		
 		Module pluginModule = new PluginModule();

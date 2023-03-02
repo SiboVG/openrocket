@@ -122,7 +122,7 @@ public class TrapezoidFinSetTest extends BaseTestCase {
 
 
 	@Test
-	public void testCGCalculations_finWithTab() throws IllegalFinPointException {
+	public void testCGCalculations_finWithTab() {
 		final Rocket rkt = createSimpleTrapezoidalFin();
 		FinSet fins = (FinSet) rkt.getChild(0).getChild(0).getChild(0);
 

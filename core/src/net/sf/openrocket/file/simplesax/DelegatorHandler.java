@@ -64,7 +64,7 @@ class DelegatorHandler extends DefaultHandler {
 	 * Stores encountered characters in the elementData stack.
 	 */
 	@Override
-	public void characters(char[] chars, int start, int length) throws SAXException {
+	public void characters(char[] chars, int start, int length) {
 		// Check for ignore
 		if (ignore > 0)
 			return;

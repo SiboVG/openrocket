@@ -53,7 +53,7 @@ public class BugReportTest {
 	
 
 	@Test
-	public void testBugReportFailure() throws IOException {
+	public void testBugReportFailure() {
 		HttpURLConnectionMock connection = setup();
 		connection.setResponseCode(200);
 		

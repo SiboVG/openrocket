@@ -12,7 +12,7 @@ public class AirStart extends AbstractSimulationListener {
 	private static final double ALTITUDE = 1000.0;
 	
 	@Override
-	public void startSimulation(SimulationStatus status) throws SimulationException {
+	public void startSimulation(SimulationStatus status) {
 		Coordinate position = status.getRocketPosition();
 		position = position.add(0, 0, ALTITUDE);
 		status.setRocketPosition(position);

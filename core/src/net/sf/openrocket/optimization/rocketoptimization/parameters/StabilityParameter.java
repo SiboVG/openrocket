@@ -43,7 +43,7 @@ public class StabilityParameter implements OptimizableParameter {
 	}
 	
 	@Override
-	public double computeValue(Simulation simulation) throws OptimizationException {
+	public double computeValue(Simulation simulation) {
 		log.debug("Calculating stability of simulation, absolute=" + absolute);
 
 		/*

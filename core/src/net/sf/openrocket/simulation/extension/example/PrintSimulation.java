@@ -12,7 +12,7 @@ import net.sf.openrocket.simulation.listeners.AbstractSimulationListener;
 public class PrintSimulation extends AbstractSimulationExtension {
 
 	@Override
-	public void initialize(SimulationConditions conditions) throws SimulationException {
+	public void initialize(SimulationConditions conditions) {
 		conditions.getSimulationListenerList().add(new PrintSimulationListener());
 	}
 
@@ -29,14 +29,14 @@ public class PrintSimulation extends AbstractSimulationExtension {
 	private static class PrintSimulationListener extends AbstractSimulationListener {
 		
 		@Override
-		public boolean handleFlightEvent(SimulationStatus status, FlightEvent event) throws SimulationException {
+		public boolean handleFlightEvent(SimulationStatus status, FlightEvent event) {
 			System.out.println("*** handleEvent *** " + event.toString() +
 							   " position=" + status.getRocketPosition() + " velocity=" + status.getRocketVelocity());
 			return true;
 		}
 		
 		@Override
-		public void postStep(SimulationStatus status) throws SimulationException {
+		public void postStep(SimulationStatus status) {
 			FlightDataBranch data = status.getFlightData();
 			System.out.printf("*** stepTaken *** time=%.3f position=" + status.getRocketPosition() +
 							  " velocity=" + status.getRocketVelocity() + "=%.3f\n", status.getSimulationTime(), status.getRocketVelocity().length());

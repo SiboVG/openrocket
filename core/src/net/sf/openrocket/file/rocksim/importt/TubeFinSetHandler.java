@@ -67,7 +67,7 @@ public class TubeFinSetHandler extends PositionDependentHandler<TubeFinSet> {
      * {@inheritDoc}
      */
     @Override
-    public ElementHandler openElement(final String element, final HashMap<String, String> attributes, final WarningSet warnings) throws SAXException {
+    public ElementHandler openElement(final String element, final HashMap<String, String> attributes, final WarningSet warnings) {
         return PlainTextHandler.INSTANCE;
     }
 

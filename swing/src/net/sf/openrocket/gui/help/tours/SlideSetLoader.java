@@ -110,7 +110,7 @@ public class SlideSetLoader {
 	 * @param reader	the reader to read from.
 	 * @return			the slide set.
 	 */
-	public SlideSet load(Reader reader) throws IOException {
+	public SlideSet load(Reader reader) {
 		source = new TextLineReader(reader);
 		
 		// Read title and description

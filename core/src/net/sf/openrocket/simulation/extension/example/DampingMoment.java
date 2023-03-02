@@ -39,7 +39,7 @@ public class DampingMoment extends AbstractSimulationExtension {
 	}
 	
 	@Override
-	public void initialize(SimulationConditions conditions) throws SimulationException {
+	public void initialize(SimulationConditions conditions) {
 		log.debug("initializing...");
 		conditions.getSimulationListenerList().add(new DampingMomentListener());
 	}
@@ -57,7 +57,7 @@ public class DampingMoment extends AbstractSimulationExtension {
 	private static class DampingMomentListener extends AbstractSimulationListener {
 	
 		@Override
-		public FlightConditions postFlightConditions(SimulationStatus status, FlightConditions flightConditions) throws SimulationException {
+		public FlightConditions postFlightConditions(SimulationStatus status, FlightConditions flightConditions) {
 			
 			//status.getFlightData().setValue(cdm, aerodynamicPart + propulsivePart);
 			status.getFlightData().setValue(cdm, calculate(status, flightConditions));

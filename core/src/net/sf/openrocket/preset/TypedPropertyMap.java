@@ -77,7 +77,7 @@ public class TypedPropertyMap implements Cloneable {
 	}
 
 	@Override
-	protected TypedPropertyMap clone() throws CloneNotSupportedException {
+	protected TypedPropertyMap clone() {
 		TypedPropertyMap clone = new TypedPropertyMap();
 		clone.putAll(this);
 		return clone;

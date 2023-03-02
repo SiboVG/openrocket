@@ -255,8 +255,7 @@ public class PhotoFrame extends JFrame {
 					public void performAction(final BufferedImage image) {
 						Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new Transferable() {
 							@Override
-							public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException,
-									IOException {
+							public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
 								if (flavor.equals(DataFlavor.imageFlavor) && image != null) {
 									return image;
 								} else {

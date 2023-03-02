@@ -227,14 +227,14 @@ public class CSVSave extends AbstractSimulationExtension {
 	}
 	
 	@Override
-	public void initialize(SimulationConditions conditions) throws SimulationException {
+	public void initialize(SimulationConditions conditions) {
 		conditions.getSimulationListenerList().add(new CSVSaveListener());
 	}
 	
 	private class CSVSaveListener extends AbstractSimulationListener {
 		
 		@Override
-		public boolean handleFlightEvent(SimulationStatus status, FlightEvent event) throws SimulationException {
+		public boolean handleFlightEvent(SimulationStatus status, FlightEvent event) {
 			
 			if (event.getType() == FlightEvent.Type.LAUNCH) {
 				int n = 1;
@@ -285,7 +285,7 @@ public class CSVSave extends AbstractSimulationExtension {
 		}
 		
 		@Override
-		public void postStep(SimulationStatus status) throws SimulationException {
+		public void postStep(SimulationStatus status) {
 			
 			final Types[] types = Types.values();
 			StringBuilder s;

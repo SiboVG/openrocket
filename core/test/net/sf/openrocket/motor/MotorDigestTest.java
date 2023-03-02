@@ -70,7 +70,7 @@ public class MotorDigestTest {
 	
 	
 	private static String md5(String source) 
-	throws NoSuchAlgorithmException, UnsupportedEncodingException {
+	throws NoSuchAlgorithmException {
 		MessageDigest digest = MessageDigest.getInstance("MD5");
 		return TextUtil.hexString(digest.digest(source.getBytes(StandardCharsets.UTF_8)));
 	}

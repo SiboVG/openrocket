@@ -47,7 +47,7 @@ public class RockSimAppearanceBuilder extends AppearanceBuilder {
 		}
 	}
 	
-	private void parseTexture(String s) throws FileNotFoundException, MalformedURLException {
+	private void parseTexture(String s) {
 		s = s.trim();
 		if (s.isEmpty()) {
 			return;

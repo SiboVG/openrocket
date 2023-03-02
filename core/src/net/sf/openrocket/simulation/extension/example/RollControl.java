@@ -31,7 +31,7 @@ public class RollControl extends AbstractSimulationExtension {
 	private static final FlightDataType FIN_CANT_TYPE = FlightDataType.getType("Control fin cant", "\u03B1fc", UnitGroup.UNITS_ANGLE);
 
 	@Override
-	public void initialize(SimulationConditions conditions) throws SimulationException {
+	public void initialize(SimulationConditions conditions) {
 		conditions.getSimulationListenerList().add(new RollControlListener());
 	}
 
@@ -159,7 +159,7 @@ public class RollControl extends AbstractSimulationExtension {
 		}
 		
 		@Override
-		public void postStep(SimulationStatus status) throws SimulationException {
+		public void postStep(SimulationStatus status) {
 			// Activate PID controller only after a specific time
 			if (status.getSimulationTime() < getStartTime()) {
 				prevTime = status.getSimulationTime();

@@ -25,15 +25,14 @@ class CustomExpressionHandler extends AbstractElementHandler {
 	
 	@Override
 	public ElementHandler openElement(String element,
-			HashMap<String, String> attributes, WarningSet warnings)
-			throws SAXException {
+			HashMap<String, String> attributes, WarningSet warnings) {
 		
 		return this;
 	}
 	
 	@Override
 	public void closeElement(String element, HashMap<String, String> attributes,
-			String content, WarningSet warnings) throws SAXException {
+			String content, WarningSet warnings) {
 		
 		if (element.equals("type")) {
 			contentHandler.getDocument().addCustomExpression(currentExpression);

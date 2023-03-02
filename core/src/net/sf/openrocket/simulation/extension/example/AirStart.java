@@ -12,7 +12,7 @@ import net.sf.openrocket.util.Coordinate;
 public class AirStart extends AbstractSimulationExtension {
 	
 	@Override
-	public void initialize(SimulationConditions conditions) throws SimulationException {
+	public void initialize(SimulationConditions conditions) {
 		conditions.getSimulationListenerList().add(new AirStartListener());
 	}
 	
@@ -55,7 +55,7 @@ public class AirStart extends AbstractSimulationExtension {
 	
 	private class AirStartListener extends AbstractSimulationListener {
 		@Override
-		public void startSimulation(SimulationStatus status) throws SimulationException {
+		public void startSimulation(SimulationStatus status) {
 			status.setRocketPosition(new Coordinate(0, 0, getLaunchAltitude()));
 			status.setRocketVelocity(status.getRocketOrientationQuaternion().rotate(new Coordinate(0, 0, getLaunchVelocity())));
 		}

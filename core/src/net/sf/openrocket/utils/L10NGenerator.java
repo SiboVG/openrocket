@@ -10,7 +10,7 @@ import net.sf.openrocket.util.Chars;
  */
 public class L10NGenerator {
 	
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 		
 		// Latin chars
 		for (char ch = 128; ch < 0x250; ch++) {

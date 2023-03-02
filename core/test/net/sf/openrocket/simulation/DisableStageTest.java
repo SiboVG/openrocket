@@ -23,7 +23,7 @@ public class DisableStageTest extends BaseTestCase {
      * Tests that the simulation results are correct when a single stage is deactivated and re-activated.
      */
     @Test
-    public void testSingleStage() throws SimulationException {
+    public void testSingleStage() {
         //// Test disabling the stage
         Rocket rocket = TestRockets.makeEstesAlphaIII();
 

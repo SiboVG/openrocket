@@ -28,7 +28,7 @@ public class TestFunctionOptimizerLoop {
 		
 		Function function = new Function() {
 			@Override
-			public double evaluate(Point p) throws InterruptedException {
+			public double evaluate(Point p) {
 				evaluations++;
 				return p.sub(optimum).length2();
 			}

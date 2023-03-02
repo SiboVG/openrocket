@@ -173,8 +173,7 @@ class FinSetHandler extends AbstractElementHandler {
 	}
 
 	@Override
-	public void closeElement(String element, HashMap<String, String> attributes, String content, WarningSet warnings)
-			throws SAXException {
+	public void closeElement(String element, HashMap<String, String> attributes, String content, WarningSet warnings) {
 		try {
 			if (RockSimCommonConstants.NAME.equals(element)) {
 				name = content;
@@ -277,7 +276,7 @@ class FinSetHandler extends AbstractElementHandler {
 
 	@Override
 	public void endHandler(String element, HashMap<String, String> attributes,
-			String content, WarningSet warnings) throws SAXException {
+			String content, WarningSet warnings) {
 		//Create the fin set and correct for overrides and actual material densities
 		FinSet finSet = asOpenRocket(warnings);
 

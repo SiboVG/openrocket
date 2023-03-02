@@ -39,8 +39,7 @@ class StageSeparationConfigurationHandler extends AbstractElementHandler {
 	
 	
 	@Override
-	public ElementHandler openElement(String element, HashMap<String, String> attributes, WarningSet warnings)
-			throws SAXException {
+	public ElementHandler openElement(String element, HashMap<String, String> attributes, WarningSet warnings) {
 		return PlainTextHandler.INSTANCE;
 	}
 	
@@ -66,7 +65,7 @@ class StageSeparationConfigurationHandler extends AbstractElementHandler {
 	}
 	
 	@Override
-	public void endHandler(String element, HashMap<String, String> attributes, String content, WarningSet warnings) throws SAXException {
+	public void endHandler(String element, HashMap<String, String> attributes, String content, WarningSet warnings) {
 		FlightConfigurationId fcid = new FlightConfigurationId(attributes.get("configid"));
 		StageSeparationConfiguration sepConfig = stage.getSeparationConfigurations().get(fcid);
 		

@@ -21,7 +21,7 @@ public class ConfigHandler extends AbstractElementHandler {
 	private final List<Object> list = new ArrayList<>();
 	
 	@Override
-	public ElementHandler openElement(String element, HashMap<String, String> attributes, WarningSet warnings) throws SAXException {
+	public ElementHandler openElement(String element, HashMap<String, String> attributes, WarningSet warnings) {
 		if (element.equals("entry") && "list".equals(attributes.get("type"))) {
 			listHandler = new ConfigHandler();
 			return listHandler;

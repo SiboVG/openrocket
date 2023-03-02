@@ -11,11 +11,11 @@ import org.junit.Test;
 public class OpenRocketComponentSaverTest {
 
     @Before
-    public void before() throws Exception {
+    public void before() {
     }
 
     @After
-    public void after() throws Exception {
+    public void after() {
     }
 
     /**
@@ -24,7 +24,7 @@ public class OpenRocketComponentSaverTest {
      *
      */
     @Test
-    public void testMarshalToOpenRocketComponent() throws Exception {
+    public void testMarshalToOpenRocketComponent() {
         //TODO: Test goes here...
     }
 
@@ -34,7 +34,7 @@ public class OpenRocketComponentSaverTest {
      *
      */
     @Test
-    public void testUnmarshalFromOpenRocketComponent() throws Exception {
+    public void testUnmarshalFromOpenRocketComponent() {
         //TODO: Test goes here...
     }
 
@@ -44,7 +44,7 @@ public class OpenRocketComponentSaverTest {
      *
      */
     @Test
-    public void testSave() throws Exception {
+    public void testSave() {
         //TODO: Test goes here...
     }
 
@@ -55,7 +55,7 @@ public class OpenRocketComponentSaverTest {
      *
      */
     @Test
-    public void testFromOpenRocketComponent() throws Exception {
+    public void testFromOpenRocketComponent() {
         //TODO: Test goes here...
 /*
 try {
@@ -75,7 +75,7 @@ try {
      *
      */
     @Test
-    public void testToOpenRocketComponentDTO() throws Exception {
+    public void testToOpenRocketComponentDTO() {
         //TODO: Test goes here...
 /*
 try {
@@ -95,7 +95,7 @@ try {
      *
      */
     @Test
-    public void testToComponentDTO() throws Exception {
+    public void testToComponentDTO() {
         //TODO: Test goes here...
 /*
 try {

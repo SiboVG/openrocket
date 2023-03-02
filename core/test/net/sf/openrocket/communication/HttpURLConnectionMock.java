@@ -139,13 +139,13 @@ public class HttpURLConnectionMock extends HttpURLConnection {
 	}
 	
 	@Override
-	public void setRequestMethod(String method) throws ProtocolException {
+	public void setRequestMethod(String method) {
 		assertFalse(connected);
 		this.requestMethod = method;
 	}
 	
 	@Override
-	public int getResponseCode() throws IOException {
+	public int getResponseCode() {
 		connect();
 		return this.responseCode;
 	}
@@ -257,7 +257,7 @@ public class HttpURLConnectionMock extends HttpURLConnection {
 	
 	
 	@Override
-	public InputStream getInputStream() throws IOException {
+	public InputStream getInputStream() {
 		assertTrue(doInput);
 		assertNull(inputStream);
 		assertNotNull(content);
@@ -269,7 +269,7 @@ public class HttpURLConnectionMock extends HttpURLConnection {
 	
 	
 	@Override
-	public OutputStream getOutputStream() throws IOException {
+	public OutputStream getOutputStream() {
 		assertTrue(doOutput);
 		assertNull(outputStream);
 		outputStream = new ByteArrayOutputStream();
@@ -376,13 +376,13 @@ public class HttpURLConnectionMock extends HttpURLConnection {
 	
 	
 	@Override
-	public Permission getPermission() throws IOException {
+	public Permission getPermission() {
 		throw new UnsupportedOperationException();
 	}
 	
 	
 	@Override
-	public String getResponseMessage() throws IOException {
+	public String getResponseMessage() {
 		throw new UnsupportedOperationException();
 	}
 	
@@ -412,14 +412,14 @@ public class HttpURLConnectionMock extends HttpURLConnection {
 	
 	
 	@Override
-	public Object getContent() throws IOException {
+	public Object getContent() {
 		throw new UnsupportedOperationException();
 	}
 	
 	
 	
 	@Override
-	public Object getContent(@SuppressWarnings("rawtypes") Class[] classes) throws IOException {
+	public Object getContent(@SuppressWarnings("rawtypes") Class[] classes) {
 		throw new UnsupportedOperationException();
 	}
 	

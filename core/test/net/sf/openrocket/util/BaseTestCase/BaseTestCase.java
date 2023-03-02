@@ -17,7 +17,7 @@ import com.google.inject.util.Modules;
 public class BaseTestCase {
 	
 	@BeforeClass
-	public static void setUp() throws Exception {
+	public static void setUp() {
 		Module applicationModule = new ServicesForTesting();
 		Module debugTranslator = new AbstractModule() {
 			

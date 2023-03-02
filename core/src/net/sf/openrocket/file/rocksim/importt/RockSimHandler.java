@@ -127,7 +127,7 @@ class RockSimContentHandler extends AbstractElementHandler {
 	
 	@Override
 	public void closeElement(String element, HashMap<String, String> attributes,
-			String content, WarningSet warnings) throws SAXException {
+			String content, WarningSet warnings) {
 		/**
 		 * SAX handler for Rocksim file version number.  The value is not used currently, but could be used in the future
 		 * for backward/forward compatibility reasons (different lower level handlers could be called via a strategy pattern).
@@ -282,7 +282,7 @@ class RocketDesignHandler extends AbstractElementHandler {
 	
 	@Override
 	public void closeElement(String element, HashMap<String, String> attributes,
-			String content, WarningSet warnings) throws SAXException {
+			String content, WarningSet warnings) {
 		try {
 			if (RockSimCommonConstants.NAME.equals(element)) {
 				component.setName(content);

@@ -204,10 +204,8 @@ public final class ITextHelper {
      * @param writer   the underlying content writer
      * @param image    the source image
      *
-     * @throws DocumentException thrown if the document could not be written
      */
-    public static void renderImageAcrossPages(Rectangle pageSize, Document doc, PdfWriter writer, java.awt.Image image)
-            throws DocumentException {
+    public static void renderImageAcrossPages(Rectangle pageSize, Document doc, PdfWriter writer, java.awt.Image image) {
         final int margin = (int) Math.min(doc.topMargin(), PrintUnit.POINTS_PER_INCH * 0.3f);
         float wPage = pageSize.getWidth() - 2 * margin;
         float hPage = pageSize.getHeight() - 2 * margin;

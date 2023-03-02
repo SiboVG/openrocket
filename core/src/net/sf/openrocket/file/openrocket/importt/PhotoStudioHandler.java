@@ -29,7 +29,7 @@ public class PhotoStudioHandler extends AbstractElementHandler {
     }
 
     @Override
-    public ElementHandler openElement(String element, HashMap<String, String> attributes, WarningSet warnings) throws SAXException {
+    public ElementHandler openElement(String element, HashMap<String, String> attributes, WarningSet warnings) {
         return PlainTextHandler.INSTANCE;
     }
 

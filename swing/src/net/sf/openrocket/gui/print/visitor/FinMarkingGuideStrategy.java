@@ -63,20 +63,16 @@ public class FinMarkingGuideStrategy {
      * @param rocket the rocket to render all
      */
     private void render(final Rocket rocket) {
-        try {
-            FinMarkingGuide pfs = new FinMarkingGuide(rocket);
+        FinMarkingGuide pfs = new FinMarkingGuide(rocket);
 
-            java.awt.Dimension size = pfs.getSize();
-            final Dimension pageSize = getPageSize();
-            if (fitsOnOnePage(pageSize, size.getWidth(), size.getHeight())) {
-                printOnOnePage(pfs);
-            } else {
-                BufferedImage image = (BufferedImage) pfs.createImage();
-                ITextHelper.renderImageAcrossPages(new Rectangle(pageSize.getWidth(), pageSize.getHeight()),
-                        document, writer, image);
-            }
-        } catch (DocumentException e) {
-            log.error("Could not render the fin marking guide.", e);
+        java.awt.Dimension size = pfs.getSize();
+        final Dimension pageSize = getPageSize();
+        if (fitsOnOnePage(pageSize, size.getWidth(), size.getHeight())) {
+            printOnOnePage(pfs);
+        } else {
+            BufferedImage image = (BufferedImage) pfs.createImage();
+            ITextHelper.renderImageAcrossPages(new Rectangle(pageSize.getWidth(), pageSize.getHeight()),
+                    document, writer, image);
         }
     }
 

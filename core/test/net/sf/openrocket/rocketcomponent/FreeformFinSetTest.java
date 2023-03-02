@@ -1186,7 +1186,7 @@ public class FreeformFinSetTest extends BaseTestCase {
     
 
 	@Test
-	public void testWildmanVindicatorShape() throws Exception {
+	public void testWildmanVindicatorShape() {
 		// This fin shape is similar to the aft fins on the Wildman Vindicator.
 		// A user noticed that if the y values are similar but not equal,
 		// the computation of CP was incorrect because of numerical instability.
@@ -1439,7 +1439,7 @@ public class FreeformFinSetTest extends BaseTestCase {
 	}
 
 	@Test
-	public void testFreeFormCMWithNegativeY() throws Exception {
+	public void testFreeFormCMWithNegativeY() {
 		final Rocket rkt = createTemplateRocket();
 	    final BodyTube body = (BodyTube) rkt.getChild(0).getChild(1);
 

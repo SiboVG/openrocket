@@ -233,7 +233,7 @@ public class Alt15K {
 
 	
 	
-	private byte[] getVersionData() throws PortInUseException, IOException, 
+	private byte[] getVersionData() throws IOException,
 										   UnsupportedCommOperationException {
 		byte[] ver = new byte[3];
 		byte[] buf;

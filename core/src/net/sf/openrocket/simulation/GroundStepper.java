@@ -15,7 +15,7 @@ public class GroundStepper extends AbstractSimulationStepper {
 	}
 
 	@Override
-	public void step(SimulationStatus status, double timeStep) throws SimulationException {
+	public void step(SimulationStatus status, double timeStep) {
 		log.trace("step:  position=" + status.getRocketPosition() + ", velocity=" + status.getRocketVelocity());
 		status.setSimulationTime(status.getSimulationTime() + timeStep);
 	}

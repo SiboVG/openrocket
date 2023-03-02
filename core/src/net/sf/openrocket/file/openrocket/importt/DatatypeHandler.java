@@ -22,8 +22,7 @@ class DatatypeHandler extends AbstractElementHandler {
 	
 	@Override
 	public ElementHandler openElement(String element,
-			HashMap<String, String> attributes, WarningSet warnings)
-			throws SAXException {
+			HashMap<String, String> attributes, WarningSet warnings) {
 		
 		if (element.equals("type") && attributes.get("source").equals("customexpression")) {
 			customExpressionHandler = new CustomExpressionHandler(contentHandler, context);

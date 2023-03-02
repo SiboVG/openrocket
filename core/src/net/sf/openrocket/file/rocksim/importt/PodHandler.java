@@ -33,7 +33,7 @@ public class PodHandler extends PositionDependentHandler<PodSet> {
     }
 
     @Override
-    public ElementHandler openElement(String element, HashMap<String, String> attributes, WarningSet warnings) throws SAXException {
+    public ElementHandler openElement(String element, HashMap<String, String> attributes, WarningSet warnings) {
         if (RockSimCommonConstants.BODY_TUBE.equals(element)) {     // RockSim pods allow body tubes, not inner tubes
             return new BodyTubeHandler(context, podSet, warnings);
         }

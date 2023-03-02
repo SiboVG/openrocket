@@ -35,13 +35,12 @@ public class CSVExport {
 	 * @param simulationComments	whether to output general simulation comments.
 	 * @param fieldComments			whether to output field comments.
 	 * @param eventComments			whether to output comments for the flight events.
-	 * @throws IOException 			if an I/O exception occurs.
 	 */
 	public static void exportCSV(OutputStream stream, Simulation simulation,
 			FlightDataBranch branch, FlightDataType[] fields, Unit[] units,
 			String fieldSeparator, int decimalPlaces, boolean isExponentialNotation,
 			String commentStarter, boolean simulationComments, boolean fieldComments,
-			boolean eventComments) throws IOException {
+			boolean eventComments) {
 
 		if (fields.length != units.length) {
 			throw new IllegalArgumentException("fields and units lengths must be equal " +

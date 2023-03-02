@@ -70,7 +70,7 @@ public class PDFPrintStreamDoc implements Doc {
      * Always return the same instance.
      */
     @Override
-    public InputStream getStreamForBytes () throws IOException {
+    public InputStream getStreamForBytes () {
         return stream;
     }
 }

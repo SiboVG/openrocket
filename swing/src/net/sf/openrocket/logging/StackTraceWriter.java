@@ -11,7 +11,7 @@ public class StackTraceWriter extends Writer {
 	private boolean addPrefix = true;
 
 	@Override
-	public void write(char[] cbuf, int off, int len) throws IOException {
+	public void write(char[] cbuf, int off, int len) {
 		for (int i=0; i<len; i++) {
 			if (addPrefix) {
 				buffer.append(PREFIX);
@@ -36,12 +36,12 @@ public class StackTraceWriter extends Writer {
 
 	
 	@Override
-	public void close() throws IOException {
+	public void close() {
 		// no-op
 	}
 
 	@Override
-	public void flush() throws IOException {
+	public void flush() {
 		// no-op
 	}
 

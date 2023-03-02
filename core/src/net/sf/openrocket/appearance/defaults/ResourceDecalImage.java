@@ -39,12 +39,12 @@ public class ResourceDecalImage implements DecalImage {
 	}
 	
 	@Override
-	public InputStream getBytes() throws IOException {
+	public InputStream getBytes() {
 		return this.getClass().getResourceAsStream(resource);
 	}
 	
 	@Override
-	public void exportImage(File file) throws IOException {
+	public void exportImage(File file) {
 	}
 		
 	@Override

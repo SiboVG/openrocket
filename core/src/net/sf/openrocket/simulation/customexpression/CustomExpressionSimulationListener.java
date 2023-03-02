@@ -21,7 +21,7 @@ public class CustomExpressionSimulationListener extends AbstractSimulationListen
 	}
 	
 	@Override
-	public void postStep(SimulationStatus status) throws SimulationException {
+	public void postStep(SimulationStatus status) {
 		if (expressions == null || expressions.size() == 0) {
 			return;
 		}

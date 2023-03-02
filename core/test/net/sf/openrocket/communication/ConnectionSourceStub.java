@@ -12,7 +12,7 @@ public class ConnectionSourceStub implements ConnectionSource {
 	}
 	
 	@Override
-	public HttpURLConnection getConnection(String url) throws IOException {
+	public HttpURLConnection getConnection(String url) {
 		if (connection instanceof HttpURLConnectionMock) {
 			((HttpURLConnectionMock)connection).setTrueUrl(url);
 		}

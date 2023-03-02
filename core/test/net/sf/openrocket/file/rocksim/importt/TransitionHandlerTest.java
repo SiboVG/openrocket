@@ -45,10 +45,9 @@ public class TransitionHandlerTest extends RockSimTestBase {
     /**
      * Method: openElement(String element, HashMap<String, String> attributes, WarningSet warnings)
      *
-     * @throws Exception thrown if something goes awry
      */
     @org.junit.Test
-    public void testOpenElement() throws Exception {
+    public void testOpenElement() {
         Assert.assertEquals(PlainTextHandler.INSTANCE, new TransitionHandler(null, new AxialStage(), new WarningSet()).openElement(null, null, null));
     }
 
@@ -210,20 +209,18 @@ public class TransitionHandlerTest extends RockSimTestBase {
     /**
      * Method: getComponent()
      *
-     * @throws Exception thrown if something goes awry
      */
     @org.junit.Test
-    public void testGetComponent() throws Exception {
+    public void testGetComponent() {
         Assert.assertTrue(new TransitionHandler(null, new AxialStage(), new WarningSet()).getComponent() instanceof Transition);
     }
 
     /**
      * Method: getMaterialType()
      *
-     * @throws Exception thrown if something goes awry
      */
     @org.junit.Test
-    public void testGetMaterialType() throws Exception {
+    public void testGetMaterialType() {
         Assert.assertEquals(Material.Type.BULK, new TransitionHandler(null, new AxialStage(), new WarningSet()).getMaterialType());
     }
 

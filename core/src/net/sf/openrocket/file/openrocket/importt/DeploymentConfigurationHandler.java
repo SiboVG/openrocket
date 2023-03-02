@@ -42,8 +42,7 @@ class DeploymentConfigurationHandler extends AbstractElementHandler {
 	}
 	
 	@Override
-	public ElementHandler openElement(String element, HashMap<String, String> attributes, WarningSet warnings)
-			throws SAXException {
+	public ElementHandler openElement(String element, HashMap<String, String> attributes, WarningSet warnings) {
 		return PlainTextHandler.INSTANCE;
 	}
 	
@@ -72,7 +71,7 @@ class DeploymentConfigurationHandler extends AbstractElementHandler {
 	}
 	
 	@Override
-	public void endHandler(String element, HashMap<String, String> attributes, String content, WarningSet warnings) throws SAXException {
+	public void endHandler(String element, HashMap<String, String> attributes, String content, WarningSet warnings) {
 		FlightConfigurationId configId = new FlightConfigurationId(attributes.get("configid"));
 		DeploymentConfiguration def = recoveryDevice.getDeploymentConfigurations().getDefault();
 		recoveryDevice.getDeploymentConfigurations().set(configId, getConfiguration(def));

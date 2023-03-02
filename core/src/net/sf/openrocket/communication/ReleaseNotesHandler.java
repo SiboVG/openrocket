@@ -28,7 +28,7 @@ public class ReleaseNotesHandler extends AbstractElementHandler {
     }
 
     @Override
-    public ElementHandler openElement(String element, HashMap<String, String> attributes, WarningSet warnings) throws SAXException {
+    public ElementHandler openElement(String element, HashMap<String, String> attributes, WarningSet warnings) {
         if (element.equals("body")) {       // The release notes are encapsulated in a root <body> tag (required for XML parsing)
             return this;
         }

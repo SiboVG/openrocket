@@ -23,10 +23,9 @@ public class ParachuteHandlerTest extends RockSimTestBase {
     /**
      * Method: openElement(String element, HashMap<String, String> attributes, WarningSet warnings)
      *
-     * @throws Exception thrown if something goes awry
      */
     @org.junit.Test
-    public void testOpenElement() throws Exception {
+    public void testOpenElement() {
         Assert.assertEquals(PlainTextHandler.INSTANCE, new ParachuteHandler(null, new BodyTube(), new WarningSet()).openElement(null, null, null));
     }
 
@@ -120,20 +119,18 @@ public class ParachuteHandlerTest extends RockSimTestBase {
     /**
      * Method: getComponent()
      *
-     * @throws Exception thrown if something goes awry
      */
     @org.junit.Test
-    public void testGetComponent() throws Exception {
+    public void testGetComponent() {
         Assert.assertTrue(new ParachuteHandler(null, new BodyTube(), new WarningSet()).getComponent() instanceof Parachute);
     }
 
     /**
      * Method: getMaterialType()
      *
-     * @throws Exception thrown if something goes awry
      */
     @org.junit.Test
-    public void testGetMaterialType() throws Exception {
+    public void testGetMaterialType() {
         Assert.assertEquals(Material.Type.SURFACE, new ParachuteHandler(null, new BodyTube(), new WarningSet()).getMaterialType());
     }
 

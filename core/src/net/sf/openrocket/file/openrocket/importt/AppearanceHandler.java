@@ -28,8 +28,7 @@ class AppearanceHandler extends AbstractElementHandler {
 	}
 	
 	@Override
-	public ElementHandler openElement(String element, HashMap<String, String> attributes, WarningSet warnings)
-			throws SAXException {
+	public ElementHandler openElement(String element, HashMap<String, String> attributes, WarningSet warnings) {
 		if ("decal".equals(element)) {
 			String name = attributes.remove("name");
 			Attachment a = context.getAttachmentFactory().getAttachment(name);

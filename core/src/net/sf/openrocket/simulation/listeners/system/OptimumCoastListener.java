@@ -26,7 +26,7 @@ public class OptimumCoastListener extends AbstractSimulationListener {
 	}
 	
 	@Override
-	public boolean recoveryDeviceDeployment(SimulationStatus status, RecoveryDevice recoveryDevice) throws SimulationException {
+	public boolean recoveryDeviceDeployment(SimulationStatus status, RecoveryDevice recoveryDevice) {
 		return false;
 	}
 	

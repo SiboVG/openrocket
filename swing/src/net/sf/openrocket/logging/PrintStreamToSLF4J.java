@@ -18,7 +18,7 @@ public class PrintStreamToSLF4J {
 			StringBuilder currentLine = new StringBuilder();
 			
 			@Override
-			public synchronized void write(int b) throws IOException {
+			public synchronized void write(int b) {
 				if (b == '\r' || b == '\n') {
 					//Line is complete, log it
 					if (currentLine.toString().trim().length() > 0) {

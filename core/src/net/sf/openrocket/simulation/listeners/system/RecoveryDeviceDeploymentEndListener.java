@@ -17,7 +17,7 @@ public class RecoveryDeviceDeploymentEndListener extends AbstractSimulationListe
 	public static final RecoveryDeviceDeploymentEndListener INSTANCE = new RecoveryDeviceDeploymentEndListener();
 	
 	@Override
-	public boolean recoveryDeviceDeployment(SimulationStatus status, RecoveryDevice recoveryDevice) throws SimulationException {
+	public boolean recoveryDeviceDeployment(SimulationStatus status, RecoveryDevice recoveryDevice) {
 		status.getEventQueue().add(new FlightEvent(FlightEvent.Type.SIMULATION_END, status.getSimulationTime()));
 		return true;
 	}

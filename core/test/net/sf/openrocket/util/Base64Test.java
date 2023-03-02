@@ -10,7 +10,7 @@ import org.junit.Test;
 public class Base64Test {
 	
 	@Test
-	public void oldMainTest() throws Exception {
+	public void oldMainTest() {
 		
 		// TODO - this test case should probably be less random and more targeted to
 		// special cases such as:

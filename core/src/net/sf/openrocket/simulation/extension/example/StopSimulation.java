@@ -16,7 +16,7 @@ import net.sf.openrocket.simulation.listeners.AbstractSimulationListener;
 public class StopSimulation extends AbstractSimulationExtension {
 
 	@Override
-	public void initialize(SimulationConditions conditions) throws SimulationException {
+	public void initialize(SimulationConditions conditions) {
 		conditions.getSimulationListenerList().add(new StopSimulationListener());
 	}
 
@@ -75,7 +75,7 @@ public class StopSimulation extends AbstractSimulationExtension {
 		
 		
 		@Override
-		public void postStep(SimulationStatus status) throws SimulationException {
+		public void postStep(SimulationStatus status) {
 			step++;
 			if ((step % getReportRate()) == 0) {
 				long t = System.nanoTime();

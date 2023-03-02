@@ -15,7 +15,7 @@ public class PrintUnitTest {
      *
      */
     @Test
-    public void testToMillis() throws Exception {
+    public void testToMillis() {
         Assert.assertEquals(25.400000, PrintUnit.INCHES.toMillis(1), 0.00001);
         Assert.assertEquals(1, PrintUnit.MILLIMETERS.toInches(PrintUnit.INCHES.toMillis(1)), 0.000001);
     }
@@ -26,7 +26,7 @@ public class PrintUnitTest {
      *
      */
     @Test
-    public void testToCentis() throws Exception {
+    public void testToCentis() {
         Assert.assertEquals(4, PrintUnit.CENTIMETERS.toMeters(PrintUnit.METERS.toCentis(4)), 0.000001);
         Assert.assertEquals(4, PrintUnit.CENTIMETERS.toPoints(PrintUnit.POINTS.toCentis(4)), 0.000001);
     }
@@ -37,7 +37,7 @@ public class PrintUnitTest {
      *
      */
     @Test
-    public void testToPoints() throws Exception {
+    public void testToPoints() {
         Assert.assertEquals(1, PrintUnit.POINTS.toInches(72), 0.00001);
         Assert.assertEquals(25.4, PrintUnit.POINTS.toMillis(72), 0.00001);
         Assert.assertEquals(1, PrintUnit.MILLIMETERS.toPoints(PrintUnit.POINTS.toMillis(1)), 0.000001);

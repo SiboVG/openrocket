@@ -45,10 +45,9 @@ public class InnerBodyTubeHandlerTest extends RockSimTestBase {
     /**
      * Method: openElement(String element, HashMap<String, String> attributes, WarningSet warnings)
      *
-     * @throws Exception thrown if something goes awry
      */
     @org.junit.Test
-    public void testOpenElement() throws Exception {
+    public void testOpenElement() {
         Assert.assertEquals(PlainTextHandler.INSTANCE, new InnerBodyTubeHandler(null, new BodyTube(), new WarningSet()).openElement(null, null, null));
         Assert.assertNotNull(new InnerBodyTubeHandler(null, new BodyTube(), new WarningSet()).openElement("AttachedParts", null, null));
     }
@@ -121,20 +120,18 @@ public class InnerBodyTubeHandlerTest extends RockSimTestBase {
     /**
      * Method: getComponent()
      *
-     * @throws Exception thrown if something goes awry
      */
     @org.junit.Test
-    public void testGetComponent() throws Exception {
+    public void testGetComponent() {
         Assert.assertTrue(new InnerBodyTubeHandler(null, new BodyTube(), new WarningSet()).getComponent() instanceof InnerTube);
     }
 
     /**
      * Method: getMaterialType()
      *
-     * @throws Exception thrown if something goes awry
      */
     @org.junit.Test
-    public void testGetMaterialType() throws Exception {
+    public void testGetMaterialType() {
         Assert.assertEquals(Material.Type.BULK, new InnerBodyTubeHandler(null, new BodyTube(), new WarningSet()).getMaterialType());
     }
 

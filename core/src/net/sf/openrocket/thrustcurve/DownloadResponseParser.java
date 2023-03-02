@@ -44,7 +44,7 @@ public class DownloadResponseParser implements ElementHandler {
 	}
 	
 	@Override
-	public ElementHandler openElement(String element, HashMap<String, String> attributes, WarningSet warnings) throws SAXException {
+	public ElementHandler openElement(String element, HashMap<String, String> attributes, WarningSet warnings) {
 		if (result_tag.equals(element)) {
 			motorBurnFile = new MotorBurnFile();
 		}
@@ -71,7 +71,7 @@ public class DownloadResponseParser implements ElementHandler {
 	}
 	
 	@Override
-	public void endHandler(String element, HashMap<String, String> attributes, String content, WarningSet warnings) throws SAXException {
+	public void endHandler(String element, HashMap<String, String> attributes, String content, WarningSet warnings) {
 	}
 	
 }
