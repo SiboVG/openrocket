@@ -110,10 +110,7 @@ public class DecalRegistry {
 	}
 	
 	public Collection<DecalImage> getDecalList() {
-		
-		Set<DecalImage> decals = new TreeSet<DecalImage>();
-		
-		decals.addAll(registeredDecals.values());
+		Set<DecalImage> decals = new TreeSet<>(registeredDecals.values());
 		
 		return decals;
 	}

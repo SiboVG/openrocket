@@ -180,8 +180,7 @@ public class SimulationExportPanel extends JPanel {
 		this.add(csvOptions, "spany, split, growx 1");
 		
 		//// Add series selection box
-		ArrayList<String> stages = new ArrayList<String>();
-		stages.addAll(Util.generateSeriesLabels(simulation));
+		ArrayList<String> stages = new ArrayList<>(Util.generateSeriesLabels(simulation));
 		
 		final JComboBox<String> stageSelection = new JComboBox<String>(stages.toArray(new String[0]));
 		stageSelection.addItemListener(new ItemListener() {
