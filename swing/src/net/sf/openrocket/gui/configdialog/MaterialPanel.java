@@ -74,9 +74,7 @@ public class MaterialPanel extends JPanel {
                     document.startUndo("Set rocket finish");
 
                     // Do changes
-                    Iterator<RocketComponent> iter = component.getRoot().iterator();
-                    while (iter.hasNext()) {
-                        RocketComponent c = iter.next();
+                    for (RocketComponent c : component.getRoot()) {
                         if (c instanceof ExternalComponent) {
                             ((ExternalComponent) c).setFinish(f);
                         }

@@ -456,13 +456,11 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 	 * Return true if any of this component's children are a RecoveryDevice
 	 */
 	public boolean hasRecoveryDevice() {
-	  Iterator<RocketComponent> iterator = this.iterator();
-	  while (iterator.hasNext()) {
-	    RocketComponent child = iterator.next();
-	    if (child instanceof RecoveryDevice) {
-	      return true;
-	    }
-	  }
+		for (RocketComponent child : this) {
+			if (child instanceof RecoveryDevice) {
+				return true;
+			}
+		}
 	  return false;
 	}
 	
@@ -2743,10 +2741,9 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 
 	public void toDebugTreeHelper(StringBuilder buffer, final String indent) {
 		this.toDebugTreeNode(buffer, indent);
-		
-		Iterator<RocketComponent> iterator = this.children.iterator();
-		while (iterator.hasNext()) {
-			iterator.next().toDebugTreeHelper(buffer, indent + "....");
+
+		for (RocketComponent child : this.children) {
+			child.toDebugTreeHelper(buffer, indent + "....");
 		}
 	}
 	

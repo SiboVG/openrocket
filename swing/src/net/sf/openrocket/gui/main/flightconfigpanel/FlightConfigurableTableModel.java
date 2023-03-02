@@ -53,11 +53,9 @@ public class FlightConfigurableTableModel<T extends FlightConfigurableComponent>
 	@SuppressWarnings("unchecked")
 	protected void initialize() {
 		components.clear();
-		Iterator<RocketComponent> it = rocket.iterator();
-		while (it.hasNext()) {
-			RocketComponent c = it.next();
-			if (clazz.isAssignableFrom(c.getClass()) && includeComponent( (T) c) ) {
-				components.add( (T) c);
+		for (RocketComponent c : rocket) {
+			if (clazz.isAssignableFrom(c.getClass()) && includeComponent((T) c)) {
+				components.add((T) c);
 			}
 		}
 	}

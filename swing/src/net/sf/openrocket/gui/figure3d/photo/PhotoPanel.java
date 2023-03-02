@@ -430,15 +430,12 @@ public class PhotoPanel extends JPanel implements GLEventListener {
 		final FlightConfigurationId motorID = configuration.getFlightConfigurationID();
 
 
-
-		final Iterator<MotorConfiguration> iter = configuration.getActiveMotors().iterator();
-		while( iter.hasNext()){
-			MotorConfiguration curConfig = iter.next();
+		for (MotorConfiguration curConfig : configuration.getActiveMotors()) {
 			final MotorMount mount = curConfig.getMount();
-			int curStageNumber = ((RocketComponent)mount).getStageNumber();
+			int curStageNumber = ((RocketComponent) mount).getStageNumber();
 
 			//If this mount is not in currentStage continue on to the next one.
-			if( curStageNumber != bottomStageNumber ){
+			if (curStageNumber != bottomStageNumber) {
 				continue;
 			}
 
@@ -449,13 +446,13 @@ public class PhotoPanel extends JPanel implements GLEventListener {
 					.toAbsolute(new Coordinate(((RocketComponent) mount)
 							.getLength() + mount.getMotorOverhang() - length));
 
-            for (Coordinate coordinate : position) {
-                gl.glPushMatrix();
-                gl.glTranslated(coordinate.x + motor.getLength(),
-                        coordinate.y, coordinate.z);
-                FlameRenderer.drawExhaust(gl, p, motor);
-                gl.glPopMatrix();
-            }
+			for (Coordinate coordinate : position) {
+				gl.glPushMatrix();
+				gl.glTranslated(coordinate.x + motor.getLength(),
+						coordinate.y, coordinate.z);
+				FlameRenderer.drawExhaust(gl, p, motor);
+				gl.glPopMatrix();
+			}
 		}
 
 		gl.glDisable(GL.GL_BLEND);

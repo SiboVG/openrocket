@@ -267,11 +267,9 @@ public class OpenRocketDocument implements ComponentChangeListener, StateChangeL
 	 */
 	public int countDecalUsage(DecalImage img) {
 		int count = 0;
-		
-		Iterator<RocketComponent> it = rocket.iterator();
-		while (it.hasNext()) {
-			RocketComponent c = it.next();
-			if(hasDecal(c ,img))
+
+		for (RocketComponent c : rocket) {
+			if (hasDecal(c, img))
 				count++;
 			else if (hasDecalInside(c, img))
 				count++;

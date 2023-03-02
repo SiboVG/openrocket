@@ -755,15 +755,12 @@ public class Rocket extends ComponentAssembly {
 		}
 		
 		// removed any component configuration tied to this FCID
-		Iterator<RocketComponent> iterator = this.iterator();
-		while (iterator.hasNext()) {
-			RocketComponent comp = iterator.next();
-			
-			if (comp instanceof FlightConfigurableComponent){
-				FlightConfigurableComponent confbl = (FlightConfigurableComponent)comp;
-				confbl.reset( fcid);
-			}
-		}
+        for (RocketComponent comp : this) {
+            if (comp instanceof FlightConfigurableComponent) {
+                FlightConfigurableComponent confbl = (FlightConfigurableComponent) comp;
+                confbl.reset(fcid);
+            }
+        }
 				
 		// Get current configuration:
 		this.configSet.reset(fcid);
@@ -797,20 +794,17 @@ public class Rocket extends ComponentAssembly {
 		if( fcid.hasError() ){
 			return false;
 		}
-		
-		Iterator<RocketComponent> iterator = this.iterator();
-		while (iterator.hasNext()) {
-			RocketComponent c = iterator.next();
-			
-			if (c instanceof MotorMount) {
-				MotorMount mount = (MotorMount) c;
-				if (!mount.isMotorMount())
-					continue;
-				if (mount.getMotorConfig(fcid).getMotor() != null) {
-					return true;
-				}
-			}
-		}
+
+        for (RocketComponent c : this) {
+            if (c instanceof MotorMount) {
+                MotorMount mount = (MotorMount) c;
+                if (!mount.isMotorMount())
+                    continue;
+                if (mount.getMotorConfig(fcid).getMotor() != null) {
+                    return true;
+                }
+            }
+        }
 		return false;
 	}
 
