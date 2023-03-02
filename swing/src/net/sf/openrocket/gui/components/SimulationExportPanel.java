@@ -257,11 +257,11 @@ public class SimulationExportPanel extends JPanel {
 		int total = selected.length;
 		int n = 0;
 		String str;
-		
-		for (int i = 0; i < selected.length; i++) {
-			if (selected[i])
-				n++;
-		}
+
+        for (boolean b : selected) {
+            if (b)
+                n++;
+        }
 		
 		if (n == 1) {
 			//// Exporting 1 variable out of 

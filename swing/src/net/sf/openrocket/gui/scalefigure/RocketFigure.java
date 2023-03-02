@@ -247,12 +247,12 @@ public class RocketFigure extends AbstractScaleFigure {
 			boolean selected = false;
 			
 			// Check if component is in the selection
-			for (int j = 0; j < selection.length; j++) {
-				if (c == selection[j]) {
-					selected = true;
-					break;
-				}
-			}
+            for (RocketComponent component : selection) {
+                if (c == component) {
+                    selected = true;
+                    break;
+                }
+            }
 			
 			// Set component color and line style
 			net.sf.openrocket.util.Color color = rcs.color;

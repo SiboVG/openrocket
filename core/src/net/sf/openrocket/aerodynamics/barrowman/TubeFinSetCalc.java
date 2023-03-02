@@ -208,11 +208,11 @@ public class TubeFinSetCalc extends TubeCalc {
 		// In between use interpolation polynomial
 		double x = 1.0;
 		double val = 0;
-		
-		for (int i = 0; i < poly.length; i++) {
-			val += poly[i] * x;
-			x *= m;
-		}
+
+        for (double v : poly) {
+            val += v * x;
+            x *= m;
+        }
 		//		log.debug("val = {}", val);
 		return val;
 	}

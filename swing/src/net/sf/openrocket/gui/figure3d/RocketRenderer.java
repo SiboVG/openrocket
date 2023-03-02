@@ -218,13 +218,13 @@ public abstract class RocketRenderer {
 		
 			Coordinate[] position = ((RocketComponent) mount).toAbsolute(new Coordinate(((RocketComponent) mount)
 					.getLength() + mount.getMotorOverhang() - length));
-		
-			for (int i = 0; i < position.length; i++) {
-				gl.glPushMatrix();
-				gl.glTranslated(position[i].x, position[i].y, position[i].z);
-				renderMotor(gl, motor);
-				gl.glPopMatrix();
-			}
+
+            for (Coordinate coordinate : position) {
+                gl.glPushMatrix();
+                gl.glTranslated(coordinate.x, coordinate.y, coordinate.z);
+                renderMotor(gl, motor);
+                gl.glPopMatrix();
+            }
 			
 		}
 	}

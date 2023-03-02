@@ -26,8 +26,7 @@ public enum ShapeDTO {
 
     public static ShapeDTO asDTO(Transition.Shape targetShape) {
         ShapeDTO[] values = values();
-        for (int i = 0; i < values.length; i++) {
-            ShapeDTO value = values[i];
+        for (ShapeDTO value : values) {
             if (value.corollary.equals(targetShape)) {
                 return value;
             }

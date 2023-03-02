@@ -97,8 +97,8 @@ public class OpenRocketComponentDTO {
 
     public List<ComponentPreset> asComponentPresets() throws InvalidComponentPresetException {
         List<ComponentPreset> result = new ArrayList<ComponentPreset>(components.size());
-        for (int i = 0; i < components.size(); i++) {
-            result.add(components.get(i).asComponentPreset(getLegacy(), materials));
+        for (BaseComponentDTO component : components) {
+            result.add(component.asComponentPreset(getLegacy(), materials));
         }
         return result;
     }

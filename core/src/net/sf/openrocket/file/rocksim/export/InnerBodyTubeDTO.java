@@ -55,36 +55,35 @@ public class InnerBodyTubeDTO extends BodyTubeDTO implements AttachableParts {
 		setRadialLoc(bt.getRadialPosition() * RockSimCommonConstants.ROCKSIM_TO_OPENROCKET_LENGTH);
 		
 		List<RocketComponent> children = bt.getChildren();
-		for (int i = 0; i < children.size(); i++) {
-			RocketComponent rocketComponents = children.get(i);
-			if (rocketComponents instanceof InnerTube) {
-				final InnerTube innerTube = (InnerTube) rocketComponents;
-				//Only if the inner tube is NOT a cluster, then create the corresponding Rocksim DTO and add it
-				//to the list of attached parts.  If it is a cluster, then it is handled specially outside of this
-				//loop.
-				if (innerTube.getInstanceCount() == 1) {
-					addAttachedPart(new InnerBodyTubeDTO(innerTube, this));
-				}
-			} else if (rocketComponents instanceof BodyTube) {
-				addAttachedPart(new BodyTubeDTO((BodyTube) rocketComponents));
-			} else if (rocketComponents instanceof Transition) {
-				addAttachedPart(new TransitionDTO((Transition) rocketComponents));
-			} else if (rocketComponents instanceof EngineBlock) {
-				addAttachedPart(new EngineBlockDTO((EngineBlock) rocketComponents));
-			} else if (rocketComponents instanceof TubeCoupler) {
-				addAttachedPart(new TubeCouplerDTO((TubeCoupler) rocketComponents));
-			} else if (rocketComponents instanceof CenteringRing) {
-				addAttachedPart(new CenteringRingDTO((CenteringRing) rocketComponents));
-			} else if (rocketComponents instanceof Bulkhead) {
-				addAttachedPart(new BulkheadDTO((Bulkhead) rocketComponents));
-			} else if (rocketComponents instanceof Streamer) {
-				addAttachedPart(new StreamerDTO((Streamer) rocketComponents));
-			} else if (rocketComponents instanceof Parachute) {
-				addAttachedPart(new ParachuteDTO((Parachute) rocketComponents));
-			} else if (rocketComponents instanceof MassObject) {
-				addAttachedPart(new MassObjectDTO((MassObject) rocketComponents));
-			}
-		}
+        for (RocketComponent rocketComponents : children) {
+            if (rocketComponents instanceof InnerTube) {
+                final InnerTube innerTube = (InnerTube) rocketComponents;
+                //Only if the inner tube is NOT a cluster, then create the corresponding Rocksim DTO and add it
+                //to the list of attached parts.  If it is a cluster, then it is handled specially outside of this
+                //loop.
+                if (innerTube.getInstanceCount() == 1) {
+                    addAttachedPart(new InnerBodyTubeDTO(innerTube, this));
+                }
+            } else if (rocketComponents instanceof BodyTube) {
+                addAttachedPart(new BodyTubeDTO((BodyTube) rocketComponents));
+            } else if (rocketComponents instanceof Transition) {
+                addAttachedPart(new TransitionDTO((Transition) rocketComponents));
+            } else if (rocketComponents instanceof EngineBlock) {
+                addAttachedPart(new EngineBlockDTO((EngineBlock) rocketComponents));
+            } else if (rocketComponents instanceof TubeCoupler) {
+                addAttachedPart(new TubeCouplerDTO((TubeCoupler) rocketComponents));
+            } else if (rocketComponents instanceof CenteringRing) {
+                addAttachedPart(new CenteringRingDTO((CenteringRing) rocketComponents));
+            } else if (rocketComponents instanceof Bulkhead) {
+                addAttachedPart(new BulkheadDTO((Bulkhead) rocketComponents));
+            } else if (rocketComponents instanceof Streamer) {
+                addAttachedPart(new StreamerDTO((Streamer) rocketComponents));
+            } else if (rocketComponents instanceof Parachute) {
+                addAttachedPart(new ParachuteDTO((Parachute) rocketComponents));
+            } else if (rocketComponents instanceof MassObject) {
+                addAttachedPart(new MassObjectDTO((MassObject) rocketComponents));
+            }
+        }
 		//Do the cluster.  For now this splits the cluster into separate tubes, which is how Rocksim represents it.
 		//The import (from Rocksim to OR) could be augmented to be more intelligent and try to determine if the
 		//co-located tubes are a cluster.

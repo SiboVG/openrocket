@@ -157,12 +157,12 @@ public class SerialDownload {
 		
 		String device = null;
 		String[] devices = SerialDownload.getNames();
-		for (int i=0; i<devices.length; i++) {
-			if (devices[i].matches(".*USB.*")) {
-				device = devices[i];
-				break;
-			}
-		}
+        for (String s : devices) {
+            if (s.matches(".*USB.*")) {
+                device = s;
+                break;
+            }
+        }
 		if (device == null) {
 			System.err.println("Device not found.");
 			return;

@@ -73,8 +73,7 @@ public class StageDTO {
         }
 
         List<RocketComponent> children = theORStage.getChildren();
-        for (int i = 0; i < children.size(); i++) {
-            RocketComponent rocketComponents = children.get(i);
+        for (RocketComponent rocketComponents : children) {
             if (rocketComponents instanceof NoseCone) {
                 addExternalPart(toNoseConeDTO((NoseCone) rocketComponents));
             } else if (rocketComponents instanceof BodyTube) {

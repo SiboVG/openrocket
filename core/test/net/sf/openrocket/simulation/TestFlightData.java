@@ -103,10 +103,10 @@ public class TestFlightData {
 	}
 	
 	private void addDataPoints(final FlightDataBranch branch, final FlightDataType dataType, final double[] values) {
-		for (int i=0; i < values.length; i++) {
-			branch.addPoint();
-			branch.setValue(dataType, values[i]);
-		}
+        for (double value : values) {
+            branch.addPoint();
+            branch.setValue(dataType, value);
+        }
 	}
 
 	/**

@@ -2289,10 +2289,9 @@ public class PresetEditorDialog extends JDialog implements ItemListener {
 		StringBuilder stringBuilder = new StringBuilder();
 		List<String> invalids = e.getErrors();
 		stringBuilder.append(baseMsg).append("\n");
-		for (int i = 0; i < invalids.size(); i++) {
-			String s = invalids.get(i);
-			stringBuilder.append(s).append("\n");
-		}
+        for (String s : invalids) {
+            stringBuilder.append(s).append("\n");
+        }
 		
 		return stringBuilder.toString();
 	}

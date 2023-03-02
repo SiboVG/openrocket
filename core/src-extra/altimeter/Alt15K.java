@@ -431,9 +431,9 @@ public class Alt15K {
 		
 		String device = null;
 		String[] devices = Alt15K.getNames();
-		for (int i=0; i<devices.length; i++) {
-			if (devices[i].matches(".*USB.*")) {
-				device = devices[i];
+		for (String s : devices) {
+			if (s.matches(".*USB.*")) {
+				device = s;
 				break;
 			}
 		}
@@ -507,17 +507,17 @@ public class Alt15K {
 		
 		byte[] b = data.getVersion();
 		StringBuilder s= new StringBuilder();
-		for (int i=0; i<b.length; i++) {
+		for (byte item : b) {
 			if (s.toString().equals(""))
-				s = new StringBuilder("" + ((int) b[i]));
-			else 
-				s.append(".").append((int) b[i]);
+				s = new StringBuilder("" + ((int) item));
+			else
+				s.append(".").append((int) item);
 		}
 		output.println("# Altimeter version = " + s);
 		
 		int[] values = data.getData();
-		for (int i=0; i < values.length; i++) {
-			output.println(""+values[i]);
+		for (int value : values) {
+			output.println("" + value);
 		}
 		
 		output.close();

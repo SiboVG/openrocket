@@ -23,10 +23,10 @@ public class LinearInterpolatorTest {
 		};
 		
 		double x = 0;
-		for (int i=0; i < answer.length; i++) {
-			assertEquals( "Answer wrong for x = " + x , answer[i], interpolator.getValue(x), 0.01 );
-			x+= 0.1;
-		}
+        for (double v : answer) {
+            assertEquals("Answer wrong for x = " + x, v, interpolator.getValue(x), 0.01);
+            x += 0.1;
+        }
 
 	}
 }

@@ -77,8 +77,7 @@ public class AbstractTransitionDTO extends BasePartDTO implements AttachablePart
         setWallThickness(nc.getThickness() * RockSimCommonConstants.ROCKSIM_TO_OPENROCKET_LENGTH);
 
         List<RocketComponent> children = nc.getChildren();
-        for (int i = 0; i < children.size(); i++) {
-            RocketComponent rocketComponents = children.get(i);
+        for (RocketComponent rocketComponents : children) {
             if (rocketComponents instanceof InnerTube) {
                 addAttachedPart(new InnerBodyTubeDTO((InnerTube) rocketComponents, this));
             } else if (rocketComponents instanceof BodyTube) {

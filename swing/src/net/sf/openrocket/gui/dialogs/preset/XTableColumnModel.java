@@ -41,22 +41,22 @@ public class XTableColumnModel extends DefaultTableColumnModel {
 			int noVisibleColumns = tableColumns.size();
 			int noInvisibleColumns = allTableColumns.size();
 			int visibleIndex = 0;
-			
-			for (int invisibleIndex = 0; invisibleIndex < noInvisibleColumns; ++invisibleIndex) {
-				TableColumn visibleColumn = (visibleIndex < noVisibleColumns ? (TableColumn) tableColumns.get(visibleIndex) : null);
-				TableColumn testColumn = allTableColumns.get(invisibleIndex);
-				
-				if (testColumn == column) {
-					if (visibleColumn != column) {
-						super.addColumn(column);
-						super.moveColumn(tableColumns.size() - 1, visibleIndex);
-					}
-					return; // ####################
-				}
-				if (testColumn == visibleColumn) {
-					++visibleIndex;
-				}
-			}
+
+            for (TableColumn allTableColumn : allTableColumns) {
+                TableColumn visibleColumn = (visibleIndex < noVisibleColumns ? (TableColumn) tableColumns.get(visibleIndex) : null);
+                TableColumn testColumn = allTableColumn;
+
+                if (testColumn == column) {
+                    if (visibleColumn != column) {
+                        super.addColumn(column);
+                        super.moveColumn(tableColumns.size() - 1, visibleIndex);
+                    }
+                    return; // ####################
+                }
+                if (testColumn == visibleColumn) {
+                    ++visibleIndex;
+                }
+            }
 		}
 	}
 	
@@ -90,12 +90,11 @@ public class XTableColumnModel extends DefaultTableColumnModel {
 	 * @return table column object or null if no such column in this column model
 	 */
 	public TableColumn getColumnByModelIndex(int modelColumnIndex) {
-		for (int columnIndex = 0; columnIndex < allTableColumns.size(); ++columnIndex) {
-			TableColumn column = allTableColumns.get(columnIndex);
-			if (column.getModelIndex() == modelColumnIndex) {
-				return column;
-			}
-		}
+        for (TableColumn column : allTableColumns) {
+            if (column.getModelIndex() == modelColumnIndex) {
+                return column;
+            }
+        }
 		return null;
 	}
 	

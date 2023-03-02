@@ -361,48 +361,46 @@ public abstract class FinSetConfig extends RocketComponentConfig {
 							centeringRing1.getAxialOffset(AxialMethod.TOP)));
 						}
 			});
-			
-			for (int i = 0; i < rings.size(); i++) {
-				CenteringRing centeringRing = rings.get(i);
-				//Handle centering rings that overlap or are adjacent by synthetically merging them into one virtual ring.
-				if (!positionsFromTop.isEmpty() &&
-						positionsFromTop.get(positionsFromTop.size() - 1).bottomSidePositionFromTop() >=
+
+            for (CenteringRing centeringRing : rings) {
+                //Handle centering rings that overlap or are adjacent by synthetically merging them into one virtual ring.
+                if (!positionsFromTop.isEmpty() &&
+                        positionsFromTop.get(positionsFromTop.size() - 1).bottomSidePositionFromTop() >=
                                 centeringRing.getAxialOffset(AxialMethod.TOP)) {
-					SortableRing adjacent = positionsFromTop.get(positionsFromTop.size() - 1);
-					adjacent.merge(centeringRing, relativeTo);
-				} else {
-					positionsFromTop.add(new SortableRing(centeringRing, relativeTo));
-				}
-			}
-			
-			for (int i = 0; i < positionsFromTop.size(); i++) {
-				SortableRing sortableRing = positionsFromTop.get(i);
-				if (top == null) {
-					top = sortableRing;
-				} else if (sortableRing.bottomSidePositionFromTop() <= finPositionFromTop) {
-					top = sortableRing;
-					bottom = null;
-				} else if (top.bottomSidePositionFromTop() <= finPositionFromTop) {
-					if (bottom == null) {
-						//If the current ring is in the upper half of the root chord, make it the top ring
-						if (sortableRing.bottomSidePositionFromTop() < finPositionFromTop + finLength / 2d) {
-							top = sortableRing;
-						} else {
-							bottom = sortableRing;
-						}
-					}
-					//Is the ring even with or above the end of the root chord? If so, make the existing bottom the top ring,
-					//and the current ring the bottom
-					else if (sortableRing.positionFromTop() <= finPositionFromTop + finLength) {
-						top = bottom;
-						bottom = sortableRing;
-					}
-				} else {
-					if (bottom == null) {
-						bottom = sortableRing;
-					}
-				}
-			}
+                    SortableRing adjacent = positionsFromTop.get(positionsFromTop.size() - 1);
+                    adjacent.merge(centeringRing, relativeTo);
+                } else {
+                    positionsFromTop.add(new SortableRing(centeringRing, relativeTo));
+                }
+            }
+
+            for (SortableRing sortableRing : positionsFromTop) {
+                if (top == null) {
+                    top = sortableRing;
+                } else if (sortableRing.bottomSidePositionFromTop() <= finPositionFromTop) {
+                    top = sortableRing;
+                    bottom = null;
+                } else if (top.bottomSidePositionFromTop() <= finPositionFromTop) {
+                    if (bottom == null) {
+                        //If the current ring is in the upper half of the root chord, make it the top ring
+                        if (sortableRing.bottomSidePositionFromTop() < finPositionFromTop + finLength / 2d) {
+                            top = sortableRing;
+                        } else {
+                            bottom = sortableRing;
+                        }
+                    }
+                    //Is the ring even with or above the end of the root chord? If so, make the existing bottom the top ring,
+                    //and the current ring the bottom
+                    else if (sortableRing.positionFromTop() <= finPositionFromTop + finLength) {
+                        top = bottom;
+                        bottom = sortableRing;
+                    }
+                } else {
+                    if (bottom == null) {
+                        bottom = sortableRing;
+                    }
+                }
+            }
 		}
 
         double resultFinTabLength = 0d;

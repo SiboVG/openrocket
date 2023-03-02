@@ -151,8 +151,8 @@ public class RotationLogger {
 			int reported = is.read();
 			
 			byte computed = 0;
-			for (int i=0; i < data.length; i++) {
-				computed += data[i];
+			for (int datum : data) {
+				computed += datum;
 			}
 			if (computed == reported) {
 				System.err.println("Checksum ok ("+computed+")");
@@ -334,9 +334,9 @@ public class RotationLogger {
 		
 		String device = null;
 		String[] devices = RotationLogger.getNames();
-		for (int i=0; i<devices.length; i++) {
-			if (devices[i].matches(".*USB.*")) {
-				device = devices[i];
+		for (String s : devices) {
+			if (s.matches(".*USB.*")) {
+				device = s;
 				break;
 			}
 		}

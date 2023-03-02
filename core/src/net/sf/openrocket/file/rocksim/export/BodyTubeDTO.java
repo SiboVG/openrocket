@@ -93,8 +93,7 @@ public class BodyTubeDTO extends BasePartDTO implements AttachableParts {
         setMotorMount(theORBodyTube.isMotorMount());
 
         List<RocketComponent> children = theORBodyTube.getChildren();
-        for (int i = 0; i < children.size(); i++) {
-            RocketComponent rocketComponents = children.get(i);
+        for (RocketComponent rocketComponents : children) {
             if (rocketComponents instanceof InnerTube) {
                 final InnerTube innerTube = (InnerTube) rocketComponents;
                 final InnerBodyTubeDTO innerBodyTubeDTO = new InnerBodyTubeDTO(innerTube, this);

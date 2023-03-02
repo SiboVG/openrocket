@@ -69,9 +69,9 @@ public class QuaternionMultiply {
 		}
 
 		System.out.println("Multiplying:");
-		for (int i=0; i < values.length; i++) {
-			print(values[i]);
-		}
+        for (Value[] value : values) {
+            print(value);
+        }
 		System.out.println("Result:");
 		
 		Value[] result = values[0];

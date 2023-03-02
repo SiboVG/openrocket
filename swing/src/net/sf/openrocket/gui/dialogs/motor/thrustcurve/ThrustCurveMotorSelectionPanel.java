@@ -539,8 +539,7 @@ public class ThrustCurveMotorSelectionPanel extends JPanel implements MotorSelec
 		List<ThrustCurveMotor> motors = selectedMotorSet.getMotors();
 		if (hideSimilarBox.isSelected()  && selectedMotor != null) {
 			List<ThrustCurveMotor> filtered = new ArrayList<ThrustCurveMotor>(motors.size());
-			for (int i = 0; i < motors.size(); i++) {
-				ThrustCurveMotor m = motors.get(i);
+			for (ThrustCurveMotor m : motors) {
 				if (m.equals(selectedMotor)) {
 					filtered.add(m);
 					continue;
@@ -684,10 +683,10 @@ public class ThrustCurveMotorSelectionPanel extends JPanel implements MotorSelec
 
 				// Find and set the closest value
 				double closest = Double.NaN;
-				for (int i = 0; i < delays.size(); i++) {
+				for (Double delay : delays) {
 					// if-condition to always become true for NaN
-					if (!(Math.abs(delays.get(i) - currentDelay) > Math.abs(closest - currentDelay))) {
-						closest = delays.get(i);
+					if (!(Math.abs(delay - currentDelay) > Math.abs(closest - currentDelay))) {
+						closest = delay;
 					}
 				}
 				if (!Double.isNaN(closest)) {

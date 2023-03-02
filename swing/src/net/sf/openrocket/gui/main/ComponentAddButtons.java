@@ -276,20 +276,20 @@ public class ComponentAddButtons extends JPanel implements Scrollable {
 		int w;
 		
 		Dimension d = viewport.getExtentSize();
-		
-		for (int row = 0; row < buttons.length; row++) {
+
+		for (ComponentButton[] button : buttons) {
 			w = 0;
-			for (int col = 0; col < buttons[row].length; col++) {
+			for (int col = 0; col < button.length; col++) {
 				w += GAP + width;
 				String param = BUTTONPARAM + ",width " + width + "!,height " + height + "!";
-				
+
 				if (w + EXTRASPACE > d.width) {
 					param = param + ",newline";
 					w = GAP + width;
 				}
-				if (col == buttons[row].length - 1)
+				if (col == button.length - 1)
 					param = param + ",wrap";
-				layout.setComponentConstraints(buttons[row][col], param);
+				layout.setComponentConstraints(button[col], param);
 			}
 		}
 		revalidate();
@@ -330,8 +330,8 @@ public class ComponentAddButtons extends JPanel implements Scrollable {
 			
 			// Add labels
 			String[] l = text.split("\n");
-			for (int i = 0; i < l.length; i++) {
-				add(new StyledLabel(l[i], SwingConstants.CENTER, -2.0f), "growx");
+			for (String s : l) {
+				add(new StyledLabel(s, SwingConstants.CENTER, -2.0f), "growx");
 			}
 			
 			add(new JLabel(), "push, sizegroup spacing");
@@ -405,8 +405,7 @@ public class ComponentAddButtons extends JPanel implements Scrollable {
 		public void setEnabled(boolean enabled) {
 			super.setEnabled(enabled);
 			Component[] c = getComponents();
-			for (int i = 0; i < c.length; i++)
-				c[i].setEnabled(enabled);
+			for (Component component : c) component.setEnabled(enabled);
 		}
 		
 		
