@@ -172,6 +172,8 @@ public class SimulationStatus implements Monitorable {
 		this.time = orig.time;
 		this.previousTimeStep = orig.previousTimeStep;
 		this.position = orig.position;
+		this.maxAlt = orig.maxAlt;
+		this.maxAltTime = orig.maxAltTime;
 		this.acceleration = orig.acceleration;
 		this.worldPosition = orig.worldPosition;
 		this.velocity = orig.velocity;
