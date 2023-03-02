@@ -23,7 +23,8 @@ public class ManufacturerTest {
 		assertFalse(m1 == m5);
 		
 	}
-	
+
+	@Test
 	public void testContrail() {
 		Manufacturer c1, c2;
 		

@@ -76,7 +76,8 @@ public class TestGenericModifier extends BaseTestCase {
 		gm.modify(sim, 1.5);
 		assertEquals(4.0, value.d, EPSILON);
 	}
-	
+
+	@Test
 	public void testSingularRange() throws OptimizationException {
 		gm.setMinValue(1.0);
 		gm.setMaxValue(1.0);
