@@ -326,7 +326,7 @@ public class ComponentPresetChooserDialog extends JDialog {
 				// The "(?iu)" magic turns on case insensitivity with unicode chars
 				RowFilter<TableModel, Object> regexFilter = RowFilter.regexFilter("(?iu)" + filterTextRegex);
 				filters.add(regexFilter);
-			} catch (java.util.regex.PatternSyntaxException e) {
+			} catch (java.util.regex.PatternSyntaxException ignored) {
 			}
 		}
 		if ((null != aftDiameterFilterCheckBox) && aftDiameterFilterCheckBox.isSelected()) {

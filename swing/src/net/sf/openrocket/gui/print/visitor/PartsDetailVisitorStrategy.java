@@ -696,7 +696,7 @@ public class PartsDetailVisitorStrategy {
                     }
                 }
             }
-            catch (Exception e) {
+            catch (Exception ignored) {
             }
         }
         PdfPCell cell = new PdfPCell();

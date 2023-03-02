@@ -715,7 +715,7 @@ public class DoubleModel implements StateChangeListener, ChangeSource, Invalidat
 		Method s = null;
 		try {
 			s = source.getClass().getMethod("set" + valueName, double.class);
-		} catch (NoSuchMethodException e1) {
+		} catch (NoSuchMethodException ignored) {
 		} // Ignore
 		setMethod = s;
 		
@@ -726,7 +726,7 @@ public class DoubleModel implements StateChangeListener, ChangeSource, Invalidat
 		try {
 			get = source.getClass().getMethod("is" + valueName + "Automatic");
 			set = source.getClass().getMethod("set" + valueName + "Automatic", boolean.class);
-		} catch (NoSuchMethodException e) {
+		} catch (NoSuchMethodException ignored) {
 		} // ignore
 		
 		if (set != null && get != null) {

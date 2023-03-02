@@ -58,7 +58,7 @@ public class JarUtil {
 				logger.debug("jar file location using README.TXT is {}", urlString);
 				jarUrl = new URL(urlString);
 				logger.debug("Found jar file using README.TXT location");
-			} catch (IOException e1) {
+			} catch (IOException ignored) {
 			}
 		}
 		if (jarUrl == null) {

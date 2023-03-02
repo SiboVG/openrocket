@@ -137,7 +137,7 @@ public class MathUtilTest {
 		try {
 			MathUtil.map(6.0, 1.0, Math.nextUp(1.0), 1.0, 2.0);
 			fail("Should not be reached.");
-		} catch (IllegalArgumentException normal) {
+		} catch (IllegalArgumentException ignored) {
 		}
 		
 		assertEquals(7.0, MathUtil.map(Math.nextUp(1.0), 0.0, 5.0, 9.0, -1.0), EPS);

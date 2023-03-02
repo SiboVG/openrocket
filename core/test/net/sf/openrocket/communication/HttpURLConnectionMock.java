@@ -103,7 +103,7 @@ public class HttpURLConnectionMock extends HttpURLConnection {
 		if (!connected) {
 			try {
 				Thread.sleep(connectionDelay);
-			} catch (InterruptedException e) {
+			} catch (InterruptedException ignored) {
 			}
 			connected = true;
 		}

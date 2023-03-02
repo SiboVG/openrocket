@@ -689,7 +689,7 @@ public class DesignReport {
 				 * is a really long running simulation
 				 */
 				executor.awaitTermination(5, TimeUnit.MINUTES);
-			} catch (InterruptedException ie) {
+			} catch (InterruptedException ignored) {
 				
 			}
 		}

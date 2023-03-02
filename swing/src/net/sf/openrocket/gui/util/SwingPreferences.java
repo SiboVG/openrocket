@@ -670,7 +670,7 @@ public class SwingPreferences extends net.sf.openrocket.startup.Preferences {
 		Set<String> collection = new HashSet<>();
 		try {
 			collection.addAll(Arrays.asList(prefs.keys()));
-		} catch (BackingStoreException bex) {
+		} catch (BackingStoreException ignored) {
 			
 		}
 		return collection;
@@ -719,7 +719,7 @@ public class SwingPreferences extends net.sf.openrocket.startup.Preferences {
 					collection.add(m);
 				}
 			}
-		} catch (BackingStoreException e) {
+		} catch (BackingStoreException ignored) {
 		}
 		
 		return collection;
@@ -732,7 +732,7 @@ public class SwingPreferences extends net.sf.openrocket.startup.Preferences {
 			for (String s : prefs.keys()) {
 				prefs.remove(s);
 			}
-		} catch (BackingStoreException e) {
+		} catch (BackingStoreException ignored) {
 		}
 		for (Manufacturer m : manus) {
 			prefs.putBoolean(m.getSimpleName(), true);

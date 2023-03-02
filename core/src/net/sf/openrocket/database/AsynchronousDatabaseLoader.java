@@ -79,7 +79,7 @@ public abstract class AsynchronousDatabaseLoader {
 				while (!endedLoading) {
 					try {
 						this.wait();
-					} catch (InterruptedException e) {
+					} catch (InterruptedException ignored) {
 					}
 				}
 			}
@@ -112,7 +112,7 @@ public abstract class AsynchronousDatabaseLoader {
 			synchronized (this) {
 				try {
 					this.wait(startLoading - System.currentTimeMillis());
-				} catch (InterruptedException e) {
+				} catch (InterruptedException ignored) {
 				}
 			}
 		}

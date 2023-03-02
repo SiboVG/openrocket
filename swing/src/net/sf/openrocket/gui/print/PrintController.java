@@ -158,13 +158,13 @@ public class PrintController {
             writer.close();
             idoc.close();
         }
-        catch (DocumentException | ExceptionConverter e) {
+        catch (DocumentException | ExceptionConverter ignored) {
         } finally {
             if (outputFile != null) {
                 try {
                     outputFile.close();
                 }
-                catch (IOException e) {
+                catch (IOException ignored) {
                 }
             }
         }

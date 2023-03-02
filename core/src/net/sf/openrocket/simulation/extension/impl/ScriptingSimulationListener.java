@@ -76,7 +76,7 @@ public class ScriptingSimulationListener implements SimulationListener, Simulati
 	public void endSimulation(SimulationStatus status, SimulationException exception) {
 		try {
 			invoke(Void.class, null, "endSimulation", status, exception);
-		} catch (SimulationException e) {
+		} catch (SimulationException ignored) {
 		}
 	}
 	

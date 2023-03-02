@@ -223,7 +223,7 @@ public class GeneralRocketLoader {
 			if (isContainer) {
 				try {
 					attachmentFactory = new ZipFileAttachmentFactory(baseFile.toURI().toURL());
-				} catch (MalformedURLException mex) {
+				} catch (MalformedURLException ignored) {
 				}
 			} else if (baseFile != null) {
 				attachmentFactory = new FileSystemAttachmentFactory(baseFile.getParentFile());

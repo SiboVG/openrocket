@@ -114,7 +114,7 @@ public class ThrustCurveMotorSetTest {
 		try {
 			set.addMotor(motor3);
 			fail("Did not throw exception");
-		} catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException ignored) {
 		}
 	}
 	

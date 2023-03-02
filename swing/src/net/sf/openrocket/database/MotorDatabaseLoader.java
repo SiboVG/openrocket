@@ -161,7 +161,7 @@ public class MotorDatabaseLoader extends AsynchronousDatabaseLoader {
 			log.warn("Exception while loading file " + f.getU() + ": " + e, e);
 			try {
 				f.getV().close();
-			} catch (IOException e1) {
+			} catch (IOException ignored) {
 			}
 		}
 	}

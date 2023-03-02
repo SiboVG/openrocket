@@ -119,22 +119,22 @@ public class TestConfig {
 		try {
 			config.put("foo", (Boolean) null);
 			fail();
-		} catch (NullPointerException e) {
+		} catch (NullPointerException ignored) {
 		}
 		try {
 			config.put("foo", (String) null);
 			fail();
-		} catch (NullPointerException e) {
+		} catch (NullPointerException ignored) {
 		}
 		try {
 			config.put("foo", (Number) null);
 			fail();
-		} catch (NullPointerException e) {
+		} catch (NullPointerException ignored) {
 		}
 		try {
 			config.put("foo", (List<?>) null);
 			fail();
-		} catch (NullPointerException e) {
+		} catch (NullPointerException ignored) {
 		}
 	}
 	
@@ -146,7 +146,7 @@ public class TestConfig {
 		try {
 			config.put("foo", list);
 			fail();
-		} catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException ignored) {
 		}
 	}
 	
@@ -158,7 +158,7 @@ public class TestConfig {
 		try {
 			config.put("foo", list);
 			fail();
-		} catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException ignored) {
 		}
 	}
 }

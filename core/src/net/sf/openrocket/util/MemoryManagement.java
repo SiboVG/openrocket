@@ -76,7 +76,7 @@ public final class MemoryManagement {
 			System.gc();
 			try {
 				Thread.sleep(1);
-			} catch (InterruptedException e) {
+			} catch (InterruptedException ignored) {
 			}
 		}
 		purgeCollectables();
@@ -116,7 +116,7 @@ public final class MemoryManagement {
 			System.gc();
 			try {
 				Thread.sleep(1);
-			} catch (InterruptedException e) {
+			} catch (InterruptedException ignored) {
 			}
 		}
 		purgeListeners();

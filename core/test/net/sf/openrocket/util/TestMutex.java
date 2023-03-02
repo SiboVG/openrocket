@@ -195,7 +195,7 @@ public class TestMutex {
 		while (testState != state && failure == null) {
 			try {
 				Thread.sleep(1);
-			} catch (InterruptedException e) {
+			} catch (InterruptedException ignored) {
 			}
 		}
 	}
