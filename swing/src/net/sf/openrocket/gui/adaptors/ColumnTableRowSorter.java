@@ -31,7 +31,7 @@ public class ColumnTableRowSorter extends TableRowSorter<ColumnTableModel> {
 	@Override
 	protected boolean useToString(int column) {
 		Comparator<?> c = columnTableModel.getColumn(column).getComparator();
-		return ( c != null ) ? false : super.useToString(column);
+		return c == null && super.useToString(column);
 	}
 
 }
