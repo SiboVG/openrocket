@@ -48,7 +48,7 @@ public class RASPMotorLoader extends AbstractMotorLoader {
 		
 		String manufacturer = "";
 		String designation = "";
-		String comment = "";
+		StringBuilder comment = new StringBuilder();
 		
 		double length = 0;
 		double diameter = 0;
@@ -69,7 +69,7 @@ public class RASPMotorLoader extends AbstractMotorLoader {
 			
 				manufacturer = "";
 				designation = "";
-				comment = "";
+				comment = new StringBuilder();
 				length = 0;
 				diameter = 0;
 				delays = new ArrayList<Double>();
@@ -81,13 +81,13 @@ public class RASPMotorLoader extends AbstractMotorLoader {
 				// Read comment
 				while (line.length() == 0 || line.charAt(0) == ';') {
 					if (line.length() > 0) {
-						comment += line.substring(1).trim() + "\n";
+						comment.append(line.substring(1).trim()).append("\n");
 					}
 					line = in.readLine();
 					if (line == null)
 						break main;
 				}
-				comment = comment.trim();
+				comment = new StringBuilder(comment.toString().trim());
 				
 				// Parse header line, example:
 				// F32 24 124 5-10-15-P .0377 .0695 RV
@@ -152,7 +152,7 @@ public class RASPMotorLoader extends AbstractMotorLoader {
 				for (int i = 0; i < delays.size(); i++) {
 					delayArray[i] = delays.get(i);
 				}
-				motors.add(createRASPMotor(manufacturer, designation, comment,
+				motors.add(createRASPMotor(manufacturer, designation, comment.toString(),
 						length, diameter, delayArray, propW, totalW, time, thrust));
 			}
 			

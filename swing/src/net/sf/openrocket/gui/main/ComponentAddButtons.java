@@ -100,11 +100,11 @@ public class ComponentAddButtons extends JPanel implements Scrollable {
 			JViewport viewport) {
 		
 		super();
-		String constaint = "[min!]";
+		StringBuilder constaint = new StringBuilder("[min!]");
 		for (int i = 1; i < MAXCOLS; i++)
-			constaint = constaint + GAP + "[min!]";
+			constaint.append(GAP).append("[min!]");
 		
-		layout = new MigLayout("fill", constaint);
+		layout = new MigLayout("fill", constaint.toString());
 		setLayout(layout);
 		this.document = document;
 		this.selectionModel = model;

@@ -202,19 +202,19 @@ public class GeneralUnit extends Unit {
 	
 	private static void printTicks(double start, double end, double minor, double major) {
 		Tick[] ticks = Unit.NOUNIT.getTicks(start, end, minor, major);
-		String str = "Ticks for ("+start+","+end+","+minor+","+major+"):";
+		StringBuilder str = new StringBuilder("Ticks for (" + start + "," + end + "," + minor + "," + major + "):");
 		for (int i=0; i<ticks.length; i++) {
-			str += " "+ticks[i].value;
+			str.append(" ").append(ticks[i].value);
 			if (ticks[i].major) {
 				if (ticks[i].notable)
-					str += "*";
+					str.append("*");
 				else
-					str += "o";
+					str.append("o");
 			} else {
 				if (ticks[i].notable)
-					str += "_";
+					str.append("_");
 				else
-					str += " ";
+					str.append(" ");
 			}
 		}
 		System.out.println(str);

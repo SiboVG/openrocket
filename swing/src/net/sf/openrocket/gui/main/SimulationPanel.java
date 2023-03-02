@@ -701,51 +701,51 @@ public class SimulationPanel extends JPanel {
 		}
 
 		private String getSimulationToolTip(Simulation sim) {
-			String tip;
+			StringBuilder tip;
 			FlightData data = sim.getSimulatedData();
 
-			tip = "<html><b>" + sim.getName() + "</b><br>";
+			tip = new StringBuilder("<html><b>" + sim.getName() + "</b><br>");
 			switch (sim.getStatus()) {
 			case CANT_RUN:
-				tip += trans.get("simpanel.ttip.noData")+"<br>";
+				tip.append(trans.get("simpanel.ttip.noData")).append("<br>");
 				break;
 			case LOADED:
-				tip += trans.get("simpanel.ttip.loaded") + "<br>";
+				tip.append(trans.get("simpanel.ttip.loaded")).append("<br>");
 				break;
 			case UPTODATE:
-				tip += trans.get("simpanel.ttip.uptodate") + "<br>";
+				tip.append(trans.get("simpanel.ttip.uptodate")).append("<br>");
 				break;
 
 			case OUTDATED:
-				tip += trans.get("simpanel.ttip.outdated") + "<br>";
+				tip.append(trans.get("simpanel.ttip.outdated")).append("<br>");
 				break;
 
 			case EXTERNAL:
-				tip += trans.get("simpanel.ttip.external") + "<br>";
-				return tip;
+				tip.append(trans.get("simpanel.ttip.external")).append("<br>");
+				return tip.toString();
 
 			case NOT_SIMULATED:
-				tip += trans.get("simpanel.ttip.notSimulated");
-				return tip;
+				tip.append(trans.get("simpanel.ttip.notSimulated"));
+				return tip.toString();
 			}
 
 			if (data == null) {
-				tip += trans.get("simpanel.ttip.noData");
-				return tip;
+				tip.append(trans.get("simpanel.ttip.noData"));
+				return tip.toString();
 			}
 			WarningSet warnings = data.getWarningSet();
 
 			if (warnings.isEmpty()) {
-				tip += trans.get("simpanel.ttip.noWarnings");
-				return tip;
+				tip.append(trans.get("simpanel.ttip.noWarnings"));
+				return tip.toString();
 			}
 
-			tip += trans.get("simpanel.ttip.warnings");
+			tip.append(trans.get("simpanel.ttip.warnings"));
 			for (Warning w : warnings) {
-				tip += "<br>" + w.toString();
+				tip.append("<br>").append(w.toString());
 			}
 
-			return tip;
+			return tip.toString();
 		}
 	}
 

@@ -209,27 +209,27 @@ public class FractionalUnit extends Unit {
 	
 	private String numeratorString(int value) {
 		
-		String rep = "";
+		StringBuilder rep = new StringBuilder();
 		if (value == 0) {
 			return "0";
 		}
 		while (value > 0) {
-			rep = NUMERATOR[value % 10] + rep;
+			rep.insert(0, NUMERATOR[value % 10]);
 			value = value / 10;
 		}
-		return rep;
+		return rep.toString();
 	}
 	
 	private String denominatorString(int value) {
-		String rep = "";
+		StringBuilder rep = new StringBuilder();
 		if (value == 0) {
 			return "0";
 		}
 		while (value > 0) {
-			rep = DENOMINATOR[value % 10] + rep;
+			rep.insert(0, DENOMINATOR[value % 10]);
 			value = value / 10;
 		}
-		return rep;
+		return rep.toString();
 	}
 	
 	@Override

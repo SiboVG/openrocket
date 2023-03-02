@@ -138,7 +138,7 @@ public class ScriptingUtil {
 		/*
 		 * NOTE:  Hash length must be max 80 chars, the max length of a key in a Properties object.
 		 */
-		String output;
+		StringBuilder output;
 		MessageDigest digest;
 		try {
 			digest = MessageDigest.getInstance("SHA-256");
@@ -146,9 +146,9 @@ public class ScriptingUtil {
 			digest.update((byte) '|');
 			byte[] hash = digest.digest(script.getBytes(StandardCharsets.UTF_8));
 			BigInteger bigInt = new BigInteger(1, hash);
-			output = bigInt.toString(16);
+			output = new StringBuilder(bigInt.toString(16));
 			while (output.length() < 64) {
-				output = "0" + output;
+				output.insert(0, "0");
 			}
 		} catch (NoSuchAlgorithmException e) {
 			throw new BugException("JRE does not support SHA-256 hash algorithm", e);

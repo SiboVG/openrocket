@@ -94,11 +94,11 @@ public class Variable {
 	@Override
 	public String toString(){
 		if ( arrayValue.length > 1 ){
-			String out = name + " is Array (length " + arrayValue.length + ") : {";
+			StringBuilder out = new StringBuilder(name + " is Array (length " + arrayValue.length + ") : {");
 			for (double x : arrayValue){
-				out = out + x + ",";
+				out.append(x).append(",");
 			}
-			out = out.substring(0, out.length()-1);
+			out = new StringBuilder(out.substring(0, out.length() - 1));
 			return out + "}";
 		}
 		else{

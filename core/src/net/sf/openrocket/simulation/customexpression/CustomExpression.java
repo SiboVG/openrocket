@@ -167,12 +167,12 @@ public class CustomExpression implements Cloneable {
 	 * This is useful for regex evaluation
 	 */
 	protected String variableRegex() {
-		String regex = "(";
+		StringBuilder regex = new StringBuilder("(");
 		for (String s : getAllSymbols()) {
-			regex = regex + s + "|";
+			regex.append(s).append("|");
 		}
-		regex = regex.substring(0, regex.length() - 1) + ")";
-		return regex;
+		regex = new StringBuilder(regex.substring(0, regex.length() - 1) + ")");
+		return regex.toString();
 	}
 	
 	// get a list of all the names of all the available variables
@@ -522,14 +522,14 @@ public class CustomExpression implements Cloneable {
 	 */
 	public String hash() {
 		Integer hashint = Integer.valueOf(this.getExpressionString().hashCode() + symbol.hashCode());
-		String hash = "$";
+		StringBuilder hash = new StringBuilder("$");
 		for (char c : hashint.toString().toCharArray()) {
 			if (c == '-')
 				c = '0';
 			char newc = (char) (c + 17);
-			hash = hash + newc;
+			hash.append(newc);
 		}
-		return hash;
+		return hash.toString();
 	}
 	
 	@Override

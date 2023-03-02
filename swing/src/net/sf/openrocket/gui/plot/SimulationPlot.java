@@ -447,7 +447,7 @@ public class SimulationPlot {
 								List<Color> eventColors, List<Image> eventImages) {
 		HashSet<FlightEvent.Type> typeSet = new HashSet<>();
 		double prevTime = -100;
-		String text = null;
+		StringBuilder text = null;
 		Color color = null;
 		Image image = null;
 		for (EventDisplayInfo info : eventList) {
@@ -460,7 +460,7 @@ public class SimulationPlot {
 
 			if (Math.abs(t - prevTime) <= 0.05) {
 				if (!typeSet.contains(type)) {
-					text = text + ", " + type.toString();
+					text.append(", ").append(type.toString());
 					color = EventGraphics.getEventColor(type);
 					image = EventGraphics.getEventImage(type);
 					typeSet.add(type);
@@ -469,12 +469,12 @@ public class SimulationPlot {
 			} else {
 				if (text != null) {
 					eventTimes.add(prevTime);
-					eventLabels.add(text);
+					eventLabels.add(text.toString());
 					eventColors.add(color);
 					eventImages.add(image);
 				}
 				prevTime = t;
-				text = type.toString();
+				text = new StringBuilder(type.toString());
 				color = EventGraphics.getEventColor(type);
 				image = EventGraphics.getEventImage(type);
 				typeSet.clear();
@@ -484,7 +484,7 @@ public class SimulationPlot {
 		}
 		if (text != null) {
 			eventTimes.add(prevTime);
-			eventLabels.add(text);
+			eventLabels.add(text.toString());
 			eventColors.add(color);
 			eventImages.add(image);
 		}

@@ -506,12 +506,12 @@ public class Alt15K {
 		output.println("# Data count = "+data.getDataSamples());
 		
 		byte[] b = data.getVersion();
-		String s="";
+		StringBuilder s= new StringBuilder();
 		for (int i=0; i<b.length; i++) {
-			if (s.equals(""))
-				s = ""+((int)b[i]);
+			if (s.toString().equals(""))
+				s = new StringBuilder("" + ((int) b[i]));
 			else 
-				s = s+"."+((int)b[i]);
+				s.append(".").append((int) b[i]);
 		}
 		output.println("# Altimeter version = " + s);
 		
@@ -529,10 +529,10 @@ public class Alt15K {
 	}
 	
 	static private void printBytes(String str, byte[] b, int n) {
-		String s;
-		s = str+" "+n+" bytes:";
+		StringBuilder s;
+		s = new StringBuilder(str + " " + n + " bytes:");
 		for (int i=0; i<n; i++) {
-			s += " "+unsign(b[i]);
+			s.append(" ").append(unsign(b[i]));
 		}
 		System.out.println(s);
 	}

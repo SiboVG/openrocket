@@ -70,9 +70,9 @@ public class AltData {
 	public void printData() {
 		System.out.println(toString()+":");
 		for (int i=0; i<data.length; i+=8) {
-			String s = "  "+i+":";
+			StringBuilder s = new StringBuilder("  " + i + ":");
 			for (int j=0; j<8 && (i+j)<data.length; j++) {
-				s += " "+data[i+j];
+				s.append(" ").append(data[i + j]);
 			}
 			System.out.println(s);
 		}

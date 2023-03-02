@@ -130,12 +130,12 @@ public class WarningSet extends AbstractSet<Warning> implements Cloneable, Monit
 	
 	@Override
 	public String toString() {
-		String s = "";
+		StringBuilder s = new StringBuilder();
 		
 		for (Warning w : warnings) {
 			if (s.length() > 0)
-				s = s + ",";
-			s += w.toString();
+				s.append(",");
+			s.append(w.toString());
 		}
 		return "WarningSet[" + s + "]";
 	}

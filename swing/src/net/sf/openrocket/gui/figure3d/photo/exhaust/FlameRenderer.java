@@ -333,11 +333,11 @@ public final class FlameRenderer {
 			int f = gl.glCreateShader(GL2.GL_FRAGMENT_SHADER);
 			BufferedReader brf = new BufferedReader(new InputStreamReader(
 					FlameRenderer.class.getResourceAsStream("/datafiles/flame/smokeShader.glsl")));
-			String fsrc = "";
+			StringBuilder fsrc = new StringBuilder();
 			while ((line = brf.readLine()) != null) {
-				fsrc += line + "\n";
+				fsrc.append(line).append("\n");
 			}
-			gl.glShaderSource(f, 1, new String[] { fsrc }, (int[]) null, 0);
+			gl.glShaderSource(f, 1, new String[] {fsrc.toString()}, (int[]) null, 0);
 			gl.glCompileShader(f);
 
 			int statusFragmentShader[] = new int[1];

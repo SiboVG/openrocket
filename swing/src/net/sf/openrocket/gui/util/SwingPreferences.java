@@ -341,15 +341,15 @@ public class SwingPreferences extends net.sf.openrocket.startup.Preferences {
 			return;
 		}
 		
-		String str = "";
+		StringBuilder str = new StringBuilder();
 		
 		for (File file : files) {
 			if (str.length() > 0) {
-				str += SPLIT_CHARACTER;
+				str.append(SPLIT_CHARACTER);
 			}
-			str += file.getAbsolutePath();
+			str.append(file.getAbsolutePath());
 		}
-		putString(USER_THRUST_CURVES_KEY, str);
+		putString(USER_THRUST_CURVES_KEY, str.toString());
 	}
 	
 	public Color getMotorBorderColor() {
