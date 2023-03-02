@@ -32,13 +32,13 @@ public class SlideShowDialog extends JDialog {
 	private static final Logger log = LoggerFactory.getLogger(SlideShowDialog.class);
 	private static final Translator trans = Application.getTranslator();
 	
-	private SlideShowComponent slideShowComponent;
+	private final SlideShowComponent slideShowComponent;
 	private SlideSet slideSet;
 	private int position;
 	
-	private JButton nextButton;
-	private JButton prevButton;
-	private JButton closeButton;
+	private final JButton nextButton;
+	private final JButton prevButton;
+	private final JButton closeButton;
 	
 	
 	public SlideShowDialog(Window parent) {

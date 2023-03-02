@@ -11,7 +11,7 @@ import java.util.List;
 
 public abstract class BaseComponentLoader extends RockSimComponentFileLoader {
 
-	List<ComponentPreset> presets;
+	final List<ComponentPreset> presets;
 
 	public BaseComponentLoader(MaterialHolder materials, File theBasePathToLoadFrom) {
 		super(theBasePathToLoadFrom);

@@ -15,7 +15,7 @@ import java.io.InterruptedIOException;
  */
 
 public class ConcurrentProgressMonitorInputStream extends FilterInputStream {
-	private ConcurrentProgressMonitor monitor;
+	private final ConcurrentProgressMonitor monitor;
 	private int nread = 0;
 	private int size = 0;
 

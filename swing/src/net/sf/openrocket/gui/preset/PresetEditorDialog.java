@@ -2373,7 +2373,7 @@ public class PresetEditorDialog extends JDialog implements ItemListener {
 		/**
 		 * Matches user input against a regular expression.
 		 */
-		private Matcher matcher;
+		private final Matcher matcher;
 		
 		PresetInputVerifier(final Pattern thePattern) {
 			matcher = thePattern.matcher("");

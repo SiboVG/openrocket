@@ -42,7 +42,7 @@ public class PrintUtilities implements Printable {
 	public static final Font SMALL = new Font(ITextHelper.getBaseFont(), SMALL_FONT_SIZE);
 	
 
-	private Component componentToBePrinted;
+	private final Component componentToBePrinted;
 	
 	public PrintUtilities(Component componentToBePrinted) {
 		this.componentToBePrinted = componentToBePrinted;

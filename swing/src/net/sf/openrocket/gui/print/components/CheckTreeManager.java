@@ -18,11 +18,11 @@ import java.awt.event.MouseEvent;
 public class CheckTreeManager extends MouseAdapter implements TreeSelectionListener {
     
     /** The selection model. */
-    private CheckTreeSelectionModel selectionModel;
+    private final CheckTreeSelectionModel selectionModel;
     /** The actual JTree instance. */
-    private JTree tree;
+    private final JTree tree;
     /** The number of pixels of width of the check box.  Clicking anywhere within the box will trigger actions. */
-    int hotspot = new JCheckBox().getPreferredSize().width;
+    final int hotspot = new JCheckBox().getPreferredSize().width;
 
     /**
      * Construct a check box tree manager.

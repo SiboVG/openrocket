@@ -27,7 +27,7 @@ import net.sf.openrocket.unit.UnitGroup;
 @SuppressWarnings("serial")
 public class BodyTubeConfig extends RocketComponentConfig {
 
-	private DoubleModel maxLength;
+	private final DoubleModel maxLength;
 	private final JCheckBox checkAutoOuterRadius;
 	private static final Translator trans = Application.getTranslator();
 

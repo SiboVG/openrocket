@@ -7,11 +7,11 @@ public class Dimension {
     /**
      * Width, in points.
      */
-    public float width;
+    public final float width;
     /**
      * Height, in points.
      */
-    public float height;
+    public final float height;
     /**
      * Breadth, in points.
      */

@@ -19,7 +19,7 @@ class MotorConfigurationHandler extends AbstractElementHandler {
 	private final Rocket rocket;
 	private String name = null;
 	private boolean inNameElement = false;
-	private HashMap<Integer, Boolean> stageActiveness = new HashMap<>();
+	private final HashMap<Integer, Boolean> stageActiveness = new HashMap<>();
 	
 	public MotorConfigurationHandler(Rocket rocket, DocumentLoadingContext context) {
 		this.rocket = rocket;

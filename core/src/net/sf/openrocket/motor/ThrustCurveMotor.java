@@ -63,7 +63,7 @@ public class ThrustCurveMotor implements Motor, Comparable<ThrustCurveMotor>, Se
 	
 	public static class Builder {
 		
-		ThrustCurveMotor motor = new ThrustCurveMotor();
+		final ThrustCurveMotor motor = new ThrustCurveMotor();
 		
 		public Builder setCaseInfo(String v) {
 			motor.caseInfo = v;

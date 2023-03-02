@@ -84,7 +84,7 @@ public class SimulationPlot {
 
 	private final LegendItems legendItems;
 
-	private int branchCount;
+	private final int branchCount;
 
 	void setShowPoints(boolean showPoints) {
 		for (ModifiedXYItemRenderer r : renderers) {

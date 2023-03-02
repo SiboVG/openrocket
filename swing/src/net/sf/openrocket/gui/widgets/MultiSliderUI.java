@@ -54,7 +54,7 @@ class MultiSliderUI extends BasicSliderUI {
 	transient private int currentIndex = 0;
 
 	transient private boolean isDragging;
-	transient private int[] minmaxIndices = new int[2];
+	final transient private int[] minmaxIndices = new int[2];
 
 	/***
 	 * ComponentUI Interface Implementation methods
@@ -253,7 +253,7 @@ class MultiSliderUI extends BasicSliderUI {
 		int _trackBottom;
 		int _trackLeft;
 		int _trackRight;
-		transient private int[] firstXY = new int[2];
+		final transient private int[] firstXY = new int[2];
 
 		/***
 		 * If the mouse is pressed above the "thumb" component
@@ -567,8 +567,8 @@ class MultiSliderUI extends BasicSliderUI {
 	 * A static version of the above.
 	 */
 	static class SharedActionScroller extends AbstractAction {
-		int _dir;
-		boolean _block;
+		final int _dir;
+		final boolean _block;
 
 		public SharedActionScroller(int dir, boolean block) {
 			_dir = dir;

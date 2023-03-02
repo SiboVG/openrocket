@@ -711,7 +711,7 @@ public class RK4SimulationStepper extends AbstractSimulationStepper {
 		
 		public FlightConditions flightConditions;
 		
-		public double longitudinalAcceleration = Double.NaN;
+		public final double longitudinalAcceleration = Double.NaN;
 		
 		public RigidBody rocketMass;
 		

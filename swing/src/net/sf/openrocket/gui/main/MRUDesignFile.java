@@ -21,7 +21,7 @@ public class MRUDesignFile {
 
     private List<String> mruFileList;
 
-    private static MRUDesignFile instance; // The single instance
+    private static final MRUDesignFile instance; // The single instance
 
     private EventListenerList listenerList;
 

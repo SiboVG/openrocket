@@ -67,7 +67,7 @@ public class BooleanModel extends AbstractAction implements StateChangeListener,
 	private boolean oldValue;
 	private boolean oldEnabled;
 	
-	private Invalidator invalidator = new Invalidator(this);
+	private final Invalidator invalidator = new Invalidator(this);
 	
 	
 	/**

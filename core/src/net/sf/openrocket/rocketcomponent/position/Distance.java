@@ -2,8 +2,8 @@ package net.sf.openrocket.rocketcomponent.position;
 
 public class Distance {
     
-	public DistanceMethod method;
-	public double distance;
+	public final DistanceMethod method;
+	public final double distance;
 	
 	// just for convenience
 	public Distance( final DistanceMethod initialMethod, final double initialMagnitude ) {

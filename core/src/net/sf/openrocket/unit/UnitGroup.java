@@ -481,7 +481,7 @@ public class UnitGroup {
 	//////////////////////////////////////////////////////
 	
 	
-	protected ArrayList<Unit> units = new ArrayList<>();
+	protected final ArrayList<Unit> units = new ArrayList<>();
 	protected int defaultUnit = 0;
 	
 	public int getUnitCount() {

@@ -37,13 +37,13 @@ public class IgnitionSelectionDialog extends JDialog {
 
 	private static final Translator trans = Application.getTranslator();
 	
-	private RocketDescriptor descriptor = Application.getInjector().getInstance(RocketDescriptor.class);
+	private final RocketDescriptor descriptor = Application.getInjector().getInstance(RocketDescriptor.class);
 	
-	private MotorMount curMount;
-	private MotorConfiguration curMotorInstance;
+	private final MotorMount curMount;
+	private final MotorConfiguration curMotorInstance;
 	
-	private IgnitionEvent startIgnitionEvent;
-	private double startIgnitionDelay;
+	private final IgnitionEvent startIgnitionEvent;
+	private final double startIgnitionDelay;
 	
 	public IgnitionSelectionDialog(Window parent, final FlightConfigurationId curFCID, MotorMount _mount) {
 		super(parent, trans.get("edtmotorconfdlg.title.Selectignitionconf"), Dialog.ModalityType.APPLICATION_MODAL);

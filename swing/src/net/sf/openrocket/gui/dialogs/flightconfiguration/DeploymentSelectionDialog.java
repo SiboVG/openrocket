@@ -38,7 +38,7 @@ public class DeploymentSelectionDialog extends JDialog {
 	
 	private static final Translator trans = Application.getTranslator();
 	
-	private RocketDescriptor descriptor = Application.getInjector().getInstance(RocketDescriptor.class);
+	private final RocketDescriptor descriptor = Application.getInjector().getInstance(RocketDescriptor.class);
 	
 	private final DeploymentConfiguration newConfiguration;
 	

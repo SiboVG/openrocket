@@ -68,7 +68,7 @@ public class DoubleModel implements StateChangeListener, ChangeSource, Invalidat
 	@SuppressWarnings("serial")
 	public class ValueSpinnerModel extends AbstractSpinnerModel implements Invalidatable {
 		
-		private ExpressionParser parser = new ExpressionParser();
+		private final ExpressionParser parser = new ExpressionParser();
 		
 		@Override
 		public Object getValue() {
@@ -532,7 +532,7 @@ public class DoubleModel implements StateChangeListener, ChangeSource, Invalidat
 		}
 		
 		// Implement a wrapper to the ChangeListeners
-		ArrayList<PropertyChangeListener> propertyChangeListeners =
+		final ArrayList<PropertyChangeListener> propertyChangeListeners =
 				new ArrayList<>();
 		
 		@Override
@@ -610,7 +610,7 @@ public class DoubleModel implements StateChangeListener, ChangeSource, Invalidat
 	private Unit currentUnit;
 	
 	private final double minValue;
-	private double maxValue;
+	private final double maxValue;
 	
 	private String toString = null;
 	
@@ -622,7 +622,7 @@ public class DoubleModel implements StateChangeListener, ChangeSource, Invalidat
 	private double lastValue = 0;
 	private boolean lastAutomatic = false;
 	
-	private Invalidator invalidator = new Invalidator(this);
+	private final Invalidator invalidator = new Invalidator(this);
 	
 	
 	/**

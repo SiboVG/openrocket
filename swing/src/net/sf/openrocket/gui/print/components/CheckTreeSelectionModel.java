@@ -20,7 +20,7 @@ public class CheckTreeSelectionModel extends DefaultTreeSelectionModel {
     /**
      * The tree model.
      */
-    private TreeModel model;
+    private final TreeModel model;
 
     /**
      * Constructor.

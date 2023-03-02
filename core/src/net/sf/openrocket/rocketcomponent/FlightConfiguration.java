@@ -36,7 +36,7 @@ public class FlightConfiguration implements FlightConfigurableParameter<FlightCo
 	private static final Translator trans = Application.getTranslator();
 
     private String configurationName;
-	public static String DEFAULT_CONFIG_NAME = "[{motors}]";
+	public static final String DEFAULT_CONFIG_NAME = "[{motors}]";
 	private final RocketDescriptor descriptor = Application.getInjector().getInstance(RocketDescriptor.class);
 	
 	protected final Rocket rocket;
@@ -49,7 +49,7 @@ public class FlightConfiguration implements FlightConfigurableParameter<FlightCo
 	private static class StageFlags implements Cloneable {
 		public boolean active = true;
 		public int stageNumber = -1;
-		public String stageId;
+		public final String stageId;
 
 		public StageFlags(int _num, String stageId, boolean _active) {
 			this.stageNumber = _num;

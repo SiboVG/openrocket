@@ -81,8 +81,8 @@ public class ComponentAnalysisDialog extends JDialog implements StateChangeListe
 	private final DoubleModel theta, aoa, mach, roll;
 	private final JToggleButton worstToggle;
 	private boolean fakeChange = false;
-	private AerodynamicCalculator aerodynamicCalculator;
-	private double initTheta;
+	private final AerodynamicCalculator aerodynamicCalculator;
+	private final double initTheta;
 
 	private final ColumnTableModel longitudeStabilityTableModel;
 	private final ColumnTableModel dragTableModel;
@@ -715,7 +715,7 @@ public class ComponentAnalysisDialog extends JDialog implements StateChangeListe
 
 	private static class LongitudinalStabilityRow {
 
-		public String name;
+		public final String name;
 		public Object source;
 		public double eachMass;
 		public Coordinate cm;

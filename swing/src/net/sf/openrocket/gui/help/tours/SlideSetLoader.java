@@ -24,7 +24,7 @@ public class SlideSetLoader {
 	
 	private final String baseDir;
 	private TextLineReader source;
-	private Locale locale;
+	private final Locale locale;
 	
 	
 

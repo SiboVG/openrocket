@@ -34,6 +34,7 @@ public class PodSetDTO extends BasePartDTO implements AttachableParts {
             @XmlElementRef(name = RockSimCommonConstants.NOSE_CONE, type = NoseConeDTO.class),
             @XmlElementRef(name = RockSimCommonConstants.TRANSITION, type = TransitionDTO.class),
             @XmlElementRef(name = RockSimCommonConstants.EXTERNAL_POD, type = PodSetDTO.class)})
+    final
     List<BasePartDTO> attachedParts = new ArrayList<>();
 
     /**

@@ -32,11 +32,11 @@ public class TransitionConfig extends RocketComponentConfig {
 	private static final long serialVersionUID = -1851275950604625741L;
 	
 	private static final Translator trans = Application.getTranslator();
-	private JComboBox<Transition.Shape> typeBox;
+	private final JComboBox<Transition.Shape> typeBox;
 
-	private JLabel shapeLabel;
-	private JSpinner shapeSpinner;
-	private BasicSlider shapeSlider;
+	private final JLabel shapeLabel;
+	private final JSpinner shapeSpinner;
+	private final BasicSlider shapeSlider;
 	private final JCheckBox checkAutoAftRadius;
 	private final JCheckBox checkAutoForeRadius;
 	private DescriptionArea description;

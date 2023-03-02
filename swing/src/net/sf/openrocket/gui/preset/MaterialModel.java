@@ -25,9 +25,9 @@ public class MaterialModel extends DefaultComboBoxModel<Material> implements Dat
 
     private static final Translator trans = Application.getTranslator();
 
-    private Material.Type type;
+    private final Material.Type type;
 
-    private Component parent;
+    private final Component parent;
 
     public MaterialModel(Component theParent, Material.Type theType, Database<Material> materials) {
         parent = theParent;

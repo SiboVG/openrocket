@@ -15,7 +15,7 @@ import java.io.*;
 public class PDFPrintStreamDoc implements Doc {
 
     /** The source stream of the PDF document. */
-    private InputStream stream;
+    private final InputStream stream;
 
     /** The document's attributes. */
     private DocAttributeSet attributeSet;

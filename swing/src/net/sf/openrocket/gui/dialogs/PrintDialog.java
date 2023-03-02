@@ -62,12 +62,12 @@ public class PrintDialog extends JDialog implements TreeSelectionListener {
 	
 	private final RocketPrintTree stagedTree;
 	private final RocketPrintTree noStagedTree;
-	private OpenRocketDocument document;
+	private final OpenRocketDocument document;
 	private RocketPrintTree currentTree;
 	
-	private JButton previewButton;
-	private JButton saveAsPDF;
-	private JButton cancel;
+	private final JButton previewButton;
+	private final JButton saveAsPDF;
+	private final JButton cancel;
 
     private double rotation = 0d;
     

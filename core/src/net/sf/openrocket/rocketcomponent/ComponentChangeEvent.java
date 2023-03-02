@@ -19,8 +19,8 @@ public class ComponentChangeEvent extends EventObject {
 		TREE_CHILDREN( 512, "TREE_CHILDREN"),
 		;
 		
-		protected int value;
-		protected String name;
+		protected final int value;
+		protected final String name;
 		
 		private TYPE( final int _val, final String _name){
 			this.value = _val;

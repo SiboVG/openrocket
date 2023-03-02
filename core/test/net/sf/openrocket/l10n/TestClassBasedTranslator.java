@@ -15,7 +15,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(JMock.class)
 public class TestClassBasedTranslator {
-	Mockery context = new JUnit4Mockery();
+	final Mockery context = new JUnit4Mockery();
 	
 	@Mock
 	Translator translator;

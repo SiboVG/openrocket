@@ -38,9 +38,9 @@ public class FinSetCalc extends RocketComponentCalc {
 	
 	protected int interferenceFinCount = -1; // No. of fins in interference
 	
-	protected double[] chordLead = new double[DIVISIONS];
-	protected double[] chordTrail = new double[DIVISIONS];
-	protected double[] chordLength = new double[DIVISIONS];
+	protected final double[] chordLead = new double[DIVISIONS];
+	protected final double[] chordTrail = new double[DIVISIONS];
+	protected final double[] chordLength = new double[DIVISIONS];
 	
 	protected final WarningSet geometryWarnings = new WarningSet();
 	

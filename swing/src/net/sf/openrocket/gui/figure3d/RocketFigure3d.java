@@ -95,7 +95,7 @@ public class RocketFigure3d extends JPanel implements GLEventListener {
 	Point pickPoint = null;
 	MouseEvent pickEvent;
 	
-	float[] lightPosition = new float[] { 1, 4, 1, 0 };
+	final float[] lightPosition = new float[] { 1, 4, 1, 0 };
 	
 	RocketRenderer rr = new FigureRenderer();
 	
@@ -576,7 +576,7 @@ public class RocketFigure3d extends JPanel implements GLEventListener {
 		internalRepaint();
 	}
 	
-	private Set<RocketComponent> selection = new HashSet<>();
+	private final Set<RocketComponent> selection = new HashSet<>();
 	
 	public void setSelection(final RocketComponent[] selection) {
 		this.selection.clear();

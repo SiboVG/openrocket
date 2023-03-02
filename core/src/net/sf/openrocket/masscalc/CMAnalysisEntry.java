@@ -19,8 +19,8 @@ public class CMAnalysisEntry {
         totalCM = Coordinate.NaN;
     }
 
-    public String name;
-    public Object source;
+    public final String name;
+    public final Object source;
     public double eachMass;
     public Coordinate totalCM;
 

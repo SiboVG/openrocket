@@ -19,7 +19,7 @@ public class VariableTableModel extends AbstractTableModel {
 
 	private static final Translator trans = Application.getTranslator();
 
-	private List<FlightDataType> types; // = new ArrayList<FlightDataType>();
+	private final List<FlightDataType> types; // = new ArrayList<FlightDataType>();
 	private static final String[] columnNames = {trans.get("customExpression.Name"), trans.get("customExpression.Symbol"), trans.get("customExpression.Units")};
 	
 	/*

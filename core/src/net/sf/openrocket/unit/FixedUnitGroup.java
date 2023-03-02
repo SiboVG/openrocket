@@ -10,7 +10,7 @@ package net.sf.openrocket.unit;
 
 public class FixedUnitGroup extends UnitGroup {
 	
-	String unitString;
+	final String unitString;
 	
 	public FixedUnitGroup( String unitString ){
 		this.unitString = unitString; 

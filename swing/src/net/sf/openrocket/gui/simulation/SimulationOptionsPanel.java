@@ -56,10 +56,10 @@ class SimulationOptionsPanel extends JPanel {
 
 	private static final Translator trans = Application.getTranslator();
 	
-	private OpenRocketDocument document;
+	private final OpenRocketDocument document;
 	final Simulation simulation;
 	
-	private JPanel currentExtensions;
+	private final JPanel currentExtensions;
 	final JPopupMenu extensionMenu;
 	JMenu extensionMenuCopyExtension;
 	

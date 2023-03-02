@@ -38,7 +38,7 @@ public class SimulationEditDialog extends JDialog {
 	private final OpenRocketDocument document;
 	private static final Translator trans = Application.getTranslator();
 	
-	JPanel cards;
+	final JPanel cards;
 	private final static String EDITMODE = "EDIT";
 	private final static String PLOTMODE = "PLOT";
 	

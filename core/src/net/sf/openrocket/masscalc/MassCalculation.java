@@ -188,7 +188,7 @@ public class MassCalculation {
 
 	String prefix = "";
 
-	Map<Integer, CMAnalysisEntry> analysisMap;
+	final Map<Integer, CMAnalysisEntry> analysisMap;
 
 	// =========== Private Instance Functions ========================
 

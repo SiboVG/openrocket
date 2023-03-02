@@ -237,7 +237,7 @@ public class ComponentPresetTable extends JTable {
 
 
 		private class SortAscColumnMenuItem extends JCheckBoxMenuItem implements ItemListener {
-			private int columnClicked;
+			private final int columnClicked;
 			SortAscColumnMenuItem(int columnClicked) {
 				super( trans.get("ComponentPresetChooserDialog.menu.sortAsc") );
 				this.addItemListener(this);
@@ -250,7 +250,7 @@ public class ComponentPresetTable extends JTable {
 		}
 		
 		private class SortDescColumnMenuItem extends JCheckBoxMenuItem implements ItemListener {
-			private int columnClicked;
+			private final int columnClicked;
 			SortDescColumnMenuItem(int columnClicked) {
 				super( trans.get("ComponentPresetChooserDialog.menu.sortDesc") );
 				this.addItemListener(this);
@@ -263,7 +263,7 @@ public class ComponentPresetTable extends JTable {
 		}
 		
 		private class ToggleColumnMenuItem extends JCheckBoxMenuItem implements ItemListener {
-			TableColumn col;
+			final TableColumn col;
 			ToggleColumnMenuItem( TableColumn col ) {
 				super( String.valueOf(col.getHeaderValue()), tableColumnModel.isColumnVisible(col));
 				this.addItemListener(this);
@@ -276,7 +276,7 @@ public class ComponentPresetTable extends JTable {
 		}
 		
 		private class UnitSelectorMenuItem extends JMenu implements ItemListener {
-			ComponentPresetTableColumn.DoubleWithUnit col;
+			final ComponentPresetTableColumn.DoubleWithUnit col;
 			UnitSelectorMenuItem( ComponentPresetTableColumn.DoubleWithUnit col ) {
 				super(trans.get("ComponentPresetChooserDialog.menu.units"));
 				this.col = col;

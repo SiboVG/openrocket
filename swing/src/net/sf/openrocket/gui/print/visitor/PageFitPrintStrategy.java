@@ -37,19 +37,19 @@ public class PageFitPrintStrategy {
     /**
      * The iText document.
      */
-    protected Document document;
+    protected final Document document;
 
     /**
      * The direct iText writer.
      */
-    protected PdfWriter writer;
+    protected final PdfWriter writer;
 
     /**
      * The stages selected.
      */
     protected Set<Integer> stages;
 
-	protected ArrayList<PrintableComponent> componentToPrint;
+	protected final ArrayList<PrintableComponent> componentToPrint;
 
     /**
      * Constructor.

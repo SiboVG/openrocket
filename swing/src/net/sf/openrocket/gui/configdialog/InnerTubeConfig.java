@@ -430,8 +430,8 @@ class ClusterSelectionPanel extends JPanel {
 		 * 
 		 */
 		private static final long serialVersionUID = 3626386642481889629L;
-		private Clusterable component;
-		private ClusterConfiguration config;
+		private final Clusterable component;
+		private final ClusterConfiguration config;
 
 		public ClusterButton(Clusterable c, ClusterConfiguration config) {
 			component = c;

@@ -76,7 +76,7 @@ public class SimulationRunDialog extends JDialog {
 		int n = SwingPreferences.getMaxThreadCount();
 		executor = new ThreadPoolExecutor(n, n, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
 				new ThreadFactory() {
-			private ThreadFactory factory = Executors.defaultThreadFactory();
+			private final ThreadFactory factory = Executors.defaultThreadFactory();
 
 			@Override
 			public Thread newThread(Runnable r) {

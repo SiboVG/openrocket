@@ -24,15 +24,15 @@ public class CheckTreeCellRenderer extends JPanel implements TreeCellRenderer {
     /**
      * The selection model.
      */
-    private CheckTreeSelectionModel selectionModel;
+    private final CheckTreeSelectionModel selectionModel;
     /**
      * The delegated cell renderer.
      */
-    private DefaultTreeCellRenderer delegate;
+    private final DefaultTreeCellRenderer delegate;
     /**
      * The check box within this cell.
      */
-    private JCheckBox checkBox = new JCheckBox();
+    private final JCheckBox checkBox = new JCheckBox();
 
     /**
      * Constructor.

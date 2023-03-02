@@ -18,7 +18,7 @@ public class ImagePreviewPanel extends JPanel
     private ImageIcon icon;
     private Image image;
     private static final int ACCSIZE = 155;
-    private Color bg;
+    private final Color bg;
 
     public ImagePreviewPanel() {
         setPreferredSize(new Dimension(ACCSIZE, -1));

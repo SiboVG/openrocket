@@ -90,7 +90,7 @@ public class DeploymentConfiguration implements FlightConfigurableParameter<Depl
 	private double deployAltitude = 200;
 	private double deployDelay = 0;
 
-	private List<DeploymentConfiguration> configListeners = new ArrayList<>();
+	private final List<DeploymentConfiguration> configListeners = new ArrayList<>();
 	
 	public boolean isActivationEvent(FlightEvent e, RocketComponent source) {
 		return deployEvent.isActivationEvent(this, e, source);

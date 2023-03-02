@@ -455,9 +455,9 @@ public class SimulationPlotPanel extends JPanel {
 		private final String[] POSITIONS = { AUTO_NAME, LEFT_NAME, RIGHT_NAME };
 		
 		private final int index;
-		private JComboBox<FlightDataType> typeSelector;
+		private final JComboBox<FlightDataType> typeSelector;
 		private UnitSelector unitSelector;
-		private JComboBox<String> axisSelector;
+		private final JComboBox<String> axisSelector;
 		
 		
 		public PlotTypeSelector(int plotIndex, FlightDataType type, Unit unit, int position) {

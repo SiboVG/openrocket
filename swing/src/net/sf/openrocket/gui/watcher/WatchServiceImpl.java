@@ -11,9 +11,9 @@ public class WatchServiceImpl implements WatchService {
 	
 	private final static int INTERVAL_MS = 1000;
 	
-	private static AtomicInteger threadcount = new AtomicInteger(0);
+	private static final AtomicInteger threadcount = new AtomicInteger(0);
 	
-	private ScheduledExecutorService executor = Executors.newScheduledThreadPool(2, new ThreadFactory() {
+	private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(2, new ThreadFactory() {
 		
 		@Override
 		public Thread newThread(Runnable r) {
@@ -38,7 +38,7 @@ public class WatchServiceImpl implements WatchService {
 	
 	public static class WatchKeyImpl implements WatchKey {
 		
-		ScheduledFuture<?> future;
+		final ScheduledFuture<?> future;
 		
 		private WatchKeyImpl(ScheduledFuture<?> future) {
 			this.future = future;
@@ -53,7 +53,7 @@ public class WatchServiceImpl implements WatchService {
 	
 	private static class WatchableRunner implements Runnable {
 		
-		private Watchable w;
+		private final Watchable w;
 		
 		private WatchableRunner(Watchable w) {
 			this.w = w;

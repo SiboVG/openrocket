@@ -50,6 +50,7 @@ public class AbstractTransitionDTO extends BasePartDTO implements AttachablePart
             @XmlElementRef(name = RockSimCommonConstants.STREAMER, type = StreamerDTO.class),
             @XmlElementRef(name = RockSimCommonConstants.PARACHUTE, type = ParachuteDTO.class),
             @XmlElementRef(name = RockSimCommonConstants.MASS_OBJECT, type = MassObjectDTO.class)})
+    final
     List<BasePartDTO> attachedParts = new ArrayList<>();
 
     /**

@@ -37,11 +37,11 @@ public class ComponentRenderer {
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(ComponentRenderer.class);
 
-	private int LOD = 80;
+	private final int LOD = 80;
 
 	GLU glu;
 	GLUquadric q;
-	FinRenderer fr = new FinRenderer();
+	final FinRenderer fr = new FinRenderer();
 
 	public ComponentRenderer() {
 

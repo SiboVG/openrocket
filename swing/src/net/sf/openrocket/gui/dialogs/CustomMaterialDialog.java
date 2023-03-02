@@ -37,10 +37,10 @@ public class CustomMaterialDialog extends JDialog {
 	
 	private boolean okClicked = false;
 	private JComboBox<Material.Type> typeBox;
-	private JTextField nameField;
+	private final JTextField nameField;
 	private DoubleModel density;
-	private JSpinner densitySpinner;
-	private UnitSelector densityUnit;
+	private final JSpinner densitySpinner;
+	private final UnitSelector densityUnit;
 	private JCheckBox addBox;
 	
 	public CustomMaterialDialog(Window parent, Material material, boolean saveOption,

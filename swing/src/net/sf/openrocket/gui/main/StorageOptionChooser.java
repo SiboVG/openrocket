@@ -28,13 +28,13 @@ public class StorageOptionChooser extends JPanel {
 
 	private final OpenRocketDocument document;
 	
-	private JRadioButton allButton;
+	private final JRadioButton allButton;
 	private JRadioButton someButton;
-	private JRadioButton noneButton;
+	private final JRadioButton noneButton;
 	
 	private JSpinner timeSpinner;
 
-	private JLabel infoLabel;
+	private final JLabel infoLabel;
 	
 	
 	private boolean artificialEvent = false;

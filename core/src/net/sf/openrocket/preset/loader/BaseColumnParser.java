@@ -7,7 +7,7 @@ import net.sf.openrocket.preset.TypedPropertyMap;
 
 public abstract class BaseColumnParser implements RockSimComponentFileColumnParser {
 
-	protected String columnHeader;
+	protected final String columnHeader;
 	protected boolean isConfigured = false;
 	protected int columnIndex;
 

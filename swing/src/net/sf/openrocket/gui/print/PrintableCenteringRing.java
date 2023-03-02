@@ -35,7 +35,7 @@ public class PrintableCenteringRing extends AbstractPrintable<CenteringRing> {
     /**
      * A set of the inner 'holes'.  At least one, but will have many if clustered.
      */
-    private Set<Dimension> innerCenterPoints = new HashSet<>();
+    private final Set<Dimension> innerCenterPoints = new HashSet<>();
 
     /**
      * Construct a simple, non-clustered, printable centering ring, or if the motor mount represents a clustered

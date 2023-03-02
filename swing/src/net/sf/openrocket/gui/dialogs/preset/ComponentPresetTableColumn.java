@@ -57,7 +57,7 @@ public abstract class ComponentPresetTableColumn extends TableColumn {
 
 	public static class DoubleWithUnit extends Parameter {
 
-		UnitGroup unitGroup;
+		final UnitGroup unitGroup;
 		Unit selectedUnit;
 		
 		public DoubleWithUnit( TypedKey<Double> key, int modelIndex ) {

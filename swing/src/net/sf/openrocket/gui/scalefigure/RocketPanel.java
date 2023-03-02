@@ -163,7 +163,7 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 
 	private SimulationWorker backgroundSimulationWorker = null;
 
-	private List<EventListener> listeners = new ArrayList<>();
+	private final List<EventListener> listeners = new ArrayList<>();
 
 	// Store the basic frame to know which tab is selected (Rocket design, Motors & Configuration, Flight simulations)
 	private final BasicFrame basicFrame;
@@ -178,7 +178,7 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 	static {
 		backgroundSimulationExecutor = Executors.newFixedThreadPool(SwingPreferences.getMaxThreadCount(),
 				new ThreadFactory() {
-										private ThreadFactory factory = Executors.defaultThreadFactory();
+										private final ThreadFactory factory = Executors.defaultThreadFactory();
 
 										@Override
 										public Thread newThread(Runnable r) {
@@ -724,7 +724,7 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 	 * Updates the extra data included in the figure.  Currently this includes
 	 * the CP and CG carets. Also start the background simulator.
 	 */
-	private WarningSet warnings = new WarningSet();
+	private final WarningSet warnings = new WarningSet();
 
 	public void updateExtras() {
 		Coordinate cp, cg;
@@ -988,7 +988,7 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 
 		private final CustomExpressionSimulationListener exprListener;
 		private final OpenRocketDocument doc;
-		private List<Simulation> sims;
+		private final List<Simulation> sims;
 
 		public BackgroundSimulationWorker(OpenRocketDocument doc, List<Simulation> sims) {
 			super(sims.get(0));

@@ -169,7 +169,7 @@ public class ComponentPreset implements Comparable<ComponentPreset>, Serializabl
 				ComponentPreset.PACKED_DIAMETER,
 				ComponentPreset.PACKED_LENGTH });
 
-		TypedKey<?>[] displayedColumns;
+		final TypedKey<?>[] displayedColumns;
 
 		Type(TypedKey<?>[] displayedColumns) {
 			this.displayedColumns = displayedColumns;

@@ -39,8 +39,8 @@ public class CustomExpressionPanel extends JPanel {
 	private static final Logger log = LoggerFactory.getLogger(CustomExpressionPanel.class);
 	private static final Translator trans = Application.getTranslator();
 	
-	private JPanel expressionSelectorPanel;
-	private OpenRocketDocument doc;
+	private final JPanel expressionSelectorPanel;
+	private final OpenRocketDocument doc;
 	
 	public CustomExpressionPanel(final OpenRocketDocument doc, final JDialog parentDialog) {
 		super(new MigLayout("fill"));

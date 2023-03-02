@@ -75,17 +75,17 @@ public class PartsDetailVisitorStrategy {
     /**
      * The iText document.
      */
-    protected Document document;
+    protected final Document document;
 
     /**
      * The direct iText writer.
      */
-    protected PdfWriter writer;
+    protected final PdfWriter writer;
 
     /**
      * The stages selected.
      */
-    protected Set<Integer> stages;
+    protected final Set<Integer> stages;
 
     /**
      * State variable to track the level of hierarchy.

@@ -232,7 +232,7 @@ public class RocketPrintTree extends JTree {
  * JTree's work off of Vector's (unfortunately).  This class is tailored for use with check boxes in the JTree.
  */
 class NamedVector extends Vector<CheckBoxNode> {
-	String name;
+	final String name;
 	
 	int stageNumber;
 	

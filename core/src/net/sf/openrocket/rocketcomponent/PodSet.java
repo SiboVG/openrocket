@@ -18,7 +18,7 @@ public class PodSet extends ComponentAssembly implements RingInstanceable {
 	protected int instanceCount = 2;
 
 	
-	protected AngleMethod angleMethod = AngleMethod.RELATIVE;
+	protected final AngleMethod angleMethod = AngleMethod.RELATIVE;
 	// angle between each pod
 	protected double angleSeparation = Math.PI;
 	// angle to the first pod

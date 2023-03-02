@@ -135,7 +135,7 @@ public class CyclicBuffer<E> extends AbstractQueue<E> {
 	
 	private class CyclicBufferIterator implements Iterator<E> {
 
-		private int expectedModCount;
+		private final int expectedModCount;
 		private int n = 0;
 
 		public CyclicBufferIterator() {

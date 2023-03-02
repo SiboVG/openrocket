@@ -25,7 +25,7 @@ import net.sf.openrocket.util.BaseTestCase.BaseTestCase;
 
 @RunWith(JMock.class)
 public class TestRocketOptimizationFunction extends BaseTestCase {
-	Mockery context = new JUnit4Mockery();
+	final Mockery context = new JUnit4Mockery();
 	
 	@Mock
 	OptimizableParameter parameter;

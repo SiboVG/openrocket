@@ -28,10 +28,10 @@ import net.sf.openrocket.startup.Application;
 public class RocketConfig extends RocketComponentConfig {
 	private static final Translator trans = Application.getTranslator();
 	
-	private TextFieldListener textFieldListener;
+	private final TextFieldListener textFieldListener;
 	
-	private JTextArea designerTextArea;
-	private JTextArea revisionTextArea;
+	private final JTextArea designerTextArea;
+	private final JTextArea revisionTextArea;
 	
 	private final Rocket rocket;
 	

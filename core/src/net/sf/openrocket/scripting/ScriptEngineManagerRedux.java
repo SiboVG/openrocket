@@ -116,7 +116,7 @@ public class ScriptEngineManagerRedux  {
      * created <code>ScriptEngine</code>.
      * @throws NullPointerException if shortName is null.
      */
-    private Map<String, ScriptEngineFactory> _factoriesByName = new HashMap<>();
+    private final Map<String, ScriptEngineFactory> _factoriesByName = new HashMap<>();
     public synchronized ScriptEngine getEngineByName(String shortName) {
         if (shortName == null) {
             throw new NullPointerException();
@@ -291,7 +291,7 @@ public class ScriptEngineManagerRedux  {
     private TreeSet<ScriptEngineFactory> _scriptEngineFactories;
 
     /** Map of engine name to script engine factory. */
-    private HashMap<String, ScriptEngineFactory> _nameAssociations = new HashMap<>();
+    private final HashMap<String, ScriptEngineFactory> _nameAssociations = new HashMap<>();
 
     /** Global bindings associated with script engines created by this manager. */
     private Bindings _globalScope = new SimpleBindings();

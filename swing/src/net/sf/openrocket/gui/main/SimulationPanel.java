@@ -84,7 +84,7 @@ public class SimulationPanel extends JPanel {
 	private static final String OK_TEXT = "\u2714"; // Heavy check mark
 
 
-	private RocketDescriptor descriptor = Application.getInjector().getInstance(RocketDescriptor.class);
+	private final RocketDescriptor descriptor = Application.getInjector().getInstance(RocketDescriptor.class);
 
 
 	private final OpenRocketDocument document;
@@ -638,7 +638,7 @@ public class SimulationPanel extends JPanel {
 
         public static final DataFlavor CELL_DATA_FLAVOR = new DataFlavor(Object.class, "application/x-cell-value");
 
-        private Object cellValue;
+        private final Object cellValue;
 
         public CellTransferable(Object cellValue) {
             this.cellValue = cellValue;

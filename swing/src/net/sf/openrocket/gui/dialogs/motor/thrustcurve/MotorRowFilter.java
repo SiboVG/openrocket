@@ -28,7 +28,7 @@ public class MotorRowFilter extends RowFilter<TableModel, Integer> implements Ch
 
 	// configuration data used in the filter process
 	private final ThrustCurveMotorDatabaseModel model;
-	private List<ThrustCurveMotor> usedMotors = new ArrayList<>();
+	private final List<ThrustCurveMotor> usedMotors = new ArrayList<>();
 
 	private final AbstractChangeSource changeSourceDelegate = new AbstractChangeSource();
 	private final Object change = new Object();
@@ -50,7 +50,7 @@ public class MotorRowFilter extends RowFilter<TableModel, Integer> implements Ch
 	private boolean hideUsedMotors = false;
 
 	// List of manufacturers to exclude.
-	private List<Manufacturer> excludedManufacturers = new ArrayList<>();
+	private final List<Manufacturer> excludedManufacturers = new ArrayList<>();
 
 	// Impulse class filtering
 	private ImpulseClass minimumImpulse;

@@ -41,8 +41,8 @@ public class ExpressionBuilderDialog extends JDialog {
 	private static final ImageIcon GreenIcon = Icons.loadImageIcon("pix/spheres/green-16x16.png", "OK");
 	private static final ImageIcon RedIcon = Icons.loadImageIcon("pix/spheres/red-16x16.png", "Bad");
 	
-	private CustomExpression expression;
-	private CustomExpression previousExpressionCopy;
+	private final CustomExpression expression;
+	private final CustomExpression previousExpressionCopy;
 	
 	@SuppressWarnings("unused")
 	private final Window parentWindow;

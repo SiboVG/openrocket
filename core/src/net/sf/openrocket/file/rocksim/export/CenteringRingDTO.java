@@ -26,7 +26,7 @@ public class CenteringRingDTO extends BasePartDTO {
         Sleeve(3),
         TubeCoupler(4);
 
-        int ordinal;
+        final int ordinal;
 
         UsageCode(int x) {
             ordinal = x;

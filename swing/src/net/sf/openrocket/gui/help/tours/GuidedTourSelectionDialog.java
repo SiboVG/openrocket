@@ -45,9 +45,9 @@ public class GuidedTourSelectionDialog extends JDialog {
 	
 	private SlideShowDialog slideShowDialog;
 	
-	private JList<Named<SlideSet>> tourList;
-	private JEditorPane tourDescription;
-	private JLabel tourLength;
+	private final JList<Named<SlideSet>> tourList;
+	private final JEditorPane tourDescription;
+	private final JLabel tourLength;
 	
 	
 	public GuidedTourSelectionDialog(Window parent) {

@@ -39,9 +39,9 @@ public class NoseConeConfig extends RocketComponentConfig {
 	
 	private DescriptionArea description;
 	
-	private JLabel shapeLabel;
-	private JSpinner shapeSpinner;
-	private JSlider shapeSlider;
+	private final JLabel shapeLabel;
+	private final JSpinner shapeSpinner;
+	private final JSlider shapeSlider;
 	private final JCheckBox checkAutoBaseRadius;
 	private static final Translator trans = Application.getTranslator();
 	

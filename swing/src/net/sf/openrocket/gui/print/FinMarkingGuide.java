@@ -87,7 +87,7 @@ public class FinMarkingGuide extends JPanel {
 	 * A map of body tubes, to a list of components that contain fin and/or tube fin sets and launch lugs and/or
 	 * rail buttons.
 	 */
-	private Map<BodyTube, java.util.List<ExternalComponent>> markingGuideItems;
+	private final Map<BodyTube, java.util.List<ExternalComponent>> markingGuideItems;
 	
 	/**
 	 * Constructor.

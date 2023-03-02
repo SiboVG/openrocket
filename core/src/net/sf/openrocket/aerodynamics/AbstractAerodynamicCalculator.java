@@ -24,7 +24,7 @@ public abstract class AbstractAerodynamicCalculator implements AerodynamicCalcul
 	 * A <code>WarningSet</code> that can be used if <code>null</code> is passed
 	 * to a calculation method.
 	 */
-	protected WarningSet ignoreWarningSet = new WarningSet();
+	protected final WarningSet ignoreWarningSet = new WarningSet();
 	
 	/** The aerodynamic modification ID of the latest rocket */
 	private int rocketAeroModID = -1;

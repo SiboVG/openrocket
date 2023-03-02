@@ -38,8 +38,8 @@ public enum ImpulseClass {
 		return high;
 	}
 	
-	private double low;
-	private double high;
-	private String name;
+	private final double low;
+	private final double high;
+	private final String name;
 	
 }

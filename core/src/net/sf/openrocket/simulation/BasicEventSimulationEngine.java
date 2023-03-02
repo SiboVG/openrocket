@@ -57,7 +57,7 @@ public class BasicEventSimulationEngine implements SimulationEngine {
 	private FlightConfigurationId fcid;
 	
 	// this is just a list of simulation branches to 
-	Deque<SimulationStatus> toSimulate = new ArrayDeque<>();
+	final Deque<SimulationStatus> toSimulate = new ArrayDeque<>();
 
 	FlightData flightData;
 	

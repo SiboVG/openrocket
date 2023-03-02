@@ -74,9 +74,9 @@ public class ComponentPresetChooserDialog extends JDialog {
 	int aftDiameterColumnIndex = -1;
 	int foreDiameterColumnIndex = -1;
 	
-	private List<ComponentPreset> presets;
-	private ComponentPreset.Type presetType;
-	private PresetModel presetModel;
+	private final List<ComponentPreset> presets;
+	private final ComponentPreset.Type presetType;
+	private final PresetModel presetModel;
 	
 	
 	public ComponentPresetChooserDialog(Window owner, RocketComponent component, PresetModel presetModel) {

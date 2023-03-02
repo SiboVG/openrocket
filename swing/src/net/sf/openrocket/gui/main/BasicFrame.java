@@ -144,8 +144,8 @@ public class BasicFrame extends JFrame {
 	private final OpenRocketDocument document;
 	private final Rocket rocket;
 
-	private JTabbedPane tabbedPane;
-	private RocketPanel rocketpanel;
+	private final JTabbedPane tabbedPane;
+	private final RocketPanel rocketpanel;
 	private ComponentTree tree = null;
 	private final JPopupMenu popupMenu;
 
@@ -1825,7 +1825,7 @@ public class BasicFrame extends JFrame {
 }
 
 class BasicFrame_changeAdapter implements javax.swing.event.ChangeListener {
-	BasicFrame adaptee;
+	final BasicFrame adaptee;
 
 	BasicFrame_changeAdapter(BasicFrame adaptee) {
 		this.adaptee = adaptee;

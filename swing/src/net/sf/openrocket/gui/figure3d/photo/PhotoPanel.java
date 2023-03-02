@@ -70,11 +70,11 @@ public class PhotoPanel extends JPanel implements GLEventListener {
 
 	private FlightConfiguration configuration;
 	private Component canvas;
-	private TextureCache textureCache = new TextureCache();
+	private final TextureCache textureCache = new TextureCache();
 	private double ratio;
 	private boolean needUpdate = false;
 
-	private List<ImageCallback> imageCallbacks = new java.util.Vector<>();
+	private final List<ImageCallback> imageCallbacks = new java.util.Vector<>();
 
 	private RocketRenderer rr;
 	private PhotoSettings p;

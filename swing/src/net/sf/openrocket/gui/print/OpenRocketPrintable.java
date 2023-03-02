@@ -35,17 +35,17 @@ public enum OpenRocketPrintable {
 	/**
 	 * The description - will be displayed in the JTree.
 	 */
-	private String description;
+	private final String description;
 
 	/**
 	 * Flag that indicates if the enum value is different depending upon stage.
 	 */
-	private boolean stageSpecific;
+	private final boolean stageSpecific;
 
 	/**
 	 * The order of the item as it appears in the printed document.
 	 */
-	private int order;
+	private final int order;
 
 	/**
 	 * Constructor.

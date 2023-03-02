@@ -69,7 +69,7 @@ public class IntegrationTest {
 	private OpenRocketDocument document;
 	private Action undoAction, redoAction;
 	
-	private AerodynamicCalculator aeroCalc = new BarrowmanCalculator();
+	private final AerodynamicCalculator aeroCalc = new BarrowmanCalculator();
 	private FlightConfigurationId fcid;
 	private FlightConditions conditions;
 	private String massComponentID = null;

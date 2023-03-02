@@ -29,12 +29,12 @@ public class FinMarkingGuideStrategy {
     /**
      * The iText document.
      */
-    protected Document document;
+    protected final Document document;
 
     /**
      * The direct iText writer.
      */
-    protected PdfWriter writer;
+    protected final PdfWriter writer;
 
     /**
      * Constructor.
@@ -129,11 +129,11 @@ public class FinMarkingGuideStrategy {
         /**
          * Width, in points.
          */
-        public float width;
+        public final float width;
         /**
          * Height, in points.
          */
-        public float height;
+        public final float height;
 
         /**
          * Constructor.

@@ -45,7 +45,7 @@ public abstract class FlightConfigurablePanel<T extends FlightConfigurableCompon
 
 	protected static final Translator trans = Application.getTranslator();
 	private static final Logger log = LoggerFactory.getLogger(FlightConfigurablePanel.class);
-	protected RocketDescriptor descriptor = Application.getInjector().getInstance(RocketDescriptor.class);
+	protected final RocketDescriptor descriptor = Application.getInjector().getInstance(RocketDescriptor.class);
 
 	protected final FlightConfigurationPanel flightConfigurationPanel;
 	protected final Rocket rocket;

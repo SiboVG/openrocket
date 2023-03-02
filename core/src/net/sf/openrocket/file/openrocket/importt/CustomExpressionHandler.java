@@ -14,7 +14,7 @@ class CustomExpressionHandler extends AbstractElementHandler {
 	@SuppressWarnings("unused")
 	private final DocumentLoadingContext context;
 	private final OpenRocketContentHandler contentHandler;
-	public CustomExpression currentExpression;
+	public final CustomExpression currentExpression;
 	
 	public CustomExpressionHandler(OpenRocketContentHandler contentHandler, DocumentLoadingContext context) {
 		this.context = context;

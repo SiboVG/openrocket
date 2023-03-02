@@ -64,12 +64,12 @@ public class ComponentPresetEditor extends JPanel implements PresetResultListene
 	/**
 	 * The table of presets.
 	 */
-	private JTable table;
+	private final JTable table;
 	
 	/**
 	 * The table's data model.
 	 */
-	private DataTableModel model;
+	private final DataTableModel model;
 	
 	private final OpenedFileContext editContext = new OpenedFileContext();
 	
@@ -271,7 +271,7 @@ public class ComponentPresetEditor extends JPanel implements PresetResultListene
 	 */
 	static class DataTableModel extends DefaultTableModel {
 		
-		private List<Object> associated = new ArrayList<>();
+		private final List<Object> associated = new ArrayList<>();
 		
 		/**
 		 * Constructs a <code>DefaultTableModel</code> with as many columns as there are elements in

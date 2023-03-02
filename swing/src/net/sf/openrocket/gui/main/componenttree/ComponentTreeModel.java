@@ -25,7 +25,7 @@ import net.sf.openrocket.util.BugException;
  */
 
 public class ComponentTreeModel implements TreeModel, ComponentChangeListener {
-	ArrayList<TreeModelListener> listeners = new ArrayList<>();
+	final ArrayList<TreeModelListener> listeners = new ArrayList<>();
 	
 	private final RocketComponent root;
 	private final JTree tree;

@@ -17,7 +17,7 @@ import net.sf.openrocket.util.Coordinate;
 import net.sf.openrocket.gui.figure3d.geometry.Geometry.Surface;
 
 public class FinRenderer {
-	private GLUtessellator tess = GLU.gluNewTess();
+	private final GLUtessellator tess = GLU.gluNewTess();
 	
 	public void renderFinSet(final GL2 gl, FinSet finSet, Surface which) {
 		

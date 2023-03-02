@@ -71,7 +71,7 @@ public class PrintableContext implements Comparable<PrintableContext>, Iterable<
 	public Iterator<PrintableContext> iterator() {
 		return new Iterator<>() {
 
-            Iterator<OpenRocketPrintable> keyIter = previous.keySet().iterator();
+            final Iterator<OpenRocketPrintable> keyIter = previous.keySet().iterator();
 
             @Override
             public boolean hasNext() {

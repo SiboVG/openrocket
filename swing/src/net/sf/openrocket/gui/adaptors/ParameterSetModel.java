@@ -25,7 +25,7 @@ public class ParameterSetModel<T extends FlightConfigurableParameter<T>> impleme
 	//private static final Logger log = LoggerFactory.getLogger(ParameterSetModel.class);
 	//private RocketDescriptor descriptor = Application.getInjector().getInstance(RocketDescriptor.class);
 	
-	private EventListenerList listenerList = new EventListenerList();
+	private final EventListenerList listenerList = new EventListenerList();
 	
 	private Object selected;
 	private final FlightConfigurableParameterSet<T> sourceSet;

@@ -274,7 +274,7 @@ public class Manufacturer implements Serializable {
 		 * 
 		 */
 		private static final long serialVersionUID = 8311677686087002569L;
-		String displayName;
+		final String displayName;
 		ManufacturerSerializationProxy( String displayName ) {
 			this.displayName = displayName;
 		}

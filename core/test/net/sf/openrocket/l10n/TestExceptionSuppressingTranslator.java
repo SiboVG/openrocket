@@ -17,7 +17,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(JMock.class)
 public class TestExceptionSuppressingTranslator {
-	Mockery context = new JUnit4Mockery();
+	final Mockery context = new JUnit4Mockery();
 	
 	@Mock
 	Translator translator;

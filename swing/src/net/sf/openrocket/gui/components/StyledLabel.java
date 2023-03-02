@@ -25,7 +25,7 @@ public class StyledLabel extends JLabel {
 		ITALIC(Font.ITALIC),
 		BOLD_ITALIC(Font.BOLD | Font.ITALIC);
 		
-		private int style;
+		private final int style;
 		Style(int fontStyle) {
 			this.style = fontStyle;
 		}

@@ -24,7 +24,7 @@ public class Rule extends PrintableComponent {
     public static final int MID_MAJOR_TICK_LENGTH = 9;
     public static final int MAJOR_TICK_LENGTH = 14;
 
-    private Orientation orientation;
+    private final Orientation orientation;
 
     /**
      * Constructor.

@@ -58,7 +58,7 @@ public class CheckList<T> {
 	
 	public static class Builder {
 		
-		private JList<?> list;
+		private final JList<?> list;
 		
 		@SuppressWarnings("rawtypes")
 		public Builder(JList<?> list) {

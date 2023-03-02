@@ -99,7 +99,7 @@ public class DesignReport {
 	/**
 	 * The OR Document.
 	 */
-	private OpenRocketDocument rocketDocument;
+	private final OpenRocketDocument rocketDocument;
 	
 	/**
 	 * A panel used for rendering of the design diagram.
@@ -109,7 +109,7 @@ public class DesignReport {
 	/**
 	 * The iText document.
 	 */
-	protected Document document;
+	protected final Document document;
 	
 	/**
 	 * The figure rotation.
@@ -696,7 +696,7 @@ public class DesignReport {
 	}
 	
 	private static class SimulationRunnerThreadFactory implements ThreadFactory {
-		private ThreadFactory factory = Executors.defaultThreadFactory();
+		private final ThreadFactory factory = Executors.defaultThreadFactory();
 		
 		@Override
 		public Thread newThread(Runnable r) {

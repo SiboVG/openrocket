@@ -20,7 +20,7 @@ public final class MRUDesignFileAction extends JMenu {
     /**
      * The window to which an open design file action will be parented to (typically an instance of BasicFrame).
      */
-    private Window parent;
+    private final Window parent;
 
     /**
      * Constructor.

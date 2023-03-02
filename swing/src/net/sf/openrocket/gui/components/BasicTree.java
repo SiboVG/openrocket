@@ -102,7 +102,7 @@ public class BasicTree extends JTree {
 		private final static int width = 9;
 		private final static int height = 9;
 		private final static BasicStroke stroke = new BasicStroke(2);
-		private boolean plus;
+		private final boolean plus;
 		
 		private TreeIcon(boolean plus) {
 			this.plus = plus;
