@@ -6,17 +6,12 @@ import java.awt.Desktop;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
 import net.sf.openrocket.gui.util.URLUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import net.sf.openrocket.util.BugException;
 
 /**
  * A label of a URL that is clickable.  Clicking the URL will launch the URL in

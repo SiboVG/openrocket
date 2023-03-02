@@ -29,7 +29,6 @@ import net.sf.openrocket.rocketcomponent.InstanceMap;
 import net.sf.openrocket.rocketcomponent.MotorMount;
 import net.sf.openrocket.rocketcomponent.RocketComponent;
 import net.sf.openrocket.util.Coordinate;
-import net.sf.openrocket.util.Transformation;
 
 /*
  * @author Bill Kuker <bkuker@billkuker.com>

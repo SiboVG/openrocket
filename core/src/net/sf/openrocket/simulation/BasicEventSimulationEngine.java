@@ -1,7 +1,6 @@
 package net.sf.openrocket.simulation;
 
 import java.util.ArrayDeque;
-import java.util.Collection;
 import java.util.Deque;
 
 import org.slf4j.Logger;
@@ -11,7 +10,6 @@ import net.sf.openrocket.aerodynamics.FlightConditions;
 import net.sf.openrocket.aerodynamics.Warning;
 import net.sf.openrocket.aerodynamics.WarningSet;
 import net.sf.openrocket.l10n.Translator;
-import net.sf.openrocket.motor.IgnitionEvent;
 import net.sf.openrocket.motor.MotorConfiguration;
 import net.sf.openrocket.motor.MotorConfigurationId;
 import net.sf.openrocket.rocketcomponent.AxialStage;

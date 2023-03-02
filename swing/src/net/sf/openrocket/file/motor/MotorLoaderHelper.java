@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import net.sf.openrocket.file.iterator.DirectoryIterator;
 import net.sf.openrocket.file.iterator.FileIterator;
 import net.sf.openrocket.gui.util.SimpleFileFilter;
-import net.sf.openrocket.motor.Motor;
 import net.sf.openrocket.motor.ThrustCurveMotor;
 import net.sf.openrocket.util.Pair;
 

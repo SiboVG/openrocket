@@ -1,7 +1,6 @@
 package net.sf.openrocket.aerodynamics.barrowman;
 
 import static java.lang.Math.pow;
-import static net.sf.openrocket.util.MathUtil.EPSILON;
 import static net.sf.openrocket.util.MathUtil.pow2;
 
 import java.util.Arrays;

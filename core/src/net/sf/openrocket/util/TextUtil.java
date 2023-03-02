@@ -2,7 +2,6 @@ package net.sf.openrocket.util;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.text.DecimalFormat;
 import java.util.Locale;
 
 

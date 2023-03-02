@@ -31,7 +31,6 @@ import net.sf.openrocket.l10n.Translator;
 import net.sf.openrocket.startup.Application;
 import net.sf.openrocket.util.Named;
 import net.sf.openrocket.gui.widgets.SelectColorButton;
-import org.fife.ui.rtextarea.IconGroup;
 
 public class GuidedTourSelectionDialog extends JDialog {
 	private static final long serialVersionUID = -3643116444821710259L;

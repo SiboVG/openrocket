@@ -34,8 +34,6 @@ package net.sf.openrocket.scripting;
 import javax.script.*;
 import java.util.*;
 import java.security.*;
-import java.util.ServiceLoader;
-import java.util.ServiceConfigurationError;
 
 /**
  * The <code>ScriptEngineManager</code> implements a discovery and instantiation

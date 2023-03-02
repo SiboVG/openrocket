@@ -1,6 +1,5 @@
 package net.sf.openrocket.aerodynamics;
 
-import static net.sf.openrocket.util.MathUtil.EPSILON;
 import static net.sf.openrocket.util.MathUtil.pow2;
 
 import java.util.*;

@@ -6,7 +6,6 @@ import java.util.Map;
 
 import net.sf.openrocket.motor.Motor;
 import net.sf.openrocket.rocketcomponent.FlightConfiguration;
-import net.sf.openrocket.rocketcomponent.RocketComponent;
 import net.sf.openrocket.simulation.MotorClusterState;
 import net.sf.openrocket.simulation.SimulationStatus;
 import net.sf.openrocket.util.*;

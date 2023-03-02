@@ -8,7 +8,6 @@ import java.awt.desktop.QuitHandler;
 import java.awt.desktop.AppReopenedListener;
 
 import net.sf.openrocket.communication.UpdateInfoRetriever;
-import net.sf.openrocket.gui.util.DummyFrameMenuOSX;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

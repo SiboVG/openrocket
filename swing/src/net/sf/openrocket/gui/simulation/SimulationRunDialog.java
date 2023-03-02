@@ -23,7 +23,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
-import net.sf.openrocket.document.events.DocumentChangeEvent;
 import net.sf.openrocket.document.events.SimulationChangeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +50,6 @@ import net.sf.openrocket.startup.Application;
 import net.sf.openrocket.unit.Unit;
 import net.sf.openrocket.unit.UnitGroup;
 import net.sf.openrocket.util.MathUtil;
-import net.sf.openrocket.util.Coordinate;
 import net.sf.openrocket.gui.widgets.SelectColorButton;
 
 public class SimulationRunDialog extends JDialog {

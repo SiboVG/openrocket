@@ -1,7 +1,5 @@
 package net.sf.openrocket.utils;
 
-import net.sf.openrocket.gui.main.SimulationPanel;
-
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;

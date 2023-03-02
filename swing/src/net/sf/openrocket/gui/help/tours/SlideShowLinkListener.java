@@ -1,6 +1,5 @@
 package net.sf.openrocket.gui.help.tours;
 
-import java.awt.Desktop;
 import java.awt.Window;
 import java.net.URL;
 

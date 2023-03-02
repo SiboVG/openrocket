@@ -2,7 +2,6 @@ package net.sf.openrocket.rocketcomponent;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 
 import net.sf.openrocket.util.BoundingBox;
 import org.slf4j.Logger;

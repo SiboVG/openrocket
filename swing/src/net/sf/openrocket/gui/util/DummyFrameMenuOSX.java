@@ -1,8 +1,5 @@
 package net.sf.openrocket.gui.util;
 
-import net.sf.openrocket.gui.dialogs.AboutDialog;
-import net.sf.openrocket.gui.dialogs.LicenseDialog;
-import net.sf.openrocket.gui.help.tours.GuidedTourSelectionDialog;
 import net.sf.openrocket.gui.main.BasicFrame;
 import net.sf.openrocket.gui.main.ExampleDesignFileAction;
 import net.sf.openrocket.gui.main.MRUDesignFileAction;

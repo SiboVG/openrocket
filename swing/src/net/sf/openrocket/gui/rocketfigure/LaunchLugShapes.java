@@ -2,7 +2,6 @@ package net.sf.openrocket.gui.rocketfigure;
 
 import java.awt.Shape;
 
-import net.sf.openrocket.util.Coordinate;
 import net.sf.openrocket.util.Transformation;
 
 import net.sf.openrocket.rocketcomponent.LaunchLug;

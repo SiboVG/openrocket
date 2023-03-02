@@ -11,7 +11,6 @@ import net.sf.openrocket.document.Simulation;
 import net.sf.openrocket.optimization.general.Function;
 import net.sf.openrocket.optimization.general.OptimizationException;
 import net.sf.openrocket.optimization.general.Point;
-import net.sf.openrocket.rocketcomponent.Rocket;
 import net.sf.openrocket.unit.UnitGroup;
 import net.sf.openrocket.unit.Value;
 import net.sf.openrocket.util.Pair;

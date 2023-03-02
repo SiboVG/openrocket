@@ -2,8 +2,6 @@ package net.sf.openrocket.gui.dialogs.motor.thrustcurve;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.HashSet;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -11,7 +9,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import net.sf.openrocket.gui.dialogs.motor.thrustcurve.MotorFilterPanel;
 import net.sf.openrocket.gui.dialogs.motor.thrustcurve.ThrustCurveMotorDatabaseModel;
 import net.sf.openrocket.gui.dialogs.motor.thrustcurve.ImpulseClass;
 import net.sf.openrocket.motor.Manufacturer;
@@ -19,8 +16,7 @@ import net.sf.openrocket.motor.Motor;
 import net.sf.openrocket.motor.ThrustCurveMotor;
 import net.sf.openrocket.database.motor.ThrustCurveMotorSet;
 import net.sf.openrocket.util.Coordinate;
-import net.sf.openrocket.util.Pair;
-	
+
 public class MotorRowFilterTest {
 	// just "slightly" above or below limits; also accuracy of
 	// equality tests

@@ -4,7 +4,6 @@ import net.sf.openrocket.gui.print.visitor.PageFitPrintStrategy;
 import net.sf.openrocket.gui.rocketfigure.RocketComponentShape;
 import net.sf.openrocket.gui.rocketfigure.TransitionShapes;
 import net.sf.openrocket.rocketcomponent.NoseCone;
-import net.sf.openrocket.util.Coordinate;
 import net.sf.openrocket.util.Transformation;
 
 import java.awt.Graphics2D;

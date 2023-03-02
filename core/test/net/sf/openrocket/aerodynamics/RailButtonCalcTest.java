@@ -21,7 +21,6 @@ import net.sf.openrocket.rocketcomponent.position.AxialMethod;
 import net.sf.openrocket.startup.Application;
 import net.sf.openrocket.util.MathUtil;
 import net.sf.openrocket.util.TestRockets;
-import net.sf.openrocket.util.Transformation;
 
 public class RailButtonCalcTest {
 	protected final double EPSILON = 0.0001;

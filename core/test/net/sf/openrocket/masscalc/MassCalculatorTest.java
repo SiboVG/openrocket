@@ -9,7 +9,6 @@ import net.sf.openrocket.rocketcomponent.*;
 import net.sf.openrocket.rocketcomponent.position.AngleMethod;
 import net.sf.openrocket.rocketcomponent.position.AxialMethod;
 import net.sf.openrocket.rocketcomponent.position.RadiusMethod;
-import net.sf.openrocket.util.MathUtil;
 import org.junit.Test;
 
 import net.sf.openrocket.motor.Motor;

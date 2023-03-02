@@ -3,7 +3,6 @@ package net.sf.openrocket.gui.components;
 import net.sf.openrocket.gui.util.URLUtil;
 
 import java.awt.Color;
-import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Rectangle;

@@ -3,7 +3,6 @@ package net.sf.openrocket.preset;
 import static net.sf.openrocket.preset.ComponentPreset.*;
 import net.sf.openrocket.database.Databases;
 import net.sf.openrocket.material.Material;
-import net.sf.openrocket.preset.ComponentPreset.Type;
 import net.sf.openrocket.rocketcomponent.NoseCone;
 import net.sf.openrocket.rocketcomponent.RailButton;
 import net.sf.openrocket.rocketcomponent.Transition;

@@ -1,11 +1,9 @@
 package net.sf.openrocket.file.photo;
 
 import net.sf.openrocket.file.openrocket.importt.OpenRocketHandler;
-import net.sf.openrocket.gui.figure3d.TextureCache;
 import net.sf.openrocket.gui.figure3d.photo.PhotoSettings;
 import net.sf.openrocket.gui.figure3d.photo.sky.Sky;
 import net.sf.openrocket.gui.figure3d.photo.sky.builtin.*;
-import net.sf.openrocket.startup.Application;
 import net.sf.openrocket.util.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

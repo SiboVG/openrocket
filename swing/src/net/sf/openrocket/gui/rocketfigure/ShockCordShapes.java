@@ -1,7 +1,5 @@
 package net.sf.openrocket.gui.rocketfigure;
 
-import net.sf.openrocket.rocketcomponent.MassComponent;
-import net.sf.openrocket.rocketcomponent.MassObject;
 import net.sf.openrocket.rocketcomponent.RocketComponent;
 import net.sf.openrocket.rocketcomponent.ShockCord;
 import net.sf.openrocket.util.Coordinate;

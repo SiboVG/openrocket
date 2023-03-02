@@ -3,10 +3,7 @@ package net.sf.openrocket.simulation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.sf.openrocket.models.atmosphere.AtmosphericConditions;
 import net.sf.openrocket.simulation.exception.SimulationException;
-import net.sf.openrocket.util.MathUtil;
-import net.sf.openrocket.util.Coordinate;
 
 public class GroundStepper extends AbstractSimulationStepper {
 	private static final Logger log = LoggerFactory.getLogger(GroundStepper.class);

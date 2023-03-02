@@ -3,8 +3,6 @@ package net.sf.openrocket.file.openrocket.savers;
 import java.util.List;
 import java.util.Locale;
 
-import net.sf.openrocket.rocketcomponent.FinSet;
-import net.sf.openrocket.rocketcomponent.position.AxialMethod;
 import net.sf.openrocket.util.MathUtil;
 
 public class FinSetSaver extends ExternalComponentSaver {

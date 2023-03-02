@@ -29,8 +29,6 @@ import net.sf.openrocket.rocketcomponent.TubeFinSet;
 import net.sf.openrocket.util.Coordinate;
 import net.sf.openrocket.util.Transformation;
 
-import static com.jogamp.opengl.GL2ES3.GL_QUADS;
-
 /*
  * @author Bill Kuker <bkuker@billkuker.com>
  * @author Daniel Williams <equipoise@gmail.com>
