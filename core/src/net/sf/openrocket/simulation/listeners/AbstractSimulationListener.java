@@ -39,7 +39,7 @@ public class AbstractSimulationListener implements SimulationListener, Simulatio
 	}
 	
 	@Override
-	public boolean preStep(SimulationStatus status) throws SimulationException {
+	public boolean preStep(SimulationStatus status) {
 		return true;
 	}
 	
@@ -62,22 +62,22 @@ public class AbstractSimulationListener implements SimulationListener, Simulatio
 	////  SimulationEventListener  ////
 	
 	@Override
-	public boolean addFlightEvent(SimulationStatus status, FlightEvent event) throws SimulationException {
+	public boolean addFlightEvent(SimulationStatus status, FlightEvent event) {
 		return true;
 	}
 	
 	@Override
-	public boolean handleFlightEvent(SimulationStatus status, FlightEvent event) throws SimulationException {
+	public boolean handleFlightEvent(SimulationStatus status, FlightEvent event) {
 		return true;
 	}
 	
 	@Override
-	public boolean motorIgnition(SimulationStatus status, MotorConfigurationId motorId, MotorMount mount, MotorClusterState instance) throws SimulationException {
+	public boolean motorIgnition(SimulationStatus status, MotorConfigurationId motorId, MotorMount mount, MotorClusterState instance) {
 		return true;
 	}
 	
 	@Override
-	public boolean recoveryDeviceDeployment(SimulationStatus status, RecoveryDevice recoveryDevice) throws SimulationException {
+	public boolean recoveryDeviceDeployment(SimulationStatus status, RecoveryDevice recoveryDevice) {
 		return true;
 	}
 	
@@ -86,82 +86,82 @@ public class AbstractSimulationListener implements SimulationListener, Simulatio
 	////  SimulationComputationListener  ////
 	
 	@Override
-	public AccelerationData preAccelerationCalculation(SimulationStatus status) throws SimulationException {
+	public AccelerationData preAccelerationCalculation(SimulationStatus status) {
 		return null;
 	}
 	
 	@Override
-	public AerodynamicForces preAerodynamicCalculation(SimulationStatus status) throws SimulationException {
+	public AerodynamicForces preAerodynamicCalculation(SimulationStatus status) {
 		return null;
 	}
 	
 	@Override
-	public AtmosphericConditions preAtmosphericModel(SimulationStatus status) throws SimulationException {
+	public AtmosphericConditions preAtmosphericModel(SimulationStatus status) {
 		return null;
 	}
 	
 	@Override
-	public FlightConditions preFlightConditions(SimulationStatus status) throws SimulationException {
+	public FlightConditions preFlightConditions(SimulationStatus status) {
 		return null;
 	}
 	
 	@Override
-	public double preGravityModel(SimulationStatus status) throws SimulationException {
+	public double preGravityModel(SimulationStatus status) {
 		return Double.NaN;
 	}
 	
 	@Override
-	public RigidBody preMassCalculation(SimulationStatus status) throws SimulationException {
+	public RigidBody preMassCalculation(SimulationStatus status) {
 		return null;
 	}
 	
 	@Override
-	public double preSimpleThrustCalculation(SimulationStatus status) throws SimulationException {
+	public double preSimpleThrustCalculation(SimulationStatus status) {
 		return Double.NaN;
 	}
 	
 	@Override
-	public Coordinate preWindModel(SimulationStatus status) throws SimulationException {
+	public Coordinate preWindModel(SimulationStatus status) {
 		return null;
 	}
 	
 	@Override
-	public AccelerationData postAccelerationCalculation(SimulationStatus status, AccelerationData acceleration) throws SimulationException {
+	public AccelerationData postAccelerationCalculation(SimulationStatus status, AccelerationData acceleration) {
 		return null;
 	}
 	
 	@Override
-	public AerodynamicForces postAerodynamicCalculation(SimulationStatus status, AerodynamicForces forces) throws SimulationException {
+	public AerodynamicForces postAerodynamicCalculation(SimulationStatus status, AerodynamicForces forces) {
 		return null;
 	}
 	
 	@Override
-	public AtmosphericConditions postAtmosphericModel(SimulationStatus status, AtmosphericConditions atmosphericConditions) throws SimulationException {
+	public AtmosphericConditions postAtmosphericModel(SimulationStatus status, AtmosphericConditions atmosphericConditions) {
 		return null;
 	}
 	
 	@Override
-	public FlightConditions postFlightConditions(SimulationStatus status, FlightConditions flightConditions) throws SimulationException {
+	public FlightConditions postFlightConditions(SimulationStatus status, FlightConditions flightConditions) {
 		return null;
 	}
 	
 	@Override
-	public double postGravityModel(SimulationStatus status, double gravity) throws SimulationException {
+	public double postGravityModel(SimulationStatus status, double gravity) {
 		return Double.NaN;
 	}
 	
 	@Override
-	public RigidBody postMassCalculation(SimulationStatus status, RigidBody RigidBody) throws SimulationException {
+	public RigidBody postMassCalculation(SimulationStatus status, RigidBody RigidBody) {
 		return null;
 	}
 	
 	@Override
-	public double postSimpleThrustCalculation(SimulationStatus status, double thrust) throws SimulationException {
+	public double postSimpleThrustCalculation(SimulationStatus status, double thrust) {
 		return Double.NaN;
 	}
 	
 	@Override
-	public Coordinate postWindModel(SimulationStatus status, Coordinate wind) throws SimulationException {
+	public Coordinate postWindModel(SimulationStatus status, Coordinate wind) {
 		return null;
 	}
 	
