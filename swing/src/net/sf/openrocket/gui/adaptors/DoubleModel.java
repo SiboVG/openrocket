@@ -997,9 +997,9 @@ public class DoubleModel implements StateChangeListener, ChangeSource, Invalidat
 		if (!listeners.isEmpty()) {
 			log.warn(this + " being garbage-collected while having listeners " + listeners);
 		}
-	};
-	
-	
+	}
+
+
 	/**
 	 * Fire a ChangeEvent to all listeners.
 	 */

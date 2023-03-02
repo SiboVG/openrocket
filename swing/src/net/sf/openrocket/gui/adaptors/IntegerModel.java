@@ -262,9 +262,9 @@ public class IntegerModel implements StateChangeListener {
 		if (!listeners.isEmpty()) {
 			log.warn(this + " being garbage-collected while having listeners " + listeners);
 		}
-	};
-	
-	
+	}
+
+
 	public void fireStateChanged() {
 		EventListener[] list = listeners.toArray(new EventListener[0] );
 		EventObject event = new EventObject(this);

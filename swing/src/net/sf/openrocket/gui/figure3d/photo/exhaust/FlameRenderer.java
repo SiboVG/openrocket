@@ -256,7 +256,7 @@ public final class FlameRenderer {
 				@Override
 				public float f(double z) {
 					return 0.2f * (float) Math.pow((1.0f - (float) z / FLEN), 4);
-				};
+				}
 			};
 
 			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE);

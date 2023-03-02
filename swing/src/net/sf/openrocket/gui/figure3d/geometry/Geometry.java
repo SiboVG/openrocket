@@ -14,7 +14,7 @@ import com.jogamp.opengl.GL2;
  */
 public abstract class Geometry {
     public static enum Surface {
-        ALL, OUTSIDE, INSIDE, EDGES;
+        ALL, OUTSIDE, INSIDE, EDGES
     }
 
     public static final Geometry EMPTY = new Geometry(){

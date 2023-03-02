@@ -110,7 +110,7 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 		VIEW_TYPE(final boolean is3d, final int type) {
 			this.is3d = is3d;
 			this.type = type;
-		};
+		}
 
 		@Override
 		public String toString() {
@@ -1128,7 +1128,7 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 			String str = (value == null) ? "" : value.toString();
 			if (VIEW_TYPE_SEPARATOR.equals(str)) {
 				return separator;
-			};
+			}
 			return defaultRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 		}
 	}

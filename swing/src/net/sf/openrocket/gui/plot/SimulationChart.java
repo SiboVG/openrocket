@@ -42,9 +42,9 @@ public class SimulationChart extends ChartPanel {
 	
 	private enum Interaction {
 		ZOOM
-	};
-	
-	private Interaction interaction = null;
+	}
+
+    private Interaction interaction = null;
 	
 	private MouseWheelHandler mouseWheelHandler = null;
 	
