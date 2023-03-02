@@ -1,6 +1,7 @@
 package net.sf.openrocket.gui.main;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -80,7 +81,7 @@ public final class OpenRocketClipboard {
 	private static void filterClipboardComponent(RocketComponent component) {
 		if (component == null) return;
 
-		boolean allChildrenSelected = clipboardComponents.containsAll(component.getChildren());
+		boolean allChildrenSelected = new HashSet<>(clipboardComponents).containsAll(component.getChildren());
 		boolean someChildrenSelected = false;
 		for (RocketComponent child : component.getChildren()) {
 			if (clipboardComponents.contains(child)) {
