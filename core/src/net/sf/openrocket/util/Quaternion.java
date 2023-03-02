@@ -38,7 +38,7 @@ public class Quaternion {
 	}
 	
 	private static int count = 0;
-	{
+	static {
 		// Debug count
 		if (COUNT_DEBUG) {
 			synchronized (Quaternion.class) {

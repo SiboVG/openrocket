@@ -44,7 +44,7 @@ public final class Coordinate implements Cloneable, Serializable {
 	}
 	
 	private static int count = 0;
-	{
+	static {
 		// Debug count
 		if (COUNT_DEBUG) {
 			synchronized (Coordinate.class) {
