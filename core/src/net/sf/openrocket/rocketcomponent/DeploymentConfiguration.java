@@ -15,7 +15,7 @@ import java.util.Objects;
 public class DeploymentConfiguration implements FlightConfigurableParameter<DeploymentConfiguration> {
 	
 	
-	public static enum DeployEvent {
+	public enum DeployEvent {
 		LAUNCH(trans.get("RecoveryDevice.DeployEvent.LAUNCH")) {
 			@Override
 			public boolean isActivationEvent(DeploymentConfiguration config, FlightEvent e, RocketComponent source) {

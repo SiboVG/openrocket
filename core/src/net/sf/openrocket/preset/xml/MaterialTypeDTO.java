@@ -14,7 +14,7 @@ public enum MaterialTypeDTO {
 
     private final Material.Type corollary;
 
-    private MaterialTypeDTO(final Material.Type theCorollary) {
+    MaterialTypeDTO(final Material.Type theCorollary) {
         corollary = theCorollary;
     }
 

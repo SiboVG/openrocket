@@ -51,7 +51,7 @@ public enum AngleMethod implements DistanceMethod {
 
 	public final String description;
 	
-	private AngleMethod( final String descr ) { 
+	AngleMethod( final String descr ) {
 		this.description= descr;
 	}
 

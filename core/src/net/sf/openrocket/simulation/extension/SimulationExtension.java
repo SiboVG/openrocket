@@ -18,7 +18,7 @@ public interface SimulationExtension {
 	 * 
 	 * @return		the extension ID
 	 */
-	public String getId();
+    String getId();
 	
 	/**
 	 * Return a short description of this extension.  The name may contain
@@ -27,7 +27,7 @@ public interface SimulationExtension {
 	 * 
 	 * @return		a short name / description of this extension to be shown in the UI (must not be null)
 	 */
-	public String getName();
+    String getName();
 	
 	/**
 	 * Return a longer description text for this extension, if available.
@@ -36,7 +36,7 @@ public interface SimulationExtension {
 	 * 
 	 * @return		a longer description about this extension, or null if not available
 	 */
-	public String getDescription();
+    String getDescription();
 	
 	/**
 	 * Called once for each simulation this extension is attached to when loading a document.
@@ -46,7 +46,7 @@ public interface SimulationExtension {
 	 * @param simulation	the simulation this extension is attached to
 	 * @param warnings		the document loading warnings
 	 */
-	public void documentLoaded(OpenRocketDocument document, Simulation simulation, WarningSet warnings);
+    void documentLoaded(OpenRocketDocument document, Simulation simulation, WarningSet warnings);
 	
 	/**
 	 * Initialize this simulation extension for running within a simulation.
@@ -56,14 +56,14 @@ public interface SimulationExtension {
 	 * @param conditions		the simulation conditions to be run
 	 * @param configuration		the extension configuration
 	 */
-	public void initialize(SimulationConditions conditions) throws SimulationException;
+    void initialize(SimulationConditions conditions) throws SimulationException;
 	
 	/**
 	 * Return a list of any flight data types this simulation extension creates.
 	 * This should only contain new types created by this extension, not existing
 	 * types that the extension adds to the flight data.
 	 */
-	public List<FlightDataType> getFlightDataTypes();
+    List<FlightDataType> getFlightDataTypes();
 	
 	
 	/**
@@ -71,7 +71,7 @@ public interface SimulationExtension {
 	 * 
 	 * @return		a new copy of this simulation extension
 	 */
-	public SimulationExtension clone();
+    SimulationExtension clone();
 	
 	
 	/**
@@ -81,7 +81,7 @@ public interface SimulationExtension {
 	 * 
 	 * @return			the simulation extension configuration.
 	 */
-	public Config getConfig();
+    Config getConfig();
 	
 	/**
 	 * Set this simulation extension's configuration.  The extension should load all its
@@ -89,6 +89,6 @@ public interface SimulationExtension {
 	 * 
 	 * @param config	the configuration to set
 	 */
-	public void setConfig(Config config);
+    void setConfig(Config config);
 	
 }

@@ -36,7 +36,7 @@ class OperatorToken extends CalculationToken {
 		private final int precedence;
 		private final boolean leftAssociative;
 
-		private Operation(int precedence, boolean leftAssociative) {
+		Operation(int precedence, boolean leftAssociative) {
 			this.precedence = precedence;
 			this.leftAssociative = leftAssociative;
 		}

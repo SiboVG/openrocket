@@ -19,7 +19,7 @@ public interface SimulationEventListener {
 	 * @return			<code>true</code> to add the event,
 	 * 					<code>false</code> to abort adding event to event queue
 	 */
-	public boolean addFlightEvent(SimulationStatus status, FlightEvent event) throws SimulationException;
+    boolean addFlightEvent(SimulationStatus status, FlightEvent event) throws SimulationException;
 	
 	
 	
@@ -31,7 +31,7 @@ public interface SimulationEventListener {
 	 * @return			<code>true</code> to continue handling the event,
 	 * 					<code>false</code> to abort handling
 	 */
-	public boolean handleFlightEvent(SimulationStatus status, FlightEvent event) throws SimulationException;
+    boolean handleFlightEvent(SimulationStatus status, FlightEvent event) throws SimulationException;
 	
 	
 	/**
@@ -43,7 +43,7 @@ public interface SimulationEventListener {
 	 * @param instance	the motor instance being ignited
 	 * @return			<code>true</code> to ignite the motor, <code>false</code> to abort ignition
 	 */
-	public boolean motorIgnition(SimulationStatus status, MotorConfigurationId motorId, MotorMount mount,
+    boolean motorIgnition(SimulationStatus status, MotorConfigurationId motorId, MotorMount mount,
 			MotorClusterState instance) throws SimulationException;
 	
 	
@@ -54,7 +54,7 @@ public interface SimulationEventListener {
 	 * @param recoveryDevice	the recovery device that is being deployed.
 	 * @return					<code>true</code> to deploy the recovery device, <code>false</code> to abort deployment
 	 */
-	public boolean recoveryDeviceDeployment(SimulationStatus status, RecoveryDevice recoveryDevice)
+    boolean recoveryDeviceDeployment(SimulationStatus status, RecoveryDevice recoveryDevice)
 			throws SimulationException;
 	
 	

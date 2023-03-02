@@ -26,7 +26,7 @@ public enum RockSimFinishCode {
      * @param idx   the RockSim enum value
      * @param theFinish  the OpenRocket finish
      */
-    private RockSimFinishCode(int idx, ExternalComponent.Finish theFinish) {
+    RockSimFinishCode(int idx, ExternalComponent.Finish theFinish) {
         ordinal = idx;
         finish = theFinish;
     }

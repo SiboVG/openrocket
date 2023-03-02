@@ -82,7 +82,7 @@ public class PhotoPanel extends JPanel implements GLEventListener {
 	private DocumentChangeListener changeListener;
 
 	interface ImageCallback {
-		public void performAction(BufferedImage i);
+		void performAction(BufferedImage i);
 	}
 
 	void addImageCallback(ImageCallback a) {

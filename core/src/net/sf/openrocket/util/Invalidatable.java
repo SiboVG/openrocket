@@ -12,6 +12,6 @@ public interface Invalidatable {
 	/**
 	 * Invalidate this object.
 	 */
-	public void invalidate();
+    void invalidate();
 	
 }

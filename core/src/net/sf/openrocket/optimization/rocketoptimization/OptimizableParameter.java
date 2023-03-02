@@ -17,7 +17,7 @@ public interface OptimizableParameter {
 	 * 
 	 * @return	the name for the optimization parameter (e.g. "Flight altitude")
 	 */
-	public String getName();
+    String getName();
 	
 	/**
 	 * Compute the value for this optimization parameter for the simulation.
@@ -29,13 +29,13 @@ public interface OptimizableParameter {
 	 * @return				the parameter value (any double value)
 	 * @throws OptimizationException	if an error occurs preventing the optimization from continuing
 	 */
-	public double computeValue(Simulation simulation) throws OptimizationException, InterruptedException;
+    double computeValue(Simulation simulation) throws OptimizationException, InterruptedException;
 	
 	
 	/**
 	 * Return the unit group associated with the computed value.
 	 * @return	the unit group of the computed value.
 	 */
-	public UnitGroup getUnitGroup();
+    UnitGroup getUnitGroup();
 	
 }

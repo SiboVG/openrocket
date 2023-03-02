@@ -14,7 +14,7 @@ public interface SimulationExtensionProvider {
 	 * 
 	 * @return  a list of ID strings
 	 */
-	public List<String> getIds();
+    List<String> getIds();
 	
 	/**
 	 * Return the UI name for a simulation extension.  The first values
@@ -32,7 +32,7 @@ public interface SimulationExtensionProvider {
 	 * @param id	the extension ID
 	 * @return  	the UI name for the extension, or null for no display
 	 */
-	public List<String> getName(String id);
+    List<String> getName(String id);
 	
 	/**
 	 * Return a new instance of a simulation extension.  This is a new instance
@@ -41,6 +41,6 @@ public interface SimulationExtensionProvider {
 	 * @param id	the extension ID
 	 * @return		a new simulation extension instance
 	 */
-	public SimulationExtension getInstance(String id);
+    SimulationExtension getInstance(String id);
 	
 }

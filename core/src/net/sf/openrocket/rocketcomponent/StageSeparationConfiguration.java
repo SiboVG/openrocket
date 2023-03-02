@@ -11,7 +11,7 @@ import java.util.Objects;
 
 public class StageSeparationConfiguration implements FlightConfigurableParameter<StageSeparationConfiguration> {
 	
-	public static enum SeparationEvent {
+	public enum SeparationEvent {
 		//// Upper stage motor ignition
 		UPPER_IGNITION(trans.get("Stage.SeparationEvent.UPPER_IGNITION")) {
 			@Override

@@ -6,8 +6,8 @@ import net.sf.openrocket.aerodynamics.WarningSet;
 
 public interface RocketLoader {
 	
-	public void load(DocumentLoadingContext context, InputStream source) throws RocketLoadException;
+	void load(DocumentLoadingContext context, InputStream source) throws RocketLoadException;
 	
-	public WarningSet getWarnings();
+	WarningSet getWarnings();
 	
 }

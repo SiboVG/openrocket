@@ -15,7 +15,7 @@ public class MassComponent extends MassObject {
 	
 	private double mass = 0;
 	
-	public static enum MassComponentType {
+	public enum MassComponentType {
 		MASSCOMPONENT(Application.getTranslator().get("MassComponent.MassComponent")),
 		ALTIMETER(Application.getTranslator().get("MassComponent.Altimeter")),
 		FLIGHTCOMPUTER(Application.getTranslator().get("MassComponent.FlightComputer")),

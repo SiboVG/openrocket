@@ -45,7 +45,7 @@ import net.sf.openrocket.util.StateChangeListener;
 public class Simulation implements ChangeSource, Cloneable {
 	private static final Logger log = LoggerFactory.getLogger(Simulation.class);
 	
-	public static enum Status {
+	public enum Status {
 		/** Up-to-date */
 		UPTODATE,
 		

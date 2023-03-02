@@ -6,6 +6,6 @@ import java.util.Collection;
 
 public interface Loader<T> {
 
-	public Collection<T> load(InputStream stream, String filename) throws IOException;
+	Collection<T> load(InputStream stream, String filename) throws IOException;
 	
 }

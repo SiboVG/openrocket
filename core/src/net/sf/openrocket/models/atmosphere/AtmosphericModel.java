@@ -4,6 +4,6 @@ import net.sf.openrocket.util.Monitorable;
 
 public interface AtmosphericModel extends Monitorable {
 
-	public AtmosphericConditions getConditions(double altitude);
+	AtmosphericConditions getConditions(double altitude);
 	
 }

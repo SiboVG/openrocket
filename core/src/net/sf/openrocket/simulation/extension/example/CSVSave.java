@@ -18,7 +18,7 @@ import net.sf.openrocket.simulation.listeners.AbstractSimulationListener;
 
 public class CSVSave extends AbstractSimulationExtension {
 	
-	private static enum Types {
+	private enum Types {
 		TIME {
 			@Override
 			public double getValue(SimulationStatus status) {

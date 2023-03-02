@@ -142,23 +142,23 @@ import net.sf.openrocket.util.Color;
 public final class FlameRenderer {
 
 	public interface FlameSettings {
-		public double getExhaustScale();
+		double getExhaustScale();
 		
-		public boolean isFlame();
+		boolean isFlame();
 
-		public Color getFlameColor();
+		Color getFlameColor();
 
-		public boolean isSmoke();
+		boolean isSmoke();
 
-		public Color getSmokeColor();
+		Color getSmokeColor();
 
-		public double getFlameAspectRatio();
+		double getFlameAspectRatio();
 
-		public boolean isSparks();
+		boolean isSparks();
 		
-		public double getSparkConcentration();
+		double getSparkConcentration();
 		
-		public double getSparkWeight();
+		double getSparkWeight();
 	}
 
 	private static final Logger log = LoggerFactory.getLogger(FlameRenderer.class);
@@ -287,7 +287,7 @@ public final class FlameRenderer {
 	static Texture smokeN;
 	static int shaderprogram;
 
-	private static interface Func {
+	private interface Func {
 		float f(double d);
 	}
 

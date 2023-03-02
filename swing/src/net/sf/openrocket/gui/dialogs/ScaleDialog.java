@@ -637,7 +637,7 @@ public class ScaleDialog extends JDialog {
 	 * Interface for scaling a specific component/value.
 	 */
 	private interface Scaler {
-		public void scale(RocketComponent c, double multiplier, boolean scaleMass);
+		void scale(RocketComponent c, double multiplier, boolean scaleMass);
 	}
 	
 	/**

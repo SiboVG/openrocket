@@ -664,8 +664,8 @@ public class RocketFigure3d extends JPanel implements GLEventListener {
 	
 	private ComponentSelectionListener csl;
 	
-	public static interface ComponentSelectionListener {
-		public void componentClicked(RocketComponent[] components, MouseEvent e);
+	public interface ComponentSelectionListener {
+		void componentClicked(RocketComponent[] components, MouseEvent e);
 	}
 	
 	public void addComponentSelectionListener(

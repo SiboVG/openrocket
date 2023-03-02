@@ -21,7 +21,7 @@ public enum PaperOrientation {
 
 	private final String name;
 	
-	private PaperOrientation(String name) {
+	PaperOrientation(String name) {
 		this.name = name;
 	}
 	

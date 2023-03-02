@@ -25,7 +25,7 @@ public enum RockSimDensityType {
      * @param idx            the RockSim shape code
      * @param theConversion  the numerical conversion ratio to OpenRocket
      */
-    private RockSimDensityType(int idx, double theConversion) {
+    RockSimDensityType(int idx, double theConversion) {
         ordinal = idx;
         conversion = theConversion;
     }

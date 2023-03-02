@@ -21,7 +21,7 @@ public interface MotorFinder {
 	 * 
 	 * @return	the motor to use in the design, or <code>null</code> for no motor.
 	 */
-	public Motor findMotor(Motor.Type type, String manufacturer, String designation, double diameter,
+    Motor findMotor(Motor.Type type, String manufacturer, String designation, double diameter,
 			double length, String digest, WarningSet warnings);
 	
 	

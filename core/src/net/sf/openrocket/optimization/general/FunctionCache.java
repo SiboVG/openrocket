@@ -15,25 +15,25 @@ public interface FunctionCache {
 	 * @param point		the point at which to evaluate.
 	 * @return			the value of the function at that point.
 	 */
-	public double getValue(Point point);
+    double getValue(Point point);
 	
 	/**
 	 * Clear the cache.
 	 */
-	public void clearCache();
+    void clearCache();
 	
 	/**
 	 * Return the function that is evaluated by this cache implementation.
 	 * 
 	 * @return	the function that is being evaluated.
 	 */
-	public Function getFunction();
+    Function getFunction();
 	
 	/**
 	 * Set the function that is evaluated by this cache implementation.
 	 * 
 	 * @param function	the function that is being evaluated.
 	 */
-	public void setFunction(Function function);
+    void setFunction(Function function);
 	
 }

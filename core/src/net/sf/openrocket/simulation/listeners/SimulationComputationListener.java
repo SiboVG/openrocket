@@ -20,48 +20,48 @@ public interface SimulationComputationListener extends SimulationListener {
 	
 	////////  Computation/modeling related callbacks  ////////
 	
-	public AccelerationData preAccelerationCalculation(SimulationStatus status) throws SimulationException;
+	AccelerationData preAccelerationCalculation(SimulationStatus status) throws SimulationException;
 	
-	public AccelerationData postAccelerationCalculation(SimulationStatus status, AccelerationData acceleration)
+	AccelerationData postAccelerationCalculation(SimulationStatus status, AccelerationData acceleration)
 			throws SimulationException;
 	
-	public AtmosphericConditions preAtmosphericModel(SimulationStatus status)
+	AtmosphericConditions preAtmosphericModel(SimulationStatus status)
 			throws SimulationException;
 	
-	public AtmosphericConditions postAtmosphericModel(SimulationStatus status, AtmosphericConditions atmosphericConditions)
-			throws SimulationException;
-	
-	
-	public Coordinate preWindModel(SimulationStatus status) throws SimulationException;
-	
-	public Coordinate postWindModel(SimulationStatus status, Coordinate wind) throws SimulationException;
-	
-	
-	public double preGravityModel(SimulationStatus status) throws SimulationException;
-	
-	public double postGravityModel(SimulationStatus status, double gravity) throws SimulationException;
-	
-	
-	public FlightConditions preFlightConditions(SimulationStatus status)
-			throws SimulationException;
-	
-	public FlightConditions postFlightConditions(SimulationStatus status, FlightConditions flightConditions)
+	AtmosphericConditions postAtmosphericModel(SimulationStatus status, AtmosphericConditions atmosphericConditions)
 			throws SimulationException;
 	
 	
-	public AerodynamicForces preAerodynamicCalculation(SimulationStatus status)
+	Coordinate preWindModel(SimulationStatus status) throws SimulationException;
+	
+	Coordinate postWindModel(SimulationStatus status, Coordinate wind) throws SimulationException;
+	
+	
+	double preGravityModel(SimulationStatus status) throws SimulationException;
+	
+	double postGravityModel(SimulationStatus status, double gravity) throws SimulationException;
+	
+	
+	FlightConditions preFlightConditions(SimulationStatus status)
 			throws SimulationException;
 	
-	public AerodynamicForces postAerodynamicCalculation(SimulationStatus status, AerodynamicForces forces)
+	FlightConditions postFlightConditions(SimulationStatus status, FlightConditions flightConditions)
 			throws SimulationException;
 	
-	public RigidBody preMassCalculation(SimulationStatus status) throws SimulationException;
 	
-	public RigidBody postMassCalculation(SimulationStatus status, RigidBody massData) throws SimulationException;
+	AerodynamicForces preAerodynamicCalculation(SimulationStatus status)
+			throws SimulationException;
+	
+	AerodynamicForces postAerodynamicCalculation(SimulationStatus status, AerodynamicForces forces)
+			throws SimulationException;
+	
+	RigidBody preMassCalculation(SimulationStatus status) throws SimulationException;
+	
+	RigidBody postMassCalculation(SimulationStatus status, RigidBody massData) throws SimulationException;
 	
 	
-	public double preSimpleThrustCalculation(SimulationStatus status) throws SimulationException;
+	double preSimpleThrustCalculation(SimulationStatus status) throws SimulationException;
 	
-	public double postSimpleThrustCalculation(SimulationStatus status, double thrust) throws SimulationException;
+	double postSimpleThrustCalculation(SimulationStatus status, double thrust) throws SimulationException;
 	
 }

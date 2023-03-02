@@ -23,7 +23,7 @@ public enum CaseInfo {
 	
 	private final String label;
 	
-	private CaseInfo(String label) {
+	CaseInfo(String label) {
 		this.label = label;
 	}
 	

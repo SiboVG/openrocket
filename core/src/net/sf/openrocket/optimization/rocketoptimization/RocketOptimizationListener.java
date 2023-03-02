@@ -19,6 +19,6 @@ public interface RocketOptimizationListener {
 	 * @param parameterValue	the parameter value (or NaN if unavailable)
 	 * @param goalValue			the goal value (return value of the function)
 	 */
-	public void evaluated(Point point, Value[] state, Value domainReference, Value parameterValue, double goalValue);
+    void evaluated(Point point, Value[] state, Value domainReference, Value parameterValue, double goalValue);
 	
 }

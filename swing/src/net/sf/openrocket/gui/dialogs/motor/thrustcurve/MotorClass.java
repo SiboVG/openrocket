@@ -46,7 +46,7 @@ public enum MotorClass {
 	private final double max;
 	
 	
-	private MotorClass(String className, double min, double max) {
+	MotorClass(String className, double min, double max) {
 		this.className = className;
 		this.min = min;
 		this.max = max;

@@ -824,7 +824,7 @@ public class Transition extends SymmetricComponent implements InsideColorCompone
 	 *
 	 * @author Sampo Niskanen <sampo.niskanen@iki.fi>
 	 */
-	public static enum Shape {
+	public enum Shape {
 
 		/**
 		 * Conical shape.

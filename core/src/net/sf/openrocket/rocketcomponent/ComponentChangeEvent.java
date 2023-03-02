@@ -22,7 +22,7 @@ public class ComponentChangeEvent extends EventObject {
 		private final int value;
 		private final String name;
 		
-		private TYPE( final int _val, final String _name){
+		TYPE( final int _val, final String _name){
 			this.value = _val;
 			this.name = _name;
 		}

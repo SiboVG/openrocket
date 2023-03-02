@@ -42,7 +42,7 @@ public enum RockSimNoseConeCode {
      * @param aShape        the corresponding OpenRocket shape
      * @param theShapeNames an array of alternate names
      */
-    private RockSimNoseConeCode(int idx, Transition.Shape aShape, String... theShapeNames) {
+    RockSimNoseConeCode(int idx, Transition.Shape aShape, String... theShapeNames) {
         ordinal = idx;
         shape = aShape;
         shapeNames.add(this.name().toLowerCase());

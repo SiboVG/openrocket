@@ -18,7 +18,7 @@ public interface SimulationEngine {
 	 * @return				a FlightData object containing the simulated data.
 	 * @throws SimulationException		if an error occurs during simulation
 	 */
-	public FlightData simulate(SimulationConditions simulation)
+    FlightData simulate(SimulationConditions simulation)
 		throws SimulationException;
 	
 }

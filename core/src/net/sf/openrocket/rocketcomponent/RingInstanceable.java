@@ -8,26 +8,26 @@ import net.sf.openrocket.rocketcomponent.position.RadiusPositionable;
 public interface RingInstanceable extends Instanceable, AnglePositionable, RadiusPositionable {
 
 	@Override
-	public double getAngleOffset();
+    double getAngleOffset();
 	@Override
-	public void setAngleOffset( final double angle);
+    void setAngleOffset(final double angle);
 	@Override
-	public AngleMethod getAngleMethod();
+    AngleMethod getAngleMethod();
 	@Override
-	public void setAngleMethod( final AngleMethod method );
+    void setAngleMethod(final AngleMethod method );
 	
-	public double getInstanceAngleIncrement();
+	double getInstanceAngleIncrement();
 	
-	public double[] getInstanceAngles();
+	double[] getInstanceAngles();
 	
 	
 	@Override
-	public double getRadiusOffset();
+    double getRadiusOffset();
 	@Override
-	public void setRadiusOffset( final double radius);
+    void setRadiusOffset(final double radius);
 	@Override
-	public RadiusMethod getRadiusMethod();
+    RadiusMethod getRadiusMethod();
 	@Override
-	public void setRadiusMethod( final RadiusMethod method );
+    void setRadiusMethod(final RadiusMethod method );
 	
 }

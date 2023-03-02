@@ -12,10 +12,10 @@ import net.sf.openrocket.rocketcomponent.Rocket;
 @Plugin
 public interface RocketSubstitutor {
 	
-	public boolean containsSubstitution(String str);
+	boolean containsSubstitution(String str);
 	
-	public String substitute(String str, Rocket rocket, FlightConfigurationId configId);
+	String substitute(String str, Rocket rocket, FlightConfigurationId configId);
 	
-	public Map<String, String> getDescriptions();
+	Map<String, String> getDescriptions();
 	
 }

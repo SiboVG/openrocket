@@ -2,13 +2,13 @@ package net.sf.openrocket.rocketcomponent.position;
 
 public interface RadiusPositionable {
 
-    public double getBoundingRadius();
+    double getBoundingRadius();
 
-	public double getRadiusOffset();
-	public void setRadiusOffset(final double radius);
+	double getRadiusOffset();
+	void setRadiusOffset(final double radius);
 	
-	public RadiusMethod getRadiusMethod();
-	public void setRadiusMethod( final RadiusMethod method );
+	RadiusMethod getRadiusMethod();
+	void setRadiusMethod( final RadiusMethod method );
 	
 	/**
 	 * Equivalent to:
@@ -17,6 +17,6 @@ public interface RadiusPositionable {
 	 * @param radius
 	 * @param method
 	 */
-	public void setRadius( final RadiusMethod method, final double radius );
+    void setRadius( final RadiusMethod method, final double radius );
 	
 }

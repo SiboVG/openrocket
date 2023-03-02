@@ -11,5 +11,5 @@ package net.sf.openrocket.gui;
  * @author Sampo Niskanen <sampo.niskanen@iki.fi>
  */
 public interface Resettable {
-	public void resetModel();
+	void resetModel();
 }

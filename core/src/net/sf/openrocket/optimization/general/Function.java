@@ -20,6 +20,6 @@ public interface Function {
 	 * @throws InterruptedException		if the thread was interrupted before function evaluation was completed.
 	 * @throws OptimizationException	if an error occurs that prevents the optimization
 	 */
-	public double evaluate(Point point) throws InterruptedException, OptimizationException;
+    double evaluate(Point point) throws InterruptedException, OptimizationException;
 	
 }

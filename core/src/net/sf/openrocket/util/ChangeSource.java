@@ -8,8 +8,8 @@ package net.sf.openrocket.util;
  */
 public interface ChangeSource {
 	
-	public void addChangeListener(StateChangeListener listener);
+	void addChangeListener(StateChangeListener listener);
 	
-	public void removeChangeListener(StateChangeListener listener);
+	void removeChangeListener(StateChangeListener listener);
 	
 }

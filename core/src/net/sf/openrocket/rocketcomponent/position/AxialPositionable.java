@@ -3,11 +3,11 @@ package net.sf.openrocket.rocketcomponent.position;
 
 public interface AxialPositionable {
 
-	public double getAxialOffset();
+	double getAxialOffset();
 	
-	public void setAxialOffset(final double newAxialOffset);
+	void setAxialOffset(final double newAxialOffset);
 	
-	public AxialMethod getAxialMethod( );
+	AxialMethod getAxialMethod( );
 	
-	public void setAxialMethod( AxialMethod newMethod );
+	void setAxialMethod( AxialMethod newMethod );
 }

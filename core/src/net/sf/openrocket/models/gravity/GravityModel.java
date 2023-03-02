@@ -16,6 +16,6 @@ public interface GravityModel extends Monitorable {
 	 * @param wc	the world coordinate location
 	 * @return		gravitational acceleration in m/s/s
 	 */
-	public double getGravity(WorldCoordinate wc);
+    double getGravity(WorldCoordinate wc);
 	
 }

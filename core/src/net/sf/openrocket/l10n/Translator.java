@@ -20,7 +20,7 @@ public interface Translator {
 	 * @throws MissingResourceException if the translation corresponding to the key is not found.
 	 * @throws NullPointerException	if key is null.
 	 */
-	public String get(String key);
+    String get(String key);
 	
 	
 	/**
@@ -35,7 +35,7 @@ public interface Translator {
 	 * @param text		the base (English) text to translate
 	 * @return			the translated string, or "text" if not found
 	 */
-	public String get(String base, String text);
+    String get(String base, String text);
 	
 	
 	/**
@@ -49,13 +49,13 @@ public interface Translator {
 	 * @param translation	the translated string
 	 * @return				the base text, or the translation if not found.
 	 */
-	public String getBaseText(String base, String translation);
+    String getBaseText(String base, String translation);
 
 	/**
 	 * Checks whether a certain translation key exists.
 	 * @param key the key to check
 	 * @return true if it exists, false otherwise
 	 */
-	public boolean checkIfKeyExists(String key);
+    boolean checkIfKeyExists(String key);
 	
 }

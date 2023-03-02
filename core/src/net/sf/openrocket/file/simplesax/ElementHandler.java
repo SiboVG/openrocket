@@ -44,7 +44,7 @@ public interface ElementHandler {
 	 * @return				the handler that handles elements encountered within this element,
 	 * 						or <code>null</code> if the element is to be ignored.
 	 */
-	public ElementHandler openElement(String element, HashMap<String, String> attributes,
+    ElementHandler openElement(String element, HashMap<String, String> attributes,
 			WarningSet warnings) throws SAXException;
 	
 	/**
@@ -58,7 +58,7 @@ public interface ElementHandler {
 	 * @param content		the textual content of the element.
 	 * @param warnings		the warning set to store warnings in.
 	 */
-	public abstract void closeElement(String element, HashMap<String, String> attributes,
+    void closeElement(String element, HashMap<String, String> attributes,
 			String content, WarningSet warnings) throws SAXException;
 	
 	/**
@@ -66,7 +66,7 @@ public interface ElementHandler {
 	 * 
 	 * @param warnings		the warning set to store warnings in.
 	 */
-	public abstract void endHandler(String element, HashMap<String, String> attributes,
+    void endHandler(String element, HashMap<String, String> attributes,
 			String content, WarningSet warnings) throws SAXException;
 	
 }

@@ -99,7 +99,7 @@ public enum RadiusMethod implements DistanceMethod {
 	
 	// =============
 	
-	private RadiusMethod( final String descr ) {
+	RadiusMethod( final String descr ) {
 		this.description = descr;	
 	}
 

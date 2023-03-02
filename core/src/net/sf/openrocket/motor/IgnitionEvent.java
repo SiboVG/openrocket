@@ -70,7 +70,7 @@ public enum IgnitionEvent {
 		return false;
 	}		
 	
-	private IgnitionEvent(final String _name, final String _key) {
+	IgnitionEvent(final String _name, final String _key) {
 		this.name = _name;
 		this.translationKey = _key; 
 	}

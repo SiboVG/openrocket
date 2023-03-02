@@ -15,6 +15,6 @@ interface Setter {
 	 * @param attributes	attributes for the element.
 	 * @param warnings		the warning set to use.
 	 */
-	public void set(RocketComponent component, String value,
+    void set(RocketComponent component, String value,
 			HashMap<String, String> attributes, WarningSet warnings);
 }

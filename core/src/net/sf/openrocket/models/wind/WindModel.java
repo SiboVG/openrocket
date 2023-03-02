@@ -5,6 +5,6 @@ import net.sf.openrocket.util.Monitorable;
 
 public interface WindModel extends Monitorable {
 
-	public Coordinate getWindVelocity(double time, double altitude);
+	Coordinate getWindVelocity(double time, double altitude);
 	
 }

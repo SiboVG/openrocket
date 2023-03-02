@@ -2,8 +2,8 @@ package net.sf.openrocket.util;
 
 public interface Statistics {
 	
-	public String getStatistics();
+	String getStatistics();
 	
-	public void resetStatistics();
+	void resetStatistics();
 	
 }

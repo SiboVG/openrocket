@@ -14,7 +14,7 @@ import java.awt.Graphics2D;
  */
 public class Rule extends PrintableComponent {
 
-    public static enum Orientation {
+    public enum Orientation {
         TOP,
         BOTTOM
     }

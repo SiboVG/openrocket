@@ -2,8 +2,8 @@ package net.sf.openrocket.gui.watcher;
 
 public interface Watchable {
 	
-	public WatchEvent monitor();
+	WatchEvent monitor();
 	
-	public void handleEvent(WatchEvent evt);
+	void handleEvent(WatchEvent evt);
 	
 }

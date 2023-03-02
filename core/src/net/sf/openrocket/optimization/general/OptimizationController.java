@@ -13,7 +13,7 @@ public interface OptimizationController {
 	 * @param stepSize	the step length that is used to search for smaller function values when applicable, or NaN.
 	 * @return			<code>true</code> to continue optimization, <code>false</code> to stop.
 	 */
-	public boolean stepTaken(Point oldPoint, double oldValue, Point newPoint, double newValue,
+    boolean stepTaken(Point oldPoint, double oldValue, Point newPoint, double newValue,
 			double stepSize);
 	
 }

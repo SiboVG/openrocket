@@ -4,8 +4,8 @@ import net.sf.openrocket.rocketcomponent.position.AxialPositionable;
 
 public interface LineInstanceable extends AxialPositionable, Instanceable {
 
-	public double getInstanceSeparation();
+	double getInstanceSeparation();
 	
-	public void setInstanceSeparation(final double radius);
+	void setInstanceSeparation(final double radius);
 	
 }

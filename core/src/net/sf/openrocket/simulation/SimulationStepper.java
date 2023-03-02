@@ -11,7 +11,7 @@ public interface SimulationStepper {
 	 * @param status		the current simulation status.
 	 * @return				a SimulationStatus suitable for simulating with this simulation stepper.
 	 */
-	public SimulationStatus initialize(SimulationStatus status);
+    SimulationStatus initialize(SimulationStatus status);
 	
 	/**
 	 * Perform one simulation time step.
@@ -20,6 +20,6 @@ public interface SimulationStepper {
 	 * @param maxTimeStep	the maximum time step to take.  This is an upper bound and can be used to limit a stepper
 	 * 						from stepping over upcoming flight events (motor ignition etc).
 	 */
-	public void step(SimulationStatus status, double maxTimeStep) throws SimulationException;
+    void step(SimulationStatus status, double maxTimeStep) throws SimulationException;
 	
 }

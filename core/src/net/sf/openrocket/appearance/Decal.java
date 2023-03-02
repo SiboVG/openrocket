@@ -15,7 +15,7 @@ public class Decal {
 	 * 
 	 *
 	 */
-	public static enum EdgeMode {
+	public enum EdgeMode {
 		REPEAT("TextureWrap.Repeat"), MIRROR("TextureWrap.Mirror"), CLAMP("TextureWrap.Clamp"), STICKER("TextureWrap.Sticker");
 		private final String transName;
 		

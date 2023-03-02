@@ -4,6 +4,6 @@ import java.util.EventListener;
 
 public interface ComponentChangeListener extends EventListener {
 
-	public void componentChanged(ComponentChangeEvent e);
+	void componentChanged(ComponentChangeEvent e);
 	
 }

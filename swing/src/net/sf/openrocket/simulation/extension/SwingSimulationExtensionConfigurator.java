@@ -14,7 +14,7 @@ public interface SwingSimulationExtensionConfigurator {
 	 * @param extension		the extension to test
 	 * @return				true if this configurator can configure the specified extension
 	 */
-	public boolean support(SimulationExtension extension);
+    boolean support(SimulationExtension extension);
 	
 	/**
 	 * Open an application-modal dialog for configuring a simulation extension.
@@ -24,6 +24,6 @@ public interface SwingSimulationExtensionConfigurator {
 	 * @param simulation	the simulation the extension is attached to
 	 * @param parent		the parent window for the dialog
 	 */
-	public void configure(SimulationExtension extension, Simulation simulation, Window parent);
+    void configure(SimulationExtension extension, Simulation simulation, Window parent);
 	
 }

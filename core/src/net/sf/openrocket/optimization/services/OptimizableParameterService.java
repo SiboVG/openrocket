@@ -19,7 +19,7 @@ public interface OptimizableParameterService {
 	 * @param document	the design document
 	 * @return			a collection of the rocket optimization parameters.
 	 */
-	public Collection<OptimizableParameter> getParameters(OpenRocketDocument document);
+    Collection<OptimizableParameter> getParameters(OpenRocketDocument document);
 	
 
 }

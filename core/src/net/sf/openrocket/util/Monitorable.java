@@ -36,6 +36,6 @@ public interface Monitorable {
 	 * @return		a modification ID value for this object.
 	 * @see			UniqueID#next()
 	 */
-	public int getModID();
+    int getModID();
 	
 }

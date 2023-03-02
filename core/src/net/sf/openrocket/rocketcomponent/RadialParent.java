@@ -9,7 +9,7 @@ public interface RadialParent {
 	 * @param x		the lengthwise position in the coordinates of this component.
 	 * @return		the outer radius of the component at that position.
 	 */
-	public double getOuterRadius(double x);
+    double getOuterRadius(double x);
 
 	/**
 	 * Return the inner radius of the component at local coordinate <code>x</code>.
@@ -18,7 +18,7 @@ public interface RadialParent {
 	 * @param x		the lengthwise position in the coordinates of this component.
 	 * @return		the inner radius of the component at that position.
 	 */
-	public double getInnerRadius(double x);
+    double getInnerRadius(double x);
 	
 	
 	/**
@@ -26,6 +26,6 @@ public interface RadialParent {
 	 * 
 	 * @return		the length of this component.
 	 */
-	public double getLength();
+    double getLength();
 		
 }

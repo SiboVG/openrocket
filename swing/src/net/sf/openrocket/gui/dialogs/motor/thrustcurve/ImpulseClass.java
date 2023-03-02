@@ -20,7 +20,7 @@ public enum ImpulseClass {
 	N("N", 10240.0, 20480.0),
 	O("O", 20480.0, Double.MAX_VALUE);
 
-	private ImpulseClass( String name, double low, double high ) {
+	ImpulseClass( String name, double low, double high ) {
 		this.name = name;
 		this.low = low;
 		this.high = high;

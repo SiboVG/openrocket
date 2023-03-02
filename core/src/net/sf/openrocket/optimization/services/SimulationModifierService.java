@@ -18,7 +18,7 @@ public interface SimulationModifierService {
 	 * @param document	the design document
 	 * @return			a collection of the rocket optimization parameters.
 	 */
-	public Collection<SimulationModifier> getModifiers(OpenRocketDocument document);
+    Collection<SimulationModifier> getModifiers(OpenRocketDocument document);
 	
 
 }

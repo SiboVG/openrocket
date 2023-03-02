@@ -16,7 +16,7 @@ public interface FunctionOptimizer {
 	 * @param control	the optimization control.
 	 * @throws OptimizationException	if an error occurs that prevents optimization
 	 */
-	public void optimize(Point initial, OptimizationController control) throws OptimizationException;
+    void optimize(Point initial, OptimizationController control) throws OptimizationException;
 	
 	
 	/**
@@ -25,7 +25,7 @@ public interface FunctionOptimizer {
 	 * @return	the optimum point value.
 	 * @throws IllegalStateException	if {@link #optimize(Point, OptimizationController)} has not been called.
 	 */
-	public Point getOptimumPoint();
+    Point getOptimumPoint();
 	
 	/**
 	 * Return the function value at the optimum point.
@@ -33,7 +33,7 @@ public interface FunctionOptimizer {
 	 * @return	the value at the optimum point.
 	 * @throws IllegalStateException	if {@link #optimize(Point, OptimizationController)} has not been called.
 	 */
-	public double getOptimumValue();
+    double getOptimumValue();
 	
 	
 	/**
@@ -41,7 +41,7 @@ public interface FunctionOptimizer {
 	 * 
 	 * @return	the function cache.
 	 */
-	public FunctionCache getFunctionCache();
+    FunctionCache getFunctionCache();
 	
 	/**
 	 * Set the function cache that provides the function values for this algorithm.
@@ -50,7 +50,7 @@ public interface FunctionOptimizer {
 	 * 
 	 * @param functionCache		the function cache.
 	 */
-	public void setFunctionCache(FunctionCache functionCache);
+    void setFunctionCache(FunctionCache functionCache);
 	
 
 }

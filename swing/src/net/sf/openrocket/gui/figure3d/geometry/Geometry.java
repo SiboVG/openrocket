@@ -13,7 +13,7 @@ import com.jogamp.opengl.GL2;
  * @author Daniel Williams <equipoise@gmail.com>
  */
 public abstract class Geometry {
-    public static enum Surface {
+    public enum Surface {
         ALL, OUTSIDE, INSIDE, EDGES
     }
 

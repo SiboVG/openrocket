@@ -20,6 +20,6 @@ public interface MotorLoader extends Loader<ThrustCurveMotor.Builder> {
 	 * @throws IOException	if an I/O exception occurs of the file format is invalid.
 	 */
 	@Override
-	public List<ThrustCurveMotor.Builder> load(InputStream stream, String filename) throws IOException;
+    List<ThrustCurveMotor.Builder> load(InputStream stream, String filename) throws IOException;
 	
 }

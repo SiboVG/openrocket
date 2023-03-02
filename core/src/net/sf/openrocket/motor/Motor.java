@@ -9,7 +9,7 @@ public interface Motor {
 	 * 
 	 * @author Sampo Niskanen <sampo.niskanen@iki.fi>
 	 */
-	public enum Type {
+    enum Type {
 		SINGLE("Single-use", "Single-use solid propellant motor"), 
 		RELOAD("Reloadable", "Reloadable solid propellant motor"), 
 		HYBRID("Hybrid", "Hybrid rocket motor engine"), 
@@ -47,16 +47,16 @@ public interface Motor {
 		}
 	}
 	
-	public static final double PSEUDO_TIME_EMPTY = Double.NaN;
-	public static final double PSEUDO_TIME_LAUNCH = 0.0;
-	public static final double PSEUDO_TIME_BURNOUT = Double.MAX_VALUE;
+	double PSEUDO_TIME_EMPTY = Double.NaN;
+	double PSEUDO_TIME_LAUNCH = 0.0;
+	double PSEUDO_TIME_BURNOUT = Double.MAX_VALUE;
 	
 		
 	/**
 	 * Ejection charge delay value signifying a "plugged" motor with no ejection charge.
 	 * The value is that of <code>Double.POSITIVE_INFINITY</code>.
 	 */
-	public static final double PLUGGED_DELAY = Double.POSITIVE_INFINITY;
+    double PLUGGED_DELAY = Double.POSITIVE_INFINITY;
 	
 	
 	/**
@@ -64,7 +64,7 @@ public interface Motor {
 	 * calculating average thrust and burn time.  NFPA 1125 defines the "official"
 	 * burn time to be the time which the motor produces over 5% of its maximum thrust.
 	 */
-	public static final double MARGINAL_THRUST = 0.05;
+    double MARGINAL_THRUST = 0.05;
 	
 	
 	
@@ -73,7 +73,7 @@ public interface Motor {
 	 * 
 	 * @return  the motorType
 	 */
-	public Type getMotorType();
+    Type getMotorType();
 	
 	
 	/**
@@ -81,14 +81,14 @@ public interface Motor {
 	 * 
 	 * @return the code
 	 */
-	public String getCode();
+    String getCode();
 	
 	/**
 	 * Return the common name of the motor.
 	 * 
 	 * @return the common name
 	 */
-	public String getCommonName();
+    String getCommonName();
 	
 	/**
 	 * Return the common name of the motor, including a delay.
@@ -96,14 +96,14 @@ public interface Motor {
 	 * @param delay  the delay of the motor.
 	 * @return		 common name with delay.
 	 */
-	public String getCommonName(double delay);
+    String getCommonName(double delay);
 	
 	/**
 	 * Return the designation of the motor.
 	 * 
 	 * @return the designation
 	 */
-	public String getDesignation();
+    String getDesignation();
 	
 	/**
 	 * Return the designation of the motor, including a delay.
@@ -111,13 +111,13 @@ public interface Motor {
 	 * @param delay  the delay of the motor.
 	 * @return		 designation with delay.
 	 */
-	public String getDesignation(double delay);
+    String getDesignation(double delay);
 
 	/**
 	 * Returns the motor name, based on whether the preference is to use the designation or common name.
 	 * @return the motor designation, if the preference is to use the designation, otherwise the common name.
 	 */
-	public default String getMotorName() {
+	default String getMotorName() {
 		boolean useDesignation = Application.getPreferences().getMotorNameColumn();
 		return useDesignation ? getDesignation() : getCommonName();
 	}
@@ -126,7 +126,7 @@ public interface Motor {
 	 * Returns the motor name, including a delay, based on whether the preference is to use the designation or common name.
 	 * @return the motor designation, including a delay, if the preference is to use the designation, otherwise the common name.
 	 */
-	public default String getMotorName(double delay) {
+	default String getMotorName(double delay) {
 		boolean useDesignation = Application.getPreferences().getMotorNameColumn();
 		return useDesignation ? getDesignation(delay) : getCommonName(delay);
 	}
@@ -139,7 +139,7 @@ public interface Motor {
 	 * 
 	 * @return the description
 	 */
-	public String getDescription();
+    String getDescription();
 	
 	
 	/**
@@ -147,7 +147,7 @@ public interface Motor {
 	 * 
 	 * @return the diameter
 	 */
-	public double getDiameter();
+    double getDiameter();
 	
 	/**
 	 * Return the length of the motor.  This should be a "characteristic" length,
@@ -157,39 +157,39 @@ public interface Motor {
 	 * 
 	 * @return the length
 	 */
-	public double getLength();
+    double getLength();
 	
-	public String getDigest();
+	String getDigest();
 	
-	public double getAverageThrust( final double startTime, final double endTime );
+	double getAverageThrust( final double startTime, final double endTime );
 	
-	public double getLaunchCGx();
+	double getLaunchCGx();
 	
-	public double getBurnoutCGx();
+	double getBurnoutCGx();
 	
-	public double getLaunchMass();
+	double getLaunchMass();
 	
-	public double getBurnoutMass();
+	double getBurnoutMass();
 	
 	/**
 	 * Return an estimate of the burn time of this motor, or NaN if an estimate is unavailable.
 	 */
-	public double getBurnTimeEstimate();
+    double getBurnTimeEstimate();
 	
 	/**
 	 * Return an estimate of the average thrust of this motor, or NaN if an estimate is unavailable.
 	 */
-	public double getAverageThrustEstimate();
+    double getAverageThrustEstimate();
 	
 	/**
 	 * Return an estimate of the maximum thrust of this motor, or NaN if an estimate is unavailable.
 	 */
-	public double getMaxThrustEstimate();
+    double getMaxThrustEstimate();
 	
 	/**
 	 * Return an estimate of the total impulse of this motor, or NaN if an estimate is unavailable.
 	 */
-	public double getTotalImpulseEstimate();
+    double getTotalImpulseEstimate();
 
 
 	double getBurnTime();
@@ -204,28 +204,28 @@ public interface Motor {
  	 * @param motorTime  time (in seconds) since motor ignition
  	 * @return thrust (double, in Newtons) at given time
  	 */
-	public double getThrust( final double motorTime);
+    double getThrust( final double motorTime);
 	
 	/**
 	 * Return the mass at a time offset from motor ignition
 	 * 
      * @param motorTime  time (in seconds) since motor ignition
 	 */
-	public double getTotalMass( final double motorTime);
+    double getTotalMass( final double motorTime);
 
-	public double getPropellantMass( final Double motorTime);
+	double getPropellantMass( final Double motorTime);
 	
 	/** Return the mass at a given time 
 	 * 
 	 * @param motorTime  time (in seconds) since motor ignition
 	 * @return
 	 */
-	public double getCMx( final double motorTime);
+    double getCMx( final double motorTime);
 	
-	public double getUnitIxx();
+	double getUnitIxx();
 	
-	public double getUnitIyy();
+	double getUnitIyy();
 	
-	public double getUnitIzz();
+	double getUnitIzz();
 
 }

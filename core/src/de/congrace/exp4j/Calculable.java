@@ -12,14 +12,14 @@ public interface Calculable {
 	 * 
 	 * @return the result of the calculation
 	 */
-	public Variable calculate();
+	Variable calculate();
 
 	/**
 	 * return the expression in reverse polish postfix notation
 	 * 
 	 * @return the expression used to construct this {@link Calculable}
 	 */
-	public String getExpression();
+	String getExpression();
 
 	/**
 	 * set a variable value for the calculation
@@ -27,5 +27,5 @@ public interface Calculable {
 	 * @param value
 	 *            the value of the variable
 	 */
-	public void setVariable(Variable var);
+	void setVariable(Variable var);
 }

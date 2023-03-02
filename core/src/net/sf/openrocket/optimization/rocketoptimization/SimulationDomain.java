@@ -24,7 +24,7 @@ public interface SimulationDomain {
 	 * 						a positive value or NaN if not.  The second is the value
 	 * 						indication of the domain (may be null).
 	 */
-	public Pair<Double, Value> getDistanceToDomain(Simulation simulation);
+    Pair<Double, Value> getDistanceToDomain(Simulation simulation);
 	
 
 }

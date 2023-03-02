@@ -21,7 +21,7 @@ public enum PaperSize {
 	private final String name;
 	private final Rectangle size;
 	
-	private PaperSize(String name, Rectangle size) {
+	PaperSize(String name, Rectangle size) {
 		this.name = name;
 		this.size = size;
 	}

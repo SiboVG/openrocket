@@ -20,13 +20,13 @@ public interface SimulationModifier extends ChangeSource {
 	 * Return a short name describing this modifier.
 	 * @return	a name describing this modifier.
 	 */
-	public String getName();
+    String getName();
 	
 	/**
 	 * Return a longer description describing this modifiers.
 	 * @return	a description of the modifier.
 	 */
-	public String getDescription();
+    String getDescription();
 	
 	/**
 	 * Return the object this modifier is related to.  This is for example the
@@ -35,7 +35,7 @@ public interface SimulationModifier extends ChangeSource {
 	 * 
 	 * @return	the object this modifier is related to, or <code>null</code>.
 	 */
-	public Object getRelatedObject();
+    Object getRelatedObject();
 	
 	
 	/**
@@ -43,40 +43,40 @@ public interface SimulationModifier extends ChangeSource {
 	 * @return	the current value of this parameter in SI units.
 	 * @throws OptimizationException	if fetching the current value fails
 	 */
-	public double getCurrentSIValue(Simulation simulation) throws OptimizationException;
+    double getCurrentSIValue(Simulation simulation) throws OptimizationException;
 	
 	
 	/**
 	 * Return the minimum value (corresponding to scaled value 0) in SI units.
 	 * @return	the value corresponding to scaled value 0.
 	 */
-	public double getMinValue();
+    double getMinValue();
 	
 	/**
 	 * Set the minimum value (corresponding to scaled value 0) in SI units.
 	 * @param value	the value corresponding to scaled value 0.
 	 */
-	public void setMinValue(double value);
+    void setMinValue(double value);
 	
 	
 	/**
 	 * Return the maximum value (corresponding to scaled value 1) in SI units.
 	 * @return	the value corresponding to scaled value 1.
 	 */
-	public double getMaxValue();
+    double getMaxValue();
 	
 	/**
 	 * Set the maximum value (corresponding to scaled value 1) in SI units.
 	 * @param value	the value corresponding to scaled value 1.
 	 */
-	public void setMaxValue(double value);
+    void setMaxValue(double value);
 	
 	
 	/**
 	 * Return the unit group used for the values returned by {@link #getCurrentSIValue(Simulation)} etc.
 	 * @return	the unit group
 	 */
-	public UnitGroup getUnitGroup();
+    UnitGroup getUnitGroup();
 	
 	
 	/**
@@ -86,7 +86,7 @@ public interface SimulationModifier extends ChangeSource {
 	 * @return	the current value of this parameter (normally between [0 ... 1])
 	 * @throws OptimizationException 	if fetching the current value fails
 	 */
-	public double getCurrentScaledValue(Simulation simulation) throws OptimizationException;
+    double getCurrentScaledValue(Simulation simulation) throws OptimizationException;
 	
 	
 	
@@ -97,7 +97,7 @@ public interface SimulationModifier extends ChangeSource {
 	 * @param scaledValue	the scaled value in the range [0...1]
 	 * @throws OptimizationException 	if the modification fails
 	 */
-	public void modify(Simulation simulation, double scaledValue) throws OptimizationException;
+    void modify(Simulation simulation, double scaledValue) throws OptimizationException;
 	
 	/**
 	 * Called once at the start of the optimization.
@@ -105,7 +105,7 @@ public interface SimulationModifier extends ChangeSource {
 	 * 
 	 * @param simulation
 	 */
-	public void initialize(Simulation simulation) throws OptimizationException;
+    void initialize(Simulation simulation) throws OptimizationException;
 	
 	/**
 	 * Compare whether this SimulationModifier is equivalent to another simulation modifier.
@@ -114,5 +114,5 @@ public interface SimulationModifier extends ChangeSource {
 	 * has the same component ID).
 	 */
 	@Override
-	public boolean equals(Object obj);
+    boolean equals(Object obj);
 }

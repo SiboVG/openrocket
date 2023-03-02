@@ -19,7 +19,7 @@ public interface ParallelFunctionCache extends FunctionCache {
 	 * 
 	 * @param points	the points at which to evaluate the function.
 	 */
-	public void compute(Collection<Point> points);
+    void compute(Collection<Point> points);
 	
 	/**
 	 * Schedule function evaluation for the specified point.  The point is
@@ -27,7 +27,7 @@ public interface ParallelFunctionCache extends FunctionCache {
 	 * 
 	 * @param point		the point at which to evaluate the function.
 	 */
-	public void compute(Point point);
+    void compute(Point point);
 	
 	/**
 	 * Wait for a collection of points to be computed.  After calling this method
@@ -37,7 +37,7 @@ public interface ParallelFunctionCache extends FunctionCache {
 	 * @throws InterruptedException		if this thread or the computing thread was interrupted while waiting.
 	 * @throws OptimizationException 	if an error preventing continuing the optimization occurs.
 	 */
-	public void waitFor(Collection<Point> points) throws InterruptedException, OptimizationException;
+    void waitFor(Collection<Point> points) throws InterruptedException, OptimizationException;
 	
 	/**
 	 * Wait for a point to be computed.  After calling this method
@@ -47,7 +47,7 @@ public interface ParallelFunctionCache extends FunctionCache {
 	 * @throws InterruptedException		if this thread or the computing thread was interrupted while waiting.
 	 * @throws OptimizationException 	if an error preventing continuing the optimization occurs.
 	 */
-	public void waitFor(Point point) throws InterruptedException, OptimizationException;
+    void waitFor(Point point) throws InterruptedException, OptimizationException;
 	
 	
 	/**
@@ -57,7 +57,7 @@ public interface ParallelFunctionCache extends FunctionCache {
 	 * @param points	the points to abort.
 	 * @return			a list of the points that have been computed anyway
 	 */
-	public List<Point> abort(Collection<Point> points);
+    List<Point> abort(Collection<Point> points);
 	
 	
 	/**
@@ -67,11 +67,11 @@ public interface ParallelFunctionCache extends FunctionCache {
 	 * @param point		the point to abort.
 	 * @return			<code>true</code> if the point has been computed anyway, <code>false</code> if not.
 	 */
-	public boolean abort(Point point);
+    boolean abort(Point point);
 	
 	
 	/**
 	 * Abort the computation of all still unexecuted points.
 	 */
-	public void abortAll();
+    void abortAll();
 }

@@ -29,7 +29,7 @@ public abstract class Material implements Comparable<Material> {
 		private final String name;
 		private final UnitGroup units;
 		
-		private Type(String nameKey, UnitGroup units) {
+		Type(String nameKey, UnitGroup units) {
 			this.name = trans.get(nameKey);
 			this.units = units;
 		}

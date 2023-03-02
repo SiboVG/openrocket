@@ -9,7 +9,7 @@ public interface RockSimComponentFileColumnParser {
 	 * 
 	 * @param headers
 	 */
-	public void configure( String[] headers );
+    void configure( String[] headers );
 	
 	/**
 	 * Examine the data array, parse the appropriate data and push into props.
@@ -17,6 +17,6 @@ public interface RockSimComponentFileColumnParser {
 	 * @param data
 	 * @param props
 	 */
-	public void parse( String[] data, TypedPropertyMap props );
+    void parse( String[] data, TypedPropertyMap props );
 	
 }

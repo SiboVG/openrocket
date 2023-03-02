@@ -16,7 +16,7 @@ public interface SimulationListener {
 	 * 
 	 * @param status	the simulation status.
 	 */
-	public void startSimulation(SimulationStatus status) throws SimulationException;
+    void startSimulation(SimulationStatus status) throws SimulationException;
 	
 	
 	/**
@@ -28,7 +28,7 @@ public interface SimulationListener {
 	 * @param status	the simulation status.
 	 * @param exception	the exception that caused ending the simulation, or <code>null</code> if ending normally.
 	 */
-	public void endSimulation(SimulationStatus status, SimulationException exception);
+    void endSimulation(SimulationStatus status, SimulationException exception);
 	
 	
 	/**
@@ -38,7 +38,7 @@ public interface SimulationListener {
 	 * @param status	the simulation status.
 	 * @return			<code>true</code> to continue normally, <code>false</code> to skip taking the step
 	 */
-	public boolean preStep(SimulationStatus status) throws SimulationException;
+    boolean preStep(SimulationStatus status) throws SimulationException;
 	
 	
 	/**
@@ -47,7 +47,7 @@ public interface SimulationListener {
 	 * 
 	 * @param status	the simulation status.
 	 */
-	public void postStep(SimulationStatus status) throws SimulationException;
+    void postStep(SimulationStatus status) throws SimulationException;
 	
 	
 	/**
@@ -59,11 +59,11 @@ public interface SimulationListener {
 	 * 
 	 * @return		whether this is a system listener
 	 */
-	public boolean isSystemListener();
+    boolean isSystemListener();
 	
 	
 	/**
 	 * Return a deep copy of this simulation listener including its state.
 	 */
-	public SimulationListener clone();
+    SimulationListener clone();
 }

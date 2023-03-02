@@ -44,7 +44,7 @@ public enum RockSimComponentFileType {
      * @param theDefaultFileName  the default filename
      * @param theColumns the array of column names in the file
      */
-    private RockSimComponentFileType(final String theDefaultFileName, String... theColumns) {
+    RockSimComponentFileType(final String theDefaultFileName, String... theColumns) {
         defaultFileName = theDefaultFileName;
         columns = theColumns;
     }

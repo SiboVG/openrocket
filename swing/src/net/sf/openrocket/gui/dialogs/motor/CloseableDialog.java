@@ -7,6 +7,6 @@ public interface CloseableDialog {
 	 * 
 	 * @param ok	whether "OK" should be considered to have been clicked.
 	 */
-	public void close(boolean ok);
+    void close(boolean ok);
 	
 }

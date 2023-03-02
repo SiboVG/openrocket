@@ -20,7 +20,7 @@ public enum ShapeDTO {
 
     private final Transition.Shape corollary;
 
-    private ShapeDTO(Transition.Shape theShape) {
+    ShapeDTO(Transition.Shape theShape) {
         corollary = theShape;
     }
 

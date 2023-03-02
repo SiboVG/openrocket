@@ -16,6 +16,6 @@ public interface ConnectionSource {
 	 * @return		the corresponding HttpURLConnection
 	 * @throws IOException	if an IOException occurs
 	 */
-	public HttpURLConnection getConnection(String url) throws IOException;
+    HttpURLConnection getConnection(String url) throws IOException;
 	
 }

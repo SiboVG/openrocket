@@ -4,11 +4,11 @@ import net.sf.openrocket.util.ChangeSource;
 
 public interface Clusterable extends ChangeSource, Instanceable {
 	
-	public ClusterConfiguration getClusterConfiguration();
+	ClusterConfiguration getClusterConfiguration();
 	
-	public void setClusterConfiguration(ClusterConfiguration cluster);
+	void setClusterConfiguration(ClusterConfiguration cluster);
 	
-	public double getClusterSeparation();
+	double getClusterSeparation();
 	
 	
 }

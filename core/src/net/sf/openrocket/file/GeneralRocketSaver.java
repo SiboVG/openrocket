@@ -42,7 +42,7 @@ public class GeneralRocketSaver {
 		 * 
 		 * @param progress  int value between 0 and 100 representing percent complete.
 		 */
-		public void setProgress(int progress);
+		void setProgress(int progress);
 		
 	}
 	
