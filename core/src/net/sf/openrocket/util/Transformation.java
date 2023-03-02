@@ -84,8 +84,7 @@ public class Transformation implements java.io.Serializable {
 	 */
 	public Transformation(double[][] rotation, Coordinate translation) {
 		for (int i=0; i<3; i++)
-			for (int j=0; j<3; j++)
-				this.rotation[i][j] = rotation[i][j];
+            System.arraycopy(rotation[i], 0, this.rotation[i], 0, 3);
 		this.translate = translation;
 	}
 	
@@ -97,8 +96,7 @@ public class Transformation implements java.io.Serializable {
 	 */
 	public Transformation(double[][] rotation) {
 		for (int i=0; i<3; i++)
-			for (int j=0; j<3; j++)
-				this.rotation[i][j] = rotation[i][j];
+            System.arraycopy(rotation[i], 0, this.rotation[i], 0, 3);
 		this.translate = Coordinate.NUL;
 	}
 	
