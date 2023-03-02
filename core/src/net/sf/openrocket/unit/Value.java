@@ -141,13 +141,8 @@ public class Value implements Comparable<Value> {
 		}
 		if (Double.isNaN(them))
 			return -1;
-		
-		if (us < them)
-			return -1;
-		else if (us > them)
-			return 1;
-		else
-			return 0;
+
+		return Double.compare(us, them);
 	}
 	
 }

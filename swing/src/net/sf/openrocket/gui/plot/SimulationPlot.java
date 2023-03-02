@@ -585,11 +585,7 @@ public class SimulationPlot {
 
 			@Override
 			public int compare(EventDisplayInfo o1, EventDisplayInfo o2) {
-				if (o1.time < o2.time)
-					return -1;
-				if (o1.time == o2.time)
-					return 0;
-				return 1;
+				return Double.compare(o1.time, o2.time);
 			}
 
 		});
