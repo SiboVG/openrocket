@@ -134,7 +134,7 @@ public class DescriptionArea extends JScrollPane {
 							uri = of.toURI();
 
 							try {
-								byte buffer[] = is.readAllBytes();
+								byte[] buffer = is.readAllBytes();
 								os.write(buffer);
 								os.close();
 							}

@@ -122,7 +122,7 @@ public class SymmetricComponentCalcTest {
 		// vvv TEST vvv
 	    // these values from a reimplementation of the pressure cd calculation in python
 	    // values at M = 0, 0.05, ... , 1.15
-		double cd[] = {
+		double[] cd = {
 			8.000392024269301e-07, 2.422001414621988e-06, 2.0098855921838474e-05,
 			8.295843903984836e-05, 0.000230425812213129, 0.0005104254351619708,
 			0.0009783566607446353, 0.0016963974152150677, 0.0027329880483111142,

@@ -23,7 +23,7 @@ public class PrintableTransition extends AbstractPrintable<Transition> {
 	/**
 	 * Dashed array value.
 	 */
-	private final static float dash1[] = { 4.0f };
+	private final static float[] dash1 = { 4.0f };
 	/**
 	 * The dashed stroke for glue tab.
 	 */

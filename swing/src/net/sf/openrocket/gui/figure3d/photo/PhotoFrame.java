@@ -348,7 +348,7 @@ public class PhotoFrame extends JFrame {
 		return true;
 	}
 	
-	public static void main(String args[]) throws Exception {
+	public static void main(String[] args) throws Exception {
 
 		LoggingSystemSetup.setupLoggingAppender();
 		LoggingSystemSetup.addConsoleAppender();

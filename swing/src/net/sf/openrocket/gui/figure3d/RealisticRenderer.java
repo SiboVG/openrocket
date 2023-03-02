@@ -56,7 +56,7 @@ public class RealisticRenderer extends RocketRenderer {
 		gl.glEnable(GLLightingFunc.GL_NORMALIZE);
 		
 		if (gl.isExtensionAvailable("GL_EXT_texture_filter_anisotropic")) {
-			float a[] = new float[1];
+			float[] a = new float[1];
 			gl.glGetFloatv(GL.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, a, 0);
 			anisotrophy = a[0];
 		}

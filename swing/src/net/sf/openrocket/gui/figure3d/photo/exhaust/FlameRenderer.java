@@ -340,10 +340,10 @@ public final class FlameRenderer {
 			gl.glShaderSource(f, 1, new String[] {fsrc.toString()}, (int[]) null, 0);
 			gl.glCompileShader(f);
 
-			int statusFragmentShader[] = new int[1];
+			int[] statusFragmentShader = new int[1];
 			gl.glGetShaderiv(f, GL2.GL_COMPILE_STATUS, IntBuffer.wrap(statusFragmentShader));
 			if (statusFragmentShader[0] == GL2.GL_FALSE) {
-				int infoLogLenght[] = new int[1];
+				int[] infoLogLenght = new int[1];
 				gl.glGetShaderiv(f, GL2.GL_INFO_LOG_LENGTH, IntBuffer.wrap(infoLogLenght));
 				ByteBuffer infoLog = Buffers.newDirectByteBuffer(infoLogLenght[0]);
 				gl.glGetShaderInfoLog(f, infoLogLenght[0], null, infoLog);
@@ -393,8 +393,8 @@ public final class FlameRenderer {
 			gl.glGetDoublev(GLMatrixFunc.GL_MODELVIEW_MATRIX, mvmatrix, 0);
 			gl.glGetDoublev(GLMatrixFunc.GL_PROJECTION_MATRIX, projmatrix, 0);
 
-			final double out[] = new double[4];
-			final double out2[] = new double[4];
+			final double[] out = new double[4];
+			final double[] out2 = new double[4];
 			(new GLU()).gluProject(0, 0, 0, mvmatrix, 0, projmatrix, 0, viewport, 0, out, 0);
 			(new GLU()).gluProject(0, 0, 0.01f, mvmatrix, 0, projmatrix, 0, viewport, 0, out2, 0);
 

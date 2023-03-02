@@ -83,8 +83,8 @@ public class CheckTreeSelectionModel extends DefaultTreeSelectionModel {
      * @return true if path1 is a descendant of path2
      */
     private boolean isDescendant (TreePath path1, TreePath path2) {
-        Object obj1[] = path1.getPath();
-        Object obj2[] = path2.getPath();
+        Object[] obj1 = path1.getPath();
+        Object[] obj2 = path2.getPath();
         for (int i = 0; i < obj2.length; i++) {
             if (i < obj1.length) {
                 if (obj1[i] != obj2[i]) {
@@ -106,7 +106,7 @@ public class CheckTreeSelectionModel extends DefaultTreeSelectionModel {
      */
     @Override
     public void setSelectionPaths (TreePath[] pPaths) {
-        TreePath selected[] = getSelectionPaths();
+        TreePath[] selected = getSelectionPaths();
         for (TreePath aSelected : selected) {
             removeSelectionPath(aSelected);
         }

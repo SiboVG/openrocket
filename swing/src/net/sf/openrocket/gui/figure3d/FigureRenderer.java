@@ -162,7 +162,7 @@ public class FigureRenderer extends RocketRenderer {
 	
 	@Override
 	protected void renderMotor(GL2 gl, Motor motor) {
-		final float outside[] = { 0.3f, 0.3f, 0.3f, 1.0f };
+		final float[] outside = { 0.3f, 0.3f, 0.3f, 1.0f };
 		gl.glMaterialfv(GL.GL_FRONT, GLLightingFunc.GL_DIFFUSE, outside, 0);
 		gl.glMaterialfv(GL.GL_FRONT, GLLightingFunc.GL_AMBIENT, outside, 0);
 		super.renderMotor(gl, motor);

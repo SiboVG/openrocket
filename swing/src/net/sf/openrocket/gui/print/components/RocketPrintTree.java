@@ -240,12 +240,12 @@ class NamedVector extends Vector<CheckBoxNode> {
 		name = theName;
 	}
 	
-	public NamedVector(String theName, CheckBoxNode elements[], int stage) {
+	public NamedVector(String theName, CheckBoxNode[] elements, int stage) {
 		this(theName, elements);
 		stageNumber = stage;
 	}
 	
-	public NamedVector(String theName, CheckBoxNode elements[]) {
+	public NamedVector(String theName, CheckBoxNode[] elements) {
 		name = theName;
 		for (int i = 0, n = elements.length; i < n; i++) {
 			add(elements[i]);

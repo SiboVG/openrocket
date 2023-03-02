@@ -611,7 +611,7 @@ public class RocketFigure3d extends JPanel implements GLEventListener {
 		gl.glGetDoublev(GLMatrixFunc.GL_MODELVIEW_MATRIX, mvmatrix, 0);
 		gl.glGetDoublev(GLMatrixFunc.GL_PROJECTION_MATRIX, projmatrix, 0);
 		
-		final double out[] = new double[4];
+		final double[] out = new double[4];
 		glu.gluProject(c.x, c.y, c.z, mvmatrix, 0, projmatrix, 0, viewport, 0,
 				out, 0);
 		

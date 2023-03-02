@@ -277,7 +277,7 @@ public class GUIUtil {
 				
 				// Search for better LAF
 				UIManager.LookAndFeelInfo[] info = UIManager.getInstalledLookAndFeels();
-				String lafNames[] = {
+				String[] lafNames = {
 						".*[gG][tT][kK].*",
 						".*[wW][iI][nN].*",
 						".*[mM][aA][cC].*",
@@ -401,7 +401,7 @@ public class GUIUtil {
 	
 	public static void setAutomaticColumnTableWidths(JTable table, int max) {
 		int columns = table.getColumnCount();
-		int widths[] = new int[columns];
+		int[] widths = new int[columns];
 		Arrays.fill(widths, 1);
 		
 		for (int row = 0; row < table.getRowCount(); row++) {

@@ -18,7 +18,7 @@ import com.jogamp.opengl.util.texture.Texture;
 public class SkyBox extends Sky {
 	private static final Logger log = LoggerFactory.getLogger(SkyBox.class);
 	
-	private static final String NAME[][] = {
+	private static final String[][] NAME = {
 			{ "North", "East", "South", "West", "Up", "Down" },
 			{ "posz", "posx", "negz", "negx", "posy", "negy" },
 			{ "pos_z", "pos_x", "neg_z", "neg_x", "pos_y", "neg_y" },

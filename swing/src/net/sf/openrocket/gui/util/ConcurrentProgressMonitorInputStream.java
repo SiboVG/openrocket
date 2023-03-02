@@ -76,7 +76,7 @@ public class ConcurrentProgressMonitorInputStream extends FilterInputStream {
 	 * to update the progress monitor after the read.
 	 */
 	@Override
-	public int read(byte b[]) throws IOException {
+	public int read(byte[] b) throws IOException {
 		int nr = in.read(b);
 		if (nr > 0)
 			monitor.setProgress(nread += nr);
@@ -94,7 +94,7 @@ public class ConcurrentProgressMonitorInputStream extends FilterInputStream {
 	 * to update the progress monitor after the read.
 	 */
 	@Override
-	public int read(byte b[], int off, int len) throws IOException {
+	public int read(byte[] b, int off, int len) throws IOException {
 		int nr = in.read(b, off, len);
 		if (nr > 0)
 			monitor.setProgress(nread += nr);
