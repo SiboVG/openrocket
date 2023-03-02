@@ -117,7 +117,7 @@ public class FlightConfigurableParameterSet<E extends FlightConfigurableParamete
 		if( 0 > index){
 			throw new ArrayIndexOutOfBoundsException("Attempt to retrieve a configurable parameter by an index less than zero: "+index);
 		}
-		if(( 0 > index) || ( this.map.size() <= index )){
+		if(this.map.size() <= index){
 			throw new ArrayIndexOutOfBoundsException("Attempt to retrieve a configurable parameter with an index larger "
 													+" than the stored values: "+index+"/"+this.map.size());
 		}
