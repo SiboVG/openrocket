@@ -23,22 +23,18 @@ public class ZipFileAttachment extends Attachment {
 	@Override
 	public InputStream getBytes() throws DecalNotFoundException, IOException {
 		String name = getName();
-		
-		ZipInputStream zis = new ZipInputStream(zipFileLocation.openStream());
-		
-		try {
-			ZipEntry entry = zis.getNextEntry();
-			while (entry != null) {
-				if (entry.getName().equals(name)) {
-					byte[] bytes = FileUtils.readBytes(zis);
-					return new ByteArrayInputStream(bytes);
-				}
-				entry = zis.getNextEntry();
-			}
-			throw new DecalNotFoundException(name, null);
-		} finally {
-			zis.close();
-		}
+
+        try (ZipInputStream zis = new ZipInputStream(zipFileLocation.openStream())) {
+            ZipEntry entry = zis.getNextEntry();
+            while (entry != null) {
+                if (entry.getName().equals(name)) {
+                    byte[] bytes = FileUtils.readBytes(zis);
+                    return new ByteArrayInputStream(bytes);
+                }
+                entry = zis.getNextEntry();
+            }
+            throw new DecalNotFoundException(name, null);
+        }
 		
 	}
 	

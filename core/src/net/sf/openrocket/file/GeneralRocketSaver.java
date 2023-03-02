@@ -189,16 +189,16 @@ public class GeneralRocketSaver {
 
 		// Open a zip stream to write to.
 		ZipOutputStream zos = new ZipOutputStream(output);
-		zos.setLevel(9);
 		// big try block to close the zos.
-		try {
-			
-			
+		try (zos) {
+			zos.setLevel(9);
+
+
 			ZipEntry mainFile = new ZipEntry("rocket.ork");
 			zos.putNextEntry(mainFile);
 			saveInternal(zos, document, options);
 			zos.closeEntry();
-			
+
 			// Now we write out all the decal images files.
 			for (DecalImage image : decals) {
 				if (image.isIgnored()) {
@@ -209,7 +209,7 @@ public class GeneralRocketSaver {
 				String name = image.getName();
 				ZipEntry decal = new ZipEntry(name);
 				zos.putNextEntry(decal);
-				
+
 				InputStream is = image.getBytes();
 				int bytesRead = 0;
 				byte[] buffer = new byte[2048];
@@ -218,10 +218,8 @@ public class GeneralRocketSaver {
 				}
 				zos.closeEntry();
 			}
-			
+
 			zos.flush();
-		} finally {
-			zos.close();
 		}
 		
 		

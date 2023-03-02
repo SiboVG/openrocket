@@ -102,40 +102,36 @@ public class SlideSetManager {
 	
 	private List<String> loadTourList() throws IOException {
 		InputStream in = ClassLoader.getSystemResourceAsStream(baseDir + TOURS_FILE);
-		if (in == null) {
-			throw new FileNotFoundException("File '" + baseDir + TOURS_FILE + "' not found.");
-		}
-		
-		try {
-			
+
+		try (in) {
+			if (in == null) {
+				throw new FileNotFoundException("File '" + baseDir + TOURS_FILE + "' not found.");
+			}
+
 			List<String> tours = new ArrayList<>();
 			TextLineReader reader = new TextLineReader(in);
 			while (reader.hasNext()) {
 				tours.add(reader.next());
 			}
 			return tours;
-			
-		} finally {
-			in.close();
+
 		}
 	}
 	
 	
 	private StyleSheet loadStyleSheet() throws IOException {
 		InputStream in = ClassLoader.getSystemResourceAsStream(baseDir + STYLESHEET_FILE);
-		if (in == null) {
-			throw new FileNotFoundException("File '" + baseDir + STYLESHEET_FILE + "' not found.");
-		}
-		
-		try {
-			
+
+		try (in) {
+			if (in == null) {
+				throw new FileNotFoundException("File '" + baseDir + STYLESHEET_FILE + "' not found.");
+			}
+
 			StyleSheet ss = new StyleSheet();
 			InputStreamReader reader = new InputStreamReader(in, "UTF-8");
 			ss.loadRules(reader, null);
 			return ss;
-			
-		} finally {
-			in.close();
+
 		}
 		
 	}
