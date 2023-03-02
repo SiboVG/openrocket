@@ -43,7 +43,7 @@ public class TestConfig {
 		assertEquals(123L, (long) config.getLong("foo", 123L));
 		assertEquals(1.23, config.getDouble("foo", 1.23), 0);
 		assertEquals("bar", config.getString("foo", "bar"));
-		assertEquals(Arrays.asList("foo"), config.getList("foo", Arrays.asList("foo")));
+		assertEquals(List.of("foo"), config.getList("foo", List.of("foo")));
 	}
 	
 	
@@ -111,7 +111,7 @@ public class TestConfig {
 		assertEquals(123, (int) copy.getInt("int", null));
 		assertEquals(100, (int) copy.getInt("atomicinteger", null));
 		assertEquals(Math.PI, copy.getDouble("double", null), 0);
-		assertEquals(Arrays.asList("Foo"), copy.getList("list", null));
+		assertEquals(List.of("Foo"), copy.getList("list", null));
 	}
 	
 	@Test

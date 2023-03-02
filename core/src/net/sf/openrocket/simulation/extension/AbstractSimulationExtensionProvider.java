@@ -1,6 +1,7 @@
 package net.sf.openrocket.simulation.extension;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import net.sf.openrocket.l10n.Translator;
@@ -39,7 +40,7 @@ public abstract class AbstractSimulationExtensionProvider implements SimulationE
 	 */
 	@Override
 	public List<String> getIds() {
-		return Arrays.asList(extensionClass.getCanonicalName());
+		return Collections.singletonList(extensionClass.getCanonicalName());
 	}
 	
 	/**

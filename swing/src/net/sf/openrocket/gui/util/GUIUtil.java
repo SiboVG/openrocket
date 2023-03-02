@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -218,9 +219,9 @@ public class GUIUtil {
 	 * @param c		the component to modify
 	 */
 	public static void setTabToFocusing(Component c) {
-		Set<KeyStroke> strokes = new HashSet<KeyStroke>(Arrays.asList(KeyStroke.getKeyStroke("pressed TAB")));
+		Set<KeyStroke> strokes = new HashSet<KeyStroke>(Collections.singletonList(KeyStroke.getKeyStroke("pressed TAB")));
 		c.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, strokes);
-		strokes = new HashSet<KeyStroke>(Arrays.asList(KeyStroke.getKeyStroke("shift pressed TAB")));
+		strokes = new HashSet<KeyStroke>(Collections.singletonList(KeyStroke.getKeyStroke("shift pressed TAB")));
 		c.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, strokes);
 	}
 	

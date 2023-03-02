@@ -6,8 +6,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import net.sf.openrocket.database.motor.ThrustCurveMotorSet;
 import net.sf.openrocket.motor.Manufacturer;
@@ -107,7 +107,7 @@ public class ThrustCurveMotorSetTest {
 		assertEquals(2, set.getMotors().size());
 		assertEquals(motor1, set.getMotors().get(0));
 		assertEquals(motor2, set.getMotors().get(1));
-		assertEquals(Arrays.asList(5.0), set.getDelays());
+		assertEquals(List.of(5.0), set.getDelays());
 
 		// Test that adding motor3 fails
 		assertFalse(set.matches(motor3));
