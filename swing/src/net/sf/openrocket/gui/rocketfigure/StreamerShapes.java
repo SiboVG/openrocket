@@ -59,13 +59,13 @@ public class StreamerShapes extends RocketComponentShape {
 			
 		Rectangle2D bounds = baseShape[0].getBounds2D();
 
-		Double left=bounds.getX()+bounds.getWidth()/4;
-		Double streamerWidth=bounds.getWidth()/2;
-		Double streamerHeight=bounds.getHeight()/2;
+		double left=bounds.getX()+bounds.getWidth()/4;
+		double streamerWidth=bounds.getWidth()/2;
+		double streamerHeight=bounds.getHeight()/2;
 		Double top=bounds.getCenterY()+streamerHeight/2;
 		Double bottom=bounds.getCenterY()-streamerHeight/2;
 		Double flutterHeight=bounds.getHeight()/16;
-		Double flutterWidth=streamerWidth/4;
+		double flutterWidth=streamerWidth/4;
 		
 		Path2D.Double streamer= new Path2D.Double();
 		streamer.moveTo(left, bottom); //bottom left

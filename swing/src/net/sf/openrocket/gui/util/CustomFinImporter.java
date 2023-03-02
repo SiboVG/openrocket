@@ -83,7 +83,7 @@ public class CustomFinImporter {
 	
 	private void loadFin(BufferedImage pic, ArrayList<Coordinate> points) {
 		int height = pic.getHeight();
-		Boolean offBottom = false;
+		boolean offBottom = false;
 		
 		currentX = startX;
 		currentY = height - 1;
@@ -215,7 +215,7 @@ public class CustomFinImporter {
 		int startIx;
 		ListIterator<Coordinate> start, entry, entry2;
 		Coordinate startPoint, endPoint, testPoint;
-		Boolean removedSection;
+		boolean removedSection;
 		
 		startIx = 0;
 		start = points.listIterator();

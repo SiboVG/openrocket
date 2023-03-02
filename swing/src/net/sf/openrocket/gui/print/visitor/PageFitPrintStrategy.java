@@ -94,7 +94,7 @@ public class PageFitPrintStrategy {
 
     	while (componentToPrint.size() > 0) {
     		int pageY = marginY;
-    		Boolean anyAddedToRow;
+    		boolean anyAddedToRow;
 
             Graphics2D g2 = createGraphics((float) wPage, (float) hPage, cb);
 

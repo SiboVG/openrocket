@@ -60,7 +60,7 @@ public class ParachuteShapes extends RocketComponentShape {
 			
 		Rectangle2D bounds = baseShape[0].getBounds2D();
 
-		Double chuteDiameter = bounds.getHeight()/2;
+		double chuteDiameter = bounds.getHeight()/2;
 		if(chuteDiameter>0.75*bounds.getWidth())
 			chuteDiameter=0.75*bounds.getWidth();
 		

@@ -49,7 +49,7 @@ public class FinSetCalcTest {
 		FinSetCalc calcObj = new FinSetCalc( fins );
 		
 		// Need to sum forces for fins
-		for (Integer i = 0; i < fins.getFinCount(); i++) {
+		for (int i = 0; i < fins.getFinCount(); i++) {
 			calcObj.calculateNonaxialForces(conditions,
 											Transformation.rotate_x(Math.PI * i / fins.getFinCount()),
 											componentForces, warnings);

@@ -66,11 +66,11 @@ public class ShockCordShapes extends RocketComponentShape {
 			
 		Rectangle2D bounds = baseShape[0].getBounds2D();
 
-		Double left=bounds.getX()+bounds.getWidth()/4;
-		Double cordWidth=bounds.getWidth()/2;
+		double left=bounds.getX()+bounds.getWidth()/4;
+		double cordWidth=bounds.getWidth()/2;
 		Double top=bounds.getCenterY();
 		Double flutterHeight=bounds.getHeight()/4;
-		Double flutterWidth=cordWidth/4;
+		double flutterWidth=cordWidth/4;
 		
 		Path2D.Double streamer= new Path2D.Double();
 		streamer.moveTo(left, bounds.getCenterY()); 

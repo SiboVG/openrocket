@@ -1607,7 +1607,7 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 	 * Return the mass of this component and all of its subcomponents.
 	 */
 	public final double getSectionMass() {
-		Double massSubtotal = getMass();
+		double massSubtotal = getMass();
 		if (massOverridden && overrideSubcomponentsMass) {
 			return massSubtotal;
 		}

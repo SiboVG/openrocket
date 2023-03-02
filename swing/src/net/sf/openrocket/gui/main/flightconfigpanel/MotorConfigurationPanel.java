@@ -520,7 +520,7 @@ public class MotorConfigurationPanel extends FlightConfigurablePanel<MotorMount>
 			MotorConfiguration curInstance = mount.getMotorConfig(id);
 			
 			IgnitionEvent ignitionEvent = curInstance.getIgnitionEvent();
-			Double ignitionDelay = curInstance.getIgnitionDelay();
+			double ignitionDelay = curInstance.getIgnitionDelay();
 			boolean useDefault = !curInstance.hasIgnitionOverride();
 			
 			if ( useDefault ) {

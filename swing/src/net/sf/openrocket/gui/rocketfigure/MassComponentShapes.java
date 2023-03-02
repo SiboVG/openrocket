@@ -89,9 +89,9 @@ public class MassComponentShapes extends RocketComponentShape {
 		System.arraycopy(baseShape, 0, newShape, 0, baseShape.length);
 			
 		Rectangle2D bounds = baseShape[0].getBounds2D();
-		Double vMargin = bounds.getHeight()/8.0;
-		Double hMargin = bounds.getWidth()/2.25;
-		Double halfArrowWidth=MathUtil.min(hMargin, vMargin);
+		double vMargin = bounds.getHeight()/8.0;
+		double hMargin = bounds.getWidth()/2.25;
+		double halfArrowWidth=MathUtil.min(hMargin, vMargin);
 		
 		Path2D.Double symbol = new Path2D.Double();
 		symbol.moveTo(bounds.getCenterX(), bounds.getY()+vMargin);
@@ -113,11 +113,11 @@ public class MassComponentShapes extends RocketComponentShape {
 		Rectangle2D bounds = baseShape[0].getBounds2D();
 
 			
-		Double vMargin = bounds.getHeight()/8.0;
-		Double hMargin = bounds.getWidth()/6.0;
-		Double pinHeight=vMargin;
-		Double pinSpacing=(bounds.getWidth()-2*hMargin)/(pins+1);
-		Double pinWidth=pinSpacing/2;
+		double vMargin = bounds.getHeight()/8.0;
+		double hMargin = bounds.getWidth()/6.0;
+		double pinHeight=vMargin;
+		double pinSpacing=(bounds.getWidth()-2*hMargin)/(pins+1);
+		double pinWidth=pinSpacing/2;
 		newShape[offset]=new Rectangle2D.Double(bounds.getX()+hMargin, bounds.getY()+2*vMargin, 4*hMargin,4*vMargin);
 		for(int i=0; i<(pins/2); i++){
 			newShape[i+1+offset]=new Rectangle2D.Double(bounds.getX()+hMargin+2*i*pinSpacing+pinSpacing, bounds.getY()+6*vMargin, pinWidth, pinHeight);
@@ -133,14 +133,14 @@ public class MassComponentShapes extends RocketComponentShape {
 		System.arraycopy(baseShape, 0, newShape, 0, baseShape.length);
 		
 		Rectangle2D bounds = baseShape[0].getBounds2D();
-		Double vMargin=bounds.getWidth()/10;
+		double vMargin=bounds.getWidth()/10;
 		
-		Double xCenter=bounds.getCenterX();
-		Double yCenter=bounds.getCenterY();
+		double xCenter=bounds.getCenterX();
+		double yCenter=bounds.getCenterY();
 		
-		Double arcExtent = 60.0;
-		Double arcStart1 = 360-arcExtent/2;
-		Double arcStart2 = 180-arcExtent/2;
+		double arcExtent = 60.0;
+		double arcStart1 = 360-arcExtent/2;
+		double arcStart2 = 180-arcExtent/2;
 		
 		if(3*vMargin*Math.sin(Math.toRadians(arcExtent/2))>0.9*bounds.getHeight()/2){
 			vMargin=0.9*bounds.getHeight()/(6*Math.sin(Math.toRadians(arcExtent/2)));
@@ -158,8 +158,8 @@ public class MassComponentShapes extends RocketComponentShape {
 		System.arraycopy(baseShape, 0, newShape, 0, baseShape.length);
 		
 		Rectangle2D bounds = baseShape[0].getBounds2D();
-		Double vMargin=bounds.getHeight()/10;
-		Double hMargin=bounds.getWidth()/10;
+		double vMargin=bounds.getHeight()/10;
+		double hMargin=bounds.getWidth()/10;
 		
 	
 		newShape[offset]= new Ellipse2D.Double(bounds.getX()+hMargin, bounds.getY()+vMargin,bounds.getWidth()-2*hMargin,bounds.getHeight()-2*vMargin);
@@ -171,8 +171,8 @@ public class MassComponentShapes extends RocketComponentShape {
 		int offset=baseShape.length;
 		System.arraycopy(baseShape, 0, newShape, 0, baseShape.length);
 		Rectangle2D bounds = baseShape[0].getBounds2D();
-		Double vMargin=bounds.getHeight()/8;
-		Double hMargin=bounds.getWidth()/8;
+		double vMargin=bounds.getHeight()/8;
+		double hMargin=bounds.getWidth()/8;
 		
 	
 		newShape[offset]= new RoundRectangle2D.Double(bounds.getX()+hMargin, bounds.getY()+vMargin,bounds.getWidth()-2*hMargin,bounds.getHeight()-2*vMargin, 15, 5);
@@ -190,8 +190,8 @@ public class MassComponentShapes extends RocketComponentShape {
 		Rectangle2D bounds = baseShape[0].getBounds2D();
 		
 		Double vMargin=bounds.getWidth()/10;
-		Double xCenter=bounds.getCenterX();
-		Double yCenter=bounds.getCenterY();
+		double xCenter=bounds.getCenterX();
+		double yCenter=bounds.getCenterY();
 		Random rand = new Random();
 	
 		newShape[offset]= new Arc2D.Double(xCenter-2*vMargin, yCenter-2*vMargin,4*vMargin,4*vMargin, 55.0, 180.0, Arc2D.CHORD);
@@ -216,16 +216,16 @@ public class MassComponentShapes extends RocketComponentShape {
 	
 			
 		Double vMargin = bounds.getHeight()/8.0;
-		Double hMargin = bounds.getWidth()/3.0;
-		Double cellWidth=hMargin/3.0;
-		Double cellTop=bounds.getY()+7*vMargin;
-		Double cellBottom=bounds.getY()+vMargin;
+		double hMargin = bounds.getWidth()/3.0;
+		double cellWidth=hMargin/3.0;
+		double cellTop=bounds.getY()+7*vMargin;
+		double cellBottom=bounds.getY()+vMargin;
 		
 		
 		Path2D.Double symbol = new Path2D.Double();
 		symbol.moveTo(bounds.getX()+hMargin, bounds.getCenterY());
 		symbol.lineTo(bounds.getX()+2*hMargin/3, bounds.getCenterY());
-		for(Double x=bounds.getX()+hMargin; x<bounds.getX()+2*hMargin; x+=cellWidth){
+		for(double x = bounds.getX()+hMargin; x<bounds.getX()+2*hMargin; x+=cellWidth){
 			symbol.moveTo(x,cellTop);
 			symbol.lineTo(x, cellBottom);
 			symbol.moveTo(x+cellWidth/2.0, cellBottom+vMargin);
