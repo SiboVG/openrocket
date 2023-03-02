@@ -587,15 +587,8 @@ public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
 			}
 			
 			// Applying continuously around Mach 1
-			if (mach < 0.9) {
-				Cf *= c1;
-			} else if (mach < 1.1) {
-				Cf *= (c2 * (mach - 0.9) / 0.2 + c1 * (1.1 - mach) / 0.2);
-			} else {
-				Cf *= c2;
-			}
-			
-			
+
+
 		} else {
 			
 			// Assume fully turbulent.  Roughness-limitation is checked later.
@@ -616,14 +609,14 @@ public class BarrowmanCalculator extends AbstractAerodynamicCalculator {
 				c2 = 1 / Math.pow(1 + 0.15 * pow2(mach), 0.58);
 			}
 			// Applying continuously around Mach 1
-			if (mach < 0.9) {
-				Cf *= c1;
-			} else if (mach < 1.1) {
-				Cf *= c2 * (mach - 0.9) / 0.2 + c1 * (1.1 - mach) / 0.2;
-			} else {
-				Cf *= c2;
-			}
-			
+
+		}
+		if (mach < 0.9) {
+			Cf *= c1;
+		} else if (mach < 1.1) {
+			Cf *= (c2 * (mach - 0.9) / 0.2 + c1 * (1.1 - mach) / 0.2);
+		} else {
+			Cf *= c2;
 		}
 
 		return Cf;

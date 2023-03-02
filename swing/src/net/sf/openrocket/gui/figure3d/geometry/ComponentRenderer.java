@@ -180,16 +180,14 @@ public class ComponentRenderer {
 					renderTube(gl, Surface.EDGES, t.getAftShoulderRadius(), iR, t.getAftShoulderLength());
 					gl.glPushMatrix();
 					gl.glRotated(90, 0, 1.0, 0);
-					glu.gluDisk(q, t.getAftShoulderRadius(), t.getAftRadius(), LOD, 2);
-					gl.glPopMatrix();
 
 				} else {
 					renderTube(gl, Surface.INSIDE, t.getAftShoulderRadius(), iR, t.getAftShoulderLength());
 					gl.glPushMatrix();
 					gl.glRotated(270, 0, 1.0, 0);
-					glu.gluDisk(q, t.getAftShoulderRadius(), t.getAftRadius(), LOD, 2);
-					gl.glPopMatrix();
 				}
+				glu.gluDisk(q, t.getAftShoulderRadius(), t.getAftRadius(), LOD, 2);
+				gl.glPopMatrix();
 				gl.glPopMatrix();
 			}
 
@@ -216,16 +214,14 @@ public class ComponentRenderer {
 					renderTube(gl, Surface.EDGES, t.getForeShoulderRadius(), iR, t.getForeShoulderLength());
 					gl.glPushMatrix();
 					gl.glRotated(90, 0, 1.0, 0);
-					glu.gluDisk(q, t.getForeShoulderRadius(), t.getForeRadius(), LOD, 2);
-					gl.glPopMatrix();
 
 				} else {
 					renderTube(gl, Surface.INSIDE, t.getForeShoulderRadius(), iR, t.getForeShoulderLength());
 					gl.glPushMatrix();
 					gl.glRotated(270, 0, 1.0, 0);
-					glu.gluDisk(q, t.getForeShoulderRadius(), t.getForeRadius(), LOD, 2);
-					gl.glPopMatrix();
 				}
+				glu.gluDisk(q, t.getForeShoulderRadius(), t.getForeRadius(), LOD, 2);
+				gl.glPopMatrix();
 				gl.glPopMatrix();
 			}
 

@@ -130,28 +130,24 @@ public class FinPointFigure extends AbstractScaleFigure {
 		for (Tick t : verticalTicks) {
 			if (t.major) {
 				g2.setColor(FinPointFigure.GRID_MAJOR_LINE_COLOR);
-				line.setLine( t.value, y0, t.value, y1);
-				g2.draw(line);
-			}else{
+            }else{
 				g2.setColor(FinPointFigure.GRID_MINOR_LINE_COLOR);
-				line.setLine( t.value, y0, t.value, y1);
-				g2.draw(line);
-			}
-		}
+            }
+            line.setLine( t.value, y0, t.value, y1);
+            g2.draw(line);
+        }
 
 		// horizontal
 		Tick[] horizontalTicks = unit.getTicks(y0, y1, MINOR_TICKS / this.scale, MAJOR_TICKS / this.scale);
 		for (Tick t : horizontalTicks) {
 			if (t.major) {
 				g2.setColor(FinPointFigure.GRID_MAJOR_LINE_COLOR);
-				line.setLine( x0, t.value, x1, t.value);
-				g2.draw(line);
-			}else{
+            }else{
 				g2.setColor(FinPointFigure.GRID_MINOR_LINE_COLOR);
-				line.setLine( x0, t.value, x1, t.value);
-				g2.draw(line);
-			}
-		}
+            }
+            line.setLine( x0, t.value, x1, t.value);
+            g2.draw(line);
+        }
 	}
 
 	private void paintRocketBody( Graphics2D g2){
