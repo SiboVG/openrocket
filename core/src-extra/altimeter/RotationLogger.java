@@ -6,6 +6,7 @@ import gnu.io.SerialPort;
 import gnu.io.UnsupportedCommOperationException;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -301,27 +302,32 @@ public class RotationLogger {
 			return;
 		}
 		if (arg.length == 1) {
-			FileInputStream is = new FileInputStream(arg[0]);
-			byte[] buffer = new byte[BYTES];
-			int n = is.read(buffer);
-			if (n != BYTES) {
-				System.err.println("Could read only "+n+" bytes");
+			try (FileInputStream is = new FileInputStream(arg[0])) {
+				byte[] buffer = new byte[BYTES];
+				int n = is.read(buffer);
+				if (n != BYTES) {
+					System.err.println("Could read only "+n+" bytes");
+					return;
+				}
+
+				int[] data = new int[BYTES];
+				for (int i=0; i<BYTES; i++) {
+					data[i] = unsign(buffer[i]);
+				}
+
+				int checksum=0;
+				for (int i=0; i<BYTES; i++) {
+					checksum += data[i];
+				}
+				checksum = checksum%256;
+				System.err.println("Checksum: "+checksum);
+
+				convertData(data);
+			} catch (FileNotFoundException e) {
+				System.err.println("File not found: "+arg[0]);
 				return;
 			}
-			
-			int[] data = new int[BYTES];
-			for (int i=0; i<BYTES; i++) {
-				data[i] = unsign(buffer[i]);
-			}
 
-			int checksum=0;
-			for (int i=0; i<BYTES; i++) {
-				checksum += data[i];
-			}
-			checksum = checksum%256;
-			System.err.println("Checksum: "+checksum);
-			
-			convertData(data);
 			return;			
 		}
 		

@@ -115,44 +115,36 @@ public abstract class RockSimComponentFileLoader {
 		if (is == null) {
 			return;
 		}
-		InputStreamReader r = null;
-		try {
-			r = new InputStreamReader(is);
-			
+		try (InputStreamReader r = new InputStreamReader(is)) {
 			// Create the CSV reader.  Use comma separator.
 			CSVParser parser = new CSVParserBuilder()
 					.withSeparator(',')
 					.withQuoteChar('\'')
 					.withEscapeChar('\\')
 					.build();
-			CSVReader reader = new CSVReaderBuilder(r)
+			try (CSVReader reader = new CSVReaderBuilder(r)
 					.withCSVParser(parser)
-					.build();
+					.build()) {
 
-			//Read and throw away the header row.
-			parseHeaders(reader.readNext());
+				//Read and throw away the header row.
+				parseHeaders(reader.readNext());
 
-			String[] data = null;
-			while ((data = reader.readNext()) != null) {
-				// detect empty lines and skip:
-				if (data.length == 0) {
-					continue;
+				String[] data = null;
+				while ((data = reader.readNext()) != null) {
+					// detect empty lines and skip:
+					if (data.length == 0) {
+						continue;
+					}
+					if (data.length == 1 && StringUtil.isEmpty(data[0])) {
+						continue;
+					}
+					parseData(data);
 				}
-				if (data.length == 1 && StringUtil.isEmpty(data[0])) {
-					continue;
-				}
-				parseData(data);
 			}
 			//Read the rest of the file as data rows.
 			return;
 		} catch (IOException | CsvValidationException e) {
 			throw new BugException("Could not read component file", e);
-		} finally {
-			if (r != null) {
-				try {
-					r.close();
-				} catch (IOException ignored) { }
-			}
 		}
 		
 	}
