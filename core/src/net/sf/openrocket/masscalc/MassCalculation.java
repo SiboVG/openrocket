@@ -8,7 +8,6 @@ import net.sf.openrocket.motor.Motor;
 import net.sf.openrocket.motor.MotorConfiguration;
 import net.sf.openrocket.rocketcomponent.*;
 import net.sf.openrocket.simulation.MotorClusterState;
-import net.sf.openrocket.simulation.customexpression.CustomExpression;
 import net.sf.openrocket.util.Coordinate;
 import net.sf.openrocket.util.MathUtil;
 import net.sf.openrocket.util.Transformation;

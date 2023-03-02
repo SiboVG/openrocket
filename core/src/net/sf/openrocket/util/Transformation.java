@@ -3,7 +3,6 @@ package net.sf.openrocket.util;
 import java.nio.DoubleBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * Defines an affine transformation of the form  A*x+c,  where x and c are Coordinates and

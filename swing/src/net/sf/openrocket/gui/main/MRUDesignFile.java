@@ -19,11 +19,11 @@ public class MRUDesignFile {
 
     public static final int MAX_SIZE = 9;
 
-    private List<String> mruFileList;
+    private final List<String> mruFileList;
 
     private static final MRUDesignFile instance; // The single instance
 
-    private EventListenerList listenerList;
+    private final EventListenerList listenerList;
 
     static {
         instance = new MRUDesignFile();

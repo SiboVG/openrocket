@@ -10,7 +10,6 @@ import java.awt.image.BufferedImage;
 import java.util.Collection;
 import java.util.EventObject;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
@@ -77,7 +76,7 @@ public class PhotoPanel extends JPanel implements GLEventListener {
 	private final List<ImageCallback> imageCallbacks = new java.util.Vector<>();
 
 	private RocketRenderer rr;
-	private PhotoSettings p;
+	private final PhotoSettings p;
 	private OpenRocketDocument document;
 	private DocumentChangeListener changeListener;
 

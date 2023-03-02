@@ -1,8 +1,6 @@
 package net.sf.openrocket.file.rocksim.importt;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.net.MalformedURLException;
 
 import net.sf.openrocket.aerodynamics.WarningSet;
 import net.sf.openrocket.appearance.AppearanceBuilder;

@@ -37,7 +37,7 @@ public class StorageOptionChooser extends JPanel {
 	private final JLabel infoLabel;
 	
 	
-	private boolean artificialEvent = false;
+	private final boolean artificialEvent = false;
 	private static final Translator trans = Application.getTranslator();
 	
 	public StorageOptionChooser(OpenRocketDocument doc, StorageOptions opts) {

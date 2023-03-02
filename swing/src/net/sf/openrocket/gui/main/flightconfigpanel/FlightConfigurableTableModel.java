@@ -1,7 +1,6 @@
 package net.sf.openrocket.gui.main.flightconfigpanel;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;

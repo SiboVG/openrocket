@@ -1,6 +1,5 @@
 package net.sf.openrocket.logging;
 
-import java.io.IOException;
 import java.io.Writer;
 
 public class StackTraceWriter extends Writer {

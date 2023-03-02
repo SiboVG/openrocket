@@ -109,7 +109,7 @@ public class PresetEditorDialog extends JDialog implements ItemListener {
 	private final DoubleModel trForeDia;
 	private final DoubleModel trForeShoulderDia;
 	private final DoubleModel trForeShoulderLen;
-	private DoubleModel trMass;
+	private final DoubleModel trMass;
 	private ImageIcon trImage;
 	private final JCheckBox trFilledCB;
 	private final JComboBox<String> trShapeCB;

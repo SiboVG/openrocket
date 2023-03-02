@@ -1,6 +1,5 @@
 package net.sf.openrocket.communication;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 
 public class ConnectionSourceStub implements ConnectionSource {

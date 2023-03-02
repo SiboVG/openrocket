@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -19,7 +20,7 @@ import net.sf.openrocket.util.BugException;
  */
 public class TextLineReader implements Iterator<String> {
 	
-	private static final Charset UTF8 = Charset.forName("UTF-8");
+	private static final Charset UTF8 = StandardCharsets.UTF_8;
 	
 
 

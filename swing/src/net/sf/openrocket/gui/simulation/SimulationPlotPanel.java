@@ -94,13 +94,13 @@ public class SimulationPlotPanel extends JPanel {
 	private PlotConfiguration configuration;
 	
 	
-	private JComboBox<PlotConfiguration> configurationSelector;
+	private final JComboBox<PlotConfiguration> configurationSelector;
 	
-	private JComboBox<FlightDataType> domainTypeSelector;
-	private UnitSelector domainUnitSelector;
+	private final JComboBox<FlightDataType> domainTypeSelector;
+	private final UnitSelector domainUnitSelector;
 	
-	private JPanel typeSelectorPanel;
-	private FlightEventTableModel eventTableModel;
+	private final JPanel typeSelectorPanel;
+	private final FlightEventTableModel eventTableModel;
 	
 	
 	private int modifying = 0;
@@ -456,7 +456,7 @@ public class SimulationPlotPanel extends JPanel {
 		
 		private final int index;
 		private final JComboBox<FlightDataType> typeSelector;
-		private UnitSelector unitSelector;
+		private final UnitSelector unitSelector;
 		private final JComboBox<String> axisSelector;
 		
 		

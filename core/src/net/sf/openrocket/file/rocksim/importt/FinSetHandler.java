@@ -9,7 +9,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.sf.openrocket.rocketcomponent.Transition;
-import org.xml.sax.SAXException;
 
 import net.sf.openrocket.aerodynamics.WarningSet;
 import net.sf.openrocket.file.DocumentLoadingContext;

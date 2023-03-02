@@ -6,7 +6,6 @@ import java.io.PrintStream;
 import java.io.StringReader;
 import java.util.List;
 
-import net.sf.openrocket.material.Material;
 import net.sf.openrocket.preset.ComponentPreset;
 import net.sf.openrocket.preset.loader.BodyTubeLoader;
 import net.sf.openrocket.preset.loader.BulkHeadLoader;

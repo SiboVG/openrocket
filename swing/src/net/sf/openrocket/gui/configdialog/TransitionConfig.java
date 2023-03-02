@@ -39,7 +39,7 @@ public class TransitionConfig extends RocketComponentConfig {
 	private final BasicSlider shapeSlider;
 	private final JCheckBox checkAutoAftRadius;
 	private final JCheckBox checkAutoForeRadius;
-	private DescriptionArea description;
+	private final DescriptionArea description;
 	
 
 	// Prepended to the description from Transition.DESCRIPTIONS

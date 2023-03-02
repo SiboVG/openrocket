@@ -55,9 +55,9 @@ public class ScaleScrollPane extends JScrollPane
 	private final JComponent component;
 	private final AbstractScaleFigure figure;
 	
-	private DoubleModel rulerUnit;
-	private Ruler horizontalRuler;
-	private Ruler verticalRuler;
+	private final DoubleModel rulerUnit;
+	private final Ruler horizontalRuler;
+	private final Ruler verticalRuler;
 
 	// is the subject *currently* being fitting
 	protected boolean fit = false;

@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -128,7 +129,7 @@ public class SlideSetManager {
 			}
 
 			StyleSheet ss = new StyleSheet();
-			InputStreamReader reader = new InputStreamReader(in, "UTF-8");
+			InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8);
 			ss.loadRules(reader, null);
 			return ss;
 

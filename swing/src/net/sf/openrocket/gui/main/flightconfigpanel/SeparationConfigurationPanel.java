@@ -39,7 +39,7 @@ import net.sf.openrocket.gui.widgets.SelectColorButton;
 public class SeparationConfigurationPanel extends FlightConfigurablePanel<AxialStage> {
 	private static final long serialVersionUID = -1556652925279847316L;
 	static final Translator trans = Application.getTranslator();
-	private RocketDescriptor descriptor = Application.getInjector().getInstance(RocketDescriptor.class);
+	private final RocketDescriptor descriptor = Application.getInjector().getInstance(RocketDescriptor.class);
 
 	private FlightConfigurableTableModel<AxialStage> separationTableModel;
 	private final JButton selectSeparationButton;

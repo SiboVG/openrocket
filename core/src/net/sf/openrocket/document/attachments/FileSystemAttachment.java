@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import net.sf.openrocket.document.Attachment;
-import net.sf.openrocket.util.DecalNotFoundException;
 
 /**
  * 

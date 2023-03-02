@@ -18,7 +18,6 @@ import java.util.regex.Pattern;
 
 import net.sf.openrocket.rocketcomponent.FlightConfiguration;
 import net.sf.openrocket.rocketcomponent.Rocket;
-import net.sf.openrocket.simulation.customexpression.CustomExpression;
 import net.sf.openrocket.util.StringUtil;
 
 

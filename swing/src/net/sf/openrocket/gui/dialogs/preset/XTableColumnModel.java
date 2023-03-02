@@ -103,7 +103,7 @@ public class XTableColumnModel extends DefaultTableColumnModel {
 	 * @return visibility of specified column (false if there is no such column at all. [It's not visible, right?])
 	 */
 	public boolean isColumnVisible(TableColumn aColumn) {
-		return (tableColumns.indexOf(aColumn) >= 0);
+		return (tableColumns.contains(aColumn));
 	}
 	
 	/** Append <code>column</code> to the right of existing columns.

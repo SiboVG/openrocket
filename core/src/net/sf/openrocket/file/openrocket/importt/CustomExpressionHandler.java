@@ -8,8 +8,6 @@ import net.sf.openrocket.file.simplesax.AbstractElementHandler;
 import net.sf.openrocket.file.simplesax.ElementHandler;
 import net.sf.openrocket.simulation.customexpression.CustomExpression;
 
-import org.xml.sax.SAXException;
-
 class CustomExpressionHandler extends AbstractElementHandler {
 	@SuppressWarnings("unused")
 	private final DocumentLoadingContext context;

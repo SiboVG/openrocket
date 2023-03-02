@@ -144,7 +144,7 @@ public class ComponentPresetTable extends JTable {
 						});
 				}
 				
-				if ( visibleColumnKeys.indexOf(key) < 0 ) {
+				if (!visibleColumnKeys.contains(key)) {
 					hiddenColumns.add(columns[index]);
 				}
 				index ++;

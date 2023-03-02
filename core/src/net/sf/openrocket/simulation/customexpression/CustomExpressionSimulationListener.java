@@ -4,7 +4,6 @@ import java.util.List;
 
 import net.sf.openrocket.simulation.FlightDataBranch;
 import net.sf.openrocket.simulation.SimulationStatus;
-import net.sf.openrocket.simulation.exception.SimulationException;
 import net.sf.openrocket.simulation.listeners.AbstractSimulationListener;
 
 import org.slf4j.Logger;

@@ -1,7 +1,6 @@
 package net.sf.openrocket.optimization.general.multidim;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 

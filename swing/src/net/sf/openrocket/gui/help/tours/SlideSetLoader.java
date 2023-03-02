@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -67,7 +68,7 @@ public class SlideSetLoader {
 		String file = baseDir + filename;
 
 		try (InputStream in = getLocalizedFile(file)) {
-			InputStreamReader reader = new InputStreamReader(in, "UTF-8");
+			InputStreamReader reader = new InputStreamReader(in, StandardCharsets.UTF_8);
 			return load(reader);
 		}
 	}

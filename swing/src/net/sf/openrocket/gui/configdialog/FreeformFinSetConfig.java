@@ -15,6 +15,7 @@ import java.io.IOException;
 
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -347,7 +348,7 @@ public class FreeformFinSetConfig extends FinSetConfig {
 		int nCol = table.getColumnCount();
 
 		try {
-			final Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), "utf-8"));
+			final Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), StandardCharsets.UTF_8));
 
 			//write the header information
 			StringBuilder bufferHeader = new StringBuilder();

@@ -34,7 +34,7 @@ import net.sf.openrocket.gui.widgets.SelectColorButton;
 public class RecoveryConfigurationPanel extends FlightConfigurablePanel<RecoveryDevice> {
 
 	final Translator trans = Application.getTranslator();
-	private RocketDescriptor descriptor = Application.getInjector().getInstance(RocketDescriptor.class);
+	private final RocketDescriptor descriptor = Application.getInjector().getInstance(RocketDescriptor.class);
 
 	private FlightConfigurableTableModel<RecoveryDevice> recoveryTableModel;
 	private final JButton selectDeploymentButton;

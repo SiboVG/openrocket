@@ -3,7 +3,6 @@ package net.sf.openrocket.gui.main.componenttree;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.IOException;
 import java.util.List;
 
 import net.sf.openrocket.rocketcomponent.RocketComponent;

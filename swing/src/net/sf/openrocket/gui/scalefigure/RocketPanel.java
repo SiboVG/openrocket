@@ -144,7 +144,7 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 	private ScaleSelector scaleSelector;
 
 	/* Calculation of CP and CG */
-	private AerodynamicCalculator aerodynamicCalculator;
+	private final AerodynamicCalculator aerodynamicCalculator;
 
 	private final OpenRocketDocument document;
 

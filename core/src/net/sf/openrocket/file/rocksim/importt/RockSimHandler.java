@@ -18,8 +18,6 @@ import net.sf.openrocket.rocketcomponent.Rocket;
 import net.sf.openrocket.rocketcomponent.RocketComponent;
 import net.sf.openrocket.rocketcomponent.AxialStage;
 
-import org.xml.sax.SAXException;
-
 /**
  * This class is a Sax element handler for Rocksim version 9 design files.  It parses the Rocksim file (typically
  * a .rkt extension) and creates corresponding OpenRocket components.  This is a best effort approach and may not

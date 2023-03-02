@@ -17,6 +17,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -1227,10 +1228,7 @@ public class BasicFrame extends JFrame {
 
 		// Try URL-decoding the URL
 		if (displayName == null) {
-			try {
-				displayName = URLDecoder.decode(url.toString(), "UTF-8");
-			} catch (UnsupportedEncodingException ignore) {
-			}
+			displayName = URLDecoder.decode(url.toString(), StandardCharsets.UTF_8);
 		}
 
 		if (displayName == null) {

@@ -37,7 +37,7 @@ import net.sf.openrocket.unit.UnitGroup;
 public class NoseConeConfig extends RocketComponentConfig {
 	
 	
-	private DescriptionArea description;
+	private final DescriptionArea description;
 	
 	private final JLabel shapeLabel;
 	private final JSpinner shapeSpinner;
