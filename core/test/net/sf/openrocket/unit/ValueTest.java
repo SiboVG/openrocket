@@ -15,8 +15,8 @@ public class ValueTest {
 		
 		assertTrue(v1.compareTo(v2) > 0);
 		assertTrue(v2.compareTo(v1) < 0);
-		assertTrue(v1.compareTo(v1) == 0);
-		assertTrue(v2.compareTo(v2) == 0);
+		assertEquals(0, v1.compareTo(v1));
+		assertEquals(0, v2.compareTo(v2));
 		
 		v2 = new Value(283.15, UnitGroup.UNITS_TEMPERATURE.findApproximate("K"));
 		assertTrue(v1.compareTo(v2) > 0);
