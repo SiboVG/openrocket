@@ -152,7 +152,7 @@ public class SlideSetLoader {
 		
 		String imageFile = matcher.group(1);
 		
-		StringBuffer desc = new StringBuffer();
+		StringBuilder desc = new StringBuilder();
 		while (source.hasNext() && !nextLineStartsSlide()) {
 			if (desc.length() > 0) {
 				desc.append('\n');

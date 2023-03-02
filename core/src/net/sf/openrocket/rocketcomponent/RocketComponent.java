@@ -2180,7 +2180,7 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 			return null;
 		int pos = parent.getChildPosition(this);
 		if (pos < 0) {
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			sb.append("Inconsistent internal state: ");
 			sb.append("this=").append(this).append('[')
 					.append(System.identityHashCode(this)).append(']');

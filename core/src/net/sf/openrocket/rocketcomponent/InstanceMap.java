@@ -43,7 +43,7 @@ public class InstanceMap extends ConcurrentHashMap<RocketComponent, ArrayList<In
 	// this is primarily for debugging.
 	@Override
 	public String toString() {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		int outerIndex = 0;
 		buffer.append(">> Printing InstanceMap:\n");
 		for(Map.Entry<RocketComponent, ArrayList<InstanceContext>> entry: entrySet() ) {

@@ -290,7 +290,7 @@ public class RocketComponentSaver {
     }
 
     protected static String generateOpenTag( final Map<String,String> attrs, final String enclosingTag ){
-       StringBuffer buf = new StringBuffer();
+       StringBuilder buf = new StringBuilder();
        if( null == attrs ) {
     	   return enclosingTag;
        }

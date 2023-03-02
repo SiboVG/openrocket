@@ -275,7 +275,7 @@ public class Transformation implements java.io.Serializable {
 	
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		
 		sb.append(String.format("[%3.2f %3.2f %3.2f]   [%3.2f]\n",
 				rotation[X][X],rotation[X][Y],rotation[X][Z],translate.x));

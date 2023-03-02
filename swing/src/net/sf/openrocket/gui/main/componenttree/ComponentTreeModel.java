@@ -241,7 +241,7 @@ public class ComponentTreeModel implements TreeModel, ComponentChangeListener {
 	 * @return			a string representation
 	 */
 	public static String pathToString(TreePath treePath) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("[");
 		for (Object o : treePath.getPath()) {
 			if (sb.length() > 1) {
