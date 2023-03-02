@@ -351,10 +351,10 @@ public class AppearancePanel extends JPanel {
 			System.arraycopy(LineStyle.values(), 0, list, 1,
 					LineStyle.values().length);
 
-			final JComboBox<LineStyle> combo = new JComboBox<LineStyle>(new EnumModel<LineStyle>(c,
-					"LineStyle",
-					// // Default style
-					list, trans.get("LineStyle.Defaultstyle")));
+			final JComboBox<LineStyle> combo = new JComboBox<>(new EnumModel<>(c,
+                    "LineStyle",
+                    // // Default style
+                    list, trans.get("LineStyle.Defaultstyle")));
 
 			fDefault.addEnableComponent(combo, false);
 
@@ -503,7 +503,7 @@ public class AppearancePanel extends JPanel {
 		} else return;
 
 		DecalModel decalModel = new DecalModel(panel, document, builder);
-		JComboBox<DecalImage> textureDropDown = new JComboBox<DecalImage>(decalModel);
+		JComboBox<DecalImage> textureDropDown = new JComboBox<>(decalModel);
 
 		// We need to add this action listener that triggers a decalModel update when the same item is selected, because
 		// for multi-comp edits, the listeners' decals may not be updated otherwise
@@ -721,8 +721,8 @@ public class AppearancePanel extends JPanel {
 		EdgeMode[] list = new EdgeMode[EdgeMode.values().length];
 		System.arraycopy(EdgeMode.values(), 0, list, 0,
 				EdgeMode.values().length);
-		JComboBox<EdgeMode> combo = new JComboBox<EdgeMode>(new EnumModel<EdgeMode>(builder,
-				"EdgeMode", list));
+		JComboBox<EdgeMode> combo = new JComboBox<>(new EnumModel<>(builder,
+                "EdgeMode", list));
 		mDefault.addEnableComponent(combo, false);
 		panel.add(combo, "wrap");
 		order.add(combo);

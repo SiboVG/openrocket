@@ -72,7 +72,7 @@ public class RocketComponentConfig extends JPanel {
 	protected final ComponentConfigDialog parent;
 	protected boolean isNewComponent = false;		// Checks whether this config dialog is editing an existing component, or a new one
 	
-	private final List<Invalidatable> invalidatables = new ArrayList<Invalidatable>();
+	private final List<Invalidatable> invalidatables = new ArrayList<>();
 	protected final List<Component> order = new ArrayList<>();		// Component traversal order
 	
 	private JComboBox<?> presetComboBox;

@@ -185,8 +185,8 @@ public class MathUtilTest {
 	
 	@Test
 	public void testAverageStddev() {
-		List<Integer> ints = new ArrayList<Integer>();
-		List<Double> doubles = new ArrayList<Double>();
+		List<Integer> ints = new ArrayList<>();
+		List<Double> doubles = new ArrayList<>();
 		
 		ints.add(3);
 		ints.add(4);
@@ -208,8 +208,8 @@ public class MathUtilTest {
 	
 	@Test
 	public void testMedian() {
-		List<Integer> ints = new ArrayList<Integer>();
-		List<Double> doubles = new ArrayList<Double>();
+		List<Integer> ints = new ArrayList<>();
+		List<Double> doubles = new ArrayList<>();
 		
 		ints.add(3);
 		ints.add(4);
@@ -239,8 +239,8 @@ public class MathUtilTest {
 		List<Double> x;
 		List<Double> y;
 
-		x = new ArrayList<Double>();
-		y = new ArrayList<Double>();
+		x = new ArrayList<>();
+		y = new ArrayList<>();
 		y.add(1.0);
 		
 		v= MathUtil.interpolate(null, y, 0.0);
@@ -249,9 +249,9 @@ public class MathUtilTest {
 		v = MathUtil.interpolate(x, y, 0.0);
 		assertEquals("Failed to test for empty domain", Double.NaN, v, EPS);
 		
-		x = new ArrayList<Double>();
+		x = new ArrayList<>();
 		x.add(1.0);
-		y = new ArrayList<Double>();
+		y = new ArrayList<>();
 		
 		v = MathUtil.interpolate(x, null, 0.0);
 		assertEquals("Failed to test for range null", Double.NaN, v, EPS);
@@ -259,10 +259,10 @@ public class MathUtilTest {
 		v = MathUtil.interpolate(x, y, 0.0);
 		assertEquals("Failed to test for empty range", Double.NaN, v, EPS);
 		
-		x = new ArrayList<Double>();
+		x = new ArrayList<>();
 		x.add(1.0);
 		x.add(2.0);
-		y = new ArrayList<Double>();
+		y = new ArrayList<>();
 		y.add(15.0);
 		y.add(17.0);
 		
@@ -279,12 +279,12 @@ public class MathUtilTest {
 		v = MathUtil.interpolate(x,y,1.5);
 		assertEquals("Failed to calculate center", 16.0, v, EPS);
 		
-		x = new ArrayList<Double>();
+		x = new ArrayList<>();
 		x.add(0.25);
 		x.add(0.5);
 		x.add(1.0);
 		x.add(2.0);
-		y = new ArrayList<Double>();
+		y = new ArrayList<>();
 		y.add(0.0);
 		y.add(0.0);
 		y.add(15.0);

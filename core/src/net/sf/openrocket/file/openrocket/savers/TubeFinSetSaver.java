@@ -11,7 +11,7 @@ public class TubeFinSetSaver extends ExternalComponentSaver {
 	private static final TubeFinSetSaver instance = new TubeFinSetSaver();
 	
 	public static List<String> getElements(net.sf.openrocket.rocketcomponent.RocketComponent c) {
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 		
 		list.add("<tubefinset>");
 		instance.addParams(c, list);

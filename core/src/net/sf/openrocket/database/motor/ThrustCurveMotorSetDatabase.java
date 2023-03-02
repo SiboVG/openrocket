@@ -19,14 +19,14 @@ import net.sf.openrocket.motor.ThrustCurveMotor;
 public class ThrustCurveMotorSetDatabase implements MotorDatabase {
 	private static final Logger log = LoggerFactory.getLogger(ThrustCurveMotorSetDatabase.class);
 	
-	private final List<ThrustCurveMotorSet> motorSets = new ArrayList<ThrustCurveMotorSet>();
+	private final List<ThrustCurveMotorSet> motorSets = new ArrayList<>();
 	
 	@Override
 	public List<ThrustCurveMotor> findMotors(String digest, Motor.Type type, String manufacturer, String designation,
 			double diameter, double length) {
-		ArrayList<ThrustCurveMotor> fullMatches = new ArrayList<ThrustCurveMotor>();
-		ArrayList<ThrustCurveMotor> digestMatches = new ArrayList<ThrustCurveMotor>();
-		ArrayList<ThrustCurveMotor> descriptionMatches = new ArrayList<ThrustCurveMotor>();
+		ArrayList<ThrustCurveMotor> fullMatches = new ArrayList<>();
+		ArrayList<ThrustCurveMotor> digestMatches = new ArrayList<>();
+		ArrayList<ThrustCurveMotor> descriptionMatches = new ArrayList<>();
 
 		// Apply filters to see if we can find any motors that match the given criteria.  We'll return
 		// the most restrictive nonempty list we find, or empty list if no matches at all

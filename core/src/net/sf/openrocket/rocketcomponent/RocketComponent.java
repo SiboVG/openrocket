@@ -60,7 +60,7 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 	/**
 	 * List of child components of this component.
 	 */
-	protected ArrayList<RocketComponent> children = new ArrayList<RocketComponent>();
+	protected ArrayList<RocketComponent> children = new ArrayList<>();
 	
 	
 	////////  Parameters common to all components:
@@ -418,7 +418,7 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 			
 			// Reset all parent/child information
 			clone.parent = null;
-			clone.children = new ArrayList<RocketComponent>();
+			clone.children = new ArrayList<>();
 			
 			// Add copied children to the structure without firing events.
 			for (RocketComponent child : this.children) {
@@ -2542,7 +2542,7 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 	 */
 	protected List<RocketComponent> copyFrom(RocketComponent src) {
 		checkState();
-		List<RocketComponent> toInvalidate = new ArrayList<RocketComponent>();
+		List<RocketComponent> toInvalidate = new ArrayList<>();
 		
 		if (this.parent != null) {
 			throw new UnsupportedOperationException("copyFrom called for non-root component, parent=" +
@@ -2620,7 +2620,7 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 	 */
 	private static class RocketComponentIterator implements Iterator<RocketComponent> {
 		// Stack holds iterators which still have some components left.
-		private final Deque<Iterator<RocketComponent>> iteratorStack = new ArrayDeque<Iterator<RocketComponent>>();
+		private final Deque<Iterator<RocketComponent>> iteratorStack = new ArrayDeque<>();
 		
 		private final Rocket root;
 		private final int treeModID;

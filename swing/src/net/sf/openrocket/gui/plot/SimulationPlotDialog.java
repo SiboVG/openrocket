@@ -83,7 +83,7 @@ public class SimulationPlotDialog extends JDialog {
 		panel.add(check, "split, left");
 
 		//// Add series selection box
-		ArrayList<String> stages = new ArrayList<String>();
+		ArrayList<String> stages = new ArrayList<>();
 		stages.add("All");
 		stages.addAll(Util.generateSeriesLabels(simulation));
 

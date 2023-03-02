@@ -11,7 +11,7 @@ public class StreamerSaver extends RecoveryDeviceSaver {
 	private static final StreamerSaver instance = new StreamerSaver();
 
 	public static List<String> getElements(net.sf.openrocket.rocketcomponent.RocketComponent c) {
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 
 		list.add("<streamer>");
 		instance.addParams(c, list);

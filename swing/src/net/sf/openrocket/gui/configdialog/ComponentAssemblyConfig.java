@@ -53,8 +53,8 @@ public class ComponentAssemblyConfig extends RocketComponentConfig {
 		// radial distance method
 		JLabel radiusMethodLabel = new JLabel(trans.get("RocketComponent.Position.Method.Radius.Label"));
         motherPanel.add( radiusMethodLabel, "align left");
-		final ComboBoxModel<RadiusMethod> radiusMethodModel = new EnumModel<RadiusMethod>( boosters, "RadiusMethod", RadiusMethod.choices());
-		final JComboBox<RadiusMethod> radiusMethodCombo = new JComboBox<RadiusMethod>( radiusMethodModel );
+		final ComboBoxModel<RadiusMethod> radiusMethodModel = new EnumModel<>(boosters, "RadiusMethod", RadiusMethod.choices());
+		final JComboBox<RadiusMethod> radiusMethodCombo = new JComboBox<>(radiusMethodModel);
 		motherPanel.add( radiusMethodCombo, "spanx 3, wrap");
 		order.add(radiusMethodCombo);
 		

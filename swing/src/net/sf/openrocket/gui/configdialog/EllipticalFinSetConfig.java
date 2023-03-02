@@ -98,8 +98,8 @@ public class EllipticalFinSetConfig extends FinSetConfig {
 		////  Cross section
 		{//// Fin cross section:
 			panel.add(new JLabel(trans.get("EllipticalFinSetCfg.FincrossSection")), "span, split");
-			JComboBox<FinSet.CrossSection> sectionCombo = new JComboBox<FinSet.CrossSection>(
-					new EnumModel<FinSet.CrossSection>(component, "CrossSection"));
+			JComboBox<FinSet.CrossSection> sectionCombo = new JComboBox<>(
+                    new EnumModel<>(component, "CrossSection"));
 			panel.add(sectionCombo, "growx, wrap unrel");
 			order.add(sectionCombo);
 		}

@@ -297,13 +297,13 @@ public class MathUtil {
 			return Double.NaN;
 		}
 		
-		List<Number> sorted = new ArrayList<Number>(values);
-		Collections.sort(sorted, new Comparator<Number>() {
-			@Override
-			public int compare(Number o1, Number o2) {
-				return Double.compare(o1.doubleValue(), o2.doubleValue());
-			}
-		});
+		List<Number> sorted = new ArrayList<>(values);
+		Collections.sort(sorted, new Comparator<>() {
+            @Override
+            public int compare(Number o1, Number o2) {
+                return Double.compare(o1.doubleValue(), o2.doubleValue());
+            }
+        });
 		
 		int n = sorted.size();
 		if (n % 2 == 0) {

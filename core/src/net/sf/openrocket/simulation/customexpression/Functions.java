@@ -25,7 +25,7 @@ public class Functions {
 	private static final Logger log = LoggerFactory.getLogger(Functions.class);
 	private static final Translator trans = Application.getTranslator();
 	
-	private final List<CustomFunction> allFunctions = new ArrayList<CustomFunction>();
+	private final List<CustomFunction> allFunctions = new ArrayList<>();
 
 	public static Functions getInstance() {
 		if(instance == null) {
@@ -43,45 +43,45 @@ public class Functions {
 	}
 	
 	// A map of available operator strings (keys) and description of function (value)
-	public static final SortedMap<String, String> AVAILABLE_OPERATORS = new TreeMap<String, String>() {{
-	    put("+"       	, trans.get("Operator.plus"));
-	    put("-"			, trans.get("Operator.minus"));
-	    put("*"			, trans.get("Operator.star"));
-	    put("/"			, trans.get("Operator.div"));
-	    put("%"			, trans.get("Operator.mod"));
-	    put("^"			, trans.get("Operator.pow"));
-	    put("abs()"		, trans.get("Operator.abs"));
-	    put("ceil()"	, trans.get("Operator.ceil"));
-	    put("floor()"	, trans.get("Operator.floor"));
-	    put("sqrt()"	, trans.get("Operator.sqrt"));
-	    put("cbrt()"	, trans.get("Operator.cbrt"));
-	    put("exp()"		, trans.get("Operator.exp"));
-	    put("log()"		, trans.get("Operator.ln"));
-	    put("sin()"		, trans.get("Operator.sin"));
-	    put("cos()"		, trans.get("Operator.cos"));
-	    put("tan()"		, trans.get("Operator.tan"));
-	    put("asin()"	, trans.get("Operator.asin"));
-	    put("acos()"	, trans.get("Operator.acos"));
-	    put("atan()"	, trans.get("Operator.atan"));
-	    put("sinh()"	, trans.get("Operator.hsin"));
-	    put("cosh()"	, trans.get("Operator.hcos"));
-	    put("tanh()"	, trans.get("Operator.htan"));
-	    put("log10()"	, trans.get("Operator.log10"));
-	    put("round()"	, trans.get("Operator.round"));
-	    put("random()"	, trans.get("Operator.random"));
-	    put("expm1()"	, trans.get("Operator.expm1"));
-	    put("mean([:])"	, trans.get("Operator.mean"));
-	    put("min([:])"	, trans.get("Operator.min"));
-	    put("max([:])"	, trans.get("Operator.max"));
-	    put("var([:])"	, trans.get("Operator.var"));
-	    put("rms([:])"	, trans.get("Operator.rms"));
-	    put("stdev([:])", trans.get("Operator.stdev"));
-	    put("lclip(,)"  , trans.get("Operator.lclip"));
-	    put("uclip(,)"  , trans.get("Operator.uclip"));
-	    put("binf([:],,)"	, trans.get("Operator.binf"));
-	    put("trapz([:])"	, trans.get("Operator.trapz"));
-	    put("tnear([:],)"	, trans.get("Operator.tnear"));
-	}}; 
+	public static final SortedMap<String, String> AVAILABLE_OPERATORS = new TreeMap<>() {{
+        put("+", trans.get("Operator.plus"));
+        put("-", trans.get("Operator.minus"));
+        put("*", trans.get("Operator.star"));
+        put("/", trans.get("Operator.div"));
+        put("%", trans.get("Operator.mod"));
+        put("^", trans.get("Operator.pow"));
+        put("abs()", trans.get("Operator.abs"));
+        put("ceil()", trans.get("Operator.ceil"));
+        put("floor()", trans.get("Operator.floor"));
+        put("sqrt()", trans.get("Operator.sqrt"));
+        put("cbrt()", trans.get("Operator.cbrt"));
+        put("exp()", trans.get("Operator.exp"));
+        put("log()", trans.get("Operator.ln"));
+        put("sin()", trans.get("Operator.sin"));
+        put("cos()", trans.get("Operator.cos"));
+        put("tan()", trans.get("Operator.tan"));
+        put("asin()", trans.get("Operator.asin"));
+        put("acos()", trans.get("Operator.acos"));
+        put("atan()", trans.get("Operator.atan"));
+        put("sinh()", trans.get("Operator.hsin"));
+        put("cosh()", trans.get("Operator.hcos"));
+        put("tanh()", trans.get("Operator.htan"));
+        put("log10()", trans.get("Operator.log10"));
+        put("round()", trans.get("Operator.round"));
+        put("random()", trans.get("Operator.random"));
+        put("expm1()", trans.get("Operator.expm1"));
+        put("mean([:])", trans.get("Operator.mean"));
+        put("min([:])", trans.get("Operator.min"));
+        put("max([:])", trans.get("Operator.max"));
+        put("var([:])", trans.get("Operator.var"));
+        put("rms([:])", trans.get("Operator.rms"));
+        put("stdev([:])", trans.get("Operator.stdev"));
+        put("lclip(,)", trans.get("Operator.lclip"));
+        put("uclip(,)", trans.get("Operator.uclip"));
+        put("binf([:],,)", trans.get("Operator.binf"));
+        put("trapz([:])", trans.get("Operator.trapz"));
+        put("tnear([:],)", trans.get("Operator.tnear"));
+    }};
 	
 	
 	protected Functions() throws InvalidCustomFunctionException {

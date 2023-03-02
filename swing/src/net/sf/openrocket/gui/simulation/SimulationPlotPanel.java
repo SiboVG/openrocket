@@ -122,7 +122,7 @@ public class SimulationPlotPanel extends JPanel {
 		////  Configuration selector
 		
 		// Setup the combo box
-		configurationSelector = new JComboBox<PlotConfiguration>(PRESET_ARRAY);
+		configurationSelector = new JComboBox<>(PRESET_ARRAY);
 		for (PlotConfiguration config : PRESET_ARRAY) {
 			if (config.getName().equals(configuration.getName())) {
 				configurationSelector.setSelectedItem(config);
@@ -161,7 +161,7 @@ public class SimulationPlotPanel extends JPanel {
 		
 		//// X axis type:
 		this.add(new JLabel(trans.get("simplotpanel.lbl.Xaxistype")), "spanx, split");
-		domainTypeSelector = new JComboBox<FlightDataType>(types);
+		domainTypeSelector = new JComboBox<>(types);
 		domainTypeSelector.setSelectedItem(configuration.getDomainAxisType());
 		domainTypeSelector.addItemListener(new ItemListener() {
 			@Override
@@ -465,7 +465,7 @@ public class SimulationPlotPanel extends JPanel {
 			
 			this.index = plotIndex;
 			
-			typeSelector = new JComboBox<FlightDataType>(types);
+			typeSelector = new JComboBox<>(types);
 			typeSelector.setSelectedItem(type);
 			typeSelector.addItemListener(new ItemListener() {
 				@Override
@@ -499,7 +499,7 @@ public class SimulationPlotPanel extends JPanel {
 			
 			//// Axis:
 			this.add(new JLabel(trans.get("simplotpanel.lbl.Axis")));
-			axisSelector = new JComboBox<String>(POSITIONS);
+			axisSelector = new JComboBox<>(POSITIONS);
 			if (position == LEFT)
 				axisSelector.setSelectedIndex(1);
 			else if (position == RIGHT)

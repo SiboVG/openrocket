@@ -34,7 +34,7 @@ public class FlightDataType implements Comparable<FlightDataType> {
 	
 	/** List of existing types.  MUST BE DEFINED BEFORE ANY TYPES!! */
 	/** NOTE: The String key here is now the symbol */
-	private static final Map<String, FlightDataType> EXISTING_TYPES = new HashMap<String, FlightDataType>();
+	private static final Map<String, FlightDataType> EXISTING_TYPES = new HashMap<>();
 	
 	
 	//// Time

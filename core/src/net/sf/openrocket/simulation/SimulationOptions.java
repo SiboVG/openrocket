@@ -83,7 +83,7 @@ public class SimulationOptions implements ChangeSource, Cloneable {
 	private boolean calculateExtras = true;
 	
 	
-	private List<EventListener> listeners = new ArrayList<EventListener>();
+	private List<EventListener> listeners = new ArrayList<>();
 	
 	public SimulationOptions() {
 	}
@@ -383,7 +383,7 @@ public class SimulationOptions implements ChangeSource, Cloneable {
 	public SimulationOptions clone() {
 		try {
 			SimulationOptions copy = (SimulationOptions) super.clone();
-			copy.listeners = new ArrayList<EventListener>();
+			copy.listeners = new ArrayList<>();
 			return copy;
 		} catch (CloneNotSupportedException e) {
 			throw new BugException(e);

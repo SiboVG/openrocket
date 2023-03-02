@@ -281,33 +281,32 @@ public class PhotoSettingsConfig extends JTabbedPane {
 						return trans.get("DecalModel.lbl.select");
 					}
 				};
-				add(new JComboBox<Sky>(new DefaultComboBoxModel<Sky>(new Sky[] { noSky, Mountains.instance, Meadow.instance,
-						Storm.instance, Lake.instance, Orbit.instance, Miramar.instance }) {
-				}) {
-					{
-						addActionListener(new ActionListener() {
-							@Override
-							public void actionPerformed(ActionEvent e) {
-								@SuppressWarnings("unchecked")
-								Object s = ((JComboBox<Sky>) e.getSource()).getSelectedItem();
-								if (s instanceof Sky && s != noSky) {
-									p.setSky((Sky) s);
-									skyColorButton.setEnabled(false);
-								} else if (s == noSky) {
-									p.setSky(null);
-									skyColorButton.setEnabled(true);
-								}
-							}
-						});
+				add(new JComboBox<>(new DefaultComboBoxModel<>(new Sky[]{noSky, Mountains.instance, Meadow.instance,
+                        Storm.instance, Lake.instance, Orbit.instance, Miramar.instance}) {
+                }) {
+                    {
+                        addActionListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                @SuppressWarnings("unchecked")
+                                Object s = ((JComboBox<Sky>) e.getSource()).getSelectedItem();
+                                if (s instanceof Sky && s != noSky) {
+                                    p.setSky((Sky) s);
+                                    skyColorButton.setEnabled(false);
+                                } else if (s == noSky) {
+                                    p.setSky(null);
+                                    skyColorButton.setEnabled(true);
+                                }
+                            }
+                        });
 
-						if (p.getSky() != null) {
-							setSelectedItem(p.getSky());
-						}
-						else {
-							setSelectedItem(noSky);
-						}
-					}
-				}, "spanx, wrap");
+                        if (p.getSky() != null) {
+                            setSelectedItem(p.getSky());
+                        } else {
+                            setSelectedItem(noSky);
+                        }
+                    }
+                }, "spanx, wrap");
 
 				/// Image credit
 				final JLabel creditLabel = new JLabel(trans.get("PhotoSettingsConfig.lbl.skyCredit"));

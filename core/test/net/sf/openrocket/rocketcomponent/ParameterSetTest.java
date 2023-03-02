@@ -68,7 +68,7 @@ public class ParameterSetTest extends BaseTestCase {
 	public void localSetUp() {
 		gid=0;
 		TestParameter defaultParam = new TestParameter();
-		testSet = new FlightConfigurableParameterSet<TestParameter>( defaultParam );
+		testSet = new FlightConfigurableParameterSet<>(defaultParam);
 	}
 	
 	// ================ Actual Tests ================
@@ -170,7 +170,7 @@ public class ParameterSetTest extends BaseTestCase {
 		
 		assertThat("set should contain two overrides: ", testSet.size(), equalTo( 4 ));
 
-		ArrayList<FlightConfigurationId> refList = new ArrayList<FlightConfigurationId>();
+		ArrayList<FlightConfigurationId> refList = new ArrayList<>();
 		refList.add(fcid1);
 		refList.add(fcid2);
 		refList.add(fcid3);
@@ -262,7 +262,7 @@ public class ParameterSetTest extends BaseTestCase {
 		FlightConfigurationId fcid4 = new FlightConfigurationId();
 		testSet.set(fcid4, tp4);
 		
-		List<FlightConfigurationId> refList = new ArrayList<FlightConfigurationId>();
+		List<FlightConfigurationId> refList = new ArrayList<>();
 		refList.add(fcid1);
 		refList.add(fcid2);
 		refList.add(fcid3);

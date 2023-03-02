@@ -346,7 +346,7 @@ public abstract class FinSetConfig extends RocketComponentConfig {
 	 */
 	private static double computeFinTabLength(List<CenteringRing> rings, Double finPositionFromTop, Double finLength, DoubleModel mts,
                                               final RocketComponent relativeTo) {
-		List<SortableRing> positionsFromTop = new ArrayList<SortableRing>();
+		List<SortableRing> positionsFromTop = new ArrayList<>();
 		
 		//Fin tabs will be computed between the last two rings that meet the criteria, represented by top and bottom here.
 		SortableRing top = null;
@@ -354,12 +354,12 @@ public abstract class FinSetConfig extends RocketComponentConfig {
 		
 		if (rings != null) {
 			//Sort rings from top of parent to bottom
-			Collections.sort(rings, new Comparator<CenteringRing>() {
+			Collections.sort(rings, new Comparator<>() {
 				@Override
 				public int compare(CenteringRing centeringRing, CenteringRing centeringRing1) {
 					return (int) (1000d * (centeringRing.getAxialOffset(AxialMethod.TOP) -
 							centeringRing1.getAxialOffset(AxialMethod.TOP)));
-						}
+				}
 			});
 
             for (CenteringRing centeringRing : rings) {
@@ -574,7 +574,7 @@ public abstract class FinSetConfig extends RocketComponentConfig {
 	    label.setToolTipText(trans.get("MaterialPanel.lbl.ttip.ComponentMaterialAffects"));
 	    filletPanel.add(label, "spanx 4, wrap rel");
 		
-	    JComboBox<Material> materialCombo = new JComboBox<Material>(new MaterialModel(filletPanel, component, Material.Type.BULK, "FilletMaterial"));
+	    JComboBox<Material> materialCombo = new JComboBox<>(new MaterialModel(filletPanel, component, Material.Type.BULK, "FilletMaterial"));
 
 	    //// The component material affects the weight of the component.
 	    materialCombo.setToolTipText(trans.get("MaterialPanel.combo.ttip.ComponentMaterialAffects"));

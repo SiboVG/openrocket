@@ -18,7 +18,7 @@ public class AxialStage extends ComponentAssembly implements FlightConfigurableC
 	 * default constructor, builds a rocket with zero stages
 	 */
 	public AxialStage(){
-		this.separations = new FlightConfigurableParameterSet<StageSeparationConfiguration>( new StageSeparationConfiguration());
+		this.separations = new FlightConfigurableParameterSet<>(new StageSeparationConfiguration());
 		this.axialMethod = AxialMethod.AFTER;
 		this.stageNumber = 0;
 	}
@@ -89,7 +89,7 @@ public class AxialStage extends ComponentAssembly implements FlightConfigurableC
 	@Override
 	protected RocketComponent copyWithOriginalID() {
 		AxialStage copy = (AxialStage) super.copyWithOriginalID();
-		copy.separations = new FlightConfigurableParameterSet<StageSeparationConfiguration>(separations);
+		copy.separations = new FlightConfigurableParameterSet<>(separations);
 		return copy;
 	}
 	

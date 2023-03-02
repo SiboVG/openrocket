@@ -31,10 +31,10 @@ public class FlightDataBranch implements Monitorable {
 	private final String branchName;
 	
 	private final Map<FlightDataType, ArrayList<Double>> values =
-			new LinkedHashMap<FlightDataType, ArrayList<Double>>();
+            new LinkedHashMap<>();
 	
-	private final Map<FlightDataType, Double> maxValues = new HashMap<FlightDataType, Double>();
-	private final Map<FlightDataType, Double> minValues = new HashMap<FlightDataType, Double>();
+	private final Map<FlightDataType, Double> maxValues = new HashMap<>();
+	private final Map<FlightDataType, Double> minValues = new HashMap<>();
 	
 	/**
 	 * time for the rocket to reach apogee if the flight had been no recovery deployment
@@ -45,7 +45,7 @@ public class FlightDataBranch implements Monitorable {
 	 */
 	private double optimumAltitude = Double.NaN;
 	
-	private final ArrayList<FlightEvent> events = new ArrayList<FlightEvent>();
+	private final ArrayList<FlightEvent> events = new ArrayList<>();
 	
 	private final Mutable mutable = new Mutable();
 	
@@ -70,7 +70,7 @@ public class FlightDataBranch implements Monitorable {
 						"times in constructor.");
 			}
 			
-			values.put(t, new ArrayList<Double>());
+			values.put(t, new ArrayList<>());
 			minValues.put(t, Double.NaN);
 			maxValues.put(t, Double.NaN);
 		}
@@ -116,7 +116,7 @@ public class FlightDataBranch implements Monitorable {
 		ArrayList<Double> list = values.get(type);
 		
 		if (list == null) {
-			list = new ArrayList<Double>();
+			list = new ArrayList<>();
 			int n = getLength();
 			for (int i = 0; i < n; i++) {
 				list.add(Double.NaN);

@@ -20,8 +20,8 @@ import net.sf.openrocket.database.DatabaseListener;
 public class Database<T extends Comparable<T>> extends AbstractSet<T> {
 	
 	/** the list that contains the data from the database itself*/
-	protected final List<T> list = new ArrayList<T>();
-	private final ArrayList<DatabaseListener<T>> listeners = new ArrayList<DatabaseListener<T>>();
+	protected final List<T> list = new ArrayList<>();
+	private final ArrayList<DatabaseListener<T>> listeners = new ArrayList<>();
 	
 	
 	@Override

@@ -58,7 +58,7 @@ public class MotorRowFilterTest {
 		ThrustCurveMotorSet motorSet = new ThrustCurveMotorSet();
 		motorSet.addMotor(motor);
 		
-		List<ThrustCurveMotorSet> motorList = new ArrayList<ThrustCurveMotorSet>();
+		List<ThrustCurveMotorSet> motorList = new ArrayList<>();
 		motorList.add(motorSet);
 		
 		ThrustCurveMotorDatabaseModel model = new ThrustCurveMotorDatabaseModel(motorList);
@@ -67,7 +67,7 @@ public class MotorRowFilterTest {
 
 		///////////////////////////////////
 		// search terms filter
-		ArrayList<String> badSearchTerms = new ArrayList<String>();
+		ArrayList<String> badSearchTerms = new ArrayList<>();
 
 		// Two search terms, one present and one not
 		badSearchTerms.add("xx");
@@ -122,7 +122,7 @@ public class MotorRowFilterTest {
 
 		//////////////////////////////////
 		// manufacturer set/get/filter presence/absence
-		List<Manufacturer> excludedManufacturers = new ArrayList<Manufacturer>();
+		List<Manufacturer> excludedManufacturers = new ArrayList<>();
 		if (motor.getManufacturer() != Manufacturer.getManufacturer("UNKNOWN")) {
 			excludedManufacturers.add(Manufacturer.getManufacturer("Estes"));		
 			excludedManufacturers.add(motor.getManufacturer());

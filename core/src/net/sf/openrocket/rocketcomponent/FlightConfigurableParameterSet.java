@@ -20,7 +20,7 @@ import net.sf.openrocket.util.Utils;
 public class FlightConfigurableParameterSet<E extends FlightConfigurableParameter<E>> implements Iterable<E> {
 	
 	//private static final Logger log = LoggerFactory.getLogger(ParameterSet.class);
-	protected final LinkedHashMap<FlightConfigurationId, E> map = new LinkedHashMap<FlightConfigurationId, E>();
+	protected final LinkedHashMap<FlightConfigurationId, E> map = new LinkedHashMap<>();
 
 	/**
 	 * Construct a FlightConfiguration that has no overrides.
@@ -150,7 +150,7 @@ public class FlightConfigurableParameterSet<E extends FlightConfigurableParamete
      * @return a sorted list of all the contained FlightConfigurationIDs
      */
     public List<FlightConfigurationId> getIds(){
-        ArrayList<FlightConfigurationId> toReturn = new ArrayList<FlightConfigurationId>();
+        ArrayList<FlightConfigurationId> toReturn = new ArrayList<>();
 
         toReturn.addAll( this.map.keySet() );
         toReturn.remove( FlightConfigurationId.DEFAULT_VALUE_FCID );

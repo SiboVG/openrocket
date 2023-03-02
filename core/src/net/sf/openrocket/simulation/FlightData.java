@@ -38,7 +38,7 @@ public class FlightData {
 	
 	private final Mutable mutable = new Mutable();
 	
-	private final ArrayList<FlightDataBranch> branches = new ArrayList<FlightDataBranch>();
+	private final ArrayList<FlightDataBranch> branches = new ArrayList<>();
 	
 	private final WarningSet warnings = new WarningSet();
 	

@@ -38,7 +38,7 @@ public class ScriptingSimulationListener implements SimulationListener, Simulati
 	 */
 	
 	private final Invocable invocable;
-	private Set<String> missing = new HashSet<String>();
+	private Set<String> missing = new HashSet<>();
 	
 	
 	public ScriptingSimulationListener(Invocable invocable) {
@@ -56,7 +56,7 @@ public class ScriptingSimulationListener implements SimulationListener, Simulati
 	public SimulationListener clone() {
 		try {
 			ScriptingSimulationListener clone = (ScriptingSimulationListener) super.clone();
-			clone.missing = new HashSet<String>(missing);
+			clone.missing = new HashSet<>(missing);
 			return clone;
 		} catch (CloneNotSupportedException e) {
 			throw new BugException(e);

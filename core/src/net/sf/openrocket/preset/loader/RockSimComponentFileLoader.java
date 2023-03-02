@@ -32,7 +32,7 @@ public abstract class RockSimComponentFileLoader {
 	
 	private final File dir;
 	
-	protected List<RockSimComponentFileColumnParser> fileColumns = new ArrayList<RockSimComponentFileColumnParser>();
+	protected List<RockSimComponentFileColumnParser> fileColumns = new ArrayList<>();
 	
 	/**
 	 * Constructor.

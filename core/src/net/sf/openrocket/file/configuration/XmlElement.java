@@ -12,7 +12,7 @@ import java.util.Map;
 public abstract class XmlElement {
 	
 	private final String name;
-	private final HashMap<String, String> attributes = new HashMap<String, String>();
+	private final HashMap<String, String> attributes = new HashMap<>();
 	
 	
 

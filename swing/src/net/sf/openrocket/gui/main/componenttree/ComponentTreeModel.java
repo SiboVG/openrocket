@@ -25,7 +25,7 @@ import net.sf.openrocket.util.BugException;
  */
 
 public class ComponentTreeModel implements TreeModel, ComponentChangeListener {
-	ArrayList<TreeModelListener> listeners = new ArrayList<TreeModelListener>();
+	ArrayList<TreeModelListener> listeners = new ArrayList<>();
 	
 	private final RocketComponent root;
 	private final JTree tree;
@@ -102,7 +102,7 @@ public class ComponentTreeModel implements TreeModel, ComponentChangeListener {
 
 		// Get currently expanded path IDs
 		Enumeration<TreePath> enumer = tree.getExpandedDescendants(new TreePath(path));
-		ArrayList<String> expanded = new ArrayList<String>();
+		ArrayList<String> expanded = new ArrayList<>();
 		if (enumer != null) {
 			while (enumer.hasMoreElements()) {
 				TreePath p = enumer.nextElement();
@@ -208,7 +208,7 @@ public class ComponentTreeModel implements TreeModel, ComponentChangeListener {
 		
 		RocketComponent c = component;
 		
-		List<RocketComponent> list = new LinkedList<RocketComponent>();
+		List<RocketComponent> list = new LinkedList<>();
 		
 		while (c != null) {
 			list.add(0, c);

@@ -41,10 +41,10 @@ public class ComponentIcons {
 	private static final String SMALL_SUFFIX = "-small.png";
 	private static final String LARGE_SUFFIX = "-large.png";
 
-	private static final HashMap<Class<?>, ImageIcon> SMALL_ICONS = new HashMap<Class<?>, ImageIcon>();
-	private static final HashMap<Class<?>, ImageIcon> LARGE_ICONS = new HashMap<Class<?>, ImageIcon>();
-	private static final HashMap<Class<?>, ImageIcon> DISABLED_ICONS = new HashMap<Class<?>, ImageIcon>();
-	private static final HashMap<MassComponentType, ImageIcon> MASS_COMPONENT_SMALL_ICONS = new HashMap<MassComponentType, ImageIcon>();
+	private static final HashMap<Class<?>, ImageIcon> SMALL_ICONS = new HashMap<>();
+	private static final HashMap<Class<?>, ImageIcon> LARGE_ICONS = new HashMap<>();
+	private static final HashMap<Class<?>, ImageIcon> DISABLED_ICONS = new HashMap<>();
+	private static final HashMap<MassComponentType, ImageIcon> MASS_COMPONENT_SMALL_ICONS = new HashMap<>();
 	static {
 		// // Nose cone
 		load("nosecone", trans.get("ComponentIcons.Nosecone"), NoseCone.class);

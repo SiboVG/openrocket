@@ -69,7 +69,7 @@ public class FigureRenderer extends RocketRenderer {
 		return false;
 	}
 	
-	private static final HashMap<Class<?>, Color> defaultColorCache = new HashMap<Class<?>, Color>();
+	private static final HashMap<Class<?>, Color> defaultColorCache = new HashMap<>();
 	
 	@Override
 	public void renderComponent(GL2 gl, Geometry geom, float alpha) {

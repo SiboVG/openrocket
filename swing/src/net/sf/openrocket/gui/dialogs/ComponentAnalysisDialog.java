@@ -92,8 +92,8 @@ public class ComponentAnalysisDialog extends JDialog implements StateChangeListe
 
 
 	private final List<LongitudinalStabilityRow> stabData = new ArrayList<>();
-	private final List<AerodynamicForces> dragData = new ArrayList<AerodynamicForces>();
-	private final List<AerodynamicForces> rollData = new ArrayList<AerodynamicForces>();
+	private final List<AerodynamicForces> dragData = new ArrayList<>();
+	private final List<AerodynamicForces> rollData = new ArrayList<>();
 
 
 	public ComponentAnalysisDialog(final RocketPanel rocketPanel) {
@@ -614,7 +614,7 @@ public class ComponentAnalysisDialog extends JDialog implements StateChangeListe
 			warningList.setListData(new String[] {trans.get("componentanalysisdlg.noWarnings")
 			});
 		} else {
-			warningList.setListData(new Vector<Warning>(set));
+			warningList.setListData(new Vector<>(set));
 		}
 
 		longitudeStabilityTableModel.fireTableDataChanged();

@@ -63,7 +63,7 @@ public class SimulationConditions implements Monitorable, Cloneable {
 	private boolean calculateExtras = true;
 	
 	
-	private List<SimulationListener> simulationListeners = new ArrayList<SimulationListener>();
+	private List<SimulationListener> simulationListeners = new ArrayList<>();
 	
 	
 	private int randomSeed = 0;
@@ -307,7 +307,7 @@ public class SimulationConditions implements Monitorable, Cloneable {
 		try {
 			// TODO: HIGH: Deep clone models
 			SimulationConditions clone = (SimulationConditions) super.clone();
-			clone.simulationListeners = new ArrayList<SimulationListener>(this.simulationListeners.size());
+			clone.simulationListeners = new ArrayList<>(this.simulationListeners.size());
 			for (SimulationListener listener : this.simulationListeners) {
 				clone.simulationListeners.add(listener.clone());
 			}

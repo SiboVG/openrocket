@@ -29,7 +29,7 @@ public class SlideSetManager {
 	
 	
 	private final String baseDir;
-	private final Map<String, SlideSet> slideSets = new LinkedHashMap<String, SlideSet>();
+	private final Map<String, SlideSet> slideSets = new LinkedHashMap<>();
 	
 	
 	/**
@@ -81,7 +81,7 @@ public class SlideSetManager {
 	 * Return a set containing all the slide set names.
 	 */
 	public List<String> getSlideSetNames() {
-		return new ArrayList<String>(slideSets.keySet());
+		return new ArrayList<>(slideSets.keySet());
 	}
 	
 	/**
@@ -108,7 +108,7 @@ public class SlideSetManager {
 		
 		try {
 			
-			List<String> tours = new ArrayList<String>();
+			List<String> tours = new ArrayList<>();
 			TextLineReader reader = new TextLineReader(in);
 			while (reader.hasNext()) {
 				tours.add(reader.next());

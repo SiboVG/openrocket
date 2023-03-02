@@ -142,7 +142,7 @@ public class OptimizationPlotDialog extends JDialog {
 		
 		// Create the optimization path (with autosort)
 		XYSeries series = new XYSeries(trans.get("plot1d.series"), true, true);
-		List<String> tooltips = new ArrayList<String>();
+		List<String> tooltips = new ArrayList<>();
 		for (Point p : evaluations.keySet()) {
 			FunctionEvaluationData data = evaluations.get(p);
 			if (data != null) {
@@ -241,7 +241,7 @@ public class OptimizationPlotDialog extends JDialog {
 		
 		// Create the optimization path dataset
 		XYSeries pathSeries = new XYSeries(trans.get("plot2d.path"), false, true);
-		List<String> pathTooltips = new ArrayList<String>();
+		List<String> pathTooltips = new ArrayList<>();
 		for (Point p : path) {
 			FunctionEvaluationData data = evaluations.get(p);
 			if (data != null) {
@@ -258,7 +258,7 @@ public class OptimizationPlotDialog extends JDialog {
 		double min = Double.POSITIVE_INFINITY;
 		double max = Double.NEGATIVE_INFINITY;
 		double[][] evals = new double[3][evaluations.size()];
-		List<String> evalTooltips = new ArrayList<String>();
+		List<String> evalTooltips = new ArrayList<>();
 		
 		Iterator<FunctionEvaluationData> iterator = evaluations.values().iterator();
 		for (int i = 0; i < evaluations.size(); i++) {

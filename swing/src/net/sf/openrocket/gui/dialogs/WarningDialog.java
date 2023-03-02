@@ -16,7 +16,7 @@ public class WarningDialog extends JDialog {
 	public static void showWarnings(Component parent, Object message, String title, WarningSet warnings) {
 		
 		Warning[] w = warnings.toArray(new Warning[0]);
-		final JList<Warning> list = new JList<Warning>(w);
+		final JList<Warning> list = new JList<>(w);
 		JScrollPane pane = new JScrollPane(list);
 		
 		JOptionPane.showMessageDialog(parent, new Object[] { message, pane }, 

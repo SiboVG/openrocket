@@ -115,9 +115,9 @@ public class SimulationPreferencesPanel extends PreferencesPanel {
 		label.setToolTipText(trans.get("simedtdlg.lbl.ttip.GeodeticMethodTip"));
 		subsub.add(label, "gapright para");
 
-		EnumModel<GeodeticComputationStrategy> gcsModel = new EnumModel<GeodeticComputationStrategy>(
-				preferences, "GeodeticComputation");
-		final JComboBox<GeodeticComputationStrategy> gcsCombo = new JComboBox<GeodeticComputationStrategy>(gcsModel);
+		EnumModel<GeodeticComputationStrategy> gcsModel = new EnumModel<>(
+                preferences, "GeodeticComputation");
+		final JComboBox<GeodeticComputationStrategy> gcsCombo = new JComboBox<>(gcsModel);
 		ActionListener gcsTTipListener = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {

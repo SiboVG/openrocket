@@ -65,7 +65,7 @@ public class FixedPrecisionUnit extends Unit {
 			throw new IllegalArgumentException("getTicks called with minor="+minor+" major="+major);
 		}
 		
-		ArrayList<Tick> ticks = new ArrayList<Tick>();
+		ArrayList<Tick> ticks = new ArrayList<>();
 		
 		int mod2,mod3,mod4;  // Moduli for minor-notable, major-nonnotable, major-notable
 		double minstep;

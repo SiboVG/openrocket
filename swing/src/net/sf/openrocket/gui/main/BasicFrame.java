@@ -131,7 +131,7 @@ public class BasicFrame extends JFrame {
 	 * List of currently open frames.  When the list goes empty
 	 * it is time to exit the application.
 	 */
-	private static final List<BasicFrame> frames = new ArrayList<BasicFrame>();
+	private static final List<BasicFrame> frames = new ArrayList<>();
 	private static BasicFrame startupFrame = null;	// the frame that was created at startup
 
 
@@ -1001,7 +1001,7 @@ public class BasicFrame extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				log.info(Markers.USER_MARKER, "Exhaust memory selected");
-				LinkedList<byte[]> data = new LinkedList<byte[]>();
+				LinkedList<byte[]> data = new LinkedList<>();
 				int count = 0;
 				final int bytesPerArray = 10240;
 				try {

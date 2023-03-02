@@ -42,7 +42,7 @@ public class Alt15K {
 	
 
 	public static String[] getNames() {
-		ArrayList<String> list = new ArrayList<String>();
+		ArrayList<String> list = new ArrayList<>();
 
 		Enumeration<?> pids = CommPortIdentifier.getPortIdentifiers();
 
@@ -89,7 +89,7 @@ public class Alt15K {
 	 */
 	public AltData getData(int n) throws IOException, PortInUseException {
 		AltData alt = new AltData();
-		ArrayList<Integer> data = new ArrayList<Integer>();
+		ArrayList<Integer> data = new ArrayList<>();
 		byte[] buf;
 		byte[] buf2 = new byte[0];
 		boolean identical = false;  // Whether identical lines have been read

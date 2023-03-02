@@ -29,7 +29,7 @@ public class Icons {
 	 */
 	public static final Map<Simulation.Status, Icon> SIMULATION_STATUS_ICON_MAP;
 	static {
-		HashMap<Simulation.Status, Icon> map = new HashMap<Simulation.Status, Icon>();
+		HashMap<Simulation.Status, Icon> map = new HashMap<>();
 		map.put(Simulation.Status.NOT_SIMULATED, loadImageIcon("pix/spheres/gray-16x16.png", "Not simulated"));
 		map.put(Simulation.Status.CANT_RUN, loadImageIcon("pix/spheres/yellow-16x16.png", "Can't run, no motors assigned."));
 		map.put(Simulation.Status.UPTODATE, loadImageIcon("pix/spheres/green-16x16.png", "Up to date"));

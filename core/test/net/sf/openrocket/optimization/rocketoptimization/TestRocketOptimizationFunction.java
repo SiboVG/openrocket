@@ -60,7 +60,7 @@ public class TestRocketOptimizationFunction extends BaseTestCase {
 				oneOf(modifier1).modify(simulation, p1);
 				oneOf(modifier2).modify(simulation, p2);
 				oneOf(domain).getDistanceToDomain(simulation);
-				will(returnValue(new Pair<Double, Value>(ddist, dref)));
+				will(returnValue(new Pair<>(ddist, dref)));
 				oneOf(parameter).computeValue(simulation);
 				will(returnValue(pvalue));
 				oneOf(parameter).getUnitGroup();
@@ -113,7 +113,7 @@ public class TestRocketOptimizationFunction extends BaseTestCase {
 				oneOf(modifier1).modify(simulation, p1);
 				oneOf(modifier2).modify(simulation, p2);
 				oneOf(domain).getDistanceToDomain(simulation);
-				will(returnValue(new Pair<Double, Value>(ddist, dref)));
+				will(returnValue(new Pair<>(ddist, dref)));
 				oneOf(parameter).computeValue(simulation);
 				will(returnValue(pvalue));
 				oneOf(parameter).getUnitGroup();
@@ -156,7 +156,7 @@ public class TestRocketOptimizationFunction extends BaseTestCase {
 				oneOf(modifier1).modify(simulation, p1);
 				oneOf(modifier2).modify(simulation, p2);
 				oneOf(domain).getDistanceToDomain(simulation);
-				will(returnValue(new Pair<Double, Value>(ddist, dref)));
+				will(returnValue(new Pair<>(ddist, dref)));
 				oneOf(modifier1).getCurrentSIValue(simulation);
 				will(returnValue(0.2));
 				oneOf(modifier1).getUnitGroup();
@@ -203,7 +203,7 @@ public class TestRocketOptimizationFunction extends BaseTestCase {
 				oneOf(modifier1).modify(simulation, p1);
 				oneOf(modifier2).modify(simulation, p2);
 				oneOf(domain).getDistanceToDomain(simulation);
-				will(returnValue(new Pair<Double, Value>(ddist, dref)));
+				will(returnValue(new Pair<>(ddist, dref)));
 			}
 		});
 		// @formatter:on

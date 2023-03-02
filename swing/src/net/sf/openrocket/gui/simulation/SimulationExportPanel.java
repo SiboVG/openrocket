@@ -182,7 +182,7 @@ public class SimulationExportPanel extends JPanel {
 		//// Add series selection box
 		ArrayList<String> stages = new ArrayList<>(Util.generateSeriesLabels(simulation));
 		
-		final JComboBox<String> stageSelection = new JComboBox<String>(stages.toArray(new String[0]));
+		final JComboBox<String> stageSelection = new JComboBox<>(stages.toArray(new String[0]));
 		stageSelection.addItemListener(new ItemListener() {
 			
 			@Override

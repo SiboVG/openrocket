@@ -909,14 +909,14 @@ public abstract class Preferences implements ChangeSource {
 		 * Map of default line styles
 		 */
 		
-		private static final HashMap<Class<?>, String> DEFAULT_LINE_STYLES = new HashMap<Class<?>, String>();
+		private static final HashMap<Class<?>, String> DEFAULT_LINE_STYLES = new HashMap<>();
 		
 		static {
 			DEFAULT_LINE_STYLES.put(RocketComponent.class, LineStyle.SOLID.name());
 			DEFAULT_LINE_STYLES.put(MassObject.class, LineStyle.DASHED.name());
 		}
 		
-		private static final HashMap<Class<?>, String> DEFAULT_COLORS = new HashMap<Class<?>, String>();
+		private static final HashMap<Class<?>, String> DEFAULT_COLORS = new HashMap<>();
 		
 		static {
 			DEFAULT_COLORS.put(BodyComponent.class, "0,0,240");
@@ -930,7 +930,7 @@ public abstract class Preferences implements ChangeSource {
 		}
 	}
 	
-	private final List<EventListener> listeners = new ArrayList<EventListener>();
+	private final List<EventListener> listeners = new ArrayList<>();
 	private final EventObject event = new EventObject(this);
 	
 	@Override

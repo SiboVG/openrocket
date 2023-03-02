@@ -47,7 +47,7 @@ public abstract class MotorFilterPanel extends JPanel {
 
 	private static final Translator trans = Application.getTranslator();
 
-	private static final Hashtable<Integer,JLabel> diameterLabels = new Hashtable<Integer,JLabel>();
+	private static final Hashtable<Integer,JLabel> diameterLabels = new Hashtable<>();
 	private static final double[] motorDiameters = new double[] {
 		0.0,
 		0.013,
@@ -81,7 +81,7 @@ public abstract class MotorFilterPanel extends JPanel {
 		diameterLabels.get( motorDiameters.length-1).setText("+");
 	}
 
-	final private static Hashtable<Integer,JLabel> impulseLabels = new Hashtable<Integer,JLabel>();
+	final private static Hashtable<Integer,JLabel> impulseLabels = new Hashtable<>();
 	static {
 		int i =0;
 		for( ImpulseClass impulseClass : ImpulseClass.values() ) {
@@ -150,13 +150,13 @@ public abstract class MotorFilterPanel extends JPanel {
 
 		this.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
 
-		List<Manufacturer> manufacturers = new ArrayList<Manufacturer>();
+		List<Manufacturer> manufacturers = new ArrayList<>();
         manufacturers.addAll(allManufacturers);
 
-		Collections.sort(manufacturers, new Comparator<Manufacturer>() {
+		Collections.sort(manufacturers, new Comparator<>() {
 			@Override
 			public int compare(Manufacturer o1, Manufacturer o2) {
-				return o1.getSimpleName().compareTo( o2.getSimpleName());
+				return o1.getSimpleName().compareTo(o2.getSimpleName());
 			}
 
 		});

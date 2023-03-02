@@ -63,7 +63,7 @@ class DocumentConfig {
 	
 	
 	////////  Component constructors
-	static final HashMap<String, Constructor<? extends RocketComponent>> constructors = new HashMap<String, Constructor<? extends RocketComponent>>();
+	static final HashMap<String, Constructor<? extends RocketComponent>> constructors = new HashMap<>();
 	static {
 		try {
 			// External components
@@ -108,16 +108,16 @@ class DocumentConfig {
 	 * the element name.  Setters are searched for in descending class order.
 	 * A setter of null means setting the parameter is not allowed.
 	 */
-	static final HashMap<String, Setter> setters = new HashMap<String, Setter>();
+	static final HashMap<String, Setter> setters = new HashMap<>();
 	static {
 		// RocketComponent
 		setters.put("RocketComponent:name", new StringSetter(
 				Reflection.findMethod(RocketComponent.class, "setName", String.class)));
 		setters.put("RocketComponent:color", new ColorSetter(
 				Reflection.findMethod(RocketComponent.class, "setColor", Color.class)));
-		setters.put("RocketComponent:linestyle", new EnumSetter<LineStyle>(
-				Reflection.findMethod(RocketComponent.class, "setLineStyle", LineStyle.class),
-				LineStyle.class));
+		setters.put("RocketComponent:linestyle", new EnumSetter<>(
+                Reflection.findMethod(RocketComponent.class, "setLineStyle", LineStyle.class),
+                LineStyle.class));
 		setters.put("RocketComponent:position", new AxialPositionSetter() );
 		setters.put("RocketComponent:axialoffset", new AxialPositionSetter() );
 		setters.put("RocketComponent:overridemass", new OverrideSetter(
@@ -146,9 +146,9 @@ class DocumentConfig {
 		
 
 		// ExternalComponent
-		setters.put("ExternalComponent:finish", new EnumSetter<Finish>(
-				Reflection.findMethod(ExternalComponent.class, "setFinish", Finish.class),
-				Finish.class));
+		setters.put("ExternalComponent:finish", new EnumSetter<>(
+                Reflection.findMethod(ExternalComponent.class, "setFinish", Finish.class),
+                Finish.class));
 		setters.put("ExternalComponent:material", new MaterialSetter(
 				Reflection.findMethod(ExternalComponent.class, "setMaterial", Material.class),
 				Material.Type.BULK));
@@ -212,9 +212,9 @@ class DocumentConfig {
 
 			
 		// Transition
-		setters.put("Transition:shape", new EnumSetter<Transition.Shape>(
-				Reflection.findMethod(Transition.class, "setType", Transition.Shape.class),
-				Transition.Shape.class));
+		setters.put("Transition:shape", new EnumSetter<>(
+                Reflection.findMethod(Transition.class, "setType", Transition.Shape.class),
+                Transition.Shape.class));
 		setters.put("Transition:shapeclipped", new BooleanSetter(
 				Reflection.findMethod(Transition.class, "setClipped", boolean.class)));
 		setters.put("Transition:shapeparameter", new DoubleSetter(
@@ -269,9 +269,9 @@ class DocumentConfig {
 		setters.put("FinSet:radiusoffset", new RadiusPositionSetter() );
 		setters.put("FinSet:thickness", new DoubleSetter(
 				Reflection.findMethod(FinSet.class, "setThickness", double.class)));
-		setters.put("FinSet:crosssection", new EnumSetter<FinSet.CrossSection>(
-				Reflection.findMethod(FinSet.class, "setCrossSection", FinSet.CrossSection.class),
-				FinSet.CrossSection.class));
+		setters.put("FinSet:crosssection", new EnumSetter<>(
+                Reflection.findMethod(FinSet.class, "setCrossSection", FinSet.CrossSection.class),
+                FinSet.CrossSection.class));
 		setters.put("FinSet:cant", new DoubleSetter(
 				Reflection.findMethod(FinSet.class, "setCantAngle", double.class), Math.PI / 180.0));
 		setters.put("FinSet:tabheight", new DoubleSetter(
@@ -405,9 +405,9 @@ class DocumentConfig {
 				Reflection.findMethod(MassComponent.class, "setComponentMass", double.class)));
 		/*setters.put("MassComponent:masscomponenttype", new DoubleSetter(
 				Reflection.findMethod(MassComponent.class, "setMassComponentType", double.class)));*/
-		setters.put("MassComponent:masscomponenttype", new EnumSetter<MassComponent.MassComponentType>(
-				Reflection.findMethod(MassComponent.class, "setMassComponentType", MassComponent.MassComponentType.class),
-				MassComponent.MassComponentType.class));
+		setters.put("MassComponent:masscomponenttype", new EnumSetter<>(
+                Reflection.findMethod(MassComponent.class, "setMassComponentType", MassComponent.MassComponentType.class),
+                MassComponent.MassComponentType.class));
 		/*		setters.put("Transition:shape", new EnumSetter<Transition.Shape>(
 						Reflection.findMethod(Transition.class, "setType", Transition.Shape.class),
 						Transition.Shape.class));*/
@@ -424,10 +424,10 @@ class DocumentConfig {
 				Reflection.findMethod(RecoveryDevice.class, "setCD", double.class),
 				"auto",
 				Reflection.findMethod(RecoveryDevice.class, "setCDAutomatic", boolean.class)));
-		setters.put("RecoveryDevice:deployevent", new EnumSetter<DeployEvent>(
-				Reflection.findMethod(RecoveryDevice.class, "getDeploymentConfigurations"),
-				Reflection.findMethod(DeploymentConfiguration.class, "setDeployEvent", DeployEvent.class),
-				DeployEvent.class));
+		setters.put("RecoveryDevice:deployevent", new EnumSetter<>(
+                Reflection.findMethod(RecoveryDevice.class, "getDeploymentConfigurations"),
+                Reflection.findMethod(DeploymentConfiguration.class, "setDeployEvent", DeployEvent.class),
+                DeployEvent.class));
 		setters.put("RecoveryDevice:deployaltitude", new DoubleSetter(
 				Reflection.findMethod(RecoveryDevice.class, "getDeploymentConfigurations"),
 				Reflection.findMethod(DeploymentConfiguration.class, "setDeployAltitude", double.class)));
@@ -463,9 +463,9 @@ class DocumentConfig {
 		
 		// Rocket
 		// <motorconfiguration> handled by separate handler
-		setters.put("Rocket:referencetype", new EnumSetter<ReferenceType>(
-				Reflection.findMethod(Rocket.class, "setReferenceType", ReferenceType.class),
-				ReferenceType.class));
+		setters.put("Rocket:referencetype", new EnumSetter<>(
+                Reflection.findMethod(Rocket.class, "setReferenceType", ReferenceType.class),
+                ReferenceType.class));
 		setters.put("Rocket:customreference", new DoubleSetter(
 				Reflection.findMethod(Rocket.class, "setCustomReferenceLength", double.class)));
 		setters.put("Rocket:designer", new StringSetter(
@@ -474,10 +474,10 @@ class DocumentConfig {
 				Reflection.findMethod(Rocket.class, "setRevision", String.class)));
 		
 		// Axial Stage
-		setters.put("AxialStage:separationevent", new EnumSetter<StageSeparationConfiguration.SeparationEvent>(
-				Reflection.findMethod(AxialStage.class, "getSeparationConfigurations"),
-				Reflection.findMethod(StageSeparationConfiguration.class, "setSeparationEvent", StageSeparationConfiguration.SeparationEvent.class),
-				StageSeparationConfiguration.SeparationEvent.class));
+		setters.put("AxialStage:separationevent", new EnumSetter<>(
+                Reflection.findMethod(AxialStage.class, "getSeparationConfigurations"),
+                Reflection.findMethod(StageSeparationConfiguration.class, "setSeparationEvent", StageSeparationConfiguration.SeparationEvent.class),
+                StageSeparationConfiguration.SeparationEvent.class));
 		setters.put("AxialStage:separationdelay", new DoubleSetter(
 				Reflection.findMethod(AxialStage.class, "getSeparationConfigurations"),
 				Reflection.findMethod(StageSeparationConfiguration.class, "setSeparationDelay", double.class)));

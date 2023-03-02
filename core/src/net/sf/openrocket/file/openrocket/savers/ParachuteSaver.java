@@ -11,7 +11,7 @@ public class ParachuteSaver extends RecoveryDeviceSaver {
 	private static final ParachuteSaver instance = new ParachuteSaver();
 
 	public static List<String> getElements(net.sf.openrocket.rocketcomponent.RocketComponent c) {
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 
 		list.add("<parachute>");
 		instance.addParams(c, list);

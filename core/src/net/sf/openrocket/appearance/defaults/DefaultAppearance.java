@@ -89,7 +89,7 @@ public class DefaultAppearance {
 	private static final Appearance KLIMA_MOTOR = simple("/datafiles/textures/motors/klima.jpg");
 	private static final Appearance REUSABLE_MOTOR = simpleAlpha(new Color(195, 60, 50), .6f, "/datafiles/textures/motors/reusable.png");
 	
-	private static final HashMap<Color, Appearance> plastics = new HashMap<Color, Appearance>();
+	private static final HashMap<Color, Appearance> plastics = new HashMap<>();
 	
 	/**
 	 * gets the appearance correspondent to the plastic with the given color

@@ -13,7 +13,7 @@ public final class OpenRocketClipboard {
 	private static final List<RocketComponent> clipboardComponents = new LinkedList<>();
 	private static Simulation[] clipboardSimulations = null;
 	
-	private static final List<ClipboardListener> listeners = new ArrayList<ClipboardListener>();
+	private static final List<ClipboardListener> listeners = new ArrayList<>();
 	
 	private OpenRocketClipboard() {
 		// Disallow instantiation

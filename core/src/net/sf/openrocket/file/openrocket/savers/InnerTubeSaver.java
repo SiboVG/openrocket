@@ -11,7 +11,7 @@ public class InnerTubeSaver extends ThicknessRingComponentSaver {
 	private static final InnerTubeSaver instance = new InnerTubeSaver();
 
 	public static List<String> getElements(net.sf.openrocket.rocketcomponent.RocketComponent c) {
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 
 		list.add("<innertube>");
 		instance.addParams(c, list);

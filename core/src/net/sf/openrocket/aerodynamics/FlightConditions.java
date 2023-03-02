@@ -23,7 +23,7 @@ import net.sf.openrocket.util.UniqueID;
  */
 public class FlightConditions implements Cloneable, ChangeSource, Monitorable {
 	
-	private List<EventListener> listenerList = new ArrayList<EventListener>();
+	private List<EventListener> listenerList = new ArrayList<>();
 	private EventObject event = new EventObject(this);
 	
 	
@@ -431,7 +431,7 @@ public class FlightConditions implements Cloneable, ChangeSource, Monitorable {
 	public FlightConditions clone() {
 		try {
 			FlightConditions cond = (FlightConditions) super.clone();
-			cond.listenerList = new ArrayList<EventListener>();
+			cond.listenerList = new ArrayList<>();
 			cond.event = new EventObject(cond);
 			cond.atmosphericConditions = atmosphericConditions.clone();
 			return cond;

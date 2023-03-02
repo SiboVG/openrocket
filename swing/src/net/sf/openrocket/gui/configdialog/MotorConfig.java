@@ -74,8 +74,8 @@ public class MotorConfig extends JPanel {
 		
 		MotorConfiguration motorInstance = mount.getDefaultMotorConfig();
 		
-		final EnumModel<IgnitionEvent> igEvModel = new EnumModel<IgnitionEvent>(motorInstance, "IgnitionEvent", IgnitionEvent.values());
-		final JComboBox<IgnitionEvent> eventBox = new JComboBox<IgnitionEvent>( igEvModel);
+		final EnumModel<IgnitionEvent> igEvModel = new EnumModel<>(motorInstance, "IgnitionEvent", IgnitionEvent.values());
+		final JComboBox<IgnitionEvent> eventBox = new JComboBox<>(igEvModel);
 		panel.add(eventBox , "wrap");
 		order.add(eventBox);
 		

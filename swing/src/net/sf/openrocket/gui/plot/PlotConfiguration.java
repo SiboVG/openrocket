@@ -23,7 +23,7 @@ public class PlotConfiguration implements Cloneable {
 	
 	public static final PlotConfiguration[] DEFAULT_CONFIGURATIONS;
 	static {
-		ArrayList<PlotConfiguration> configs = new ArrayList<PlotConfiguration>();
+		ArrayList<PlotConfiguration> configs = new ArrayList<>();
 		PlotConfiguration config;
 		
 		//// Vertical motion vs. time
@@ -178,12 +178,12 @@ public class PlotConfiguration implements Cloneable {
 	
 	
 	/** The data types to be plotted. */
-	private ArrayList<FlightDataType> plotDataTypes = new ArrayList<FlightDataType>();
+	private ArrayList<FlightDataType> plotDataTypes = new ArrayList<>();
 	
-	private ArrayList<Unit> plotDataUnits = new ArrayList<Unit>();
+	private ArrayList<Unit> plotDataUnits = new ArrayList<>();
 	
 	/** The corresponding Axis on which they will be plotted, or null to auto-select. */
-	private ArrayList<Integer> plotDataAxes = new ArrayList<Integer>();
+	private ArrayList<Integer> plotDataAxes = new ArrayList<>();
 	
 	private EnumSet<FlightEvent.Type> events = EnumSet.noneOf(FlightEvent.Type.class);
 	
@@ -194,7 +194,7 @@ public class PlotConfiguration implements Cloneable {
 	
 	/** All available axes. */
 	private final int axesCount;
-	private ArrayList<Axis> allAxes = new ArrayList<Axis>();
+	private ArrayList<Axis> allAxes = new ArrayList<>();
 	
 	private String name = null;
 	
@@ -346,7 +346,7 @@ public class PlotConfiguration implements Cloneable {
 	
 	
 	public List<Axis> getAllAxes() {
-		List<Axis> list = new ArrayList<Axis>();
+		List<Axis> list = new ArrayList<>();
 		list.addAll(allAxes);
 		return list;
 	}
@@ -407,7 +407,7 @@ public class PlotConfiguration implements Cloneable {
 		
 		if (autoindex >= plotDataAxes.size()) {
 			// All axes have been assigned, just return since we are already the best
-			return new Pair<PlotConfiguration, Double>(copy, copy.getGoodnessValue(data));
+			return new Pair<>(copy, copy.getGoodnessValue(data));
 		}
 		
 		
@@ -423,7 +423,7 @@ public class PlotConfiguration implements Cloneable {
 			}
 		}
 		
-		return new Pair<PlotConfiguration, Double>(best, bestValue);
+		return new Pair<>(best, bestValue);
 	}
 
 
@@ -708,7 +708,7 @@ public class PlotConfiguration implements Cloneable {
 			copy.events = this.events.clone();
 			
 			// Deep-clone all Axis since they are mutable
-			copy.allAxes = new ArrayList<Axis>();
+			copy.allAxes = new ArrayList<>();
 			for (Axis a : this.allAxes) {
 				copy.allAxes.add(a.clone());
 			}

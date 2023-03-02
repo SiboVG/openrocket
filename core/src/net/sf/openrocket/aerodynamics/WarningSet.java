@@ -21,7 +21,7 @@ import net.sf.openrocket.util.Mutable;
 public class WarningSet extends AbstractSet<Warning> implements Cloneable, Monitorable {
 	
 	/** the actual array of warnings*/
-	private ArrayList<Warning> warnings = new ArrayList<Warning>();
+	private ArrayList<Warning> warnings = new ArrayList<>();
 	
 	private Mutable mutable = new Mutable();
 	
@@ -82,23 +82,23 @@ public class WarningSet extends AbstractSet<Warning> implements Cloneable, Monit
 	@Override
 	public Iterator<Warning> iterator() {
 		final Iterator<Warning> iterator = warnings.iterator();
-		return new Iterator<Warning>() {
+		return new Iterator<>() {
 			@Override
 			public boolean hasNext() {
 				return iterator.hasNext();
 			}
-			
+
 			@Override
 			public Warning next() {
 				return iterator.next();
 			}
-			
+
 			@Override
 			public void remove() {
 				mutable.check();
 				iterator.remove();
 			}
-			
+
 		};
 	}
 	

@@ -90,8 +90,8 @@ public class RocketFigure extends AbstractScaleFigure {
 			Comparator.comparingInt(o -> -o.component.getDisplayOrder_back()));
 	
 	
-	private final ArrayList<FigureElement> relativeExtra = new ArrayList<FigureElement>();
-	private final ArrayList<FigureElement> absoluteExtra = new ArrayList<FigureElement>();
+	private final ArrayList<FigureElement> relativeExtra = new ArrayList<>();
+	private final ArrayList<FigureElement> absoluteExtra = new ArrayList<>();
 	
 	
 	/**
@@ -361,7 +361,7 @@ public class RocketFigure extends AbstractScaleFigure {
 			return new RocketComponent[0];
 		}
 		
-		LinkedHashSet<RocketComponent> l = new LinkedHashSet<RocketComponent>();
+		LinkedHashSet<RocketComponent> l = new LinkedHashSet<>();
 
 		PriorityQueue<RocketComponentShape> figureShapes;
 		if (currentViewType == RocketPanel.VIEW_TYPE.SideView || currentViewType == RocketPanel.VIEW_TYPE.TopView)

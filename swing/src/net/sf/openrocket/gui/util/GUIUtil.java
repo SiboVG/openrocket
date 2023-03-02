@@ -81,7 +81,7 @@ public class GUIUtil {
 	private static final KeyStroke ESCAPE = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
 	private static final String CLOSE_ACTION_KEY = "escape:WINDOW_CLOSING";
 	
-	private static final List<Image> images = new ArrayList<Image>();
+	private static final List<Image> images = new ArrayList<>();
 	static {
 		loadImage("pix/icon/icon-256.png");
 		loadImage("pix/icon/icon-064.png");
@@ -219,9 +219,9 @@ public class GUIUtil {
 	 * @param c		the component to modify
 	 */
 	public static void setTabToFocusing(Component c) {
-		Set<KeyStroke> strokes = new HashSet<KeyStroke>(Collections.singletonList(KeyStroke.getKeyStroke("pressed TAB")));
+		Set<KeyStroke> strokes = new HashSet<>(Collections.singletonList(KeyStroke.getKeyStroke("pressed TAB")));
 		c.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, strokes);
-		strokes = new HashSet<KeyStroke>(Collections.singletonList(KeyStroke.getKeyStroke("shift pressed TAB")));
+		strokes = new HashSet<>(Collections.singletonList(KeyStroke.getKeyStroke("shift pressed TAB")));
 		c.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, strokes);
 	}
 	
@@ -530,7 +530,7 @@ public class GUIUtil {
 				combo.removeActionListener(l);
 			}
 			ComboBoxModel<?> model = combo.getModel();
-			combo.setModel(new DefaultComboBoxModel<Object>());
+			combo.setModel(new DefaultComboBoxModel<>());
 			if (model instanceof Invalidatable) {
 				((Invalidatable) model).invalidate();
 			}

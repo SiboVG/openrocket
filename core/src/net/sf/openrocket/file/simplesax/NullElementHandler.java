@@ -19,7 +19,7 @@ import org.xml.sax.SAXException;
 public class NullElementHandler extends AbstractElementHandler {
 	public static final NullElementHandler INSTANCE = new NullElementHandler();
 
-	private static final HashMap<String, String> EMPTY_MAP = new HashMap<String,String>();
+	private static final HashMap<String, String> EMPTY_MAP = new HashMap<>();
 	
 	private NullElementHandler() {
 	}

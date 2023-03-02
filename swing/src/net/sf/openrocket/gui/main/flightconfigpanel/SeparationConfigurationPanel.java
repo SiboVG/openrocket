@@ -93,23 +93,23 @@ public class SeparationConfigurationPanel extends FlightConfigurablePanel<AxialS
 	@Override
 	protected JTable initializeTable() {
 		//// Separation selection 
-		separationTableModel = new FlightConfigurableTableModel<AxialStage>(AxialStage.class, rocket) {
-			private static final long serialVersionUID = 7979648984099308970L;
+		separationTableModel = new FlightConfigurableTableModel<>(AxialStage.class, rocket) {
+            private static final long serialVersionUID = 7979648984099308970L;
 
-			@Override
-			protected boolean includeComponent(AxialStage component) {
-				return component.getStageNumber() > 0;
-			}
+            @Override
+            protected boolean includeComponent(AxialStage component) {
+                return component.getStageNumber() > 0;
+            }
 
-			@Override
-			public void componentChanged(ComponentChangeEvent cce) {
-				super.componentChanged(cce);
-				// This will catch a name change of the stage to cause a change in the header of the table
-				if (cce.getSource() instanceof AxialStage && cce.isNonFunctionalChange()) {
-					fireTableStructureChanged();
-				}
-			}
-		};
+            @Override
+            public void componentChanged(ComponentChangeEvent cce) {
+                super.componentChanged(cce);
+                // This will catch a name change of the stage to cause a change in the header of the table
+                if (cce.getSource() instanceof AxialStage && cce.isNonFunctionalChange()) {
+                    fireTableStructureChanged();
+                }
+            }
+        };
 		JTable separationTable = new JTable(separationTableModel);
 		separationTable.getTableHeader().setReorderingAllowed(false);
 		separationTable.setCellSelectionEnabled(true);

@@ -97,7 +97,7 @@ public class ComponentPresetTable extends JTable {
 		};
 
 
-		sorter = new TableRowSorter<TableModel>(tableModel);
+		sorter = new TableRowSorter<>(tableModel);
 
 		tableColumnModel = new XTableColumnModel();
 
@@ -107,7 +107,7 @@ public class ComponentPresetTable extends JTable {
 		columns[0] = new ComponentPresetTableColumn.Favorite(0);
 		tableColumnModel.addColumn(columns[0]);
 
-		List<TableColumn> hiddenColumns = new ArrayList<TableColumn>();
+		List<TableColumn> hiddenColumns = new ArrayList<>();
 		{
 			int index = 1;
 			for (final TypedKey<?> key: ComponentPreset.ORDERED_KEY_LIST ) {

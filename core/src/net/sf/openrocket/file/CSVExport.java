@@ -102,7 +102,7 @@ public class CSVExport {
 		int eventPosition = 0;
 
 		// List of field values
-		List<List<Double>> fieldValues = new ArrayList<List<Double>>();
+		List<List<Double>> fieldValues = new ArrayList<>();
 		for (FlightDataType t : fields) {
 			fieldValues.add(branch.get(t));
 		}

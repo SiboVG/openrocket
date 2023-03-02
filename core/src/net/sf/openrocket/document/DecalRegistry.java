@@ -41,7 +41,7 @@ public class DecalRegistry {
 	}
 	
 	/** the decal usage map*/
-	private final Map<String, DecalImageImpl> registeredDecals = new HashMap<String, DecalImageImpl>();
+	private final Map<String, DecalImageImpl> registeredDecals = new HashMap<>();
 	
 	/**
 	 * returns a new decal with the same image but with unique names
@@ -292,7 +292,7 @@ public class DecalRegistry {
 		String basename = getGroup(BASE_NAME_INDEX,fileNamePattern.matcher(newName));
 		String extension = getGroup(EXTENSION_INDEX,fileNamePattern.matcher(newName));
 		
-		Set<Integer> counts = new TreeSet<Integer>();
+		Set<Integer> counts = new TreeSet<>();
 		
 		boolean needsRewrite = false;
 

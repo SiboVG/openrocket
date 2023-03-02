@@ -63,9 +63,9 @@ public class ScaleDialog extends JDialog {
 	 * together with the other dimensions and one for when the offsets do need to scale.
 	 */
 	private static final Map<Class<? extends RocketComponent>, List<Scaler>> SCALERS_NO_OFFSET =
-			new HashMap<Class<? extends RocketComponent>, List<Scaler>>();
+            new HashMap<>();
 	private static final Map<Class<? extends RocketComponent>, List<Scaler>> SCALERS_OFFSET =
-			new HashMap<Class<? extends RocketComponent>, List<Scaler>>();
+            new HashMap<>();
 	static {
 		List<Scaler> list;
 
@@ -185,7 +185,7 @@ public class ScaleDialog extends JDialog {
 								  Map<Class<? extends RocketComponent>, List<Scaler>> scaler) {
 		List<Scaler> list = scaler.get(componentClass);
 		if (list == null) {
-			list = new ArrayList<ScaleDialog.Scaler>();
+			list = new ArrayList<>();
 			scaler.put(componentClass, list);
 		}
 		list.add(new GeneralScaler(componentClass, methodName, autoMethodName));
@@ -252,7 +252,7 @@ public class ScaleDialog extends JDialog {
 	
 	private void init() {
 		// Generate options for scaling
-		List<String> options = new ArrayList<String>();
+		List<String> options = new ArrayList<>();
 		if (!onlySelection)
 			options.add(SCALE_ROCKET);
 
@@ -355,7 +355,7 @@ public class ScaleDialog extends JDialog {
 		label.setToolTipText(tip);
 		panel.add(label, "span, split, gapright unrel");
 		
-		selectionOption = new JComboBox<String>(options.toArray(new String[0]));
+		selectionOption = new JComboBox<>(options.toArray(new String[0]));
 		selectionOption.setEditable(false);
 		selectionOption.setToolTipText(tip);
 		panel.add(selectionOption, "growx, wrap para*2");

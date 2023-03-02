@@ -241,7 +241,7 @@ public class ScriptEngineManagerRedux  {
         Iterator<ScriptEngineFactory> itr;
         try {
             ServiceLoader<ScriptEngineFactory> loaders = AccessController.doPrivileged(
-                    new PrivilegedAction<ServiceLoader<ScriptEngineFactory>>() {
+                    new PrivilegedAction<>() {
                         @Override
                         public ServiceLoader<ScriptEngineFactory> run() {
                             return getServiceLoader(loader);

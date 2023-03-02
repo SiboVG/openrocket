@@ -8,7 +8,7 @@ public class EllipticalFinSetSaver extends FinSetSaver {
 	private static final EllipticalFinSetSaver instance = new EllipticalFinSetSaver();
 	
 	public static ArrayList<String> getElements(net.sf.openrocket.rocketcomponent.RocketComponent c) {
-		ArrayList<String> list = new ArrayList<String>();
+		ArrayList<String> list = new ArrayList<>();
 		
 		list.add("<ellipticalfinset>");
 		instance.addParams(c,list);

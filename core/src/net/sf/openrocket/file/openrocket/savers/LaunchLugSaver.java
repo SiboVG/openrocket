@@ -11,7 +11,7 @@ public class LaunchLugSaver extends ExternalComponentSaver {
 	private static final LaunchLugSaver instance = new LaunchLugSaver();
 
 	public static List<String> getElements(net.sf.openrocket.rocketcomponent.RocketComponent c) {
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 
 		list.add("<launchlug>");
 		instance.addParams(c, list);

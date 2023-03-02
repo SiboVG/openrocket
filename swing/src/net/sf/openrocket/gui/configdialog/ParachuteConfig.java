@@ -81,8 +81,8 @@ public class ParachuteConfig extends RecoveryDeviceConfig {
 		//// Material:
 		canopyPanel.add(new JLabel(trans.get("ParachuteCfg.lbl.Material")), "wrap rel");
 
-		JComboBox<Material> surfaceMaterialCombo = new JComboBox<Material>(new MaterialModel(canopyPanel, component,
-				Material.Type.SURFACE));
+		JComboBox<Material> surfaceMaterialCombo = new JComboBox<>(new MaterialModel(canopyPanel, component,
+                Material.Type.SURFACE));
 		surfaceMaterialCombo.setToolTipText(trans.get("ParachuteCfg.combo.MaterialModel"));
 		canopyPanel.add(surfaceMaterialCombo, "spanx, growx, wrap 15lp");
 		order.add(surfaceMaterialCombo);
@@ -149,7 +149,7 @@ public class ParachuteConfig extends RecoveryDeviceConfig {
 		shroudPanel.add(new JLabel(trans.get("ParachuteCfg.lbl.Material")), "spanx, wrap rel");
 		
 		JComboBox<Material> shroudMaterialCombo =
-				new JComboBox<Material>(new MaterialModel(shroudPanel, component, Material.Type.LINE, "LineMaterial"));
+                new JComboBox<>(new MaterialModel(shroudPanel, component, Material.Type.LINE, "LineMaterial"));
 		shroudPanel.add(shroudMaterialCombo, "spanx, growx");
 		order.add(shroudMaterialCombo);
 
@@ -209,9 +209,9 @@ public class ParachuteConfig extends RecoveryDeviceConfig {
 			DeploymentConfiguration deploymentConfig = parachute.getDeploymentConfigurations().getDefault();
 			// this issues a warning because EnumModel ipmlements ComboBoxModel without a parameter...
 			ComboBoxModel<DeploymentConfiguration.DeployEvent> deployOptionsModel =
-					new EnumModel<DeploymentConfiguration.DeployEvent>(deploymentConfig, "DeployEvent");
+                    new EnumModel<>(deploymentConfig, "DeployEvent");
 			JComboBox<DeploymentConfiguration.DeployEvent> eventCombo =
-					new JComboBox<DeploymentConfiguration.DeployEvent>(deployOptionsModel);
+                    new JComboBox<>(deployOptionsModel);
 			if ((component.getStageNumber() + 1) == d.getRocket().getStageCount()) {
 				//	This is the bottom stage:  Restrict deployment options.
 				eventCombo.removeItem(DeployEvent.LOWER_STAGE_SEPARATION);

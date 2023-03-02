@@ -140,7 +140,7 @@ public class IntegerModel implements StateChangeListener {
 	private final Method getMethod;
 	private final Method setMethod;
 	
-	private final ArrayList<EventListener> listeners = new ArrayList<EventListener>();
+	private final ArrayList<EventListener> listeners = new ArrayList<>();
 	
 	private final int minValue;
 	private final int maxValue;

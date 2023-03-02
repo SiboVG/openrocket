@@ -62,7 +62,7 @@ public class MassObjectHandlerTest extends RockSimTestBase {
     @org.junit.Test
     public void testCloseElement() throws Exception {
         BodyTube tube = new BodyTube();
-        HashMap<String, String> attributes = new HashMap<String, String>();
+        HashMap<String, String> attributes = new HashMap<>();
         WarningSet warnings = new WarningSet();
 
         MassObjectHandler handler = new MassObjectHandler(null, tube, new WarningSet());

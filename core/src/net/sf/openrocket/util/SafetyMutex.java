@@ -107,7 +107,7 @@ public abstract class SafetyMutex {
 		// longingLocation is set when lockingThread is, if STORE_LOCKING_LOCATION is true
 		Throwable lockingLocation = null;
 		// Stack of places that have locked this mutex
-		final LinkedList<String> locations = new LinkedList<String>();
+		final LinkedList<String> locations = new LinkedList<>();
 		
 		
 		

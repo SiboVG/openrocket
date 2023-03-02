@@ -193,7 +193,7 @@ public class TrapezoidFinSet extends FinSet {
 	 */
 	@Override
 	public Coordinate[] getFinPoints() {
-		List<Coordinate> list = new ArrayList<Coordinate>(4);
+		List<Coordinate> list = new ArrayList<>(4);
 		
 		list.add(Coordinate.NUL);
 		list.add(new Coordinate(sweep, height));

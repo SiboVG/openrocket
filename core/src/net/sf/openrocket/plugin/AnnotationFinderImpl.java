@@ -23,7 +23,7 @@ public class AnnotationFinderImpl implements AnnotationFinder {
 	
 	@Override
 	public List<Class<?>> findAnnotatedTypes(Class<?> annotation) {
-		final List<Class<?>> classes = new ArrayList<Class<?>>();
+		final List<Class<?>> classes = new ArrayList<>();
 		
 		TypeReporter reporter = new ListReporter(classes);
 		final AnnotationDetector cf = new AnnotationDetector(reporter);
@@ -39,7 +39,7 @@ public class AnnotationFinderImpl implements AnnotationFinder {
 				URLClassLoader urlClassLoader = (URLClassLoader) loader;
 				URL[] urls = urlClassLoader.getURLs();
 				
-				List<File> files = new ArrayList<File>();
+				List<File> files = new ArrayList<>();
 				for (URL url : urls) {
 					if (url.getProtocol().equals("file")) {
 						files.add(JarUtil.urlToFile(url));
@@ -65,7 +65,7 @@ public class AnnotationFinderImpl implements AnnotationFinder {
 	
 	private static class ListReporter implements TypeReporter {
 		private final List<Class<?>> classes;
-		private final Set<String> names = new HashSet<String>();
+		private final Set<String> names = new HashSet<>();
 		
 		public ListReporter(List<Class<?>> classes) {
 			this.classes = classes;

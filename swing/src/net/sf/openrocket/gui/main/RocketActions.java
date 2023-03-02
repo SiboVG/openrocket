@@ -818,7 +818,7 @@ public class RocketActions {
 				
 			} else if (sims != null) {
 				
-				ArrayList<Simulation> copySims = new ArrayList<Simulation>();
+				ArrayList<Simulation> copySims = new ArrayList<>();
 
 				for (Simulation s: sims) {
 					Simulation copy = s.duplicateSimulation(rocket);
@@ -922,7 +922,7 @@ public class RocketActions {
 
 				parentFrame.selectTab(BasicFrame.DESIGN_TAB);
 			} else if (sims != null && sims.length > 0) {
-				ArrayList<Simulation> copySims = new ArrayList<Simulation>();
+				ArrayList<Simulation> copySims = new ArrayList<>();
 
 				// TODO: the undoing doesn't do anything...
 				if (sims.length == 1) {

@@ -45,7 +45,7 @@ public class DefaultSimulationModifierService implements SimulationModifierServi
 	private static final double DEFAULT_RANGE_MULTIPLIER = 2.0;
 	
 	
-	private static final Map<Class<?>, List<ModifierDefinition>> definitions = new HashMap<Class<?>, List<ModifierDefinition>>();
+	private static final Map<Class<?>, List<ModifierDefinition>> definitions = new HashMap<>();
 	static {
 		//addModifier("optimization.modifier.", unitGroup, multiplier, componentClass, methodName);
 		
@@ -109,7 +109,7 @@ public class DefaultSimulationModifierService implements SimulationModifierServi
 		
 		List<ModifierDefinition> list = definitions.get(componentClass);
 		if (list == null) {
-			list = new ArrayList<DefaultSimulationModifierService.ModifierDefinition>();
+			list = new ArrayList<>();
 			definitions.put(componentClass, list);
 		}
 		
@@ -123,7 +123,7 @@ public class DefaultSimulationModifierService implements SimulationModifierServi
 	
 	@Override
 	public Collection<SimulationModifier> getModifiers(OpenRocketDocument document) {
-		List<SimulationModifier> modifiers = new ArrayList<SimulationModifier>();
+		List<SimulationModifier> modifiers = new ArrayList<>();
 		
 		Rocket rocket = document.getRocket();
 		
@@ -252,41 +252,41 @@ public class DefaultSimulationModifierService implements SimulationModifierServi
 			
 			// Recovery device deployment altitude and delay
 			if (c instanceof RecoveryDevice) {
-				SimulationModifier mod = new FlightConfigurationModifier<DeploymentConfiguration>(
-						trans.get("optimization.modifier.recoverydevice.deployDelay"),
-						trans.get("optimization.modifier.recoverydevice.deployDelay.desc"),
-						c,
-						UnitGroup.UNITS_SHORT_TIME,
-						1.0,
-						c.getClass(),
-						c.getID(),
-						"DeploymentConfigurations",
-						DeploymentConfiguration.class,
-						"DeployDelay");
+				SimulationModifier mod = new FlightConfigurationModifier<>(
+                        trans.get("optimization.modifier.recoverydevice.deployDelay"),
+                        trans.get("optimization.modifier.recoverydevice.deployDelay.desc"),
+                        c,
+                        UnitGroup.UNITS_SHORT_TIME,
+                        1.0,
+                        c.getClass(),
+                        c.getID(),
+                        "DeploymentConfigurations",
+                        DeploymentConfiguration.class,
+                        "DeployDelay");
 				
 				mod.setMinValue(0);
 				mod.setMaxValue(10);
 				modifiers.add(mod);
 				
-				mod = new FlightConfigurationModifier<DeploymentConfiguration>(
-						trans.get("optimization.modifier.recoverydevice.deployAltitude"),
-						trans.get("optimization.modifier.recoverydevice.deployAltitude.desc"),
-						c,
-						UnitGroup.UNITS_DISTANCE,
-						1.0,
-						c.getClass(),
-						c.getID(),
-						"DeploymentConfigurations",
-						DeploymentConfiguration.class,
-						"DeployAltitude") {
-					
-					@Override
-					public void initialize(Simulation simulation) throws OptimizationException {
-						DeploymentConfiguration config = getModifiedObject(simulation);
-						config.setDeployEvent(DeployEvent.APOGEE);
-					}
-					
-				};
+				mod = new FlightConfigurationModifier<>(
+                        trans.get("optimization.modifier.recoverydevice.deployAltitude"),
+                        trans.get("optimization.modifier.recoverydevice.deployAltitude.desc"),
+                        c,
+                        UnitGroup.UNITS_DISTANCE,
+                        1.0,
+                        c.getClass(),
+                        c.getID(),
+                        "DeploymentConfigurations",
+                        DeploymentConfiguration.class,
+                        "DeployAltitude") {
+
+                    @Override
+                    public void initialize(Simulation simulation) throws OptimizationException {
+                        DeploymentConfiguration config = getModifiedObject(simulation);
+                        config.setDeployEvent(DeployEvent.APOGEE);
+                    }
+
+                };
 				setDefaultMinMax(mod, simulation);
 				modifiers.add(mod);
 			}
