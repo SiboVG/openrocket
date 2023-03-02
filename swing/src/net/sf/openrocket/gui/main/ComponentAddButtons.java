@@ -457,9 +457,7 @@ public class ComponentAddButtons extends JPanel implements Scrollable {
 			RocketComponent component;
 			try {
 				component = (RocketComponent) constructor.newInstance();
-			} catch (InstantiationException e) {
-				throw new BugException("Could not construct new instance of class " + constructor, e);
-			} catch (IllegalAccessException e) {
+			} catch (InstantiationException | IllegalAccessException e) {
 				throw new BugException("Could not construct new instance of class " + constructor, e);
 			} catch (InvocationTargetException e) {
 				throw Reflection.handleWrappedException(e);

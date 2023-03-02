@@ -784,9 +784,7 @@ public class DoubleModel implements StateChangeListener, ChangeSource, Invalidat
 		
 		try {
 			return (Double) getMethod.invoke(source) * multiplier;
-		} catch (IllegalArgumentException e) {
-			throw new BugException("Unable to invoke getMethod of " + this, e);
-		} catch (IllegalAccessException e) {
+		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new BugException("Unable to invoke getMethod of " + this, e);
 		} catch (InvocationTargetException e) {
 			throw Reflection.handleWrappedException(e);
@@ -821,9 +819,7 @@ public class DoubleModel implements StateChangeListener, ChangeSource, Invalidat
 			setMethod.invoke(source, v / multiplier);
 			// Make sure to notify all the listeners that have registered
 			fireStateChanged();
-		} catch (IllegalArgumentException e) {
-			throw new BugException("Unable to invoke setMethod of " + this, e);
-		} catch (IllegalAccessException e) {
+		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new BugException("Unable to invoke setMethod of " + this, e);
 		} catch (InvocationTargetException e) {
 			throw Reflection.handleWrappedException(e);
@@ -847,9 +843,7 @@ public class DoubleModel implements StateChangeListener, ChangeSource, Invalidat
 		
 		try {
 			return (Boolean) getAutoMethod.invoke(source);
-		} catch (IllegalArgumentException e) {
-			throw new BugException("Method call failed", e);
-		} catch (IllegalAccessException e) {
+		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new BugException("Method call failed", e);
 		} catch (InvocationTargetException e) {
 			throw Reflection.handleWrappedException(e);
@@ -873,9 +867,7 @@ public class DoubleModel implements StateChangeListener, ChangeSource, Invalidat
 		lastAutomatic = auto;
 		try {
 			setAutoMethod.invoke(source, auto);
-		} catch (IllegalArgumentException e) {
-			throw new BugException(e);
-		} catch (IllegalAccessException e) {
+		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new BugException(e);
 		} catch (InvocationTargetException e) {
 			throw Reflection.handleWrappedException(e);

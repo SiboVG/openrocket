@@ -214,10 +214,7 @@ public class Alt15K {
 			alt.setData(d);
 			
 		//  Catch all exceptions, close the port and re-throw the exception
-		} catch (PortInUseException e) {
-			close();
-			throw e;
-		} catch (IOException e) {
+		} catch (PortInUseException | IOException e) {
 			close();
 			throw e;
 		} catch (UnsupportedCommOperationException e) {
@@ -476,9 +473,7 @@ public class Alt15K {
 			System.out.println("Saving data to "+file+"...");
 			savefile(file,alt);
 			
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (PortInUseException e) {
+		} catch (IOException | PortInUseException e) {
 			e.printStackTrace();
 		}
 
