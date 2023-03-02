@@ -151,9 +151,7 @@ public abstract class MotorFilterPanel extends JPanel {
 		this.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
 
 		List<Manufacturer> manufacturers = new ArrayList<Manufacturer>();
-		for (Manufacturer m : allManufacturers) {
-			manufacturers.add(m);
-		}
+        manufacturers.addAll(allManufacturers);
 
 		Collections.sort(manufacturers, new Comparator<Manufacturer>() {
 			@Override
