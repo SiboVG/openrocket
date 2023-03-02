@@ -133,8 +133,8 @@ final class MassObjectRenderer {
 	 * @param slices number of slices for the 3D object (kind of like subdivision surface)
 	 * @param stacks number of stacks for the 3D object (kind of like subdivision surface)
 	 */
-	static final void drawMassObject(final GL2 gl, final MassObject o,
-			final int slices, final int stacks) {
+	static void drawMassObject(final GL2 gl, final MassObject o,
+							   final int slices, final int stacks) {
 
 		double da, r, dz;	// Axial length per slice, radius & length per stack
 		double x, y, z;		// X-, y- and z-position
@@ -192,7 +192,7 @@ final class MassObjectRenderer {
 		} // for stacks
 	}
 	
-	private static final double getRadius(MassObject o, double z) {
+	private static double getRadius(MassObject o, double z) {
 		double arc = Math.min(o.getLength(), 2 * o.getRadius()) * 0.35f;
 		double r = o.getRadius();
 		if (z == 0 || z == o.getLength())
@@ -214,23 +214,23 @@ final class MassObjectRenderer {
 	
 	private static final double PI = Math.PI;
 	
-	private static final void glBegin(GL gl, int mode) {
+	private static void glBegin(GL gl, int mode) {
 		gl.getGL2().glBegin(mode);
 	}
 	
-	private static final void glEnd(GL gl) {
+	private static void glEnd(GL gl) {
 		gl.getGL2().glEnd();
 	}
 	
-	private static final void glVertex3d(GL gl, double x, double y, double z) {
+	private static void glVertex3d(GL gl, double x, double y, double z) {
 		gl.getGL2().glVertex3d(x, y, z);
 	}
 	
-	private static final void glNormal3d(GL gl, double x, double y, double z) {
+	private static void glNormal3d(GL gl, double x, double y, double z) {
 		gl.getGL2().glNormal3d(x, y, z);
 	}
 	
-	private static final void glTexCoord2d(GL gl, double x, double y) {
+	private static void glTexCoord2d(GL gl, double x, double y) {
 		gl.getGL2().glTexCoord2d(x, y);
 	}
 	
@@ -241,7 +241,7 @@ final class MassObjectRenderer {
 	 * @param y
 	 * @param z
 	 */
-	private static final void normal3d(GL gl, double x, double y, double z) {
+	private static void normal3d(GL gl, double x, double y, double z) {
 		double mag;
 		
 		mag = Math.sqrt(x * x + y * y + z * z);
@@ -253,16 +253,16 @@ final class MassObjectRenderer {
 		glNormal3d(gl, x, y, z);
 	}
 	
-	private static final void TXTR_COORD(GL gl, double x, double y) {
+	private static void TXTR_COORD(GL gl, double x, double y) {
 		if (textureFlag)
 			glTexCoord2d(gl, x, y);
 	}
 	
-	private static final double sin(double r) {
+	private static double sin(double r) {
 		return Math.sin(r);
 	}
 	
-	private static final double cos(double r) {
+	private static double cos(double r) {
 		return Math.cos(r);
 	}
 }

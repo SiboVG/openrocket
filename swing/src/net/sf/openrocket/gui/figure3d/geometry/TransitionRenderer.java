@@ -123,8 +123,8 @@ final class TransitionRenderer {
 	private TransitionRenderer() {
 	}
 	
-	static final void drawTransition(final GL2 gl, final Transition tr,
-			final int slices, final int stacks, final double offsetRadius) {
+	static void drawTransition(final GL2 gl, final Transition tr,
+                               final int slices, final int stacks, final double offsetRadius) {
 		
 		double da, r, dzBase;
 		double x, y, z, nz, lnz = 0;
@@ -193,7 +193,7 @@ final class TransitionRenderer {
 		
 	}
 	
-	static final void normal3d(GL2 gl, double x, double y, double z) {
+	static void normal3d(GL2 gl, double x, double y, double z) {
 		double mag;
 		mag = (double) Math.sqrt(x * x + y * y + z * z);
 		if (mag > 0.00001F) {
