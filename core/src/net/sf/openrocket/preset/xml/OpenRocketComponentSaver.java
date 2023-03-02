@@ -74,7 +74,7 @@ public class OpenRocketComponentSaver {
 
         // We're going to sort the initial data since that makes the output much easier on the eyes.
 
-        Collections.sort(theMaterialList, new Comparator<>() {
+        theMaterialList.sort(new Comparator<>() {
 
             @Override
             public int compare(Material o1, Material o2) {
@@ -83,7 +83,7 @@ public class OpenRocketComponentSaver {
 
         });
 
-        Collections.sort(thePresetList, new Comparator<>() {
+        thePresetList.sort(new Comparator<>() {
 
             @Override
             public int compare(ComponentPreset o1, ComponentPreset o2) {

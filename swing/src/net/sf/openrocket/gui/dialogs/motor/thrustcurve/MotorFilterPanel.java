@@ -153,7 +153,7 @@ public abstract class MotorFilterPanel extends JPanel {
 		List<Manufacturer> manufacturers = new ArrayList<>();
         manufacturers.addAll(allManufacturers);
 
-		Collections.sort(manufacturers, new Comparator<>() {
+		manufacturers.sort(new Comparator<>() {
 			@Override
 			public int compare(Manufacturer o1, Manufacturer o2) {
 				return o1.getSimpleName().compareTo(o2.getSimpleName());

@@ -298,12 +298,12 @@ public class MathUtil {
 		}
 		
 		List<Number> sorted = new ArrayList<>(values);
-		Collections.sort(sorted, new Comparator<>() {
-            @Override
-            public int compare(Number o1, Number o2) {
-                return Double.compare(o1.doubleValue(), o2.doubleValue());
-            }
-        });
+		sorted.sort(new Comparator<>() {
+			@Override
+			public int compare(Number o1, Number o2) {
+				return Double.compare(o1.doubleValue(), o2.doubleValue());
+			}
+		});
 		
 		int n = sorted.size();
 		if (n % 2 == 0) {
