@@ -499,7 +499,7 @@ public final class FlameRenderer {
 		c2[3] = 1;
 		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 		gl.glEnable(GL.GL_BLEND);
-		gl.glLineWidth(1 + (float)fs.getSparkWeight() * 1.0f);
+		gl.glLineWidth(1 + (float) fs.getSparkWeight());
 		for (int i = 0; i < 4000 * fs.getSparkConcentration(); i++) {
 			final float z = 0.01f + 2 * (r.nextFloat() * r.nextFloat() * r.nextFloat());
 			final float x = z * (r.nextFloat() - 0.5f);

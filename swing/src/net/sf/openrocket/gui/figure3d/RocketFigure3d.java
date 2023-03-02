@@ -214,7 +214,7 @@ public class RocketFigure3d extends JPanel implements GLEventListener {
 		g2d.setBackground(new Color(0, 0, 0, 0));
 		g2d.clearRect(0, 0, CARET_SIZE, CARET_SIZE);
 		
-		new CGCaret(CARET_SIZE / 2, CARET_SIZE / 2).paint(g2d, 1.0);
+		new CGCaret(CARET_SIZE / 2f, CARET_SIZE / 2f).paint(g2d, 1.0);
 		
 		g2d.dispose();
 		
@@ -226,7 +226,7 @@ public class RocketFigure3d extends JPanel implements GLEventListener {
 		g2d.setBackground(new Color(0, 0, 0, 0));
 		g2d.clearRect(0, 0, CARET_SIZE, CARET_SIZE);
 		
-		new CPCaret(CARET_SIZE / 2, CARET_SIZE / 2).paint(g2d, 1.0);
+		new CPCaret(CARET_SIZE / 2f, CARET_SIZE / 2f).paint(g2d, 1.0);
 		
 		g2d.dispose();
 		

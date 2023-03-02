@@ -236,7 +236,7 @@ class MultiSliderUI extends BasicSliderUI {
 	public void scrollByUnit(int direction) {
 		synchronized(slider) {
 			int oldValue = ((MultiSlider)slider).getValueAt(this.currentIndex);
-			int delta = 1 * ((direction > 0) ? POSITIVE_SCROLL : NEGATIVE_SCROLL);
+			int delta = ((direction > 0) ? POSITIVE_SCROLL : NEGATIVE_SCROLL);
 			((MultiSlider)slider).setValueAt(this.currentIndex, oldValue + delta);
 		}
 	}

@@ -62,7 +62,7 @@ public class MathUtilTest {
 		
 		for (int i = 0; i < 10000; i++) {
 			double x = Math.random() * 100 - 50;
-			double y = Math.random() * i - i / 2;
+			double y = Math.random() * i - i / 2f;
 			double z = Math.hypot(x, y);
 			assertEquals(z, MathUtil.hypot(x, y), EPS);
 		}

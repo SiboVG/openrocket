@@ -62,7 +62,7 @@ public class CompassSelector extends CompassPointer {
 		int y = e.getY() - mid;
 		
 		double distance = Math.hypot(x, y);
-		return distance < width / 2;
+		return distance < width / 2f;
 	}
 	
 	private void clicked(MouseEvent e) {

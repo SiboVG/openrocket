@@ -164,11 +164,11 @@ public class OpenRocketSaver extends RocketSaver {
 			componentCount++;
 		}
 		
-		size += componentCount * BYTES_PER_COMPONENT_COMPRESSED;
+		size += (long) componentCount * BYTES_PER_COMPONENT_COMPRESSED;
 		
 		
 		// Size per simulation
-		size += doc.getSimulationCount() * BYTES_PER_SIMULATION_COMPRESSED;
+		size += (long) doc.getSimulationCount() * BYTES_PER_SIMULATION_COMPRESSED;
 		
 		
 		// Size per flight data point
@@ -184,7 +184,7 @@ public class OpenRocketSaver extends RocketSaver {
 			}
 		}
 		
-		size += pointCount * BYTES_PER_DATAPOINT_COMPRESSED;
+		size += (long) pointCount * BYTES_PER_DATAPOINT_COMPRESSED;
 		
 		return size;
 	}

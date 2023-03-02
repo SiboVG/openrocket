@@ -472,9 +472,9 @@ class ClusterSelectionPanel extends JPanel {
 				double x = points.get(i * 2);
 				double y = points.get(i * 2 + 1);
 
-				double px = BUTTON_SIZE / 2 + x * MOTOR_DIAMETER;
-				double py = BUTTON_SIZE / 2 - y * MOTOR_DIAMETER;
-				circle.setFrameFromCenter(px, py, px + MOTOR_DIAMETER / 2, py + MOTOR_DIAMETER / 2);
+				double px = BUTTON_SIZE / 2f + x * MOTOR_DIAMETER;
+				double py = BUTTON_SIZE / 2f - y * MOTOR_DIAMETER;
+				circle.setFrameFromCenter(px, py, px + MOTOR_DIAMETER / 2f, py + MOTOR_DIAMETER / 2f);
 
 				g2.setColor(MOTOR_FILL_COLOR);
 				g2.fill(circle);
