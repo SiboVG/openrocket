@@ -15,7 +15,7 @@ public abstract class Communicator {
 		String url;
 		url = System.getProperty("openrocket.debug.bugurl");
 		if (url == null)
-			url = "http://openrocket.sourceforge.net/actions/reportbug";
+			url = "https://openrocket.sourceforge.net/actions/reportbug";
 		BUG_REPORT_URL = url;
 		
 		url = System.getProperty("openrocket.debug.updateurl");

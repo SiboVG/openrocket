@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<search-response xmlns="http://www.thrustcurve.org/2015/SearchResponse" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.thrustcurve.org/2015/SearchResponse http://www.thrustcurve.org/2015/search-response.xsd">
+<search-response xmlns="http://www.thrustcurve.org/2015/SearchResponse" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.thrustcurve.org/2015/SearchResponse https://www.thrustcurve.org/2015/search-response.xsd">
     <criteria>
         <criterion>
             <name>manufacturer</name>
@@ -26,7 +26,7 @@
             <tot-impulse-ns>8.96</tot-impulse-ns>
             <burn-time-s>2.86</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1036</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1036</info-url>
             <total-weight-g>23.9</total-weight-g>
             <prop-weight-g>5.2</prop-weight-g>
             <delays>P</delays>
@@ -52,7 +52,7 @@
             <tot-impulse-ns>18.75</tot-impulse-ns>
             <burn-time-s>1.4</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=739</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=739</info-url>
             <total-weight-g>25.9</total-weight-g>
             <prop-weight-g>9.8</prop-weight-g>
             <delays>3,5,7</delays>
@@ -77,7 +77,7 @@
             <tot-impulse-ns>19.26</tot-impulse-ns>
             <burn-time-s>1.52</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=33</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=33</info-url>
             <prop-weight-g>9.8</prop-weight-g>
             <delays>4,7,10</delays>
             <case-info>RMS-R/C-18/70</case-info>
@@ -102,7 +102,7 @@
             <tot-impulse-ns>18.96</tot-impulse-ns>
             <burn-time-s>1.15</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=34</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=34</info-url>
             <prop-weight-g>8.9</prop-weight-g>
             <delays>4,7</delays>
             <case-info>RMS-24/40</case-info>
@@ -127,7 +127,7 @@
             <tot-impulse-ns>17.21</tot-impulse-ns>
             <burn-time-s>8.14</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1037</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1037</info-url>
             <total-weight-g>29.3</total-weight-g>
             <prop-weight-g>10.7</prop-weight-g>
             <delays>P</delays>
@@ -153,7 +153,7 @@
             <tot-impulse-ns>19.59</tot-impulse-ns>
             <burn-time-s>0.94</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=35</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=35</info-url>
             <prop-weight-g>9.6</prop-weight-g>
             <delays>4,7</delays>
             <prop-info>Blue Thunder</prop-info>
@@ -177,7 +177,7 @@
             <tot-impulse-ns>18.02</tot-impulse-ns>
             <burn-time-s>1.22</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=36</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=36</info-url>
             <total-weight-g>32.0</total-weight-g>
             <prop-weight-g>8.7</prop-weight-g>
             <delays>4,7,10</delays>
@@ -203,7 +203,7 @@
             <tot-impulse-ns>18.53</tot-impulse-ns>
             <burn-time-s>2.87</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=28</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=28</info-url>
             <prop-weight-g>10.5</prop-weight-g>
             <case-info>RMS-R/C-24/20-40</case-info>
             <prop-info>Blue Thunder</prop-info>
@@ -227,7 +227,7 @@
             <tot-impulse-ns>18.76</tot-impulse-ns>
             <burn-time-s>1.88</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=29</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=29</info-url>
             <prop-weight-g>10.1</prop-weight-g>
             <delays>4,7</delays>
             <case-info>RMS-24/40</case-info>
@@ -252,7 +252,7 @@
             <tot-impulse-ns>32.74</tot-impulse-ns>
             <burn-time-s>2.83</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=505</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=505</info-url>
             <total-weight-g>62.4</total-weight-g>
             <prop-weight-g>25.0</prop-weight-g>
             <delays>3</delays>
@@ -278,7 +278,7 @@
             <tot-impulse-ns>34.22</tot-impulse-ns>
             <burn-time-s>3.05</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=44</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=44</info-url>
             <prop-weight-g>30.3</prop-weight-g>
             <case-info>RMS-R/C-24/20-40</case-info>
             <prop-info>Blackjack</prop-info>
@@ -301,7 +301,7 @@
             <tot-impulse-ns>40.0</tot-impulse-ns>
             <burn-time-s>2.66666666666667</burn-time-s>
             <data-files>3</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=45</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=45</info-url>
             <prop-weight-g>20.1</prop-weight-g>
             <delays>4,7,P</delays>
             <prop-info>White Lightning</prop-info>
@@ -325,7 +325,7 @@
             <tot-impulse-ns>37.67</tot-impulse-ns>
             <burn-time-s>2.0</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=48</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=48</info-url>
             <prop-weight-g>19.0</prop-weight-g>
             <delays>4,7</delays>
             <case-info>RMS-29/40</case-info>
@@ -350,7 +350,7 @@
             <tot-impulse-ns>36.54</tot-impulse-ns>
             <burn-time-s>2.14</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=49</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=49</info-url>
             <prop-weight-g>20.7</prop-weight-g>
             <delays>4,7</delays>
             <case-info>RMS-24/40</case-info>
@@ -375,7 +375,7 @@
             <tot-impulse-ns>35.0</tot-impulse-ns>
             <burn-time-s>1.6</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=782</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=782</info-url>
             <total-weight-g>49.0</total-weight-g>
             <prop-weight-g>16.2</prop-weight-g>
             <delays>4,7</delays>
@@ -400,7 +400,7 @@
             <tot-impulse-ns>35.32</tot-impulse-ns>
             <burn-time-s>1.57</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=50</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=50</info-url>
             <prop-weight-g>17.4</prop-weight-g>
             <delays>5,8</delays>
             <case-info>RMS-29/40</case-info>
@@ -425,7 +425,7 @@
             <tot-impulse-ns>39.69</tot-impulse-ns>
             <burn-time-s>1.22</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=51</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=51</info-url>
             <prop-weight-g>18.4</prop-weight-g>
             <delays>4,7</delays>
             <case-info>RMS-24/40</case-info>
@@ -450,7 +450,7 @@
             <tot-impulse-ns>39.51</tot-impulse-ns>
             <burn-time-s>1.22</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=52</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=52</info-url>
             <prop-weight-g>19.3</prop-weight-g>
             <delays>4,7</delays>
             <prop-info>Blue Thunder</prop-info>
@@ -473,7 +473,7 @@
             <tot-impulse-ns>40.0</tot-impulse-ns>
             <burn-time-s>6.66666666666667</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=37</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=37</info-url>
             <prop-weight-g>21.5</prop-weight-g>
             <delays>4,6,8,P</delays>
             <case-info>RMS 24/20-40 R/C</case-info>
@@ -498,7 +498,7 @@
             <tot-impulse-ns>37.5</tot-impulse-ns>
             <burn-time-s>7.12</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=38</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=38</info-url>
             <total-weight-g>50.0</total-weight-g>
             <prop-weight-g>21.5</prop-weight-g>
             <case-info>RMS-R/C-24/20-40</case-info>
@@ -523,7 +523,7 @@
             <tot-impulse-ns>29.35</tot-impulse-ns>
             <burn-time-s>5.43</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=39</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=39</info-url>
             <prop-weight-g>17.1</prop-weight-g>
             <case-info>RMS-R/C-24/20-40</case-info>
             <prop-info>Blue Thunder</prop-info>
@@ -547,7 +547,7 @@
             <tot-impulse-ns>76.33</tot-impulse-ns>
             <burn-time-s>7.13</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=53</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=53</info-url>
             <prop-weight-g>40.7</prop-weight-g>
             <delays>4,6,8</delays>
             <case-info>SU 29x85</case-info>
@@ -571,7 +571,7 @@
             <tot-impulse-ns>43.2</tot-impulse-ns>
             <burn-time-s>2.93</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=54</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=54</info-url>
             <prop-weight-g>30.3</prop-weight-g>
             <delays>3,5</delays>
             <case-info>RMS-24/40</case-info>
@@ -596,7 +596,7 @@
             <tot-impulse-ns>62.07</tot-impulse-ns>
             <burn-time-s>5.1</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=55</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=55</info-url>
             <prop-weight-g>32.3</prop-weight-g>
             <case-info>RMS-R/C-32/60-100</case-info>
             <prop-info>Blue Thunder</prop-info>
@@ -620,7 +620,7 @@
             <tot-impulse-ns>75.48</tot-impulse-ns>
             <burn-time-s>5.69</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=56</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=56</info-url>
             <prop-weight-g>62.5</prop-weight-g>
             <case-info>RMS-R/C-32/60-100</case-info>
             <prop-info>Blackjack</prop-info>
@@ -644,7 +644,7 @@
             <tot-impulse-ns>51.75</tot-impulse-ns>
             <burn-time-s>2.49</burn-time-s>
             <data-files>3</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=57</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=57</info-url>
             <total-weight-g>80.2</total-weight-g>
             <prop-weight-g>30.0</prop-weight-g>
             <delays>4,7</delays>
@@ -669,7 +669,7 @@
             <tot-impulse-ns>55.0</tot-impulse-ns>
             <burn-time-s>2.5</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=58</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=58</info-url>
             <total-weight-g>64.0</total-weight-g>
             <prop-weight-g>30.0</prop-weight-g>
             <delays>4,6,8</delays>
@@ -695,7 +695,7 @@
             <tot-impulse-ns>65.0</tot-impulse-ns>
             <burn-time-s>3.31</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=59</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=59</info-url>
             <prop-weight-g>46.3</prop-weight-g>
             <delays>5,7</delays>
             <case-info>RMS-29/40</case-info>
@@ -719,7 +719,7 @@
             <tot-impulse-ns>70.0</tot-impulse-ns>
             <burn-time-s>3.47</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=61</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=61</info-url>
             <prop-weight-g>37.8</prop-weight-g>
             <case-info>RMS-R/C-32/60-100</case-info>
             <prop-info>White Lightning</prop-info>
@@ -743,7 +743,7 @@
             <tot-impulse-ns>41.2</tot-impulse-ns>
             <burn-time-s>2.21</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=60</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=60</info-url>
             <total-weight-g>82.3</total-weight-g>
             <prop-weight-g>30.0</prop-weight-g>
             <delays>4,7</delays>
@@ -768,7 +768,7 @@
             <tot-impulse-ns>47.31</tot-impulse-ns>
             <burn-time-s>2.13</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=63</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=63</info-url>
             <prop-weight-g>19.0</prop-weight-g>
             <delays>4,7</delays>
             <case-info>RMS-24/40</case-info>
@@ -793,7 +793,7 @@
             <tot-impulse-ns>77.92</tot-impulse-ns>
             <burn-time-s>3.05</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=64</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=64</info-url>
             <prop-weight-g>35.6</prop-weight-g>
             <delays>4,6,9</delays>
             <prop-info>White Lightning</prop-info>
@@ -816,7 +816,7 @@
             <tot-impulse-ns>62.2</tot-impulse-ns>
             <burn-time-s>2.39230769230769</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=65</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=65</info-url>
             <prop-weight-g>43.1</prop-weight-g>
             <delays>6,9</delays>
             <prop-info>Fast Blackjack</prop-info>
@@ -840,7 +840,7 @@
             <tot-impulse-ns>49.6</tot-impulse-ns>
             <burn-time-s>2.03</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=468</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=468</info-url>
             <prop-weight-g>28.4</prop-weight-g>
             <delays>4,8</delays>
             <prop-info>Redline</prop-info>
@@ -864,7 +864,7 @@
             <tot-impulse-ns>47.0</tot-impulse-ns>
             <burn-time-s>1.54605263157895</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=944</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=944</info-url>
             <prop-weight-g>31.2</prop-weight-g>
             <delays>4,6,8</delays>
             <prop-info>Fast Blackjack</prop-info>
@@ -888,7 +888,7 @@
             <tot-impulse-ns>56.9</tot-impulse-ns>
             <burn-time-s>1.659</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=593</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=593</info-url>
             <total-weight-g>64.0</total-weight-g>
             <prop-weight-g>31.0</prop-weight-g>
             <delays>4,6,8</delays>
@@ -913,7 +913,7 @@
             <tot-impulse-ns>79.2</tot-impulse-ns>
             <burn-time-s>2.72</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=66</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=66</info-url>
             <prop-weight-g>37.7</prop-weight-g>
             <delays>5,10,15</delays>
             <case-info>SU 24x95</case-info>
@@ -938,7 +938,7 @@
             <tot-impulse-ns>57.1</tot-impulse-ns>
             <burn-time-s>1.63</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=559</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=559</info-url>
             <total-weight-g>85.0</total-weight-g>
             <prop-weight-g>30.0</prop-weight-g>
             <delays>5,8,11</delays>
@@ -964,7 +964,7 @@
             <tot-impulse-ns>50.67</tot-impulse-ns>
             <burn-time-s>1.6</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=69</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=69</info-url>
             <prop-weight-g>28.2</prop-weight-g>
             <delays>M</delays>
             <case-info>RMS-29/60</case-info>
@@ -989,7 +989,7 @@
             <tot-impulse-ns>49.66</tot-impulse-ns>
             <burn-time-s>1.33</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=70</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=70</info-url>
             <prop-weight-g>22.7</prop-weight-g>
             <delays>6,9</delays>
             <case-info>RMS-24/40</case-info>
@@ -1014,7 +1014,7 @@
             <tot-impulse-ns>78.09</tot-impulse-ns>
             <burn-time-s>2.06</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=71</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=71</info-url>
             <prop-weight-g>40.0</prop-weight-g>
             <delays>4,7,10</delays>
             <case-info>RMS-29/40</case-info>
@@ -1038,7 +1038,7 @@
             <tot-impulse-ns>52.9</tot-impulse-ns>
             <burn-time-s>1.25952380952381</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=72</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=72</info-url>
             <prop-weight-g>27.0</prop-weight-g>
             <delays>4,8</delays>
             <prop-info>Blue Thunder</prop-info>
@@ -1062,7 +1062,7 @@
             <tot-impulse-ns>41.5</tot-impulse-ns>
             <burn-time-s>1.0</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1023</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1023</info-url>
             <total-weight-g>48.0</total-weight-g>
             <prop-weight-g>19.7</prop-weight-g>
             <delays>4,8</delays>
@@ -1087,7 +1087,7 @@
             <tot-impulse-ns>76.83</tot-impulse-ns>
             <burn-time-s>1.43</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=73</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=73</info-url>
             <prop-weight-g>37.9</prop-weight-g>
             <delays>4,6,9</delays>
             <prop-info>Blue Thunder</prop-info>
@@ -1111,7 +1111,7 @@
             <tot-impulse-ns>72.95</tot-impulse-ns>
             <burn-time-s>1.42</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=75</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=75</info-url>
             <prop-weight-g>36.6</prop-weight-g>
             <delays>5,8,11</delays>
             <case-info>RMS-29/40</case-info>
@@ -1136,7 +1136,7 @@
             <tot-impulse-ns>51.0</tot-impulse-ns>
             <burn-time-s>1.13</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=77</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=77</info-url>
             <total-weight-g>109.0</total-weight-g>
             <prop-weight-g>30.5</prop-weight-g>
             <delays>M</delays>
@@ -1162,7 +1162,7 @@
             <tot-impulse-ns>74.92</tot-impulse-ns>
             <burn-time-s>1.21</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=78</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=78</info-url>
             <prop-weight-g>36.8</prop-weight-g>
             <delays>5,10,15</delays>
             <case-info>SU 24x124</case-info>
@@ -1186,7 +1186,7 @@
             <tot-impulse-ns>85.0</tot-impulse-ns>
             <burn-time-s>1.0</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=108</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=108</info-url>
             <prop-weight-g>46.0</prop-weight-g>
             <delays>S,M,L</delays>
             <case-info>RMS-29/100</case-info>
@@ -1211,7 +1211,7 @@
             <tot-impulse-ns>81.5</tot-impulse-ns>
             <burn-time-s>1.0</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=109</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=109</info-url>
             <total-weight-g>136.0</total-weight-g>
             <prop-weight-g>43.9</prop-weight-g>
             <delays>M</delays>
@@ -1237,7 +1237,7 @@
             <tot-impulse-ns>87.22</tot-impulse-ns>
             <burn-time-s>8.55</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=80</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=80</info-url>
             <prop-weight-g>51.1</prop-weight-g>
             <case-info>RMS-R/C-32/60-100</case-info>
             <prop-info>Blue Thunder</prop-info>
@@ -1261,7 +1261,7 @@
             <tot-impulse-ns>128.0</tot-impulse-ns>
             <burn-time-s>0.95</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1017</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1017</info-url>
             <total-weight-g>125.0</total-weight-g>
             <prop-weight-g>59.6</prop-weight-g>
             <delays>0-14</delays>
@@ -1286,7 +1286,7 @@
             <tot-impulse-ns>84.3</tot-impulse-ns>
             <burn-time-s>0.618</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=583</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=583</info-url>
             <total-weight-g>98.0</total-weight-g>
             <prop-weight-g>44.0</prop-weight-g>
             <delays>6,10,14</delays>
@@ -1312,7 +1312,7 @@
             <tot-impulse-ns>117.5</tot-impulse-ns>
             <burn-time-s>5.3</burn-time-s>
             <data-files>3</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=82</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=82</info-url>
             <prop-weight-g>62.5</prop-weight-g>
             <delays>0-10</delays>
             <case-info>RMS-29/120</case-info>
@@ -1337,7 +1337,7 @@
             <tot-impulse-ns>98.39</tot-impulse-ns>
             <burn-time-s>3.27</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=83</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=83</info-url>
             <prop-weight-g>72.2</prop-weight-g>
             <delays>5,7</delays>
             <case-info>RMS-29/40-120</case-info>
@@ -1361,7 +1361,7 @@
             <tot-impulse-ns>108.9</tot-impulse-ns>
             <burn-time-s>0.35</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=459</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=459</info-url>
             <prop-weight-g>49.0</prop-weight-g>
             <delays>P</delays>
             <case-info>RMS-38/120</case-info>
@@ -1386,7 +1386,7 @@
             <tot-impulse-ns>100.82</tot-impulse-ns>
             <burn-time-s>2.91</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=84</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=84</info-url>
             <prop-weight-g>50.0</prop-weight-g>
             <delays>4,7</delays>
             <case-info>SU 29x98</case-info>
@@ -1410,7 +1410,7 @@
             <tot-impulse-ns>87.68</tot-impulse-ns>
             <burn-time-s>2.18</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=87</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=87</info-url>
             <prop-weight-g>55.0</prop-weight-g>
             <delays>4,7</delays>
             <prop-info>Fast Blackjack</prop-info>
@@ -1434,7 +1434,7 @@
             <tot-impulse-ns>113.74</tot-impulse-ns>
             <burn-time-s>3.06</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=89</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=89</info-url>
             <prop-weight-g>62.4</prop-weight-g>
             <delays>4,7,10</delays>
             <prop-info>White Lightning</prop-info>
@@ -1458,7 +1458,7 @@
             <tot-impulse-ns>90.9</tot-impulse-ns>
             <burn-time-s>1.71</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=482</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=482</info-url>
             <total-weight-g>146.0</total-weight-g>
             <prop-weight-g>60.0</prop-weight-g>
             <delays>5,7,10</delays>
@@ -1484,7 +1484,7 @@
             <tot-impulse-ns>81.05</tot-impulse-ns>
             <burn-time-s>1.51</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=90</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=90</info-url>
             <prop-weight-g>46.0</prop-weight-g>
             <delays>M</delays>
             <case-info>RMS-29/100</case-info>
@@ -1509,7 +1509,7 @@
             <tot-impulse-ns>119.57</tot-impulse-ns>
             <burn-time-s>2.44</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=91</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=91</info-url>
             <prop-weight-g>62.5</prop-weight-g>
             <delays>5,10,15</delays>
             <case-info>SU 24x177</case-info>
@@ -1533,7 +1533,7 @@
             <tot-impulse-ns>110.5</tot-impulse-ns>
             <burn-time-s>2.04</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=94</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=94</info-url>
             <total-weight-g>194.0</total-weight-g>
             <prop-weight-g>62.3</prop-weight-g>
             <delays>M</delays>
@@ -1559,7 +1559,7 @@
             <tot-impulse-ns>118.8</tot-impulse-ns>
             <burn-time-s>2.09</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=96</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=96</info-url>
             <total-weight-g>151.0</total-weight-g>
             <prop-weight-g>62.5</prop-weight-g>
             <delays>4,7,10</delays>
@@ -1584,7 +1584,7 @@
             <tot-impulse-ns>110.0</tot-impulse-ns>
             <burn-time-s>1.64179104477612</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=97</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=97</info-url>
             <total-weight-g>201.0</total-weight-g>
             <prop-weight-g>60.0</prop-weight-g>
             <delays>M</delays>
@@ -1610,7 +1610,7 @@
             <tot-impulse-ns>136.7</tot-impulse-ns>
             <burn-time-s>1.88</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=469</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=469</info-url>
             <total-weight-g>62.2</total-weight-g>
             <delays>P</delays>
             <case-info>RMS-38/120</case-info>
@@ -1635,7 +1635,7 @@
             <tot-impulse-ns>107.0</tot-impulse-ns>
             <burn-time-s>1.51</burn-time-s>
             <data-files>3</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=464</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=464</info-url>
             <total-weight-g>147.0</total-weight-g>
             <prop-weight-g>64.0</prop-weight-g>
             <delays>4, 7, 10</delays>
@@ -1661,7 +1661,7 @@
             <tot-impulse-ns>82.75</tot-impulse-ns>
             <burn-time-s>1.1</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1024</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1024</info-url>
             <total-weight-g>87.0</total-weight-g>
             <prop-weight-g>39.3</prop-weight-g>
             <delays>6,8</delays>
@@ -1686,7 +1686,7 @@
             <tot-impulse-ns>135.6</tot-impulse-ns>
             <burn-time-s>2.43</burn-time-s>
             <data-files>5</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=100</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=100</info-url>
             <total-weight-g>232.96</total-weight-g>
             <prop-weight-g>104.3</prop-weight-g>
             <delays>M</delays>
@@ -1712,7 +1712,7 @@
             <tot-impulse-ns>118.0</tot-impulse-ns>
             <burn-time-s>1.5</burn-time-s>
             <data-files>3</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=532</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=532</info-url>
             <total-weight-g>147.0</total-weight-g>
             <prop-weight-g>60.0</prop-weight-g>
             <delays>4,7,10</delays>
@@ -1737,7 +1737,7 @@
             <tot-impulse-ns>105.0</tot-impulse-ns>
             <burn-time-s>1.36363636363636</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=101</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=101</info-url>
             <total-weight-g>165.0</total-weight-g>
             <prop-weight-g>58.0</prop-weight-g>
             <delays>M</delays>
@@ -1763,7 +1763,7 @@
             <tot-impulse-ns>102.86</tot-impulse-ns>
             <burn-time-s>1.28</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=582</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=582</info-url>
             <total-weight-g>122.5</total-weight-g>
             <prop-weight-g>64.0</prop-weight-g>
             <delays>4,7,10</delays>
@@ -1788,7 +1788,7 @@
             <tot-impulse-ns>109.94</tot-impulse-ns>
             <burn-time-s>1.378</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=560</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=560</info-url>
             <total-weight-g>125.0</total-weight-g>
             <prop-weight-g>59.7</prop-weight-g>
             <delays>4,7,10</delays>
@@ -1813,7 +1813,7 @@
             <tot-impulse-ns>108.56</tot-impulse-ns>
             <burn-time-s>1.42</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=103</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=103</info-url>
             <total-weight-g>157.0</total-weight-g>
             <prop-weight-g>62.0</prop-weight-g>
             <delays>M</delays>
@@ -1839,7 +1839,7 @@
             <tot-impulse-ns>108.3</tot-impulse-ns>
             <burn-time-s>1.5</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=581</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=581</info-url>
             <total-weight-g>124.0</total-weight-g>
             <prop-weight-g>65.0</prop-weight-g>
             <delays>4,7,10</delays>
@@ -1864,7 +1864,7 @@
             <tot-impulse-ns>132.17</tot-impulse-ns>
             <burn-time-s>1.53</burn-time-s>
             <data-files>5</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=104</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=104</info-url>
             <total-weight-g>127.9</total-weight-g>
             <prop-weight-g>62.5</prop-weight-g>
             <delays>7,10,13,0-14</delays>
@@ -1889,7 +1889,7 @@
             <tot-impulse-ns>226.8</tot-impulse-ns>
             <burn-time-s>2.32</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1088</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1088</info-url>
             <total-weight-g>261.0</total-weight-g>
             <prop-weight-g>121.0</prop-weight-g>
             <delays>10</delays>
@@ -1915,7 +1915,7 @@
             <tot-impulse-ns>261.1</tot-impulse-ns>
             <burn-time-s>2.92</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=126</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=126</info-url>
             <total-weight-g>379.456</total-weight-g>
             <prop-weight-g>191.2</prop-weight-g>
             <delays>M</delays>
@@ -1941,7 +1941,7 @@
             <tot-impulse-ns>223.6</tot-impulse-ns>
             <burn-time-s>1.76</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=128</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=128</info-url>
             <total-weight-g>275.0</total-weight-g>
             <prop-weight-g>128.7</prop-weight-g>
             <delays>M</delays>
@@ -1967,7 +1967,7 @@
             <tot-impulse-ns>299.4</tot-impulse-ns>
             <burn-time-s>2.6</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=130</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=130</info-url>
             <total-weight-g>322.56</total-weight-g>
             <prop-weight-g>187.9</prop-weight-g>
             <delays>S,M,L</delays>
@@ -1993,7 +1993,7 @@
             <tot-impulse-ns>172.9</tot-impulse-ns>
             <burn-time-s>1.27</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=131</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=131</info-url>
             <total-weight-g>206.0</total-weight-g>
             <prop-weight-g>94.2</prop-weight-g>
             <delays>M</delays>
@@ -2019,7 +2019,7 @@
             <tot-impulse-ns>210.0</tot-impulse-ns>
             <burn-time-s>1.65</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1090</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1090</info-url>
             <total-weight-g>237.0</total-weight-g>
             <prop-weight-g>120.0</prop-weight-g>
             <delays>6-8-10-12-14</delays>
@@ -2044,7 +2044,7 @@
             <tot-impulse-ns>206.0</tot-impulse-ns>
             <burn-time-s>1.39189189189189</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=135</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=135</info-url>
             <total-weight-g>309.12</total-weight-g>
             <prop-weight-g>122.0</prop-weight-g>
             <delays>M</delays>
@@ -2069,7 +2069,7 @@
             <tot-impulse-ns>165.0</tot-impulse-ns>
             <burn-time-s>1.0</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=138</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=138</info-url>
             <total-weight-g>201.6</total-weight-g>
             <prop-weight-g>90.0</prop-weight-g>
             <delays>M</delays>
@@ -2095,7 +2095,7 @@
             <tot-impulse-ns>319.9</tot-impulse-ns>
             <burn-time-s>1.91</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=903</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=903</info-url>
             <total-weight-g>330.0</total-weight-g>
             <prop-weight-g>182.5</prop-weight-g>
             <delays>0-14</delays>
@@ -2121,7 +2121,7 @@
             <tot-impulse-ns>283.0</tot-impulse-ns>
             <burn-time-s>1.74</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=965</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=965</info-url>
             <total-weight-g>324.0</total-weight-g>
             <prop-weight-g>177.0</prop-weight-g>
             <delays>0-14</delays>
@@ -2147,7 +2147,7 @@
             <tot-impulse-ns>217.7</tot-impulse-ns>
             <burn-time-s>1.3</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=139</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=139</info-url>
             <total-weight-g>252.0</total-weight-g>
             <prop-weight-g>123.9</prop-weight-g>
             <delays>M</delays>
@@ -2173,7 +2173,7 @@
             <tot-impulse-ns>215.41</tot-impulse-ns>
             <burn-time-s>1.0</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=140</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=140</info-url>
             <total-weight-g>246.4</total-weight-g>
             <prop-weight-g>106.4</prop-weight-g>
             <delays>M</delays>
@@ -2198,7 +2198,7 @@
             <tot-impulse-ns>220.0</tot-impulse-ns>
             <burn-time-s>1.0</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=142</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=142</info-url>
             <prop-weight-g>106.4</prop-weight-g>
             <delays>M</delays>
             <case-info>RMS-29/240</case-info>
@@ -2223,7 +2223,7 @@
             <tot-impulse-ns>165.5</tot-impulse-ns>
             <burn-time-s>0.71</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=144</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=144</info-url>
             <total-weight-g>196.0</total-weight-g>
             <prop-weight-g>83.4</prop-weight-g>
             <delays>M</delays>
@@ -2249,7 +2249,7 @@
             <tot-impulse-ns>231.7</tot-impulse-ns>
             <burn-time-s>1.06</burn-time-s>
             <data-files>7</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=145</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=145</info-url>
             <total-weight-g>264.0</total-weight-g>
             <prop-weight-g>114.7</prop-weight-g>
             <delays>M</delays>
@@ -2274,7 +2274,7 @@
             <tot-impulse-ns>231.0</tot-impulse-ns>
             <burn-time-s>0.9</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=483</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=483</info-url>
             <total-weight-g>256.0</total-weight-g>
             <prop-weight-g>116.3</prop-weight-g>
             <delays>M</delays>
@@ -2299,7 +2299,7 @@
             <tot-impulse-ns>320.0</tot-impulse-ns>
             <burn-time-s>1.19402985074627</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=147</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=147</info-url>
             <total-weight-g>358.4</total-weight-g>
             <prop-weight-g>166.0</prop-weight-g>
             <delays>M</delays>
@@ -2325,7 +2325,7 @@
             <tot-impulse-ns>289.0</tot-impulse-ns>
             <burn-time-s>6.0</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=115</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=115</info-url>
             <total-weight-g>294.784</total-weight-g>
             <prop-weight-g>197.4</prop-weight-g>
             <delays>10,15</delays>
@@ -2351,7 +2351,7 @@
             <tot-impulse-ns>162.3</tot-impulse-ns>
             <burn-time-s>2.45</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=118</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=118</info-url>
             <total-weight-g>188.16</total-weight-g>
             <prop-weight-g>99.7</prop-weight-g>
             <delays>6,10,14</delays>
@@ -2377,7 +2377,7 @@
             <tot-impulse-ns>221.0</tot-impulse-ns>
             <burn-time-s>0.339</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=155</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=155</info-url>
             <prop-weight-g>98.0</prop-weight-g>
             <delays>P</delays>
             <case-info>RMS-38/240</case-info>
@@ -2402,7 +2402,7 @@
             <tot-impulse-ns>215.0</tot-impulse-ns>
             <burn-time-s>2.0</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=121</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=121</info-url>
             <total-weight-g>224.0</total-weight-g>
             <prop-weight-g>126.0</prop-weight-g>
             <delays>6,10,14</delays>
@@ -2428,7 +2428,7 @@
             <tot-impulse-ns>185.6</tot-impulse-ns>
             <burn-time-s>2.55</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=122</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=122</info-url>
             <total-weight-g>309.12</total-weight-g>
             <prop-weight-g>142.7</prop-weight-g>
             <delays>M</delays>
@@ -2454,7 +2454,7 @@
             <tot-impulse-ns>177.3</tot-impulse-ns>
             <burn-time-s>2.23</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=124</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=124</info-url>
             <total-weight-g>277.76</total-weight-g>
             <prop-weight-g>137.1</prop-weight-g>
             <delays>M</delays>
@@ -2479,7 +2479,7 @@
             <tot-impulse-ns>319.9</tot-impulse-ns>
             <burn-time-s>0.32022022022022</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=156</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=156</info-url>
             <prop-weight-g>147.0</prop-weight-g>
             <delays>P</delays>
             <case-info>RMS-38/360</case-info>
@@ -2504,7 +2504,7 @@
             <tot-impulse-ns>157.1</tot-impulse-ns>
             <burn-time-s>1.13840579710145</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=945</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=945</info-url>
             <prop-weight-g>70.0</prop-weight-g>
             <delays>0-14</delays>
             <case-info>RMS-29/40</case-info>
@@ -2529,7 +2529,7 @@
             <tot-impulse-ns>120.39</tot-impulse-ns>
             <burn-time-s>1.61</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=902</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=902</info-url>
             <total-weight-g>131.0</total-weight-g>
             <prop-weight-g>66.8</prop-weight-g>
             <delays>4,7,10</delays>
@@ -2554,7 +2554,7 @@
             <tot-impulse-ns>172.0</tot-impulse-ns>
             <burn-time-s>1.5</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1018</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1018</info-url>
             <total-weight-g>205.0</total-weight-g>
             <prop-weight-g>113.0</prop-weight-g>
             <delays>0-14</delays>
@@ -2579,7 +2579,7 @@
             <tot-impulse-ns>225.84</tot-impulse-ns>
             <burn-time-s>1.95</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1009</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1009</info-url>
             <total-weight-g>212.0</total-weight-g>
             <prop-weight-g>82.0</prop-weight-g>
             <delays>0-14</delays>
@@ -2604,7 +2604,7 @@
             <tot-impulse-ns>218.0</tot-impulse-ns>
             <burn-time-s>1.2</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1029</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1029</info-url>
             <total-weight-g>207.0</total-weight-g>
             <prop-weight-g>115.0</prop-weight-g>
             <delays>0-14</delays>
@@ -2629,7 +2629,7 @@
             <tot-impulse-ns>236.0919</tot-impulse-ns>
             <burn-time-s>1.14</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1011</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1011</info-url>
             <total-weight-g>197.0</total-weight-g>
             <prop-weight-g>115.0</prop-weight-g>
             <delays>0-14</delays>
@@ -2654,7 +2654,7 @@
             <tot-impulse-ns>320.0</tot-impulse-ns>
             <burn-time-s>6.0</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1031</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1031</info-url>
             <total-weight-g>365.0</total-weight-g>
             <prop-weight-g>180.0</prop-weight-g>
             <delays>0-10</delays>
@@ -2679,7 +2679,7 @@
             <tot-impulse-ns>312.0</tot-impulse-ns>
             <burn-time-s>0.56</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1074</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1074</info-url>
             <total-weight-g>316.0</total-weight-g>
             <prop-weight-g>176.0</prop-weight-g>
             <delays>14</delays>
@@ -2705,7 +2705,7 @@
             <tot-impulse-ns>336.0</tot-impulse-ns>
             <burn-time-s>2.4</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1013</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1013</info-url>
             <total-weight-g>356.0</total-weight-g>
             <prop-weight-g>183.0</prop-weight-g>
             <delays>0-14</delays>
@@ -2730,7 +2730,7 @@
             <tot-impulse-ns>345.0</tot-impulse-ns>
             <burn-time-s>1.7</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1030</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1030</info-url>
             <total-weight-g>315.0</total-weight-g>
             <prop-weight-g>188.0</prop-weight-g>
             <delays>0-14</delays>
@@ -2755,7 +2755,7 @@
             <tot-impulse-ns>561.0</tot-impulse-ns>
             <burn-time-s>1.9</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1014</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1014</info-url>
             <total-weight-g>616.0</total-weight-g>
             <prop-weight-g>355.0</prop-weight-g>
             <delays>0-14</delays>
@@ -2780,7 +2780,7 @@
             <tot-impulse-ns>620.0</tot-impulse-ns>
             <burn-time-s>1.24</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1019</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1019</info-url>
             <total-weight-g>576.0</total-weight-g>
             <prop-weight-g>312.0</prop-weight-g>
             <delays>0-14</delays>
@@ -2805,7 +2805,7 @@
             <tot-impulse-ns>640.0</tot-impulse-ns>
             <burn-time-s>9.0</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1033</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1033</info-url>
             <total-weight-g>752.0</total-weight-g>
             <prop-weight-g>377.0</prop-weight-g>
             <delays>0-10</delays>
@@ -2830,7 +2830,7 @@
             <tot-impulse-ns>703.0</tot-impulse-ns>
             <burn-time-s>2.6</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1015</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1015</info-url>
             <total-weight-g>642.0</total-weight-g>
             <prop-weight-g>381.0</prop-weight-g>
             <delays>0-14</delays>
@@ -2855,7 +2855,7 @@
             <tot-impulse-ns>676.0</tot-impulse-ns>
             <burn-time-s>1.6</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1032</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1032</info-url>
             <total-weight-g>631.0</total-weight-g>
             <prop-weight-g>364.0</prop-weight-g>
             <delays>0-14</delays>
@@ -2880,7 +2880,7 @@
             <tot-impulse-ns>1434.0</tot-impulse-ns>
             <burn-time-s>2.8</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1034</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1034</info-url>
             <total-weight-g>1264.0</total-weight-g>
             <prop-weight-g>745.0</prop-weight-g>
             <delays>0-14</delays>
@@ -2905,7 +2905,7 @@
             <tot-impulse-ns>2714.0</tot-impulse-ns>
             <burn-time-s>2.7</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1035</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1035</info-url>
             <total-weight-g>2194.0</total-weight-g>
             <prop-weight-g>1400.0</prop-weight-g>
             <delays>0-18</delays>
@@ -2929,7 +2929,7 @@
             <tot-impulse-ns>412.0</tot-impulse-ns>
             <burn-time-s>3.58260869565217</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=487</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=487</info-url>
             <total-weight-g>545.0</total-weight-g>
             <prop-weight-g>219.0</prop-weight-g>
             <delays>M</delays>
@@ -2954,7 +2954,7 @@
             <tot-impulse-ns>361.0</tot-impulse-ns>
             <burn-time-s>3.1</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=491</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=491</info-url>
             <total-weight-g>566.0</total-weight-g>
             <prop-weight-g>243.0</prop-weight-g>
             <delays>M</delays>
@@ -2980,7 +2980,7 @@
             <tot-impulse-ns>422.95</tot-impulse-ns>
             <burn-time-s>0.316</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=453</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=453</info-url>
             <total-weight-g>422.0</total-weight-g>
             <prop-weight-g>192.0</prop-weight-g>
             <delays>P</delays>
@@ -3006,7 +3006,7 @@
             <tot-impulse-ns>610.7</tot-impulse-ns>
             <burn-time-s>4.83</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=167</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=167</info-url>
             <total-weight-g>512.064</total-weight-g>
             <prop-weight-g>376.4</prop-weight-g>
             <delays>M,L</delays>
@@ -3032,7 +3032,7 @@
             <tot-impulse-ns>378.0</tot-impulse-ns>
             <burn-time-s>2.99</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=173</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=173</info-url>
             <total-weight-g>491.904</total-weight-g>
             <prop-weight-g>252.8</prop-weight-g>
             <delays>M</delays>
@@ -3058,7 +3058,7 @@
             <tot-impulse-ns>328.7</tot-impulse-ns>
             <burn-time-s>1.82</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=177</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=177</info-url>
             <total-weight-g>366.0</total-weight-g>
             <prop-weight-g>193.2</prop-weight-g>
             <delays>0-14</delays>
@@ -3084,7 +3084,7 @@
             <tot-impulse-ns>418.54</tot-impulse-ns>
             <burn-time-s>2.4</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=911</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=911</info-url>
             <total-weight-g>528.0</total-weight-g>
             <prop-weight-g>227.0</prop-weight-g>
             <delays>0-10</delays>
@@ -3110,7 +3110,7 @@
             <tot-impulse-ns>326.0</tot-impulse-ns>
             <burn-time-s>1.8</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1091</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1091</info-url>
             <total-weight-g>385.0</total-weight-g>
             <prop-weight-g>180.0</prop-weight-g>
             <delays>6,8,10,12,14</delays>
@@ -3136,7 +3136,7 @@
             <tot-impulse-ns>426.1</tot-impulse-ns>
             <burn-time-s>2.1</burn-time-s>
             <data-files>7</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=180</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=180</info-url>
             <total-weight-g>572.0</total-weight-g>
             <prop-weight-g>301.0</prop-weight-g>
             <delays>M</delays>
@@ -3162,7 +3162,7 @@
             <tot-impulse-ns>324.5</tot-impulse-ns>
             <burn-time-s>1.65</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=181</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=181</info-url>
             <total-weight-g>357.504</total-weight-g>
             <prop-weight-g>187.3</prop-weight-g>
             <delays>M</delays>
@@ -3188,7 +3188,7 @@
             <tot-impulse-ns>441.6</tot-impulse-ns>
             <burn-time-s>1.72</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=185</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=185</info-url>
             <total-weight-g>455.0</total-weight-g>
             <prop-weight-g>251.3</prop-weight-g>
             <delays>0-14</delays>
@@ -3213,7 +3213,7 @@
             <tot-impulse-ns>399.0</tot-impulse-ns>
             <burn-time-s>1.85581395348837</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=489</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=489</info-url>
             <total-weight-g>527.0</total-weight-g>
             <prop-weight-g>208.0</prop-weight-g>
             <delays>M</delays>
@@ -3238,7 +3238,7 @@
             <tot-impulse-ns>330.0</tot-impulse-ns>
             <burn-time-s>1.51376146788991</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=187</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=187</info-url>
             <total-weight-g>371.84</total-weight-g>
             <prop-weight-g>172.7</prop-weight-g>
             <delays>M</delays>
@@ -3264,7 +3264,7 @@
             <tot-impulse-ns>367.89</tot-impulse-ns>
             <burn-time-s>1.59</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=456</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=456</info-url>
             <prop-weight-g>264.0</prop-weight-g>
             <delays>M</delays>
             <case-info>RMS-38/480</case-info>
@@ -3288,7 +3288,7 @@
             <tot-impulse-ns>407.0</tot-impulse-ns>
             <burn-time-s>1.77729257641921</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=488</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=488</info-url>
             <total-weight-g>514.0</total-weight-g>
             <prop-weight-g>196.0</prop-weight-g>
             <delays>M</delays>
@@ -3313,7 +3313,7 @@
             <tot-impulse-ns>351.0</tot-impulse-ns>
             <burn-time-s>1.4</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=484</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=484</info-url>
             <total-weight-g>365.0</total-weight-g>
             <prop-weight-g>181.3</prop-weight-g>
             <delays>M</delays>
@@ -3339,7 +3339,7 @@
             <tot-impulse-ns>607.3</tot-impulse-ns>
             <burn-time-s>1.94</burn-time-s>
             <data-files>7</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=197</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=197</info-url>
             <total-weight-g>555.52</total-weight-g>
             <prop-weight-g>315.9</prop-weight-g>
             <delays>M</delays>
@@ -3364,7 +3364,7 @@
             <tot-impulse-ns>420.0</tot-impulse-ns>
             <burn-time-s>1.47368421052632</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=199</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=199</info-url>
             <total-weight-g>492.8</total-weight-g>
             <prop-weight-g>230.2</prop-weight-g>
             <delays>M</delays>
@@ -3390,7 +3390,7 @@
             <tot-impulse-ns>426.51</tot-impulse-ns>
             <burn-time-s>1.42</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=203</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=203</info-url>
             <prop-weight-g>221.6</prop-weight-g>
             <delays>M</delays>
             <case-info>RMS-38/480</case-info>
@@ -3415,7 +3415,7 @@
             <tot-impulse-ns>452.1</tot-impulse-ns>
             <burn-time-s>1.44</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=457</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=457</info-url>
             <prop-weight-g>330.0</prop-weight-g>
             <delays>M</delays>
             <case-info>RMS-38/600</case-info>
@@ -3440,7 +3440,7 @@
             <tot-impulse-ns>539.0</tot-impulse-ns>
             <burn-time-s>1.72</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=966</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=966</info-url>
             <total-weight-g>628.0</total-weight-g>
             <prop-weight-g>354.0</prop-weight-g>
             <delays>0-14</delays>
@@ -3466,7 +3466,7 @@
             <tot-impulse-ns>634.6</tot-impulse-ns>
             <burn-time-s>1.86</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=951</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=951</info-url>
             <total-weight-g>616.0</total-weight-g>
             <prop-weight-g>348.0</prop-weight-g>
             <delays>10</delays>
@@ -3491,7 +3491,7 @@
             <tot-impulse-ns>342.0</tot-impulse-ns>
             <burn-time-s>1.0</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=211</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=211</info-url>
             <total-weight-g>343.0</total-weight-g>
             <prop-weight-g>174.4</prop-weight-g>
             <delays>0-14</delays>
@@ -3517,7 +3517,7 @@
             <tot-impulse-ns>570.13</tot-impulse-ns>
             <burn-time-s>1.52</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=455</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=455</info-url>
             <prop-weight-g>396.0</prop-weight-g>
             <delays>M</delays>
             <case-info>RMS-38/720</case-info>
@@ -3542,7 +3542,7 @@
             <tot-impulse-ns>539.0</tot-impulse-ns>
             <burn-time-s>1.0</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=213</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=213</info-url>
             <total-weight-g>555.52</total-weight-g>
             <prop-weight-g>300.0</prop-weight-g>
             <delays>M</delays>
@@ -3568,7 +3568,7 @@
             <tot-impulse-ns>568.9</tot-impulse-ns>
             <burn-time-s>1.1</burn-time-s>
             <data-files>7</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=218</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=218</info-url>
             <total-weight-g>518.0</total-weight-g>
             <prop-weight-g>269.9</prop-weight-g>
             <delays>M</delays>
@@ -3594,7 +3594,7 @@
             <tot-impulse-ns>383.0</tot-impulse-ns>
             <burn-time-s>7.68</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=719</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=719</info-url>
             <total-weight-g>398.0</total-weight-g>
             <prop-weight-g>205.0</prop-weight-g>
             <delays>P</delays>
@@ -3620,7 +3620,7 @@
             <tot-impulse-ns>404.87</tot-impulse-ns>
             <burn-time-s>0.6</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=490</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=490</info-url>
             <total-weight-g>512.0</total-weight-g>
             <prop-weight-g>195.0</prop-weight-g>
             <delays>P</delays>
@@ -3646,7 +3646,7 @@
             <tot-impulse-ns>486.0</tot-impulse-ns>
             <burn-time-s>7.99</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=720</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=720</info-url>
             <total-weight-g>487.0</total-weight-g>
             <prop-weight-g>272.0</prop-weight-g>
             <delays>P</delays>
@@ -3672,7 +3672,7 @@
             <tot-impulse-ns>597.3</tot-impulse-ns>
             <burn-time-s>1.09</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=506</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=506</info-url>
             <total-weight-g>602.0</total-weight-g>
             <prop-weight-g>324.0</prop-weight-g>
             <delays>M</delays>
@@ -3698,7 +3698,7 @@
             <tot-impulse-ns>630.5</tot-impulse-ns>
             <burn-time-s>8.26</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=157</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=157</info-url>
             <total-weight-g>761.6</total-weight-g>
             <prop-weight-g>369.7</prop-weight-g>
             <case-info>SU 54x235</case-info>
@@ -3723,7 +3723,7 @@
             <tot-impulse-ns>1202.4</tot-impulse-ns>
             <burn-time-s>7.75</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=227</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=227</info-url>
             <total-weight-g>1288.0</total-weight-g>
             <prop-weight-g>638.7</prop-weight-g>
             <case-info>SU 54x368</case-info>
@@ -3748,7 +3748,7 @@
             <tot-impulse-ns>843.4</tot-impulse-ns>
             <burn-time-s>0.653</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=462</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=462</info-url>
             <total-weight-g>834.0</total-weight-g>
             <prop-weight-g>371.6</prop-weight-g>
             <delays>P</delays>
@@ -3774,7 +3774,7 @@
             <tot-impulse-ns>1069.0</tot-impulse-ns>
             <burn-time-s>6.83</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=228</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=228</info-url>
             <total-weight-g>1141.06</total-weight-g>
             <prop-weight-g>633.0</prop-weight-g>
             <delays>L</delays>
@@ -3800,7 +3800,7 @@
             <tot-impulse-ns>825.7</tot-impulse-ns>
             <burn-time-s>5.65</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=231</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=231</info-url>
             <total-weight-g>1797.38</total-weight-g>
             <prop-weight-g>409.5</prop-weight-g>
             <case-info>RMS 54/1280</case-info>
@@ -3823,7 +3823,7 @@
             <tot-impulse-ns>739.0</tot-impulse-ns>
             <burn-time-s>4.4</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=237</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=237</info-url>
             <prop-weight-g>409.5</prop-weight-g>
             <case-info>RMS 54/1280</case-info>
             <updated-on>2014-07-22</updated-on>
@@ -3846,7 +3846,7 @@
             <tot-impulse-ns>1214.8</tot-impulse-ns>
             <burn-time-s>0.61</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=463</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=463</info-url>
             <prop-weight-g>591.0</prop-weight-g>
             <delays>P</delays>
             <case-info>RMS-54/1280</case-info>
@@ -3871,7 +3871,7 @@
             <tot-impulse-ns>764.0</tot-impulse-ns>
             <burn-time-s>4.5</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=238</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=238</info-url>
             <total-weight-g>809.088</total-weight-g>
             <prop-weight-g>437.1</prop-weight-g>
             <delays>L</delays>
@@ -3896,7 +3896,7 @@
             <max-thrust-n>651.819</max-thrust-n>
             <tot-impulse-ns>853.842</tot-impulse-ns>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=241</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=241</info-url>
             <total-weight-g>1497.0</total-weight-g>
             <prop-weight-g>471.0</prop-weight-g>
             <case-info>RMS 54/1280</case-info>
@@ -3919,7 +3919,7 @@
             <tot-impulse-ns>731.0</tot-impulse-ns>
             <burn-time-s>2.9</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=492</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=492</info-url>
             <total-weight-g>907.0</total-weight-g>
             <prop-weight-g>487.0</prop-weight-g>
             <delays>L</delays>
@@ -3945,7 +3945,7 @@
             <tot-impulse-ns>704.0</tot-impulse-ns>
             <burn-time-s>2.7</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1087</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1087</info-url>
             <total-weight-g>708.0</total-weight-g>
             <prop-weight-g>363.0</prop-weight-g>
             <delays>14</delays>
@@ -3970,7 +3970,7 @@
             <max-thrust-n>598.969</max-thrust-n>
             <tot-impulse-ns>1170.22</tot-impulse-ns>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=251</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=251</info-url>
             <total-weight-g>1574.0</total-weight-g>
             <prop-weight-g>558.0</prop-weight-g>
             <case-info>RMS 54/1280</case-info>
@@ -3994,7 +3994,7 @@
             <tot-impulse-ns>774.0</tot-impulse-ns>
             <burn-time-s>3.3</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=255</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=255</info-url>
             <total-weight-g>864.192</total-weight-g>
             <prop-weight-g>472.0</prop-weight-g>
             <delays>L</delays>
@@ -4019,7 +4019,7 @@
             <tot-impulse-ns>763.3</tot-impulse-ns>
             <burn-time-s>2.4231746031746</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=262</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=262</info-url>
             <total-weight-g>851.2</total-weight-g>
             <prop-weight-g>438.0</prop-weight-g>
             <delays>L</delays>
@@ -4045,7 +4045,7 @@
             <tot-impulse-ns>651.68</tot-impulse-ns>
             <burn-time-s>1.836</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=904</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=904</info-url>
             <total-weight-g>577.3</total-weight-g>
             <prop-weight-g>365.0</prop-weight-g>
             <delays>0-14</delays>
@@ -4071,7 +4071,7 @@
             <tot-impulse-ns>670.1</tot-impulse-ns>
             <burn-time-s>1.5</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=269</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=269</info-url>
             <prop-weight-g>361.1</prop-weight-g>
             <delays>M</delays>
             <case-info>RMS-38/720</case-info>
@@ -4096,7 +4096,7 @@
             <tot-impulse-ns>697.4</tot-impulse-ns>
             <burn-time-s>1.78</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=270</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=270</info-url>
             <prop-weight-g>381.1</prop-weight-g>
             <delays>S,M,L</delays>
             <case-info>RMS-38/720</case-info>
@@ -4120,7 +4120,7 @@
             <tot-impulse-ns>1280.0</tot-impulse-ns>
             <burn-time-s>3.28205128205128</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=278</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=278</info-url>
             <prop-weight-g>391.0</prop-weight-g>
             <case-info>RMS 54/1280</case-info>
             <updated-on>2014-07-22</updated-on>
@@ -4143,7 +4143,7 @@
             <tot-impulse-ns>1115.38</tot-impulse-ns>
             <burn-time-s>2.8</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=586</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=586</info-url>
             <total-weight-g>912.0</total-weight-g>
             <prop-weight-g>511.0</prop-weight-g>
             <delays>L</delays>
@@ -4169,7 +4169,7 @@
             <tot-impulse-ns>1231.7</tot-impulse-ns>
             <burn-time-s>2.88</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=282</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=282</info-url>
             <total-weight-g>1168.0</total-weight-g>
             <prop-weight-g>693.3</prop-weight-g>
             <delays>L</delays>
@@ -4194,7 +4194,7 @@
             <tot-impulse-ns>658.0</tot-impulse-ns>
             <burn-time-s>1.56666666666667</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=284</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=284</info-url>
             <total-weight-g>649.6</total-weight-g>
             <prop-weight-g>345.0</prop-weight-g>
             <delays>M</delays>
@@ -4220,7 +4220,7 @@
             <tot-impulse-ns>805.5</tot-impulse-ns>
             <burn-time-s>1.81</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=287</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=287</info-url>
             <total-weight-g>789.0</total-weight-g>
             <prop-weight-g>415.4</prop-weight-g>
             <delays>L</delays>
@@ -4245,7 +4245,7 @@
             <tot-impulse-ns>723.0</tot-impulse-ns>
             <burn-time-s>1.4</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=485</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=485</info-url>
             <total-weight-g>654.0</total-weight-g>
             <prop-weight-g>362.6</prop-weight-g>
             <delays>M</delays>
@@ -4271,7 +4271,7 @@
             <tot-impulse-ns>1162.0</tot-impulse-ns>
             <burn-time-s>2.27</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=778</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=778</info-url>
             <total-weight-g>1080.0</total-weight-g>
             <prop-weight-g>662.0</prop-weight-g>
             <delays>L</delays>
@@ -4296,7 +4296,7 @@
             <tot-impulse-ns>1161.0</tot-impulse-ns>
             <burn-time-s>2.15</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=292</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=292</info-url>
             <total-weight-g>1084.16</total-weight-g>
             <prop-weight-g>679.0</prop-weight-g>
             <delays>L</delays>
@@ -4322,7 +4322,7 @@
             <tot-impulse-ns>973.1</tot-impulse-ns>
             <burn-time-s>1.91</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=294</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=294</info-url>
             <total-weight-g>902.0</total-weight-g>
             <prop-weight-g>535.8</prop-weight-g>
             <delays>M</delays>
@@ -4348,7 +4348,7 @@
             <tot-impulse-ns>798.116</tot-impulse-ns>
             <burn-time-s>1.34</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=460</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=460</info-url>
             <prop-weight-g>576.0</prop-weight-g>
             <delays>M</delays>
             <case-info>RMS-38/1080</case-info>
@@ -4373,7 +4373,7 @@
             <tot-impulse-ns>1229.11</tot-impulse-ns>
             <burn-time-s>1.76</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=297</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=297</info-url>
             <total-weight-g>1085.95</total-weight-g>
             <prop-weight-g>618.0</prop-weight-g>
             <delays>L</delays>
@@ -4399,7 +4399,7 @@
             <tot-impulse-ns>974.9</tot-impulse-ns>
             <burn-time-s>1.15</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=470</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=470</info-url>
             <prop-weight-g>500.0</prop-weight-g>
             <delays>M</delays>
             <case-info>RMS-38/1080</case-info>
@@ -4424,7 +4424,7 @@
             <tot-impulse-ns>707.0</tot-impulse-ns>
             <burn-time-s>6.85</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=223</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=223</info-url>
             <total-weight-g>852.544</total-weight-g>
             <prop-weight-g>426.0</prop-weight-g>
             <delays>L</delays>
@@ -4450,7 +4450,7 @@
             <tot-impulse-ns>945.2</tot-impulse-ns>
             <burn-time-s>10.2</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=777</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=777</info-url>
             <total-weight-g>899.0</total-weight-g>
             <prop-weight-g>556.0</prop-weight-g>
             <delays>P</delays>
@@ -4476,7 +4476,7 @@
             <tot-impulse-ns>2511.5</tot-impulse-ns>
             <burn-time-s>2.35</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=887</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=887</info-url>
             <total-weight-g>2602.0</total-weight-g>
             <prop-weight-g>1234.0</prop-weight-g>
             <delays>P</delays>
@@ -4502,7 +4502,7 @@
             <tot-impulse-ns>2426.35</tot-impulse-ns>
             <burn-time-s>2.14</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=590</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=590</info-url>
             <total-weight-g>2203.0</total-weight-g>
             <prop-weight-g>1265.0</prop-weight-g>
             <delays>P</delays>
@@ -4528,7 +4528,7 @@
             <tot-impulse-ns>2530.0</tot-impulse-ns>
             <burn-time-s>2.28</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=356</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=356</info-url>
             <total-weight-g>2128.45</total-weight-g>
             <prop-weight-g>1362.2</prop-weight-g>
             <case-info>SU 54x676</case-info>
@@ -4553,7 +4553,7 @@
             <tot-impulse-ns>1472.0</tot-impulse-ns>
             <burn-time-s>1.61</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=358</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=358</info-url>
             <total-weight-g>1336.0</total-weight-g>
             <prop-weight-g>773.3</prop-weight-g>
             <delays>L</delays>
@@ -4579,7 +4579,7 @@
             <tot-impulse-ns>1789.0</tot-impulse-ns>
             <burn-time-s>1.6</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=969</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=969</info-url>
             <total-weight-g>1459.0</total-weight-g>
             <prop-weight-g>830.0</prop-weight-g>
             <delays>0-14</delays>
@@ -4605,7 +4605,7 @@
             <tot-impulse-ns>2224.9</tot-impulse-ns>
             <burn-time-s>1.75</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=359</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=359</info-url>
             <total-weight-g>1986.0</total-weight-g>
             <prop-weight-g>1222.0</prop-weight-g>
             <delays>P</delays>
@@ -4631,7 +4631,7 @@
             <tot-impulse-ns>1321.7</tot-impulse-ns>
             <burn-time-s>0.88</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=454</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=454</info-url>
             <total-weight-g>1741.0</total-weight-g>
             <prop-weight-g>604.0</prop-weight-g>
             <delays>P</delays>
@@ -4657,7 +4657,7 @@
             <tot-impulse-ns>1417.2</tot-impulse-ns>
             <burn-time-s>6.87</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=301</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=301</info-url>
             <total-weight-g>1434.05</total-weight-g>
             <prop-weight-g>836.8</prop-weight-g>
             <delays>L</delays>
@@ -4683,7 +4683,7 @@
             <tot-impulse-ns>2540.0</tot-impulse-ns>
             <burn-time-s>1.34</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=458</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=458</info-url>
             <prop-weight-g>1225.0</prop-weight-g>
             <delays>P</delays>
             <case-info>RMS-98/2560</case-info>
@@ -4708,7 +4708,7 @@
             <tot-impulse-ns>2353.0</tot-impulse-ns>
             <burn-time-s>9.0</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=306</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=306</info-url>
             <total-weight-g>2211.33</total-weight-g>
             <prop-weight-g>1434.0</prop-weight-g>
             <delays>P</delays>
@@ -4733,7 +4733,7 @@
             <tot-impulse-ns>1967.955</tot-impulse-ns>
             <burn-time-s>7.87</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=486</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=486</info-url>
             <total-weight-g>2100.0</total-weight-g>
             <prop-weight-g>1188.0</prop-weight-g>
             <delays>P</delays>
@@ -4759,7 +4759,7 @@
             <tot-impulse-ns>2228.136</tot-impulse-ns>
             <burn-time-s>5.78</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=898</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=898</info-url>
             <total-weight-g>2106.0</total-weight-g>
             <prop-weight-g>1318.0</prop-weight-g>
             <delays>P</delays>
@@ -4785,7 +4785,7 @@
             <tot-impulse-ns>1281.0</tot-impulse-ns>
             <burn-time-s>2.89</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=967</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=967</info-url>
             <total-weight-g>1484.0</total-weight-g>
             <prop-weight-g>866.0</prop-weight-g>
             <delays>0-14</delays>
@@ -4811,7 +4811,7 @@
             <tot-impulse-ns>2464.6</tot-impulse-ns>
             <burn-time-s>6.0</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=318</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=318</info-url>
             <total-weight-g>3163.78</total-weight-g>
             <prop-weight-g>1425.0</prop-weight-g>
             <delays>P</delays>
@@ -4837,7 +4837,7 @@
             <tot-impulse-ns>2273.26</tot-impulse-ns>
             <burn-time-s>4.26</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=899</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=899</info-url>
             <total-weight-g>2078.0</total-weight-g>
             <prop-weight-g>1292.0</prop-weight-g>
             <delays>P</delays>
@@ -4863,7 +4863,7 @@
             <tot-impulse-ns>1686.8</tot-impulse-ns>
             <burn-time-s>3.5</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=322</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=322</info-url>
             <total-weight-g>2220.29</total-weight-g>
             <prop-weight-g>923.4</prop-weight-g>
             <case-info>RMS 54/1280</case-info>
@@ -4887,7 +4887,7 @@
             <tot-impulse-ns>1496.27</tot-impulse-ns>
             <burn-time-s>2.79</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=494</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=494</info-url>
             <total-weight-g>1647.0</total-weight-g>
             <prop-weight-g>974.0</prop-weight-g>
             <delays>L</delays>
@@ -4913,7 +4913,7 @@
             <tot-impulse-ns>1596.33</tot-impulse-ns>
             <burn-time-s>2.85</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=905</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=905</info-url>
             <total-weight-g>1275.0</total-weight-g>
             <prop-weight-g>876.7</prop-weight-g>
             <delays>0-14</delays>
@@ -4939,7 +4939,7 @@
             <tot-impulse-ns>1539.118</tot-impulse-ns>
             <burn-time-s>3.879</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=326</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=326</info-url>
             <total-weight-g>1487.36</total-weight-g>
             <prop-weight-g>889.1</prop-weight-g>
             <delays>L</delays>
@@ -4965,7 +4965,7 @@
             <tot-impulse-ns>2417.0</tot-impulse-ns>
             <burn-time-s>4.09</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=329</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=329</info-url>
             <total-weight-g>2744.0</total-weight-g>
             <prop-weight-g>1424.9</prop-weight-g>
             <delays>P</delays>
@@ -4991,7 +4991,7 @@
             <tot-impulse-ns>2405.7</tot-impulse-ns>
             <burn-time-s>3.67</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=339</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=339</info-url>
             <total-weight-g>2935.3</total-weight-g>
             <prop-weight-g>1280.0</prop-weight-g>
             <delays>P</delays>
@@ -5017,7 +5017,7 @@
             <tot-impulse-ns>2358.0</tot-impulse-ns>
             <burn-time-s>3.49</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=343</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=343</info-url>
             <prop-weight-g>1316.0</prop-weight-g>
             <delays>P</delays>
             <case-info>RMS-98/2560</case-info>
@@ -5041,7 +5041,7 @@
             <tot-impulse-ns>1514.0</tot-impulse-ns>
             <burn-time-s>2.17841726618705</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=344</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=344</info-url>
             <total-weight-g>1487.36</total-weight-g>
             <prop-weight-g>903.0</prop-weight-g>
             <delays>L</delays>
@@ -5067,7 +5067,7 @@
             <tot-impulse-ns>2261.0</tot-impulse-ns>
             <burn-time-s>3.51</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=346</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=346</info-url>
             <total-weight-g>2035.26</total-weight-g>
             <prop-weight-g>1303.3</prop-weight-g>
             <delays>P</delays>
@@ -5093,7 +5093,7 @@
             <tot-impulse-ns>2371.0</tot-impulse-ns>
             <burn-time-s>2.98</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=349</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=349</info-url>
             <total-weight-g>2934.4</total-weight-g>
             <prop-weight-g>1268.0</prop-weight-g>
             <delays>P</delays>
@@ -5118,7 +5118,7 @@
             <tot-impulse-ns>1762.0</tot-impulse-ns>
             <burn-time-s>2.2</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=529</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=529</info-url>
             <total-weight-g>1543.0</total-weight-g>
             <prop-weight-g>871.1</prop-weight-g>
             <delays>P</delays>
@@ -5143,7 +5143,7 @@
             <tot-impulse-ns>2120.0</tot-impulse-ns>
             <burn-time-s>2.5</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=495</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=495</info-url>
             <total-weight-g>2223.0</total-weight-g>
             <prop-weight-g>1373.0</prop-weight-g>
             <delays>P</delays>
@@ -5169,7 +5169,7 @@
             <tot-impulse-ns>3769.0</tot-impulse-ns>
             <burn-time-s>3.79</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=974</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=974</info-url>
             <total-weight-g>4717.0</total-weight-g>
             <prop-weight-g>2602.0</prop-weight-g>
             <delays>PS</delays>
@@ -5195,7 +5195,7 @@
             <tot-impulse-ns>2671.0</tot-impulse-ns>
             <burn-time-s>2.45</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1089</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1089</info-url>
             <total-weight-g>2432.0</total-weight-g>
             <prop-weight-g>1400.0</prop-weight-g>
             <delays>P</delays>
@@ -5221,7 +5221,7 @@
             <tot-impulse-ns>4947.0</tot-impulse-ns>
             <burn-time-s>4.43</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=398</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=398</info-url>
             <total-weight-g>4657.86</total-weight-g>
             <prop-weight-g>2777.8</prop-weight-g>
             <case-info>RMS-75/5120</case-info>
@@ -5246,7 +5246,7 @@
             <tot-impulse-ns>3517.0</tot-impulse-ns>
             <burn-time-s>3.07</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=399</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=399</info-url>
             <total-weight-g>3673.6</total-weight-g>
             <prop-weight-g>1902.0</prop-weight-g>
             <delays>P</delays>
@@ -5272,7 +5272,7 @@
             <tot-impulse-ns>4232.0</tot-impulse-ns>
             <burn-time-s>3.7</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=740</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=740</info-url>
             <total-weight-g>4990.0</total-weight-g>
             <prop-weight-g>2800.0</prop-weight-g>
             <delays>P</delays>
@@ -5298,7 +5298,7 @@
             <tot-impulse-ns>4374.0</tot-impulse-ns>
             <burn-time-s>3.7</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1021</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1021</info-url>
             <total-weight-g>5647.0</total-weight-g>
             <prop-weight-g>2565.0</prop-weight-g>
             <delays>P</delays>
@@ -5323,7 +5323,7 @@
             <tot-impulse-ns>4567.0</tot-impulse-ns>
             <burn-time-s>3.51307692307692</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=402</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=402</info-url>
             <prop-weight-g>2632.0</prop-weight-g>
             <delays>P</delays>
             <case-info>RMS-98/5120</case-info>
@@ -5348,7 +5348,7 @@
             <tot-impulse-ns>4780.0</tot-impulse-ns>
             <burn-time-s>3.5</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1020</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1020</info-url>
             <total-weight-g>4908.0</total-weight-g>
             <prop-weight-g>2648.0</prop-weight-g>
             <delays>PS</delays>
@@ -5373,7 +5373,7 @@
             <tot-impulse-ns>3949.0</tot-impulse-ns>
             <burn-time-s>2.63</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=600</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=600</info-url>
             <total-weight-g>3879.0</total-weight-g>
             <prop-weight-g>1973.0</prop-weight-g>
             <delays>P</delays>
@@ -5399,7 +5399,7 @@
             <tot-impulse-ns>4603.0</tot-impulse-ns>
             <burn-time-s>3.24</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=405</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=405</info-url>
             <total-weight-g>4562.0</total-weight-g>
             <prop-weight-g>2560.0</prop-weight-g>
             <delays>P</delays>
@@ -5425,7 +5425,7 @@
             <tot-impulse-ns>5089.3</tot-impulse-ns>
             <burn-time-s>3.47</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=406</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=406</info-url>
             <total-weight-g>4659.2</total-weight-g>
             <prop-weight-g>2490.9</prop-weight-g>
             <delays>P</delays>
@@ -5451,7 +5451,7 @@
             <tot-impulse-ns>3715.9</tot-impulse-ns>
             <burn-time-s>2.36</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=910</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=910</info-url>
             <total-weight-g>3651.4</total-weight-g>
             <prop-weight-g>1854.0</prop-weight-g>
             <delays>PS</delays>
@@ -5476,7 +5476,7 @@
             <tot-impulse-ns>5104.0</tot-impulse-ns>
             <burn-time-s>2.32</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=587</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=587</info-url>
             <total-weight-g>4783.0</total-weight-g>
             <prop-weight-g>2518.0</prop-weight-g>
             <delays>P</delays>
@@ -5502,7 +5502,7 @@
             <tot-impulse-ns>4668.0</tot-impulse-ns>
             <burn-time-s>1.86</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1092</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1092</info-url>
             <total-weight-g>4989.0</total-weight-g>
             <prop-weight-g>2313.0</prop-weight-g>
             <delays>P</delays>
@@ -5528,7 +5528,7 @@
             <tot-impulse-ns>3042.9</tot-impulse-ns>
             <burn-time-s>8.82</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=589</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=589</info-url>
             <total-weight-g>3210.0</total-weight-g>
             <prop-weight-g>1796.0</prop-weight-g>
             <delays>P</delays>
@@ -5554,7 +5554,7 @@
             <tot-impulse-ns>4641.58</tot-impulse-ns>
             <burn-time-s>12.24</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=909</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=909</info-url>
             <total-weight-g>5170.0</total-weight-g>
             <prop-weight-g>2696.0</prop-weight-g>
             <delays>PS</delays>
@@ -5580,7 +5580,7 @@
             <tot-impulse-ns>3646.2</tot-impulse-ns>
             <burn-time-s>4.42</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=385</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=385</info-url>
             <total-weight-g>3742.0</total-weight-g>
             <prop-weight-g>2094.8</prop-weight-g>
             <delays>P</delays>
@@ -5605,7 +5605,7 @@
             <tot-impulse-ns>3868.0</tot-impulse-ns>
             <burn-time-s>4.4</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=968</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=968</info-url>
             <total-weight-g>4724.0</total-weight-g>
             <prop-weight-g>2472.0</prop-weight-g>
             <delays>PS</delays>
@@ -5631,7 +5631,7 @@
             <tot-impulse-ns>4656.0</tot-impulse-ns>
             <burn-time-s>6.15</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=389</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=389</info-url>
             <total-weight-g>5012.22</total-weight-g>
             <prop-weight-g>2749.7</prop-weight-g>
             <delays>P</delays>
@@ -5657,7 +5657,7 @@
             <tot-impulse-ns>5571.0</tot-impulse-ns>
             <burn-time-s>5.2</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=973</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=973</info-url>
             <total-weight-g>6971.0</total-weight-g>
             <prop-weight-g>3846.0</prop-weight-g>
             <delays>PS</delays>
@@ -5683,7 +5683,7 @@
             <tot-impulse-ns>5416.6</tot-impulse-ns>
             <burn-time-s>4.17</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=420</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=420</info-url>
             <total-weight-g>4637.0</total-weight-g>
             <prop-weight-g>2722.0</prop-weight-g>
             <delays>P</delays>
@@ -5709,7 +5709,7 @@
             <tot-impulse-ns>6891.0</tot-impulse-ns>
             <burn-time-s>4.8</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=972</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=972</info-url>
             <total-weight-g>7098.0</total-weight-g>
             <prop-weight-g>4080.0</prop-weight-g>
             <delays>PS</delays>
@@ -5735,7 +5735,7 @@
             <tot-impulse-ns>6713.5</tot-impulse-ns>
             <burn-time-s>5.4</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=421</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=421</info-url>
             <total-weight-g>5644.8</total-weight-g>
             <prop-weight-g>3499.4</prop-weight-g>
             <delays>P</delays>
@@ -5761,7 +5761,7 @@
             <tot-impulse-ns>5178.154</tot-impulse-ns>
             <burn-time-s>3.8166</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1073</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1073</info-url>
             <total-weight-g>4808.0</total-weight-g>
             <prop-weight-g>1970.0</prop-weight-g>
             <delays>P</delays>
@@ -5786,7 +5786,7 @@
             <tot-impulse-ns>7755.5</tot-impulse-ns>
             <burn-time-s>7.1</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=424</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=424</info-url>
             <total-weight-g>6916.22</total-weight-g>
             <prop-weight-g>4077.0</prop-weight-g>
             <delays>P</delays>
@@ -5811,7 +5811,7 @@
             <tot-impulse-ns>5220.0</tot-impulse-ns>
             <burn-time-s>3.46</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=588</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=588</info-url>
             <total-weight-g>4896.0</total-weight-g>
             <prop-weight-g>2631.0</prop-weight-g>
             <delays>P</delays>
@@ -5837,7 +5837,7 @@
             <tot-impulse-ns>5600.0</tot-impulse-ns>
             <burn-time-s>3.0</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=426</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=426</info-url>
             <total-weight-g>5644.8</total-weight-g>
             <prop-weight-g>3170.0</prop-weight-g>
             <delays>P</delays>
@@ -5863,7 +5863,7 @@
             <tot-impulse-ns>7084.0</tot-impulse-ns>
             <burn-time-s>4.0</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=428</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=428</info-url>
             <total-weight-g>6917.12</total-weight-g>
             <prop-weight-g>4026.0</prop-weight-g>
             <delays>P</delays>
@@ -5889,7 +5889,7 @@
             <tot-impulse-ns>5783.0</tot-impulse-ns>
             <burn-time-s>3.1</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=779</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=779</info-url>
             <total-weight-g>4715.0</total-weight-g>
             <prop-weight-g>2560.0</prop-weight-g>
             <delays>PS</delays>
@@ -5915,7 +5915,7 @@
             <tot-impulse-ns>8207.7</tot-impulse-ns>
             <burn-time-s>4.5</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=584</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=584</info-url>
             <total-weight-g>9162.0</total-weight-g>
             <prop-weight-g>5599.0</prop-weight-g>
             <delays>P</delays>
@@ -5941,7 +5941,7 @@
             <tot-impulse-ns>8307.0</tot-impulse-ns>
             <burn-time-s>4.43</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=780</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=780</info-url>
             <total-weight-g>6682.0</total-weight-g>
             <prop-weight-g>3772.0</prop-weight-g>
             <delays>PS</delays>
@@ -5967,7 +5967,7 @@
             <tot-impulse-ns>7658.6</tot-impulse-ns>
             <burn-time-s>4.01</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=461</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=461</info-url>
             <prop-weight-g>4122.0</prop-weight-g>
             <delays>P</delays>
             <case-info>RMS-75/7680</case-info>
@@ -5992,7 +5992,7 @@
             <tot-impulse-ns>10481.5</tot-impulse-ns>
             <burn-time-s>6.2</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=433</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=433</info-url>
             <total-weight-g>8988.22</total-weight-g>
             <prop-weight-g>5719.1</prop-weight-g>
             <delays>P</delays>
@@ -6018,7 +6018,7 @@
             <tot-impulse-ns>9218.0</tot-impulse-ns>
             <burn-time-s>4.0</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=434</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=434</info-url>
             <total-weight-g>8986.88</total-weight-g>
             <prop-weight-g>5368.0</prop-weight-g>
             <delays>P</delays>
@@ -6043,7 +6043,7 @@
             <tot-impulse-ns>5485.0</tot-impulse-ns>
             <burn-time-s>2.6</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=530</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=530</info-url>
             <total-weight-g>4906.0</total-weight-g>
             <prop-weight-g>2663.0</prop-weight-g>
             <case-info>RMS-75/5120</case-info>
@@ -6067,7 +6067,7 @@
             <tot-impulse-ns>7802.0</tot-impulse-ns>
             <burn-time-s>3.7</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=531</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=531</info-url>
             <total-weight-g>6918.0</total-weight-g>
             <prop-weight-g>3948.0</prop-weight-g>
             <delays>P</delays>
@@ -6093,7 +6093,7 @@
             <tot-impulse-ns>7716.5</tot-impulse-ns>
             <burn-time-s>3.2</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=438</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=438</info-url>
             <total-weight-g>6451.2</total-weight-g>
             <prop-weight-g>3692.6</prop-weight-g>
             <delays>P</delays>
@@ -6119,7 +6119,7 @@
             <tot-impulse-ns>9671.0</tot-impulse-ns>
             <burn-time-s>3.85</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=440</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=440</info-url>
             <total-weight-g>8064.0</total-weight-g>
             <prop-weight-g>4711.2</prop-weight-g>
             <delays>P</delays>
@@ -6145,7 +6145,7 @@
             <tot-impulse-ns>7301.0</tot-impulse-ns>
             <burn-time-s>1.6</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1093</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1093</info-url>
             <total-weight-g>6622.0</total-weight-g>
             <prop-weight-g>3425.0</prop-weight-g>
             <delays>P</delays>
@@ -6171,7 +6171,7 @@
             <tot-impulse-ns>5964.0</tot-impulse-ns>
             <burn-time-s>9.13</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=471</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=471</info-url>
             <total-weight-g>5125.0</total-weight-g>
             <prop-weight-g>2893.0</prop-weight-g>
             <delays>P</delays>
@@ -6197,7 +6197,7 @@
             <tot-impulse-ns>7561.0</tot-impulse-ns>
             <burn-time-s>11.5</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1008</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1008</info-url>
             <total-weight-g>7008.0</total-weight-g>
             <prop-weight-g>4320.0</prop-weight-g>
             <delays>P</delays>
@@ -6223,7 +6223,7 @@
             <tot-impulse-ns>9325.0</tot-impulse-ns>
             <burn-time-s>12.65</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=472</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=472</info-url>
             <total-weight-g>8776.0</total-weight-g>
             <prop-weight-g>5540.0</prop-weight-g>
             <delays>P</delays>
@@ -6248,7 +6248,7 @@
             <tot-impulse-ns>6159.0</tot-impulse-ns>
             <burn-time-s>7.2887573964497</burn-time-s>
             <data-files>2</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=410</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=410</info-url>
             <prop-weight-g>3433.0</prop-weight-g>
             <case-info>RMS 98/5120</case-info>
             <updated-on>2014-07-22</updated-on>
@@ -6271,7 +6271,7 @@
             <tot-impulse-ns>14126.0</tot-impulse-ns>
             <burn-time-s>13.05</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=638</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=638</info-url>
             <total-weight-g>12771.0</total-weight-g>
             <prop-weight-g>8293.0</prop-weight-g>
             <delays>P</delays>
@@ -6297,7 +6297,7 @@
             <tot-impulse-ns>13347.1</tot-impulse-ns>
             <burn-time-s>6.9</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=447</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=447</info-url>
             <total-weight-g>12282.8</total-weight-g>
             <prop-weight-g>7752.6</prop-weight-g>
             <delays>P</delays>
@@ -6323,7 +6323,7 @@
             <tot-impulse-ns>10657.0</tot-impulse-ns>
             <burn-time-s>5.4</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=1022</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=1022</info-url>
             <total-weight-g>11997.0</total-weight-g>
             <prop-weight-g>7183.0</prop-weight-g>
             <delays>P</delays>
@@ -6349,7 +6349,7 @@
             <tot-impulse-ns>14041.0</tot-impulse-ns>
             <burn-time-s>4.37</burn-time-s>
             <data-files>1</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=781</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=781</info-url>
             <total-weight-g>12054.0</total-weight-g>
             <prop-weight-g>7512.0</prop-weight-g>
             <delays>PS</delays>
@@ -6375,7 +6375,7 @@
             <tot-impulse-ns>19361.0</tot-impulse-ns>
             <burn-time-s>4.44</burn-time-s>
             <data-files>4</data-files>
-            <info-url>http://www.thrustcurve.org/motorsearch.jsp?id=450</info-url>
+            <info-url>https://www.thrustcurve.org/motorsearch.jsp?id=450</info-url>
             <total-weight-g>14784.0</total-weight-g>
             <prop-weight-g>9570.8</prop-weight-g>
             <case-info>RMS-98/18000</case-info>

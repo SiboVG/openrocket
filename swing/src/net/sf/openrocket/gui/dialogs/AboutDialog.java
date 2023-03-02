@@ -26,7 +26,7 @@ import net.sf.openrocket.gui.widgets.SelectColorButton;
 @SuppressWarnings("serial")
 public class AboutDialog extends JDialog {
 	
-	public final String OPENROCKET_URL = "http://openrocket.info/";
+	public final String OPENROCKET_URL = "https:///openrocket.info/";
 
 	private final Translator trans = Application.getTranslator();
 	
@@ -62,16 +62,16 @@ public class AboutDialog extends JDialog {
 		"<br>" +
 		"<b>OpenRocket utilizes the following libraries:</b><br>" +
 		"<br>" +
-		"MiG Layout" + href("http://www.miglayout.com", true, true) + "<br>" +
-		"JFreeChart" + href("http://www.jfree.org/jfreechart", true, true) + "<br>" +
-		"iText" + href("http://www.itextpdf.com", true, true) + "<br>" +
-		"exp4j" + href("http://projects.congrace.de/exp4j/index.html", true, true) + "<br>" +
-		"JOGL" + href("http://jogamp.org/jogl/www", true, true) + "<br>" +
+		"MiG Layout" + href("https:///www.miglayout.com", true, true) + "<br>" +
+		"JFreeChart" + href("https:///www.jfree.org/jfreechart", true, true) + "<br>" +
+		"iText" + href("https:///www.itextpdf.com", true, true) + "<br>" +
+		"exp4j" + href("https:///projects.congrace.de/exp4j/index.html", true, true) + "<br>" +
+		"JOGL" + href("https:///jogamp.org/jogl/www", true, true) + "<br>" +
 		"Guava" + href("https://github.com/google/guava", true, true) + "<br>" +
-		"Opencsv" + href("http://opencsv.sourceforge.net", true, true) + "<br>" +
-		"Simple Logging Facade for Java" + href("http://www.slf4j.org", true, true) + "<br>" +
+		"Opencsv" + href("https://opencsv.sourceforge.net", true, true) + "<br>" +
+		"Simple Logging Facade for Java" + href("https://www.slf4j.org", true, true) + "<br>" +
 		"Java library for parsing and rendering CommonMark" + href("https://github.com/commonmark/commonmark-java", true, true) + "<br>" +
-		"RSyntaxTextArea" + href("http://bobbylight.github.io/RSyntaxTextArea", true, true) + "<br>" +
+		"RSyntaxTextArea" + href("https://bobbylight.github.io/RSyntaxTextArea", true, true) + "<br>" +
 		"<br>" +
 		"<b>OpenRocket gratefully acknowledges our use of the following databases:</b><br>" +
 		"<br>" +

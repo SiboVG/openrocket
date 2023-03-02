@@ -15,7 +15,7 @@ import net.sf.openrocket.file.simplesax.SimpleSAX;
 
 public class SearchResponseParser implements ElementHandler {
 	
-	private static final String thrustcurveURI = "http://www.thrustcurve.org/2008/SearchResponse";
+	private static final String thrustcurveURI = "https://www.thrustcurve.org/2008/SearchResponse";
 	/*
 	 * XML Tags in SearchResult xsd
 	 */

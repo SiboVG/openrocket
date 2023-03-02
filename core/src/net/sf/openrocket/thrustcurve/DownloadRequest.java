@@ -22,9 +22,9 @@ class DownloadRequest {
 		
 		w.append("<?xml version=\"1.0\" encoding=\"ascii\"?>\n");
 		w.append("<download-request\n");
-		w.append(" xmlns=\"http://www.thrustcurve.org/2008/DownloadRequest\"\n");
+		w.append(" xmlns=\"https://www.thrustcurve.org/2008/DownloadRequest\"\n");
 		w.append(" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
-		w.append(" xsi:schemaLocation=\"http://www.thrustcurve.org/2008/DownloadRequest http://www.thrustcurve.org/2008/download-request.xsd\">\n");
+		w.append(" xsi:schemaLocation=\"https://www.thrustcurve.org/2008/DownloadRequesthttps:///www.thrustcurve.org/2008/download-request.xsd\">\n");
 		
 		if (format != null) {
 			w.append("  <format>").append(format).append("</format>\n");

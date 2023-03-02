@@ -310,7 +310,7 @@ public class SwingExceptionHandler implements Thread.UncaughtExceptionHandler, E
 
 					trace[2].getClassName().equals("sun.awt.X11.XWindowPeer") &&
 					trace[2].getMethodName().equals("setModalBlocked")) {
-				log.warn("Ignoring Sun JRE bug (6826104): http://bugs.sun.com/view_bug.do?bug_id=6826104" + t);
+				log.warn("Ignoring Sun JRE bug (6826104): https://bugs.sun.com/view_bug.do?bug_id=6826104" + t);
 				return true;
 			}
 
@@ -328,7 +328,7 @@ public class SwingExceptionHandler implements Thread.UncaughtExceptionHandler, E
 							buggyClass.equals(elements[1].getClassName()) ||
 							buggyClass.equals(elements[2].getClassName()))) {
 				log.warn("Ignoring Sun JRE bug 6828938:  " +
-						"(see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6828938): " + t);
+                        "(see https://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6828938): " + t);
 				return true;
 			}
 		}
@@ -349,7 +349,7 @@ public class SwingExceptionHandler implements Thread.UncaughtExceptionHandler, E
 					trace[2].getClassName().equals("sun.swing.FilePane$2") &&
 					trace[2].getMethodName().equals("repaintSelection")) {
 				log.warn("Ignoring Sun JRE bug 6561072 " +
-						"(see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6561072): " + t);
+                        "(see https://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6561072): " + t);
 				return true;
 			}
 		}
@@ -365,7 +365,7 @@ public class SwingExceptionHandler implements Thread.UncaughtExceptionHandler, E
 					trace[0].getClassName().equals("sun.awt.windows.WComponentPeer") &&
 					trace[0].getMethodName().equals("getBackBuffer")) {
 				log.warn("Ignoring Sun JRE bug 6933331 " +
-						"(see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6933331): " + t);
+                        "(see https://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6933331): " + t);
 				return true;
 			}
 		}
@@ -386,7 +386,7 @@ public class SwingExceptionHandler implements Thread.UncaughtExceptionHandler, E
 					trace[2].getClassName().equals("sun.awt.shell.Win32ShellFolderManager2") &&
 					trace[2].getMethodName().equals("isFileSystemRoot")) {
 				log.warn("Ignoring Sun JRE bug " +
-						"(see http://forums.sun.com/thread.jspa?threadID=5435324): " + t);
+                        "(see https://forums.sun.com/thread.jspa?threadID=5435324): " + t);
 				return true;
 			}
 		}
@@ -397,7 +397,7 @@ public class SwingExceptionHandler implements Thread.UncaughtExceptionHandler, E
 		if (t instanceof ClassCastException) {
 			if (t.getMessage().equals("sun.awt.Win32GraphicsConfig cannot be cast to sun.java2d.d3d.D3DGraphicsConfig")) {
 				log.warn("Ignoring Sun JRE bug " +
-						"(see http://forums.sun.com/thread.jspa?threadID=5440525): " + t);
+                        "(see https://forums.sun.com/thread.jspa?threadID=5440525): " + t);
 				return true;
 			}
 		}
@@ -416,7 +416,7 @@ public class SwingExceptionHandler implements Thread.UncaughtExceptionHandler, E
 					trace[1].getMethodName().equals("getDropLineRect")) {
 
 				log.warn("Ignoring Sun JRE bug updating drop location " +
-						"(see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6560955): " + t);
+                        "(see https://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6560955): " + t);
 				return true;
 			}
 		}

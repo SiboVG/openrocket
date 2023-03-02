@@ -85,16 +85,16 @@ public class LicenseDialog extends JDialog {
 			"Licensed under the Apache License, Version 2.0 (the \"License\"); you may not use this work except in compliance with the License. " +
 			"You may view the License " +
 			"<a href=\"" + jarUrl + "!/datafiles/presets/LICENSE\">here</a>.<br>" +
-			"You may also obtain a copy of the License at " + 
-			"<a href=\"http://www.apache.org/licenses/LICENSE-2.0\">http://www.apache.org/licenses/LICENSE-2.0</a><br>" +
+			"You may also obtain a copy of the License at " +
+                    "<a href=\"https://www.apache.org/licenses/LICENSE-2.0\"https:///www.apache.org/licenses/LICENSE-2.0</a><br>" +
 			"<br>" +
 			"OpenRocket uses the Work or Derivative Works of Ant, a product which includes software developed by the Apache " +
 			"Software Foundation<br>" +
 			"<br>" +
 			"Ant also includes software developed by:" +
 			"<ul style=\"margin-top: 0;\">" +
-			"<li>the W3C Consortium (<a href=\"http://www.w3c.org\">http://www.w3c.org</a>)</li>" +
-			"<li>the SAX project (<a href=\"http://www.saxproject.org\">http://www.saxproject.org</a></li>" +
+                    "<li>the W3C Consortium (<a href=\"https://www.w3c.org\"https:///www.w3c.org</a>)</li>" +
+                    "<li>the SAX project (<a href=\"https://www.saxproject.org\"https:///www.saxproject.org</a></li>" +
 			"</ul>" +
 			"The names \"Ant\" and \"Apache Software Foundation\" must not be used to endorse or " +
 			"promote products derived from this software without prior written permission.  For written permission, "+

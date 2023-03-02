@@ -84,9 +84,9 @@ public class SearchRequest {
 		
 		w.append("<?xml version=\"1.0\" encoding=\"ascii\"?>\n");
 		w.append("<search-request\n");
-		w.append(" xmlns=\"http://www.thrustcurve.org/2014/SearchRequest\"\n");
+		w.append(" xmlns=\"https://www.thrustcurve.org/2014/SearchRequest\"\n");
 		w.append(" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n");
-		w.append(" xsi:schemaLocation=\"http://www.thrustcurve.org/2014/SearchRequest http://www.thrustcurve.org/2014/search-request.xsd\">\n");
+		w.append(" xsi:schemaLocation=\"https://www.thrustcurve.org/2014/SearchRequesthttps:///www.thrustcurve.org/2014/search-request.xsd\">\n");
 		
 		if (manufacturer != null) {
 			w.append("  <manufacturer>").append(manufacturer).append("</manufacturer>\n");
