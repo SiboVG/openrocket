@@ -1013,11 +1013,7 @@ public class GeneralOptimizationDialog extends JDialog {
 		
 		for (SimulationModifier m : OptimizationServiceHelper.getSimulationModifiers(documentCopy)) {
 			Object key = m.getRelatedObject();
-			List<SimulationModifier> list = simulationModifiers.get(key);
-			if (list == null) {
-				list = new ArrayList<>();
-				simulationModifiers.put(key, list);
-			}
+			List<SimulationModifier> list = simulationModifiers.computeIfAbsent(key, k -> new ArrayList<>());
 			list.add(m);
 		}
 		
