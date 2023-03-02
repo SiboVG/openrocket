@@ -202,7 +202,7 @@ public class TrapezoidFinSet extends FinSet {
 		}
 		list.add(new Coordinate(MathUtil.max(length, 0.0001), 0));
 		
-		return list.toArray(new Coordinate[list.size()]);
+		return list.toArray(new Coordinate[0]);
 	}
 	
 	/**

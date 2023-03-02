@@ -262,7 +262,7 @@ public class InnerTube extends ThicknessRingComponent implements AxialPositionab
 		
 		List<Coordinate> points = getClusterPoints();
 		
-		return points.toArray( new Coordinate[ points.size() ]);
+		return points.toArray(new Coordinate[0]);
 	}
 	
 //	@Override
