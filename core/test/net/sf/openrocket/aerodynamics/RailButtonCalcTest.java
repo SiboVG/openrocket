@@ -86,14 +86,14 @@ public class RailButtonCalcTest {
 		final double refArea = outerArea - notchArea;
 
 		// Get "effective" CD
-		double calccd = cd * MathUtil.pow2(mach) * barrowmanObj.calculateStagnationCD(conditions.getMach()) * refArea / conditions.getRefArea() ;
+		double calccd = cd * MathUtil.pow2(mach) * BarrowmanCalculator.calculateStagnationCD(conditions.getMach()) * refArea / conditions.getRefArea() ;
 
 		// Now compare with value from RailButtonCalc
 		WarningSet warnings = new WarningSet();
 		AerodynamicForces assemblyForces = new AerodynamicForces().zero();
 		AerodynamicForces componentForces = new AerodynamicForces();
 
-		double testcd = calcObj.calculatePressureCD(conditions, barrowmanObj.calculateStagnationCD(conditions.getMach()), 0, warnings);
+		double testcd = calcObj.calculatePressureCD(conditions, BarrowmanCalculator.calculateStagnationCD(conditions.getMach()), 0, warnings);
 
 		assertEquals("Calculated rail button CD incorrect", calccd, testcd, EPSILON);
 	}
