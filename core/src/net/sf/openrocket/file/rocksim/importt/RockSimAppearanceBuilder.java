@@ -65,39 +65,53 @@ public class RockSimAppearanceBuilder extends AppearanceBuilder {
 			final String name = part.substring(0, part.indexOf("(")).replace("=", "");
 			
 			final String value = part.substring(part.indexOf("(") + 1, part.length() - 1);
-			
-			if ("file".equals(name)) {
-				if (value.length() > 0) {
-					final File f = new File(value);
-					if (f.exists()) {
-						Attachment a = context.getAttachmentFactory().getAttachment(name);
-						setImage(context.getOpenRocketDocument().getDecalImage(a));
+
+			switch (name) {
+				case "file":
+					if (value.length() > 0) {
+						final File f = new File(value);
+						if (f.exists()) {
+							Attachment a = context.getAttachmentFactory().getAttachment(name);
+							setImage(context.getOpenRocketDocument().getDecalImage(a));
+						}
+						// else {
+						// If we can't find the file on the filesystem, we just ignore the decal.
+						//}
 					}
-					// else {
-					// If we can't find the file on the filesystem, we just ignore the decal.
-					//}
+					break;
+				case "repeat":
+					repeat = "1".equals(value);
+					break;
+				case "interpolate":
+					interpolate = "1".equals(value);
+					break;
+				case "flipr":
+					flipr = "1".equals(value);
+					break;
+				case "flips":
+					flips = "1".equals(value);
+					break;
+				case "flipt":
+					flipt = "1".equals(value);
+					break;
+				case "preventseam":
+					preventSeam = "1".equals(value);
+					break;
+				case "position": {
+					String[] c = value.split(",");
+					setOffset(Double.parseDouble(c[0]), Double.parseDouble(c[1]));
+					break;
 				}
-			} else if ("repeat".equals(name)) {
-				repeat = "1".equals(value);
-			} else if ("interpolate".equals(name)) {
-				interpolate = "1".equals(value);
-			} else if ("flipr".equals(name)) {
-				flipr = "1".equals(value);
-			} else if ("flips".equals(name)) {
-				flips = "1".equals(value);
-			} else if ("flipt".equals(name)) {
-				flipt = "1".equals(value);
-			} else if ("preventseam".equals(name)) {
-				preventSeam = "1".equals(value);
-			} else if ("position".equals(name)) {
-				String[] c = value.split(",");
-				setOffset(Double.parseDouble(c[0]), Double.parseDouble(c[1]));
-			} else if ("origin".equals(name)) {
-				String[] c = value.split(",");
-				setCenter(Double.parseDouble(c[0]), Double.parseDouble(c[1]));
-			} else if ("scale".equals(name)) {
-				String[] c = value.split(",");
-				setScaleUV(Double.parseDouble(c[0]), Double.parseDouble(c[1]));
+				case "origin": {
+					String[] c = value.split(",");
+					setCenter(Double.parseDouble(c[0]), Double.parseDouble(c[1]));
+					break;
+				}
+				case "scale": {
+					String[] c = value.split(",");
+					setScaleUV(Double.parseDouble(c[0]), Double.parseDouble(c[1]));
+					break;
+				}
 			}
 		}
 		

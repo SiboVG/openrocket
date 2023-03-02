@@ -48,74 +48,87 @@ class SimulationConditionsHandler extends AbstractElementHandler {
 			d = Double.parseDouble(content);
 		} catch (NumberFormatException ignore) {
 		}
-		
-		
-		if (element.equals("configid")) {
-			this.idToSet= new FlightConfigurationId(content);
-		} else if (element.equals("launchrodlength")) {
-			if (Double.isNaN(d)) {
-				warnings.add("Illegal launch rod length defined, ignoring.");
-			} else {
-				options.setLaunchRodLength(d);
-			}
-		} else if (element.equals("launchrodangle")) {
-			if (Double.isNaN(d)) {
-				warnings.add("Illegal launch rod angle defined, ignoring.");
-			} else {
-				options.setLaunchRodAngle(d * Math.PI / 180);
-			}
-		} else if (element.equals("launchroddirection")) {
-			if (Double.isNaN(d)) {
-				warnings.add("Illegal launch rod direction defined, ignoring.");
-			} else {
-				options.setLaunchRodDirection(d * 2.0 * Math.PI / 360);
-			}
-		} else if (element.equals("windaverage")) {
-			if (Double.isNaN(d)) {
-				warnings.add("Illegal average windspeed defined, ignoring.");
-			} else {
-				options.setWindSpeedAverage(d);
-			}
-		} else if (element.equals("windturbulence")) {
-			if (Double.isNaN(d)) {
-				warnings.add("Illegal wind turbulence intensity defined, ignoring.");
-			} else {
-				options.setWindTurbulenceIntensity(d);
-			}
-		} else if (element.equals("launchaltitude")) {
-			if (Double.isNaN(d)) {
-				warnings.add("Illegal launch altitude defined, ignoring.");
-			} else {
-				options.setLaunchAltitude(d);
-			}
-		} else if (element.equals("launchlatitude")) {
-			if (Double.isNaN(d)) {
-				warnings.add("Illegal launch latitude defined, ignoring.");
-			} else {
-				options.setLaunchLatitude(d);
-			}
-		} else if (element.equals("launchlongitude")) {
-			if (Double.isNaN(d)) {
-				warnings.add("Illegal launch longitude.");
-			} else {
-				options.setLaunchLongitude(d);
-			}
-		} else if (element.equals("geodeticmethod")) {
-			GeodeticComputationStrategy gcs =
-					(GeodeticComputationStrategy) DocumentConfig.findEnum(content, GeodeticComputationStrategy.class);
-			if (gcs != null) {
-				options.setGeodeticComputation(gcs);
-			} else {
-				warnings.add("Unknown geodetic computation method '" + content + "'");
-			}
-		} else if (element.equals("atmosphere")) {
-			atmosphereHandler.storeSettings(options, warnings);
-		} else if (element.equals("timestep")) {
-			if (Double.isNaN(d) || d <= 0) {
-				warnings.add("Illegal time step defined, ignoring.");
-			} else {
-				options.setTimeStep(d);
-			}
+
+
+		switch (element) {
+			case "configid":
+				this.idToSet = new FlightConfigurationId(content);
+				break;
+			case "launchrodlength":
+				if (Double.isNaN(d)) {
+					warnings.add("Illegal launch rod length defined, ignoring.");
+				} else {
+					options.setLaunchRodLength(d);
+				}
+				break;
+			case "launchrodangle":
+				if (Double.isNaN(d)) {
+					warnings.add("Illegal launch rod angle defined, ignoring.");
+				} else {
+					options.setLaunchRodAngle(d * Math.PI / 180);
+				}
+				break;
+			case "launchroddirection":
+				if (Double.isNaN(d)) {
+					warnings.add("Illegal launch rod direction defined, ignoring.");
+				} else {
+					options.setLaunchRodDirection(d * 2.0 * Math.PI / 360);
+				}
+				break;
+			case "windaverage":
+				if (Double.isNaN(d)) {
+					warnings.add("Illegal average windspeed defined, ignoring.");
+				} else {
+					options.setWindSpeedAverage(d);
+				}
+				break;
+			case "windturbulence":
+				if (Double.isNaN(d)) {
+					warnings.add("Illegal wind turbulence intensity defined, ignoring.");
+				} else {
+					options.setWindTurbulenceIntensity(d);
+				}
+				break;
+			case "launchaltitude":
+				if (Double.isNaN(d)) {
+					warnings.add("Illegal launch altitude defined, ignoring.");
+				} else {
+					options.setLaunchAltitude(d);
+				}
+				break;
+			case "launchlatitude":
+				if (Double.isNaN(d)) {
+					warnings.add("Illegal launch latitude defined, ignoring.");
+				} else {
+					options.setLaunchLatitude(d);
+				}
+				break;
+			case "launchlongitude":
+				if (Double.isNaN(d)) {
+					warnings.add("Illegal launch longitude.");
+				} else {
+					options.setLaunchLongitude(d);
+				}
+				break;
+			case "geodeticmethod":
+				GeodeticComputationStrategy gcs =
+						(GeodeticComputationStrategy) DocumentConfig.findEnum(content, GeodeticComputationStrategy.class);
+				if (gcs != null) {
+					options.setGeodeticComputation(gcs);
+				} else {
+					warnings.add("Unknown geodetic computation method '" + content + "'");
+				}
+				break;
+			case "atmosphere":
+				atmosphereHandler.storeSettings(options, warnings);
+				break;
+			case "timestep":
+				if (Double.isNaN(d) || d <= 0) {
+					warnings.add("Illegal time step defined, ignoring.");
+				} else {
+					options.setTimeStep(d);
+				}
+				break;
 		}
 	}
 }

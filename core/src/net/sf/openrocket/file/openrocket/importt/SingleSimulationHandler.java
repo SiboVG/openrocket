@@ -50,22 +50,25 @@ class SingleSimulationHandler extends AbstractElementHandler {
 	@Override
 	public ElementHandler openElement(String element, HashMap<String, String> attributes,
 			WarningSet warnings) {
-		
-		if (element.equals("name") || element.equals("simulator") ||
-				element.equals("calculator") || element.equals("listener")) {
-			return PlainTextHandler.INSTANCE;
-		} else if (element.equals("conditions")) {
-			conditionHandler = new SimulationConditionsHandler(doc.getRocket(), context);
-			return conditionHandler;
-		} else if (element.equals("extension")) {
-			configHandler = new ConfigHandler();
-			return configHandler;
-		} else if (element.equals("flightdata")) {
-			dataHandler = new FlightDataHandler(this, context);
-			return dataHandler;
-		} else {
-			warnings.add("Unknown element '" + element + "', ignoring.");
-			return null;
+
+		switch (element) {
+			case "name":
+			case "simulator":
+			case "calculator":
+			case "listener":
+				return PlainTextHandler.INSTANCE;
+			case "conditions":
+				conditionHandler = new SimulationConditionsHandler(doc.getRocket(), context);
+				return conditionHandler;
+			case "extension":
+				configHandler = new ConfigHandler();
+				return configHandler;
+			case "flightdata":
+				dataHandler = new FlightDataHandler(this, context);
+				return dataHandler;
+			default:
+				warnings.add("Unknown element '" + element + "', ignoring.");
+				return null;
 		}
 	}
 	

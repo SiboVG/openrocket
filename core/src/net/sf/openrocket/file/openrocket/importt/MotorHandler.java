@@ -63,85 +63,78 @@ class MotorHandler extends AbstractElementHandler {
 			String content, WarningSet warnings) throws SAXException {
 		
 		content = content.trim();
-		
-		if (element.equals("type")) {
-			
-			// Motor type
-			type = null;
-			for (Motor.Type t : Motor.Type.values()) {
-				if (t.name().toLowerCase(Locale.ENGLISH).equals(content.trim())) {
-					type = t;
-					break;
+
+		switch (element) {
+			case "type":
+				// Motor type
+				type = null;
+				for (Motor.Type t : Motor.Type.values()) {
+					if (t.name().toLowerCase(Locale.ENGLISH).equals(content.trim())) {
+						type = t;
+						break;
+					}
 				}
-			}
-			if (type == null) {
-				warnings.add(Warning.fromString("Unknown motor type '" + content + "', ignoring."));
-			}
-			
-		} else if (element.equals("manufacturer")) {
-			
-			// Manufacturer
-			manufacturer = content.trim();
-			
-		} else if (element.equals("designation")) {
-			
-			// Designation
-			designation = content.trim();
-			
-		} else if (element.equals("digest")) {
-			
-			// Digest is used only for file versions saved using the same digest algorithm
-			if (context.getFileVersion() >= MOTOR_DIGEST_VERSION) {
-				digest = content.trim();
-			}
-			
-		} else if (element.equals("diameter")) {
-			
-			// Diameter
-			diameter = Double.NaN;
-			try {
-				diameter = Double.parseDouble(content.trim());
-			} catch (NumberFormatException e) {
-				// Ignore
-			}
-			if (Double.isNaN(diameter)) {
-				warnings.add(Warning.fromString("Illegal motor diameter specified, ignoring."));
-			}
-			
-		} else if (element.equals("length")) {
-			
-			// Length
-			length = Double.NaN;
-			try {
-				length = Double.parseDouble(content.trim());
-			} catch (NumberFormatException ignore) {
-			}
-			
-			if (Double.isNaN(length)) {
-				warnings.add(Warning.fromString("Illegal motor diameter specified, ignoring."));
-			}
-			
-		} else if (element.equals("delay")) {
-			
-			// Delay
-			delay = Double.NaN;
-			if (content.equals("none")) {
-				delay = Motor.PLUGGED_DELAY;
-			} else {
+				if (type == null) {
+					warnings.add(Warning.fromString("Unknown motor type '" + content + "', ignoring."));
+				}
+				break;
+			case "manufacturer":
+				// Manufacturer
+				manufacturer = content.trim();
+				break;
+			case "designation":
+				// Designation
+				designation = content.trim();
+				break;
+			case "digest":
+				// Digest is used only for file versions saved using the same digest algorithm
+				if (context.getFileVersion() >= MOTOR_DIGEST_VERSION) {
+					digest = content.trim();
+				}
+				break;
+			case "diameter":
+				// Diameter
+				diameter = Double.NaN;
 				try {
-					delay = Double.parseDouble(content.trim());
-				} catch (NumberFormatException ignore) {
+					diameter = Double.parseDouble(content.trim());
+				} catch (NumberFormatException e) {
+					// Ignore
 				}
-				
-				if (Double.isNaN(delay)) {
-					warnings.add(Warning.fromString("Illegal motor delay specified, ignoring."));
+				if (Double.isNaN(diameter)) {
+					warnings.add(Warning.fromString("Illegal motor diameter specified, ignoring."));
 				}
-				
-			}
-			
-		} else {
-			super.closeElement(element, attributes, content, warnings);
+				break;
+			case "length":
+				// Length
+				length = Double.NaN;
+				try {
+					length = Double.parseDouble(content.trim());
+				} catch (NumberFormatException ignore) { }
+
+				if (Double.isNaN(length)) {
+					warnings.add(Warning.fromString("Illegal motor diameter specified, ignoring."));
+				}
+				break;
+			case "delay":
+				// Delay
+				delay = Double.NaN;
+				if (content.equals("none")) {
+					delay = Motor.PLUGGED_DELAY;
+				} else {
+					try {
+						delay = Double.parseDouble(content.trim());
+					} catch (NumberFormatException ignore) {
+					}
+
+					if (Double.isNaN(delay)) {
+						warnings.add(Warning.fromString("Illegal motor delay specified, ignoring."));
+					}
+
+				}
+				break;
+			default:
+				super.closeElement(element, attributes, content, warnings);
+				break;
 		}
 	}
-	
 }
