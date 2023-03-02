@@ -56,21 +56,26 @@ public class DecalRegistry {
 		}
 		
 		DecalImageImpl o = (DecalImageImpl) original;
-		
-		DecalImageImpl newDecal = o.clone();
-		
-		String newName = makeUniqueName(o.getName());
-		
-		// Return the old decal if a new one isn't required.
-		if (newName.equals(o.getName())) {
+
+		try {
+			DecalImageImpl newDecal = o.clone();
+
+			String newName = makeUniqueName(o.getName());
+
+			// Return the old decal if a new one isn't required.
+			if (newName.equals(o.getName())) {
+				return original;
+			}
+
+			newDecal.name = newName;
+
+			registeredDecals.put(newName, newDecal);
+
+			return newDecal;
+		} catch (CloneNotSupportedException e) {
+			Application.getExceptionHandler().handleErrorCondition("Error cloning decal", e);
 			return original;
 		}
-		
-		newDecal.name = newName;
-		
-		registeredDecals.put(newName, newDecal);
-		
-		return newDecal;
 		
 	}
 	
@@ -218,7 +223,7 @@ public class DecalRegistry {
 		}
 		
 		@Override
-		protected DecalImageImpl clone() {
+		protected DecalImageImpl clone() throws CloneNotSupportedException {
 			DecalImageImpl clone = new DecalImageImpl(this.delegate);
 			clone.decalFile = this.decalFile;
 			
