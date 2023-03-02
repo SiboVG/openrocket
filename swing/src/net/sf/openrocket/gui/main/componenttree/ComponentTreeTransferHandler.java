@@ -343,7 +343,7 @@ public class ComponentTreeTransferHandler extends TransferHandler {
 		return targets;
 	}
 	
-	private class SourceTarget {
+	private static class SourceTarget {
 		private final RocketComponent srcParent;
 		private final int srcIndex;
 		private final RocketComponent destParent;
@@ -440,7 +440,7 @@ public class ComponentTreeTransferHandler extends TransferHandler {
 		return new MyDropLocation(correctInsertPath, correctInsertIndex);
 	}
 	
-	private class MyDropLocation {
+	private static class MyDropLocation {
 		private final TreePath path;
 		private final int index;
 		

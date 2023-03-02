@@ -54,7 +54,7 @@ public class DampingMoment extends AbstractSimulationExtension {
 		return "Calculate damping moment coefficient after every simulation step and publish to FlightData as Cdm";
 	}
 
-	private class DampingMomentListener extends AbstractSimulationListener {
+	private static class DampingMomentListener extends AbstractSimulationListener {
 	
 		@Override
 		public FlightConditions postFlightConditions(SimulationStatus status, FlightConditions flightConditions) throws SimulationException {

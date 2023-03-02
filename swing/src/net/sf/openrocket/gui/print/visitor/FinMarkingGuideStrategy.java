@@ -125,7 +125,7 @@ public class FinMarkingGuideStrategy {
     /**
      * Convenience class to model a dimension.
      */
-    class Dimension {
+    static class Dimension {
         /**
          * Width, in points.
          */

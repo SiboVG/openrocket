@@ -82,7 +82,7 @@ public class ComponentPresetEditor extends JPanel implements PresetResultListene
 		setLayout(new MigLayout("", "[82.00px, grow][168.00px, grow][84px, grow][117.00px, grow][][222px]",
 				"[346.00px, grow][29px]"));
 		
-		model = new DataTableModel(new String[] { "Manufacturer", "Type", "Part No", "Description", "" });
+		model = new DataTableModel(new String[]{"Manufacturer", "Type", "Part No", "Description", ""});
 		
 		table = new JTable(model);
 		table.getTableHeader().setFont(new JLabel().getFont());
@@ -269,7 +269,7 @@ public class ComponentPresetEditor extends JPanel implements PresetResultListene
 	/**
 	 * A table model that adds associated objects to each row, allowing for easy retrieval.
 	 */
-	class DataTableModel extends DefaultTableModel {
+	static class DataTableModel extends DefaultTableModel {
 		
 		private List<Object> associated = new ArrayList<Object>();
 		
@@ -454,7 +454,7 @@ public class ComponentPresetEditor extends JPanel implements PresetResultListene
 		return FileHelper.confirmWrite(file, this) && new OpenRocketComponentSaver().save(file, new ArrayList<Material>(materials.values()), presets);
 	}
 	
-	class OpenedFileContext {
+	static class OpenedFileContext {
 		
 		/**
 		 * State variable to keep track of which file was opened, in case it needs to be saved back to that file.

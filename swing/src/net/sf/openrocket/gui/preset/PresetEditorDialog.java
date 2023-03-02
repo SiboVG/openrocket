@@ -2410,7 +2410,7 @@ public class PresetEditorDialog extends JDialog implements ItemListener {
 		}
 	}
 	
-	class MaterialChooser extends JComboBox<Material> {
+	static class MaterialChooser extends JComboBox<Material> {
 		private static final long serialVersionUID = -6066457077483291319L;
 
 		public MaterialChooser() {

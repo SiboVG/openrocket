@@ -104,7 +104,7 @@ public class ThrustCurveMotorTest {
 		assertEquals( 0.015285, actMass0p206,  0.001 );
 	}
 	
-	private class TestPair extends Pair<Double,Double>{
+	private static class TestPair extends Pair<Double,Double>{
 		private TestPair(){ super( 0., 0.);}
 		
 		public TestPair( Double u, Double v){
@@ -117,12 +117,12 @@ public class ThrustCurveMotorTest {
 		final ThrustCurveMotor mtr = motorEstesA8_3;
 		
 		Pair<Double, Double>[] testPairs = new TestPair[]{
-				new TestPair(0.512, 0.041),
-				new TestPair(2.115, 0.084),
-				new TestPair( 1.220, 0.060),
-				new TestPair( 1.593, 0.070),
-				new TestPair( 1.965, 0.080),	
-				new TestPair( 2.428, 0.090),	
+                new TestPair(0.512, 0.041),
+                new TestPair(2.115, 0.084),
+                new TestPair(1.220, 0.060),
+                new TestPair(1.593, 0.070),
+                new TestPair(1.965, 0.080),
+                new TestPair(2.428, 0.090),
 	    };
 		
 		for( Pair<Double,Double> testCase : testPairs ){

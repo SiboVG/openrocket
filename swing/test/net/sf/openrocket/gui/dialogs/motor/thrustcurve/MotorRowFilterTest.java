@@ -25,7 +25,7 @@ public class MotorRowFilterTest {
 	private final double EPSILON = 0.002;
 
 	// I need to define a motor entry to test the filter
-	private class MotorEntry extends MotorRowFilter.Entry<ThrustCurveMotorDatabaseModel, Integer> {
+	private static class MotorEntry extends MotorRowFilter.Entry<ThrustCurveMotorDatabaseModel, Integer> {
 		private final ThrustCurveMotorDatabaseModel model;
 
 		public MotorEntry(ThrustCurveMotorDatabaseModel model) {

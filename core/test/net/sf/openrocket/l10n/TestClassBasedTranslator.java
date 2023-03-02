@@ -100,7 +100,7 @@ public class TestClassBasedTranslator {
 	}
 	
 	
-	private class Subclass {
+	private static class Subclass {
 		private String get(Translator trans, String key) {
 			return trans.get(key);
 		}

@@ -284,7 +284,7 @@ public class ParallelExecutorCache implements ParallelFunctionCache {
 	/**
 	 * A Callable that evaluates a function at a specific point and returns the result.
 	 */
-	private class FunctionCallable implements Callable<Double> {
+	private static class FunctionCallable implements Callable<Double> {
 		private final Function calledFunction;
 		private final Point point;
 		

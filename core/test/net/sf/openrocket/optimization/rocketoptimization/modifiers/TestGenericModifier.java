@@ -88,7 +88,7 @@ public class TestGenericModifier extends BaseTestCase {
 		assertEquals(1.0, gm.getCurrentScaledValue(sim), EPSILON);
 	}
 	
-	public class TestValue {
+	public static class TestValue {
 		private double d;
 		
 		public double getValue() {

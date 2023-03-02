@@ -115,7 +115,7 @@ public class DecalRegistry {
 		return decals;
 	}
 	
-	public class DecalImageImpl implements DecalImage, Cloneable, Comparable<DecalImage>, ChangeSource {
+	public static class DecalImageImpl implements DecalImage, Cloneable, Comparable<DecalImage>, ChangeSource {
 		
 		private final Attachment delegate;
 		

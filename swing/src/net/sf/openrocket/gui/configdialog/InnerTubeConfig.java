@@ -424,7 +424,7 @@ class ClusterSelectionPanel extends JPanel {
 	}
 
 
-	private class ClusterButton extends JPanel implements StateChangeListener, MouseListener,
+	private static class ClusterButton extends JPanel implements StateChangeListener, MouseListener,
 	Resettable {
 		/**
 		 * 

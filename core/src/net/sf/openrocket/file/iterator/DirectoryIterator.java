@@ -161,7 +161,7 @@ public class DirectoryIterator extends FileIterator {
 	/**
 	 * A FileFilter wrapper that accepts or discards directories.
 	 */
-	private class DirSelectionFileFilter implements FileFilter {
+	private static class DirSelectionFileFilter implements FileFilter {
 		
 		private final boolean acceptDirs;
 		private final FileFilter parentFilter;

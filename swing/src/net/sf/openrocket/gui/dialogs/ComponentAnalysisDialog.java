@@ -713,7 +713,7 @@ public class ComponentAnalysisDialog extends JDialog implements StateChangeListe
 		}
 	}
 
-	private class LongitudinalStabilityRow {
+	private static class LongitudinalStabilityRow {
 
 		public String name;
 		public Object source;

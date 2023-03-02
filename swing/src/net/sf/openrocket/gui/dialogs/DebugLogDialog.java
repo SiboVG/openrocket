@@ -524,7 +524,7 @@ public class DebugLogDialog extends JDialog {
 	}
 	
 	
-	private class LocationComparator implements Comparator<Object> {
+	private static class LocationComparator implements Comparator<Object> {
 		private final Pattern splitPattern = Pattern.compile("^\\(([^:]*+):([0-9]++).*\\)$");
 		
 		@Override

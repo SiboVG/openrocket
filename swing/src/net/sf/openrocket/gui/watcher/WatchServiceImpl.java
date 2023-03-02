@@ -36,7 +36,7 @@ public class WatchServiceImpl implements WatchService {
 		return new WatchKeyImpl(future);
 	}
 	
-	public class WatchKeyImpl implements WatchKey {
+	public static class WatchKeyImpl implements WatchKey {
 		
 		ScheduledFuture<?> future;
 		
@@ -51,7 +51,7 @@ public class WatchServiceImpl implements WatchService {
 		
 	}
 	
-	private class WatchableRunner implements Runnable {
+	private static class WatchableRunner implements Runnable {
 		
 		private Watchable w;
 		

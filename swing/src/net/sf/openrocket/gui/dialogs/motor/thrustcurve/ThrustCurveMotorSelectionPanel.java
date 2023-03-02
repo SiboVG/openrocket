@@ -712,7 +712,7 @@ public class ThrustCurveMotorSelectionPanel extends JPanel implements MotorSelec
 	//////////////////////
 
 
-	private class CurveSelectionRenderer implements ListCellRenderer<MotorHolder> {
+	private static class CurveSelectionRenderer implements ListCellRenderer<MotorHolder> {
 
 		private final ListCellRenderer<MotorHolder> renderer;
 

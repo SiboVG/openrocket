@@ -492,7 +492,7 @@ public class RocketActions {
 
 	///////  Action classes
 
-	private abstract class RocketAction extends AbstractAction implements ClipboardListener {
+	private abstract static class RocketAction extends AbstractAction implements ClipboardListener {
 		/**
 		 * 
 		 */

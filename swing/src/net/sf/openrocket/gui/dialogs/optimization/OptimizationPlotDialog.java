@@ -404,7 +404,7 @@ public class OptimizationPlotDialog extends JDialog {
 		return ttip;
 	}
 	
-	private class GradientScale implements PaintScale {
+	private static class GradientScale implements PaintScale {
 		
 		private final double min;
 		private final double max;

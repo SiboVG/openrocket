@@ -26,7 +26,7 @@ public class PrintSimulation extends AbstractSimulationExtension {
 		return "Print summary of simulation progress to standard output after every step";
 	}
 	
-	private class PrintSimulationListener extends AbstractSimulationListener {
+	private static class PrintSimulationListener extends AbstractSimulationListener {
 		
 		@Override
 		public boolean handleFlightEvent(SimulationStatus status, FlightEvent event) throws SimulationException {

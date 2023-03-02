@@ -21,7 +21,7 @@ import net.sf.openrocket.util.StateChangeListener;
 // is done quickly enough I might as well just do it every time the
 // combobox is opened, rather than trying to watch and see if it's needed.
 public class ConfigurationComboBox extends JComboBox<FlightConfiguration> implements StateChangeListener {
-    public class ConfigurationModel implements MutableComboBoxModel<FlightConfiguration> {
+    public static class ConfigurationModel implements MutableComboBoxModel<FlightConfiguration> {
 		
 		private final Rocket rkt;
 		private FlightConfiguration selectedConfig;

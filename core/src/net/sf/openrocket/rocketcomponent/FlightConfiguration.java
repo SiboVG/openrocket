@@ -46,7 +46,7 @@ public class FlightConfiguration implements FlightConfigurableParameter<FlightCo
     // made public for testing.... there is probably a better way
 	public final int configurationInstanceId;
 
-	private class StageFlags implements Cloneable {
+	private static class StageFlags implements Cloneable {
 		public boolean active = true;
 		public int stageNumber = -1;
 		public String stageId;

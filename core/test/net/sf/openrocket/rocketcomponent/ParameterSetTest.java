@@ -25,7 +25,7 @@ public class ParameterSetTest extends BaseTestCase {
 	static int gid=0; 
 	FlightConfigurableParameterSet<TestParameter> testSet = null;
 	
-	private class TestParameter implements FlightConfigurableParameter<TestParameter> {
+	private static class TestParameter implements FlightConfigurableParameter<TestParameter> {
 		public final int id;
 		
 		public TestParameter(){
