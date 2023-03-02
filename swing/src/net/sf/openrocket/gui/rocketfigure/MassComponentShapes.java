@@ -215,7 +215,7 @@ public class MassComponentShapes extends RocketComponentShape {
 		System.arraycopy(baseShape, 0, newShape, 0, baseShape.length);
 	
 			
-		Double vMargin = bounds.getHeight()/8.0;
+		double vMargin = bounds.getHeight()/8.0;
 		double hMargin = bounds.getWidth()/3.0;
 		double cellWidth=hMargin/3.0;
 		double cellTop=bounds.getY()+7*vMargin;
