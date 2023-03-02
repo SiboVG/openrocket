@@ -185,10 +185,8 @@ public class CustomExpressionPanel extends JPanel {
 			
 			JLabel nameLabel = new JLabel(trans.get("customExpression.Name") + " :");
 			JLabel name = new JLabel(expression.getName());
-			name = setLabelStyle(name);
 			JLabel symbolLabel = new JLabel(trans.get("customExpression.Symbol") + " :");
 			JLabel symbol = new JLabel(expression.getSymbol());
-			symbol = setLabelStyle(symbol);
 			symbol.setBackground(Color.WHITE);
 			
 			JLabel unitLabel = new JLabel(trans.get("customExpression.Units") + " :");

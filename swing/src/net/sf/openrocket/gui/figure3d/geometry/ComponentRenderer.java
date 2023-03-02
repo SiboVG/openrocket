@@ -66,6 +66,9 @@ public class ComponentRenderer {
 	    return new Geometry(comp, transform) {
 			@Override
 			public void render(GL2 gl, final Surface which) {
+				if (transform == null) {
+					return;
+				}
 			    gl.glPushMatrix();
 
 			    gl.glMultMatrixd( transform.getGLMatrix() );

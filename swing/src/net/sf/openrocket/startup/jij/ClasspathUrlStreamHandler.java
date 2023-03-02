@@ -26,7 +26,7 @@ public class ClasspathUrlStreamHandler extends URLStreamHandler {
 	@Override
 	protected URLConnection openConnection(URL u) throws IOException {
 		final URL resourceUrl = classLoader.getResource(u.getPath());
-		return resourceUrl.openConnection();
+		return resourceUrl != null ? resourceUrl.openConnection() : null;
 	}
 	
 }

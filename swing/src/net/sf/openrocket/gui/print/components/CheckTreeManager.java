@@ -57,7 +57,7 @@ public class CheckTreeManager extends MouseAdapter implements TreeSelectionListe
         if (path == null) {
             return;
         }
-        if (me.getX() > tree.getPathBounds(path).x + hotspot) {
+        if (tree.getPathBounds(path) == null || me.getX() > tree.getPathBounds(path).x + hotspot) {
             return;
         }
 

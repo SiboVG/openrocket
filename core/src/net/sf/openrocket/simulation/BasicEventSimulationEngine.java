@@ -555,9 +555,13 @@ public class BasicEventSimulationEngine implements SimulationEngine {
 					// to determine the optimum altitude.
 					if (currentStatus.getSimulationConditions().isCalculateExtras() && !currentStatus.isApogeeReached()) {
 						FlightData coastStatus = computeCoastTime();
-
-						currentStatus.getFlightData().setOptimumAltitude(coastStatus.getMaxAltitude());
-						currentStatus.getFlightData().setTimeToOptimumAltitude(coastStatus.getTimeToApogee());
+						if (coastStatus != null) {
+							currentStatus.getFlightData().setOptimumAltitude(coastStatus.getMaxAltitude());
+							currentStatus.getFlightData().setTimeToOptimumAltitude(coastStatus.getTimeToApogee());
+						} else {
+							currentStatus.getFlightData().setOptimumAltitude(Double.NaN);
+							currentStatus.getFlightData().setTimeToOptimumAltitude(Double.NaN);
+						}
 					}
 
 					// switch to landing stepper (unless we're already on the ground)
