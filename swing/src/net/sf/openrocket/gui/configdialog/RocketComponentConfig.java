@@ -351,12 +351,12 @@ public class RocketComponentConfig extends JPanel {
 
 		if (allSameType && component.getPresetComponent() != null) {
 			ComponentPreset preset = component.getPresetComponent();
-			sb.append(preset.getManufacturer() + " " + preset.getPartNo() + "      ");
+			sb.append(preset.getManufacturer()).append(" ").append(preset.getPartNo()).append("      ");
 		}
 
 		List<RocketComponent> listeners = component.getConfigListeners();
 		if (allMassive && (listeners == null || listeners.size() == 0)) {	// TODO: support aggregate mass display for current component and listeners?
-			sb.append(trans.get("RocketCompCfg.lbl.Componentmass") + " ");
+			sb.append(trans.get("RocketCompCfg.lbl.Componentmass")).append(" ");
 			sb.append(UnitGroup.UNITS_MASS.getDefaultUnit().toStringUnit(
 					component.getComponentMass()));
 			
@@ -371,7 +371,7 @@ public class RocketComponentConfig extends JPanel {
 			}
 			
 			if (overridetext != null) {
-				sb.append(" " + overridetext);
+				sb.append(" ").append(overridetext);
 			}
 			
 			infoLabel.setText(sb.toString());

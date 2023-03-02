@@ -933,7 +933,7 @@ public class FlightConfiguration implements FlightConfigurableParameter<FlightCo
 		for( MotorConfiguration curConfig : this.motors.values() ){
 			boolean active=this.isStageActive( curConfig.getMount().getStage().getStageNumber());
 			String activeString = (active?"active":"      ");
-			buf.append("    "+"("+activeString+")"+curConfig.toDebugDetail()+"\n");
+			buf.append("    " + "(").append(activeString).append(")").append(curConfig.toDebugDetail()).append("\n");
 		}
 		buf.append("\n");
 		return buf.toString();

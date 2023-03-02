@@ -522,12 +522,12 @@ public class SimulationStatus implements Monitorable {
 	public String toEventDebug(){
 		final StringBuilder buf = new StringBuilder();
 		for ( FlightEvent event : this.eventQueue){
-			buf.append("      [t:"+event.getType()+" @"+ event.getTime());
+			buf.append("      [t:").append(event.getType()).append(" @").append(event.getTime());
 			if( null != event.getSource()){
-				buf.append("  src:"+event.getSource().getName());
+				buf.append("  src:").append(event.getSource().getName());
 			}
 			if( null != event.getData()){
-				buf.append("  data:"+event.getData().getClass().getSimpleName());
+				buf.append("  data:").append(event.getData().getClass().getSimpleName());
 			}
 			buf.append("]\n");
 		}
@@ -537,7 +537,7 @@ public class SimulationStatus implements Monitorable {
 	public String toMotorsDebug(){
 		final StringBuilder buf = new StringBuilder("MotorState list:\n");
 		for ( MotorClusterState state : this.motorStateList){
-			buf.append("          ["+state.toDescription()+"]\n");
+			buf.append("          [").append(state.toDescription()).append("]\n");
 		}
 		return buf.toString();
 	}

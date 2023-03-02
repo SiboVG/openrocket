@@ -156,7 +156,7 @@ public class BugReportDialog extends JDialog {
 		if (t == null) {
 			sb.append("Thread is not specified.");
 		} else {
-			sb.append(t + "\n");
+			sb.append(t).append("\n");
 		}
 		sb.append('\n');
 		
@@ -200,12 +200,12 @@ public class BugReportDialog extends JDialog {
 	
 	private static void addSystemInformation(StringBuilder sb) {
 		StringBuilder sbTemp = new StringBuilder();
-		sbTemp.append("OpenRocket version: " + BuildProperties.getVersion() + "\n");
-		sbTemp.append("OpenRocket source: " + BuildProperties.getBuildSource() + "\n");
-		sbTemp.append("OpenRocket location: " + JarUtil.getCurrentJarFile() + "\n");
-		sbTemp.append("User-defined thrust curves location: " + preferences.getUserThrustCurveFilesAsString() + "\n");
-		sbTemp.append("JOGL version: " + JoglVersion.getInstance().getImplementationVersion() + "\n");
-		sbTemp.append("Current default locale: " + Locale.getDefault() + "\n");
+		sbTemp.append("OpenRocket version: ").append(BuildProperties.getVersion()).append("\n");
+		sbTemp.append("OpenRocket source: ").append(BuildProperties.getBuildSource()).append("\n");
+		sbTemp.append("OpenRocket location: ").append(JarUtil.getCurrentJarFile()).append("\n");
+		sbTemp.append("User-defined thrust curves location: ").append(preferences.getUserThrustCurveFilesAsString()).append("\n");
+		sbTemp.append("JOGL version: ").append(JoglVersion.getInstance().getImplementationVersion()).append("\n");
+		sbTemp.append("Current default locale: ").append(Locale.getDefault()).append("\n");
 		sbTemp.append("System properties:\n");
 
 		// Sort the keys
@@ -216,7 +216,7 @@ public class BugReportDialog extends JDialog {
 
 		for (String key : keys) {
 			String value = System.getProperty(key);
-			sbTemp.append("  " + key + "=");
+			sbTemp.append("  ").append(key).append("=");
 			if (key.equals("line.separator")) {
 				for (char c : value.toCharArray()) {
 					sbTemp.append(String.format("\\u%04x", (int) c));

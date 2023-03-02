@@ -2792,7 +2792,7 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 		MotorConfiguration curInstance = mnt.getMotorConfig( curId);
 		if( curInstance.isEmpty() ){
 			// print just the tube locations
-			buffer.append(indent+"    [X] This Instance doesn't have any motors for the active configuration.\n");
+			buffer.append(indent).append("    [X] This Instance doesn't have any motors for the active configuration.\n");
 		}else{
 			// curInstance has a motor ... 
 			Motor curMotor = curInstance.getMotor();

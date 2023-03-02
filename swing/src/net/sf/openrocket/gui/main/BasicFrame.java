@@ -975,7 +975,7 @@ public class BasicFrame extends JFrame {
 					//	//	Explicitly null the strong reference to avoid possibility of invisible references
 					o = null;
 				}
-				sb.append("Total: " + count);
+				sb.append("Total: ").append(count);
 
 				// Get basic memory stats
 				System.gc();

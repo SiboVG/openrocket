@@ -261,7 +261,7 @@ public class CSVSave extends AbstractSimulationExtension {
 				final Types[] types = Types.values();
 				StringBuilder s = new StringBuilder("# " + types[0].toString());
 				for (int i = 1; i < types.length; i++) {
-					s.append("," + types[i].toString());
+					s.append(",").append(types[i].toString());
 				}
 				output.println(s);
 				
@@ -294,7 +294,7 @@ public class CSVSave extends AbstractSimulationExtension {
 				
 				s = new StringBuilder("" + types[0].getValue(status));
 				for (int i = 1; i < types.length; i++) {
-					s.append("," + types[i].getValue(status));
+					s.append(",").append(types[i].getValue(status));
 				}
 				output.println(s);
 				
