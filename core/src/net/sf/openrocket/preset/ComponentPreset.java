@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 import net.sf.openrocket.material.Material;
 import net.sf.openrocket.motor.Manufacturer;
@@ -370,7 +371,7 @@ public class ComponentPreset implements Comparable<ComponentPreset>, Serializabl
 
 		ComponentPreset that = (ComponentPreset) o;
 
-		return digest != null ? digest.equals(that.digest) : that.digest == null;
+		return Objects.equals(digest, that.digest);
 	}
 
 	@Override
