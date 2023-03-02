@@ -232,7 +232,7 @@ public class ComponentPreset implements Comparable<ComponentPreset>, Serializabl
 	public final static TypedKey<Double> PACKED_DIAMETER = new TypedKey<>("PackedDiameter", Double.class, UnitGroup.UNITS_LENGTH);
 	//	Parachute Mass declaration see: MASS
 
-	public final static List<TypedKey<?>> ORDERED_KEY_LIST = Collections.unmodifiableList(Arrays.asList(
+	public final static List<TypedKey<?>> ORDERED_KEY_LIST = List.of(
 		//	DO NOT add to this list without redefining "table.column"
 			LEGACY,
 			MANUFACTURER,
@@ -264,7 +264,7 @@ public class ComponentPreset implements Comparable<ComponentPreset>, Serializabl
 			NUT_MASS,
 			FINISH,
 			MATERIAL
-			));
+	);
 
 
 	// package scope constructor to encourage use of factory.
