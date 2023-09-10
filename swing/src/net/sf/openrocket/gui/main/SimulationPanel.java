@@ -48,6 +48,7 @@ import net.sf.openrocket.gui.util.GUIUtil;
 import net.sf.openrocket.gui.util.SwingPreferences;
 import net.sf.openrocket.gui.util.UITheme;
 import net.sf.openrocket.gui.widgets.SaveFileChooser;
+import net.sf.openrocket.gui.widgets.TableHeaderPopupMenu;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -197,6 +198,7 @@ public class SimulationPanel extends JPanel {
 		simulationTable.setDefaultRenderer(Object.class, new JLabelRenderer());
 		simulationTableModel.setColumnWidths(simulationTable.getColumnModel());
 		simulationTable.setFillsViewportHeight(true);
+		simulationTable.getTableHeader().setComponentPopupMenu(new TableHeaderPopupMenu(simulationTable));
 
 		// Unregister the default actions that would otherwise conflict with RocketActions and their acceleration keys
 		InputMap im = simulationTable.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
@@ -1157,7 +1159,7 @@ public class SimulationPanel extends JPanel {
 		public SimulationTableModel() {
 			super(
 					////  Status and warning column
-					new Column("") {
+					new Column(trans.get("simpanel.col.Status")) {
 						private StatusLabel label = null;
 
 						@Override

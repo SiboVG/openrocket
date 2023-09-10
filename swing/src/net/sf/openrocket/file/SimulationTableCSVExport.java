@@ -47,8 +47,9 @@ public class SimulationTableCSVExport {
 		if (simulationTableModel == null) {
 			return;
 		}
-		for (int i = 0; i < simulationTableModel.getColumnCount(); i++) {
-			Column c = simulationTableModel.getColumn(i);
+		for (int i = 0; i < simulationTable.getColumnCount(); i++) {
+			int modelIndex = simulationTable.convertColumnIndexToModel(i);
+			Column c = simulationTableModel.getColumn(modelIndex);
 			if (c instanceof ValueColumn) {
 				// Only value columns seem to have units that are not zero length strings... These are
 				// the ones we actually want in our lookup table.
@@ -92,8 +93,8 @@ public class SimulationTableCSVExport {
 	 * @return The CSV data as one string block.
 	 */
 	public String generateCSVDate(String fieldSep, int precision, boolean isExponentialNotation, boolean onlySelected) {
-		int modelColumnCount = simulationTableModel.getColumnCount();
-		int modelRowCount = simulationTableModel.getRowCount();
+		int modelColumnCount = simulationTable.getColumnCount();
+		int modelRowCount = simulationTable.getRowCount();
 		populateColumnNameToUnitsHashTable();
 
 		String CSVSimResultString;
@@ -150,7 +151,8 @@ public class SimulationTableCSVExport {
 
 			// Piece together the column data for the index-row, skipping any rows with null counts > 0!
 			for (int j = 1; j < modelColumnCount ; j++) { // skip first column
-				Object o = simulationTableModel.getValueAt(idx, j);
+				int modelIndex = simulationTable.convertColumnIndexToModel(j);
+				Object o = simulationTableModel.getValueAt(idx, modelIndex);
 				if (o != null) {
 					final String valueString;
 					if (o instanceof Value) {
