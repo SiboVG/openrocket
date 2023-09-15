@@ -40,6 +40,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 
 import net.sf.openrocket.arch.SystemInfo;
 import net.sf.openrocket.gui.components.CsvOptionPanel;
@@ -199,6 +200,16 @@ public class SimulationPanel extends JPanel {
 		simulationTableModel.setColumnWidths(simulationTable.getColumnModel());
 		simulationTable.setFillsViewportHeight(true);
 		simulationTable.getTableHeader().setComponentPopupMenu(new TableHeaderPopupMenu(simulationTable));
+
+		// Don't render the header text of the Status column
+		TableCellRenderer defaultHeaderRenderer = simulationTable.getTableHeader().getDefaultRenderer();
+		simulationTable.getTableHeader().setDefaultRenderer((table, value, isSelected, hasFocus, row, column) -> {
+			Component c = defaultHeaderRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			if (c instanceof JLabel && trans.get("simpanel.col.Status").equals(value)) {
+				((JLabel) c).setText("");
+			}
+			return c;
+		});
 
 		// Unregister the default actions that would otherwise conflict with RocketActions and their acceleration keys
 		InputMap im = simulationTable.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
@@ -596,8 +607,7 @@ public class SimulationPanel extends JPanel {
 		StringBuilder valuesStr = new StringBuilder();
 
 		// Copy the column names
-		valuesStr.append(trans.get("simpanel.col.Status")).append("\t");
-		for (int i = 1; i < numCols; i++) {
+		for (int i = 0; i < numCols; i++) {
 			valuesStr.append(simulationTable.getColumnName(i));
 			if (i < numCols-1) {
 				valuesStr.append("\t");
