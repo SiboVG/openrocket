@@ -111,6 +111,12 @@ public class ThrustCurveMotorSelectionPanel extends JPanel implements MotorSelec
 	private ThrustCurveMotorSet selectedMotorSet;
 	private double selectedDelay;
 
+	private static Color dimTextColor;
+
+	static {
+		initColors();
+	}
+
 	public ThrustCurveMotorSelectionPanel( final FlightConfigurationId fcid, MotorMount mount ) {
 		this();
 		setMotorMountAndConfig( fcid, mount );
@@ -336,7 +342,7 @@ public class ThrustCurveMotorSelectionPanel extends JPanel implements MotorSelec
 			nrOfMotorsLabel = new StyledLabel(-2f, StyledLabel.Style.ITALIC);
 			nrOfMotorsLabel.setToolTipText(trans.get("TCMotorSelPan.lbl.ttip.nrOfMotors"));
 			updateNrOfMotors();
-			nrOfMotorsLabel.setForeground(GUIUtil.getUITheme().getDimTextColor());
+			nrOfMotorsLabel.setForeground(dimTextColor);
 			panel.add(nrOfMotorsLabel, "gapleft para, spanx, wrap");
 			sorter.addRowSorterListener(new RowSorterListener() {
 				@Override
@@ -398,6 +404,15 @@ public class ThrustCurveMotorSelectionPanel extends JPanel implements MotorSelec
 		hideUnavailableBox.getActionListeners()[0].actionPerformed(null);
 		hideSimilarBox.getActionListeners()[0].actionPerformed(null);
 
+	}
+
+	private static void initColors() {
+		updateColors();
+		UITheme.Theme.addUIThemeChangeListener(ThrustCurveMotorSelectionPanel::updateColors);
+	}
+
+	private static void updateColors() {
+		dimTextColor = GUIUtil.getUITheme().getDimTextColor();
 	}
 
 	public void setMotorMountAndConfig( final FlightConfigurationId _fcid,  MotorMount mountToEdit ) {
@@ -594,7 +609,12 @@ public class ThrustCurveMotorSelectionPanel extends JPanel implements MotorSelec
 
 
 	public static Color getColor(int index) {
-		return (Color) CURVE_COLORS[index % CURVE_COLORS.length];
+		Color color = (Color) CURVE_COLORS[index % CURVE_COLORS.length];
+		if (UITheme.isLightTheme(GUIUtil.getUITheme())) {
+			return color;
+		} else {
+			return color.brighter().brighter();
+		}
 	}
 
 
