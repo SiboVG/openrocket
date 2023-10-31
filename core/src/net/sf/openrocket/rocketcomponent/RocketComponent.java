@@ -16,7 +16,7 @@ import net.sf.openrocket.aerodynamics.BarrowmanCalculator;
 import net.sf.openrocket.aerodynamics.FlightConditions;
 import net.sf.openrocket.logging.WarningSet;
 import net.sf.openrocket.startup.Application;
-import net.sf.openrocket.startup.Preferences;
+import net.sf.openrocket.startup.ApplicationPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -766,7 +766,7 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 	public final double getOverrideCD() {
 		mutex.verify();
 		if (!isCDOverridden()) {
-			Preferences preferences = Application.getPreferences();
+			ApplicationPreferences preferences = Application.getPreferences();
 			overrideCD = getComponentCD(0, 0, preferences.getDefaultMach(), 0);
 		}
 		return overrideCD;
@@ -836,7 +836,7 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 		}
 
 		if (!cdOverridden) {
-			Preferences preferences = Application.getPreferences();
+			ApplicationPreferences preferences = Application.getPreferences();
 			overrideCD = getComponentCD(0, 0, preferences.getDefaultMach(), 0);
 		}
 		

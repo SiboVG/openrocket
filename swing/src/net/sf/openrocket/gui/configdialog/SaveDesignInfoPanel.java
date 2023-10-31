@@ -7,7 +7,7 @@ import net.sf.openrocket.gui.widgets.SelectColorButton;
 import net.sf.openrocket.l10n.Translator;
 import net.sf.openrocket.rocketcomponent.RocketComponent;
 import net.sf.openrocket.startup.Application;
-import net.sf.openrocket.startup.Preferences;
+import net.sf.openrocket.startup.ApplicationPreferences;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -23,7 +23,7 @@ import java.awt.event.ActionListener;
  */
 public class SaveDesignInfoPanel extends RocketConfig {
     private static final Translator trans = Application.getTranslator();
-    private static final Preferences preferences = Application.getPreferences();
+    private static final ApplicationPreferences preferences = Application.getPreferences();
 
     public SaveDesignInfoPanel(OpenRocketDocument d, RocketComponent c, JDialog parent) {
         super(d, c, parent);

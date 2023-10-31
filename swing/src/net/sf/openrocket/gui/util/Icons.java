@@ -85,7 +85,7 @@ public class Icons {
 	public static final Icon ZOOM_OUT = loadImageIcon("pix/icons/zoom-out.png", "Zoom out");
 	public static final Icon ZOOM_RESET = loadImageIcon("pix/icons/zoom-reset.png", "Reset Zoom & Pan");
 	
-	public static final Icon PREFERENCES = loadImageIcon("pix/icons/preferences.png", "Preferences");
+	public static final Icon PREFERENCES = loadImageIcon("pix/icons/preferences.png", "ApplicationPreferences");
 	
 	public static final Icon CONFIGURE = loadImageIcon("pix/icons/configure.png", "Configure");
 	public static final Icon HELP = loadImageIcon("pix/icons/help-about.png", "Help");

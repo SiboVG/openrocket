@@ -49,7 +49,7 @@ public class PreferencesDialog extends JDialog {
 	private File initPrefsFile = null;
 
 	private PreferencesDialog(BasicFrame parent) {
-		// // Preferences
+		// // ApplicationPreferences
 		super(parent, trans.get("pref.dlg.title.Preferences"),
 				Dialog.ModalityType.APPLICATION_MODAL);
 
@@ -90,7 +90,7 @@ public class PreferencesDialog extends JDialog {
 		tabbedPane.addTab(trans.get("pref.dlg.tab.Graphics"),
 				new GraphicsPreferencesPanel(this));
 
-		// Default Colors Preferences
+		// Default Colors ApplicationPreferences
 		// tabbedPane.addTab(trans.get("pref.dlg.tab.Colors"),
 		// new DisplayPreferencesPanel());
 

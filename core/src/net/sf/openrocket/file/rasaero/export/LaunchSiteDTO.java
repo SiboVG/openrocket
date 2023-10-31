@@ -8,7 +8,7 @@ import net.sf.openrocket.logging.ErrorSet;
 import net.sf.openrocket.logging.WarningSet;
 import net.sf.openrocket.simulation.SimulationOptions;
 import net.sf.openrocket.startup.Application;
-import net.sf.openrocket.startup.Preferences;
+import net.sf.openrocket.startup.ApplicationPreferences;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -62,7 +62,7 @@ public class LaunchSiteDTO {
         }
 
         // If we can't get settings from the sims, use the launch site settings from the preferences
-        Preferences prefs = Application.getPreferences();
+        ApplicationPreferences prefs = Application.getPreferences();
         setAltitude(prefs.getLaunchAltitude() * RASAeroCommonConstants.OPENROCKET_TO_RASAERO_ALTITUDE);
         setPressure(prefs.getLaunchPressure() * RASAeroCommonConstants.OPENROCKET_TO_RASAERO_PRESSURE);
         setTemperature(RASAeroCommonConstants.OPENROCKET_TO_RASAERO_TEMPERATURE(prefs.getLaunchTemperature()));

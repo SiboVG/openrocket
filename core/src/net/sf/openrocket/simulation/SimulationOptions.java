@@ -6,6 +6,7 @@ import java.util.EventObject;
 import java.util.List;
 import java.util.Random;
 
+import net.sf.openrocket.startup.ApplicationPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +18,6 @@ import net.sf.openrocket.models.gravity.GravityModel;
 import net.sf.openrocket.models.gravity.WGSGravityModel;
 import net.sf.openrocket.models.wind.PinkNoiseWindModel;
 import net.sf.openrocket.startup.Application;
-import net.sf.openrocket.startup.Preferences;
 import net.sf.openrocket.util.BugException;
 import net.sf.openrocket.util.ChangeSource;
 import net.sf.openrocket.util.GeodeticComputationStrategy;
@@ -44,22 +44,22 @@ public class SimulationOptions implements ChangeSource, Cloneable {
 	 */
 	private static final AtmosphericModel ISA_ATMOSPHERIC_MODEL = new ExtendedISAModel();
 	
-	protected final Preferences preferences = Application.getPreferences();
+	protected final ApplicationPreferences preferences = Application.getPreferences();
 	
 	/*
 	 * NOTE:  When adding/modifying parameters, they must also be added to the
 	 * equals and copyFrom methods!!
 	 */
 	
-	private double launchRodLength = preferences.getDouble(Preferences.LAUNCH_ROD_LENGTH, 1);
-	private boolean launchIntoWind = preferences.getBoolean(Preferences.LAUNCH_INTO_WIND, true);
-	private double launchRodAngle = preferences.getDouble(Preferences.LAUNCH_ROD_ANGLE, 0);
-	private double windDirection = preferences.getDouble(Preferences.WIND_DIRECTION, Math.PI / 2);
-	private double launchRodDirection = preferences.getDouble(Preferences.LAUNCH_ROD_DIRECTION, Math.PI / 2);
+	private double launchRodLength = preferences.getDouble(ApplicationPreferences.LAUNCH_ROD_LENGTH, 1);
+	private boolean launchIntoWind = preferences.getBoolean(ApplicationPreferences.LAUNCH_INTO_WIND, true);
+	private double launchRodAngle = preferences.getDouble(ApplicationPreferences.LAUNCH_ROD_ANGLE, 0);
+	private double windDirection = preferences.getDouble(ApplicationPreferences.WIND_DIRECTION, Math.PI / 2);
+	private double launchRodDirection = preferences.getDouble(ApplicationPreferences.LAUNCH_ROD_DIRECTION, Math.PI / 2);
 	
 	
-	private double windAverage = preferences.getDouble(Preferences.WIND_AVERAGE, 2.0);
-	private double windTurbulence = preferences.getDouble(Preferences.WIND_TURBULENCE, 0.1);
+	private double windAverage = preferences.getDouble(ApplicationPreferences.WIND_AVERAGE, 2.0);
+	private double windTurbulence = preferences.getDouble(ApplicationPreferences.WIND_TURBULENCE, 0.1);
 	
 	/*
 	 * SimulationOptions maintains the launch site parameters as separate double values,

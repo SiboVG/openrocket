@@ -14,7 +14,7 @@ import net.miginfocom.swing.MigLayout;
 import net.sf.openrocket.gui.SpinnerEditor;
 import net.sf.openrocket.gui.adaptors.DoubleModel;
 import net.sf.openrocket.gui.main.BasicFrame;
-import net.sf.openrocket.startup.Preferences;
+import net.sf.openrocket.startup.ApplicationPreferences;
 import net.sf.openrocket.unit.UnitGroup;
 
 public class DesignPreferencesPanel extends PreferencesPanel {
@@ -27,7 +27,7 @@ public class DesignPreferencesPanel extends PreferencesPanel {
 				"gapright para");
 		this.add(
 				new JComboBox<Object>(new PrefChoiceSelector(
-						Preferences.BODY_COMPONENT_INSERT_POSITION_KEY,
+						ApplicationPreferences.BODY_COMPONENT_INSERT_POSITION_KEY,
 						// // Always ask
 						// // Insert in middle
 						// // Add to end
@@ -41,7 +41,7 @@ public class DesignPreferencesPanel extends PreferencesPanel {
 				"gapright para");
 		this.add(
 				new JComboBox<Object>(new PrefChoiceSelector(
-						Preferences.STAGE_INSERT_POSITION_KEY,
+						ApplicationPreferences.STAGE_INSERT_POSITION_KEY,
 						// // Always ask
 						// // Insert in middle
 						// // Add to end
@@ -56,7 +56,7 @@ public class DesignPreferencesPanel extends PreferencesPanel {
 
 		this.add(
 				new JComboBox<Object>(new PrefChoiceSelector(
-						Preferences.ROCKET_INFO_FONT_SIZE,
+						ApplicationPreferences.ROCKET_INFO_FONT_SIZE,
 						// // Small
 						// // Medium
 						// // Large

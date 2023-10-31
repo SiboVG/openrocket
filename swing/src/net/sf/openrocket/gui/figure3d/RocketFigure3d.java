@@ -36,6 +36,7 @@ import javax.swing.event.MouseInputAdapter;
 
 import net.sf.openrocket.gui.util.GUIUtil;
 import net.sf.openrocket.gui.util.UITheme;
+import net.sf.openrocket.startup.ApplicationPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +51,6 @@ import net.sf.openrocket.rocketcomponent.FlightConfiguration;
 import net.sf.openrocket.rocketcomponent.Rocket;
 import net.sf.openrocket.rocketcomponent.RocketComponent;
 import net.sf.openrocket.startup.Application;
-import net.sf.openrocket.startup.Preferences;
 import net.sf.openrocket.util.Coordinate;
 import net.sf.openrocket.util.MathUtil;
 import net.sf.openrocket.util.BoundingBox;
@@ -151,7 +151,7 @@ public class RocketFigure3d extends JPanel implements GLEventListener {
 		if (System.getProperty("openrocket.3d.disable") != null)
 			return false;
 		//return by preference
-		return Application.getPreferences().getBoolean(Preferences.OPENGL_ENABLED, true);
+		return Application.getPreferences().getBoolean(ApplicationPreferences.OPENGL_ENABLED, true);
 	}
 	
 	private void initGLCanvas() {
@@ -165,7 +165,7 @@ public class RocketFigure3d extends JPanel implements GLEventListener {
 			log.trace("GL - creating GLCapabilities");
 			final GLCapabilities caps = new GLCapabilities(glp);
 			
-			if (Application.getPreferences().getBoolean(Preferences.OPENGL_ENABLE_AA, true)) {
+			if (Application.getPreferences().getBoolean(ApplicationPreferences.OPENGL_ENABLE_AA, true)) {
 				log.trace("GL - setSampleBuffers");
 				caps.setSampleBuffers(true);
 				
@@ -175,7 +175,7 @@ public class RocketFigure3d extends JPanel implements GLEventListener {
 				log.trace("GL - Not enabling AA by user pref");
 			}
 			
-			if (Application.getPreferences().getBoolean(Preferences.OPENGL_USE_FBO, false)) {
+			if (Application.getPreferences().getBoolean(ApplicationPreferences.OPENGL_USE_FBO, false)) {
 				log.trace("GL - Creating GLJPanel");
 				canvas = new GLJPanel(caps);
 			} else {

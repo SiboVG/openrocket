@@ -41,7 +41,7 @@ import net.sf.openrocket.rocketcomponent.FlightConfigurationId;
 import net.sf.openrocket.rocketcomponent.Rocket;
 import net.sf.openrocket.simulation.extension.SimulationExtension;
 import net.sf.openrocket.startup.Application;
-import net.sf.openrocket.startup.Preferences;
+import net.sf.openrocket.startup.ApplicationPreferences;
 import net.sf.openrocket.util.StateChangeListener;
 
 
@@ -51,7 +51,7 @@ public class SimulationEditDialog extends JDialog {
 	private final Simulation[] simulationList;
 	private final OpenRocketDocument document;
 	private static final Translator trans = Application.getTranslator();
-	private static final Preferences preferences = Application.getPreferences();
+	private static final ApplicationPreferences preferences = Application.getPreferences();
 	
 	JPanel cards;
 	private final static String EDITMODE = "EDIT";

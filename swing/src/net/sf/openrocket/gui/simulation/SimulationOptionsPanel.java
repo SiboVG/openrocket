@@ -45,7 +45,7 @@ import net.sf.openrocket.simulation.extension.SimulationExtension;
 import net.sf.openrocket.simulation.extension.SimulationExtensionProvider;
 import net.sf.openrocket.simulation.extension.SwingSimulationExtensionConfigurator;
 import net.sf.openrocket.startup.Application;
-import net.sf.openrocket.startup.Preferences;
+import net.sf.openrocket.startup.ApplicationPreferences;
 import net.sf.openrocket.unit.UnitGroup;
 import net.sf.openrocket.util.GeodeticComputationStrategy;
 import net.sf.openrocket.gui.widgets.SelectColorButton;
@@ -181,12 +181,12 @@ class SimulationOptionsPanel extends JPanel {
 		button.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Preferences preferences = Application.getPreferences();
+				ApplicationPreferences preferences = Application.getPreferences();
 				conditions.setTimeStep(preferences.getDouble(
-						Preferences.SIMULATION_TIME_STEP,
+						ApplicationPreferences.SIMULATION_TIME_STEP,
 						RK4SimulationStepper.RECOMMENDED_TIME_STEP));
 				conditions.setGeodeticComputation(preferences.getEnum(
-						Preferences.GEODETIC_COMPUTATION,
+						ApplicationPreferences.GEODETIC_COMPUTATION,
 						GeodeticComputationStrategy.SPHERICAL));
 			}
 		});

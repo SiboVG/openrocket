@@ -52,7 +52,7 @@ import net.sf.openrocket.rocketcomponent.MotorMount;
 import net.sf.openrocket.rocketcomponent.RingComponent;
 import net.sf.openrocket.rocketcomponent.RocketComponent;
 import net.sf.openrocket.startup.Application;
-import net.sf.openrocket.startup.Preferences;
+import net.sf.openrocket.startup.ApplicationPreferences;
 import net.sf.openrocket.unit.UnitGroup;
 import net.sf.openrocket.util.BugException;
 import net.sf.openrocket.util.Coordinate;
@@ -62,7 +62,7 @@ import net.sf.openrocket.util.StateChangeListener;
 public class InnerTubeConfig extends RocketComponentConfig {
 	private static final long serialVersionUID = 7900041420864324470L;
 	private static final Translator trans = Application.getTranslator();
-	private static final Preferences prefs = Application.getPreferences();
+	private static final ApplicationPreferences prefs = Application.getPreferences();
 
 	private static final String PREF_SEPARATION_RELATIVE = "InnerTubeSeparationRelative";
 

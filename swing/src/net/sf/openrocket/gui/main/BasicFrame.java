@@ -49,8 +49,6 @@ import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import net.miginfocom.swing.MigLayout;
-import net.sf.openrocket.file.wavefrontobj.CoordTransform;
-import net.sf.openrocket.file.wavefrontobj.DefaultCoordTransform;
 import net.sf.openrocket.file.wavefrontobj.OBJOptionChooser;
 import net.sf.openrocket.file.wavefrontobj.export.OBJExportOptions;
 import net.sf.openrocket.file.wavefrontobj.export.OBJExporterFactory;
@@ -103,7 +101,7 @@ import net.sf.openrocket.rocketcomponent.ComponentChangeListener;
 import net.sf.openrocket.rocketcomponent.Rocket;
 import net.sf.openrocket.rocketcomponent.RocketComponent;
 import net.sf.openrocket.startup.Application;
-import net.sf.openrocket.startup.Preferences;
+import net.sf.openrocket.startup.ApplicationPreferences;
 import net.sf.openrocket.util.BugException;
 import net.sf.openrocket.util.DecalNotFoundException;
 import net.sf.openrocket.util.MemoryManagement;
@@ -125,7 +123,7 @@ public class BasicFrame extends JFrame {
 	private static final GeneralRocketSaver ROCKET_SAVER = new GeneralRocketSaver();
 
 	private static final Translator trans = Application.getTranslator();
-	private static final Preferences prefs = Application.getPreferences();
+	private static final ApplicationPreferences prefs = Application.getPreferences();
 
 	public static final int SHORTCUT_KEY = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
 
@@ -605,7 +603,7 @@ public class BasicFrame extends JFrame {
 		editMenu.add(item);
 
 
-		////	Preferences
+		////	ApplicationPreferences
 		item = new JMenuItem(trans.get("main.menu.edit.preferences"));
 		item.setIcon(Icons.PREFERENCES);
 
@@ -614,7 +612,7 @@ public class BasicFrame extends JFrame {
 		item.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				log.info(Markers.USER_MARKER, "Preferences selected");
+				log.info(Markers.USER_MARKER, "ApplicationPreferences selected");
 				PreferencesDialog.showPreferences(BasicFrame.this);
 			}
 		});

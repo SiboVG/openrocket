@@ -30,7 +30,7 @@ import net.sf.openrocket.gui.widgets.SaveFileChooser;
 import net.sf.openrocket.l10n.Translator;
 import net.sf.openrocket.simulation.FlightDataType;
 import net.sf.openrocket.startup.Application;
-import net.sf.openrocket.startup.Preferences;
+import net.sf.openrocket.startup.ApplicationPreferences;
 import net.sf.openrocket.gui.widgets.SelectColorButton;
 
 import org.jfree.chart.ChartPanel;
@@ -56,7 +56,7 @@ public class SimulationPlotDialog extends JDialog {
 		super(parent, simulation.getName());
 		this.setModalityType(ModalityType.DOCUMENT_MODAL);
 		
-		final boolean initialShowPoints = Application.getPreferences().getBoolean(Preferences.PLOT_SHOW_POINTS, false);
+		final boolean initialShowPoints = Application.getPreferences().getBoolean(ApplicationPreferences.PLOT_SHOW_POINTS, false);
 		
 		final SimulationPlot myPlot = new SimulationPlot(simulation, config, initialShowPoints);
 		
@@ -92,7 +92,7 @@ public class SimulationPlotDialog extends JDialog {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				boolean show = check.isSelected();
-				Application.getPreferences().putBoolean(Preferences.PLOT_SHOW_POINTS, show);
+				Application.getPreferences().putBoolean(ApplicationPreferences.PLOT_SHOW_POINTS, show);
 				myPlot.setShowPoints(show);
 			}
 		});

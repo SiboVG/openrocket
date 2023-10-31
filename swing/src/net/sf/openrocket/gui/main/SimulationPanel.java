@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
@@ -81,7 +80,7 @@ import net.sf.openrocket.rocketcomponent.FlightConfigurationId;
 import net.sf.openrocket.rocketcomponent.Rocket;
 import net.sf.openrocket.simulation.FlightData;
 import net.sf.openrocket.startup.Application;
-import net.sf.openrocket.startup.Preferences;
+import net.sf.openrocket.startup.ApplicationPreferences;
 import net.sf.openrocket.unit.UnitGroup;
 import net.sf.openrocket.util.AlphanumComparator;
 import net.sf.openrocket.file.SimulationTableCSVExport;
@@ -715,7 +714,7 @@ public class SimulationPanel extends JPanel {
 
 	/// when the simulation tab is selected this run outdated simulated if appropriate.
 	public void activating(){
-		if( ((Preferences) Application.getPreferences()).getAutoRunSimulations()){
+		if( ((ApplicationPreferences) Application.getPreferences()).getAutoRunSimulations()){
 			int nSims = simulationTable.getRowCount();
 			int outdated = 0;
 			if (nSims == 0) {

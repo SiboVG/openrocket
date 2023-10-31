@@ -3,7 +3,7 @@ package net.sf.openrocket.gui.components;
 import net.miginfocom.swing.MigLayout;
 import net.sf.openrocket.l10n.Translator;
 import net.sf.openrocket.startup.Application;
-import net.sf.openrocket.startup.Preferences;
+import net.sf.openrocket.startup.ApplicationPreferences;
 
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
@@ -16,7 +16,7 @@ import java.awt.event.ItemListener;
  */
 public class PreferencesOptionPanel extends JPanel {
     private static final Translator trans = Application.getTranslator();
-    private static final Preferences prefs = Application.getPreferences();
+    private static final ApplicationPreferences prefs = Application.getPreferences();
 
     private final JCheckBox exportUserDirectories;
     private final JCheckBox exportWindowInfo;

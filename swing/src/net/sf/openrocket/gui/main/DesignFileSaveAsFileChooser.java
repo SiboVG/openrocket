@@ -23,7 +23,7 @@ import net.sf.openrocket.gui.widgets.SaveFileChooser;
 import net.sf.openrocket.l10n.Translator;
 import net.sf.openrocket.rocketcomponent.RocketComponent;
 import net.sf.openrocket.startup.Application;
-import net.sf.openrocket.startup.Preferences;
+import net.sf.openrocket.startup.ApplicationPreferences;
 import net.sf.openrocket.util.FileUtils;
 
 public class DesignFileSaveAsFileChooser extends SaveFileChooser {
@@ -32,7 +32,7 @@ public class DesignFileSaveAsFileChooser extends SaveFileChooser {
 	private final OpenRocketDocument document;
 
 	private static final Translator trans = Application.getTranslator();
-	private static final Preferences prefs = Application.getPreferences();
+	private static final ApplicationPreferences prefs = Application.getPreferences();
 
 	public static DesignFileSaveAsFileChooser build(OpenRocketDocument document, FileType type) {
 		return new DesignFileSaveAsFileChooser(document, type, null);

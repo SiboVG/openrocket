@@ -45,7 +45,7 @@ public class GuiModule extends AbstractModule {
 	@Override
 	protected void configure() {
 		
-		bind(Preferences.class).to(SwingPreferences.class).in(Scopes.SINGLETON);
+		bind(ApplicationPreferences.class).to(SwingPreferences.class).in(Scopes.SINGLETON);
 		bind(Translator.class).toProvider(TranslatorProvider.class).in(Scopes.SINGLETON);
 		bind(RocketDescriptor.class).to(RocketDescriptorImpl.class).in(Scopes.SINGLETON);
 		bind(WatchService.class).to(WatchServiceImpl.class).in(Scopes.SINGLETON);

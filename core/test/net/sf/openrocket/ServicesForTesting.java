@@ -14,7 +14,7 @@ import net.sf.openrocket.l10n.Translator;
 import net.sf.openrocket.material.Material;
 import net.sf.openrocket.preset.ComponentPreset;
 import net.sf.openrocket.preset.ComponentPreset.Type;
-import net.sf.openrocket.startup.Preferences;
+import net.sf.openrocket.startup.ApplicationPreferences;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
@@ -23,7 +23,7 @@ public class ServicesForTesting extends AbstractModule {
 	
 	@Override
 	protected void configure() {
-		bind(Preferences.class).to(PreferencesForTesting.class);
+		bind(ApplicationPreferences.class).to(PreferencesForTesting.class);
 		bind(Translator.class).toProvider(TranslatorProviderForTesting.class);
 		bind(RocketDescriptor.class).to(RocketDescriptorImpl.class);
 	}
@@ -61,7 +61,7 @@ public class ServicesForTesting extends AbstractModule {
 		
 	}
 	
-	public static class PreferencesForTesting extends Preferences {
+	public static class PreferencesForTesting extends ApplicationPreferences {
 		
 		private static java.util.prefs.Preferences root = null;
 		

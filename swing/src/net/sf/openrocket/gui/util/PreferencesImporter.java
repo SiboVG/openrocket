@@ -53,7 +53,7 @@ public abstract class PreferencesImporter {
             // Ensure units are updated
             ((SwingPreferences) Application.getPreferences()).loadDefaultUnits();
 
-            log.info("Preferences imported successfully.");
+            log.info("ApplicationPreferences imported successfully.");
             return true;
         } catch (IOException | InvalidPreferencesFormatException e) {
             log.warn("Error while importing preferences: " + e.getMessage());

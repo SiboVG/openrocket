@@ -6,6 +6,7 @@ import net.sf.openrocket.gui.main.MRUDesignFile;
 import net.sf.openrocket.gui.widgets.SaveFileChooser;
 import net.sf.openrocket.l10n.Translator;
 import net.sf.openrocket.startup.Application;
+import net.sf.openrocket.startup.ApplicationPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -38,11 +39,11 @@ import java.util.prefs.Preferences;
 public abstract class PreferencesExporter {
     private static final Translator trans = Application.getTranslator();
     private static final Logger log = LoggerFactory.getLogger(PreferencesExporter.class);
-    private static final net.sf.openrocket.startup.Preferences prefs = Application.getPreferences();
+    private static final ApplicationPreferences prefs = Application.getPreferences();
 
     private static final List<String> keysToIgnore = new ArrayList<>();         // Preference keys to ignore when exporting user directories (= keys that export user directories)
     private static final List<String> prefixKeysToIgnore = new ArrayList<>();   // Preference keys to ignore when exporting user directories (= keys that start with these prefixes), e.g.
-    private static final List<String> nodesToIgnore = new ArrayList<>();        // Preferences nodes that should not be exported
+    private static final List<String> nodesToIgnore = new ArrayList<>();        // ApplicationPreferences nodes that should not be exported
 
     public static boolean exportPreferences(Window parent, Preferences preferences) {
         JFileChooser chooser = new SaveFileChooser();
@@ -94,7 +95,7 @@ public abstract class PreferencesExporter {
                 // Export all preferences except user directories
                 exportFilteredPreferences(preferences, fos);
             }
-            log.info("Preferences exported successfully.");
+            log.info("ApplicationPreferences exported successfully.");
         } catch (IOException | BackingStoreException e) {
             log.warn("Error while importing preferences: " + e.getMessage());
         }
@@ -108,8 +109,8 @@ public abstract class PreferencesExporter {
         nodesToIgnore.clear();
 
         if (ignoreUserDirectories) {
-            keysToIgnore.add(net.sf.openrocket.startup.Preferences.USER_THRUST_CURVES_KEY);
-            keysToIgnore.add(net.sf.openrocket.startup.Preferences.DEFAULT_DIRECTORY);
+            keysToIgnore.add(ApplicationPreferences.USER_THRUST_CURVES_KEY);
+            keysToIgnore.add(ApplicationPreferences.DEFAULT_DIRECTORY);
             prefixKeysToIgnore.add(MRUDesignFile.MRU_FILE_LIST_PROPERTY);
         }
 

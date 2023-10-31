@@ -12,8 +12,8 @@ import net.sf.openrocket.l10n.DebugTranslator;
 import net.sf.openrocket.l10n.Translator;
 import net.sf.openrocket.plugin.PluginModule;
 import net.sf.openrocket.startup.Application;
+import net.sf.openrocket.startup.ApplicationPreferences;
 import net.sf.openrocket.startup.MockPreferences;
-import net.sf.openrocket.startup.Preferences;
 import net.sf.openrocket.util.MathUtil;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -71,7 +71,7 @@ public class SimulationConditionsTest {
     private static class PreferencesModule extends AbstractModule {
         @Override
         protected void configure() {
-            bind(Preferences.class).to(MockPreferences.class);
+            bind(ApplicationPreferences.class).to(MockPreferences.class);
             bind(Translator.class).toProvider(ServicesForTesting.TranslatorProviderForTesting.class);
             bind(RocketDescriptor.class).to(RocketDescriptorImpl.class);
         }

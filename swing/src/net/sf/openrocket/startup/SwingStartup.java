@@ -204,7 +204,7 @@ public class SwingStartup {
 		String cmdLAF = System.getProperty("openrocket.laf");
 		if (cmdLAF != null) {
 			log.info("Setting cmd line LAF '{}'", cmdLAF);
-			Preferences prefs = Application.getPreferences();
+			ApplicationPreferences prefs = Application.getPreferences();
 			prefs.setUITheme(UITheme.Themes.valueOf(cmdLAF));
 		}
 		GUIUtil.applyLAF();

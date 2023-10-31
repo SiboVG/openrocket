@@ -13,13 +13,11 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -74,7 +72,7 @@ import net.sf.openrocket.arch.SystemInfo;
 import net.sf.openrocket.gui.Resettable;
 import net.sf.openrocket.logging.Markers;
 import net.sf.openrocket.startup.Application;
-import net.sf.openrocket.startup.Preferences;
+import net.sf.openrocket.startup.ApplicationPreferences;
 import net.sf.openrocket.util.BugException;
 import net.sf.openrocket.util.Invalidatable;
 import net.sf.openrocket.util.MemoryManagement;
@@ -285,7 +283,7 @@ public class GUIUtil {
 	 * @return the current theme
 	 */
 	public static UITheme.Theme getUITheme() {
-		Preferences prefs = Application.getPreferences();
+		ApplicationPreferences prefs = Application.getPreferences();
 		Object theme = prefs.getUITheme();
 		if (theme instanceof UITheme.Theme) {
 			return (UITheme.Theme) theme;
