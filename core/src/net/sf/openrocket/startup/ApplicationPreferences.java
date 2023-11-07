@@ -28,10 +28,11 @@ import net.sf.openrocket.util.Color;
 import net.sf.openrocket.util.GeodeticComputationStrategy;
 import net.sf.openrocket.util.LineStyle;
 import net.sf.openrocket.util.MathUtil;
+import net.sf.openrocket.util.Preferences;
 import net.sf.openrocket.util.StateChangeListener;
 import net.sf.openrocket.util.UniqueID;
 
-public abstract class ApplicationPreferences implements ChangeSource {
+public abstract class ApplicationPreferences implements ChangeSource, Preferences {
 	
 	/*
 	 * Well known string keys to preferences.
