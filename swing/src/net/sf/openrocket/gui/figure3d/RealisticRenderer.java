@@ -120,6 +120,37 @@ public class RealisticRenderer extends RocketRenderer {
 		return color;
 	}
 
+	/**
+	 * Generates a diffuse color based on the base color and alpha value.
+	 * This function takes the base RGB color of an object and adjusts it to ensure that the
+	 * resulting diffuse color works effectively under various lighting conditions. The adjustment
+	 * helps in avoiding overly dark or light reflections, especially for objects with extreme
+	 * base colors (very dark or very light).
+	 * The operation is a clamping of the base color's RGB values between specified minimum and maximum thresholds.
+	 * @param baseColor The base color (RGB)
+	 * @param alpha The alpha value
+	 * @return The diffuse color
+	 */
+	private float[] generateDiffuseColor(float[] baseColor, float alpha) {
+		float[] diffuseColor = new float[4];
+
+		// Ensure that colors are neither too dark nor too light
+		// You can adjust the minDiffuse and maxDiffuse values as needed
+		float minDiffuse = 0.15f; 	// Minimum diffuse threshold (for black colors)
+		float maxDiffuse = 0.95f; 	// Maximum diffuse threshold (for white colors)
+
+		// Adjust the RGB components of the base color for diffuse reflection
+		for (int i = 0; i < 3; i++) {
+			// Scale the base color to be within the min and max diffuse thresholds
+			diffuseColor[i] = baseColor[i] * (maxDiffuse - minDiffuse) + minDiffuse;
+		}
+
+		// Set the alpha value
+		diffuseColor[3] = alpha;
+
+		return diffuseColor;
+	}
+
 	private void render(GL2 gl, Geometry g, Surface which, Appearance a, boolean decals, float alpha) {
 		final Decal t = a.getTexture();
 		final Texture tex = textures.getTexture(t);
@@ -130,8 +161,9 @@ public class RealisticRenderer extends RocketRenderer {
 		for (int i=0; i < convertedColor.length; i++) {
 			color[i] = convertedColor[i];
 		}
-		
-		gl.glMaterialfv(GL.GL_FRONT, GLLightingFunc.GL_DIFFUSE, color, 0);
+
+		final float[] diffuseColor = generateDiffuseColor(convertedColor, alpha);
+		gl.glMaterialfv(GL.GL_FRONT, GLLightingFunc.GL_DIFFUSE, diffuseColor, 0);
 		gl.glMaterialfv(GL.GL_FRONT, GLLightingFunc.GL_AMBIENT, color, 0);
 		
 		color[0] = color[1] = color[2] = (float) a.getShine();
