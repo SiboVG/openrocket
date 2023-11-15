@@ -20,6 +20,8 @@ import net.sf.openrocket.util.Color;
 
 import com.jogamp.opengl.util.texture.Texture;
 
+import java.util.Arrays;
+
 public class RealisticRenderer extends RocketRenderer {
 	private final float[] colorWhite = { 1, 1, 1, 1 };
 	private final float[] color = new float[4];
@@ -127,11 +129,10 @@ public class RealisticRenderer extends RocketRenderer {
 	 * helps in avoiding overly dark or light reflections, especially for objects with extreme
 	 * base colors (very dark or very light).
 	 * The operation is a clamping of the base color's RGB values between specified minimum and maximum thresholds.
-	 * @param baseColor The base color (RGB)
-	 * @param alpha The alpha value
+	 * @param baseColor The base color (RGBA)
 	 * @return The diffuse color
 	 */
-	private float[] generateDiffuseColor(float[] baseColor, float alpha) {
+	private float[] generateDiffuseColor(float[] baseColor) {
 		float[] diffuseColor = new float[4];
 
 		// Ensure that colors are neither too dark nor too light
@@ -146,36 +147,92 @@ public class RealisticRenderer extends RocketRenderer {
 		}
 
 		// Set the alpha value
-		diffuseColor[3] = alpha;
+		diffuseColor[3] = baseColor[3];
 
 		return diffuseColor;
 	}
 
+	/**
+	 * Generates a specular color based on the base color and shine value.
+	 * This function blends the base color with white to create an opaque specular color.
+	 * @param baseColor The base color (RGBA)
+	 * @param shine The shine value
+	 * @return The specular color
+	 */
+	private float[] generateSpecularColor(float[] baseColor, float shine) {
+		float[] specularColor = new float[4];
+
+		// Define blend factor (lower value = more white)
+		float blendFactor = 0.25f;
+
+		// Blend base color with white
+		for (int i = 0; i < 3; i++) {
+			specularColor[i] = (baseColor[i] * blendFactor + (1 - blendFactor)) * shine;
+		}
+
+		specularColor[3] = 1.0f; // No alpha; transparent objects can still have specular highlights
+
+		return specularColor;
+	}
+
+	/**
+	 * Renders a single geometry with the given appearance.
+	 * @param gl The OpenGL context
+	 * @param g The geometry to render
+	 * @param which The surface to render
+	 * @param a The appearance to use
+	 * @param decals Whether to render decals
+	 * @param alpha The alpha value to draw the geometry in (is applied on top of the alpha value of the appearance)
+	 */
 	private void render(GL2 gl, Geometry g, Surface which, Appearance a, boolean decals, float alpha) {
 		final Decal t = a.getTexture();
 		final Texture tex = textures.getTexture(t);
-		
-		gl.glLightModeli(GL2.GL_LIGHT_MODEL_COLOR_CONTROL, GL2.GL_SEPARATE_SPECULAR_COLOR);
-		
-		float[] convertedColor = this.convertColor(a, alpha);
-		for (int i=0; i < convertedColor.length; i++) {
-			color[i] = convertedColor[i];
-		}
 
-		final float[] diffuseColor = generateDiffuseColor(convertedColor, alpha);
+		gl.glLightModeli(GL2.GL_LIGHT_MODEL_COLOR_CONTROL, GL2.GL_SEPARATE_SPECULAR_COLOR);
+
+		// Generate the color array from the component appearance, which includes the additional alpha value
+		float[] convertedColor = this.convertColor(a, alpha);
+		System.arraycopy(convertedColor, 0, color, 0, convertedColor.length);
+
+		/*
+		Set diffuse color: Defines the material's color under direct lighting.
+		This color scatters light in all directions, contributing to the object's
+		perceived color under a light source.
+		 */
+		final float[] diffuseColor = generateDiffuseColor(color);
 		gl.glMaterialfv(GL.GL_FRONT, GLLightingFunc.GL_DIFFUSE, diffuseColor, 0);
+
+
+		/*
+		Set ambient color: Determines the color reflected under indirect,
+		environmental lighting (set by the scene). Ambient lighting helps ensure
+		that the object is visible even in shadowed or low-light conditions, providing
+		a baseline illumination.
+		 */
 		gl.glMaterialfv(GL.GL_FRONT, GLLightingFunc.GL_AMBIENT, color, 0);
-		
-		color[0] = color[1] = color[2] = (float) a.getShine();
-		color[3] = 1;//no alpha for shine
-		gl.glMaterialfv(GL.GL_FRONT, GLLightingFunc.GL_SPECULAR, color, 0);
+
+		/*
+		Set specular color: Specifies the color and intensity of specular highlights
+		(shiny spots where light reflects directly). The specular property influences
+		the color and brightness of these highlights, which are most noticeable on
+		glossy surfaces.
+		 */
+		float[] specularColor = generateSpecularColor(color, (float) a.getShine());
+		gl.glMaterialfv(GL.GL_FRONT, GLLightingFunc.GL_SPECULAR, specularColor, 0);
+
+		/*
+		Set shininess: Controls the spread and sharpness of specular highlights.
+		Higher values result in smaller, more focused highlights, typical of
+		highly polished surfaces. Lower values create broader, less intense
+		highlights for more matte materials.
+		 */
 		gl.glMateriali(GL.GL_FRONT, GLLightingFunc.GL_SHININESS, (int) (100 * a.getShine()));
-		
-		
+
+		// Render the geometry
 		g.render(gl,which);
-		
+
+		// Render the decal texture
 		if (decals && t != null && tex != null) {
-			
 			tex.enable(gl);
 			tex.bind(gl);
 			
@@ -224,7 +281,6 @@ public class RealisticRenderer extends RocketRenderer {
 			gl.glDisable(GL2.GL_COLOR_MATERIAL);
 			tex.disable(gl);
 		}
-		
 	}
 	
 	@Override
