@@ -1,6 +1,9 @@
 package net.sf.openrocket.util;
 
-public interface Preferences {
+/**
+ * Interface for accessing OpenRocket preferences.
+ */
+public interface ORPreferences {
 	boolean getBoolean(String key, boolean defaultValue);
 
 	void putBoolean(String key, boolean value);

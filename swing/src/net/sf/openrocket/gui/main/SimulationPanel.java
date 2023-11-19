@@ -200,6 +200,7 @@ public class SimulationPanel extends JPanel {
 		simulationTable.setFillsViewportHeight(true);
 		simulationTable.getTableHeader().setComponentPopupMenu(new TableHeaderPopupMenu(simulationTable));
 
+
 		// Don't render the header text of the Status column
 		TableCellRenderer defaultHeaderRenderer = simulationTable.getTableHeader().getDefaultRenderer();
 		simulationTable.getTableHeader().setDefaultRenderer((table, value, isSelected, hasFocus, row, column) -> {
