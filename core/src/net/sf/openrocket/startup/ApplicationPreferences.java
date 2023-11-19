@@ -429,7 +429,7 @@ public abstract class ApplicationPreferences implements ChangeSource, Preference
 		this.putDouble(LAUNCH_ALTITUDE, altitude);
 
 		// Update the launch temperature and pressure if using ISA
-		if (getISAAtmosphere()) {
+		if (isISAAtmosphere()) {
 			setLaunchTemperature(ISA_ATMOSPHERIC_MODEL.getConditions(getLaunchAltitude()).getTemperature());
 			setLaunchPressure(ISA_ATMOSPHERIC_MODEL.getConditions(getLaunchAltitude()).getPressure());
 		}
@@ -519,7 +519,7 @@ public abstract class ApplicationPreferences implements ChangeSource, Preference
 	}
 	
 	
-	public boolean getISAAtmosphere() {
+	public boolean isISAAtmosphere() {
 		return this.getBoolean(LAUNCH_USE_ISA, true);
 	}
 	

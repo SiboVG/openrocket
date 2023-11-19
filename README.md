@@ -31,11 +31,11 @@ OpenRocket is a free, fully featured model rocket simulator that allows you to d
 
 ... plus many more
 
-📖 Read more on the [OpenRocket Wiki](http://wiki.openrocket.info).
+📖 Read more on [our website](https://openrocket.info/) or the [OpenRocket Wiki](http://wiki.openrocket.info).
 
 ## 💾 Installers
 
-Find the OpenRocket installers [here](https://openrocket.info/downloads.html)
+You can find the OpenRocket installers [here](https://openrocket.info/downloads.html).
 
 ## 📝 Release Notes
 

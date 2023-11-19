@@ -44,6 +44,7 @@ import javax.swing.event.RowSorterListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+import net.sf.openrocket.gui.plot.Util;
 import net.sf.openrocket.gui.util.UITheme;
 import net.sf.openrocket.startup.ApplicationPreferences;
 import net.sf.openrocket.util.StateChangeListener;
@@ -609,7 +610,7 @@ public class ThrustCurveMotorSelectionPanel extends JPanel implements MotorSelec
 
 
 	public static Color getColor(int index) {
-		Color color = (Color) CURVE_COLORS[index % CURVE_COLORS.length];
+		Color color = Util.getPlotColor(index);
 		if (UITheme.isLightTheme(GUIUtil.getUITheme())) {
 			return color;
 		} else {
@@ -752,16 +753,22 @@ public class ThrustCurveMotorSelectionPanel extends JPanel implements MotorSelec
 		public Component getListCellRendererComponent(JList<? extends MotorHolder> list, MotorHolder value, int index,
 				boolean isSelected, boolean cellHasFocus) {
 
-			Component c = renderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-			if (value instanceof MotorHolder) {
-				MotorHolder m = (MotorHolder) value;
-				c.setForeground(getColor(m.getIndex()));
+			JLabel label = (JLabel) renderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+			if (value != null) {
+				Color color = getColor(value.getIndex());
+				if (isSelected || cellHasFocus) {
+					label.setBackground(color);
+					label.setOpaque(true);
+					Color fg = list.getBackground();
+					fg = new Color(fg.getRed(), fg.getGreen(), fg.getBlue());		// List background changes for some reason, so clone the color
+					label.setForeground(fg);
+				} else {
+					label.setBackground(list.getBackground());
+					label.setForeground(color);
+				}
 			}
 
-			return c;
+			return label;
 		}
-
 	}
-
-
 }
