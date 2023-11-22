@@ -34,6 +34,7 @@ import net.sf.openrocket.rocketcomponent.RocketComponent;
 import net.sf.openrocket.rocketcomponent.TubeFinSet;
 import net.sf.openrocket.startup.ApplicationPreferences;
 import net.sf.openrocket.simulation.SimulationOptionsInterface;
+import net.sf.openrocket.util.ORPreferences;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,6 +98,7 @@ public class SwingPreferences extends ApplicationPreferences implements Simulati
 	private static final String NODENAME = (DEBUG ? "OpenRocket-debug" : "OpenRocket");
 	
 	private Preferences PREFNODE;
+	private ORPreferences tablePreferences;
 	
 	
 	public SwingPreferences() {
@@ -111,6 +113,7 @@ public class SwingPreferences extends ApplicationPreferences implements Simulati
 			}
 		}
 		PREFNODE = root.node(NODENAME);
+		tablePreferences = new TablePreferences(PREFNODE);
 		fillDefaultComponentColors();
 	}
 
@@ -151,8 +154,8 @@ public class SwingPreferences extends ApplicationPreferences implements Simulati
 	 * Returns the preference node responsible for saving table information (column widths, order...)
 	 * @return the preference node for table information
 	 */
-	public Preferences getTablePreferences() {
-		return PREFNODE.node(NODE_TABLES);
+	public ORPreferences getTablePreferences() {
+		return tablePreferences;
 	}
 	
 	public void clearPreferences() {
@@ -655,7 +658,7 @@ public class SwingPreferences extends ApplicationPreferences implements Simulati
 	}
 
 	public Integer getTableColumnWidth(String keyName, int columnIdx) {
-		String pref = getTablePreferences().get(
+		String pref = getTablePreferences().getString(
 				"cw." + keyName + "." + columnIdx, null);
 		if (pref == null)
 			return null;
@@ -673,7 +676,7 @@ public class SwingPreferences extends ApplicationPreferences implements Simulati
 	}
 
 	public void setTableColumnWidth(String keyName, int columnIdx, Integer width) {
-		getTablePreferences().put(
+		getTablePreferences().putString(
 				"cw." + keyName + "." + columnIdx, width.toString());
 		storeVersion();
 	}
@@ -964,6 +967,91 @@ public class SwingPreferences extends ApplicationPreferences implements Simulati
 		}
 		for (Manufacturer m : manus) {
 			prefs.putBoolean(m.getSimpleName(), true);
+		}
+	}
+
+	public class TablePreferences implements ORPreferences {
+		private final Preferences TABLE_PREFS_NODE;
+
+		public TablePreferences(Preferences PARENT_NODE) {
+			this.TABLE_PREFS_NODE = PARENT_NODE.node(NODE_TABLES);
+		}
+
+		@Override
+		public boolean getBoolean(String key, boolean defaultValue) {
+			if (!keyExists(TABLE_PREFS_NODE, key) && key != null) {
+				// Save the default value
+				TABLE_PREFS_NODE.putBoolean(key, defaultValue);
+				try {
+					TABLE_PREFS_NODE.flush();
+				} catch (BackingStoreException e) {
+					e.printStackTrace();
+				}
+			}
+			return TABLE_PREFS_NODE.getBoolean(key, defaultValue);
+		}
+
+		@Override
+		public void putBoolean(String key, boolean value) {
+			TABLE_PREFS_NODE.putBoolean(key, value);
+		}
+
+		@Override
+		public int getInt(String key, int defaultValue) {
+			if (!keyExists(TABLE_PREFS_NODE, key) && key != null) {
+				TABLE_PREFS_NODE.putInt(key, defaultValue);
+				try {
+					TABLE_PREFS_NODE.flush();
+				} catch (BackingStoreException e) {
+					e.printStackTrace();
+				}
+			}
+			return TABLE_PREFS_NODE.getInt(key, defaultValue);
+		}
+
+		@Override
+		public void putInt(String key, int value) {
+			TABLE_PREFS_NODE.putInt(key, value);
+		}
+
+		@Override
+		public double getDouble(String key, double defaultValue) {
+			if (!keyExists(TABLE_PREFS_NODE, key) && key != null) {
+				TABLE_PREFS_NODE.putDouble(key, defaultValue);
+				try {
+					TABLE_PREFS_NODE.flush();
+				} catch (BackingStoreException e) {
+					e.printStackTrace();
+				}
+			}
+			return TABLE_PREFS_NODE.getDouble(key, defaultValue);
+		}
+
+		@Override
+		public void putDouble(String key, double value) {
+			TABLE_PREFS_NODE.putDouble(key, value);
+		}
+
+		@Override
+		public String getString(String key, String defaultValue) {
+			if (!keyExists(TABLE_PREFS_NODE, key) && key != null && defaultValue != null) {
+				TABLE_PREFS_NODE.put(key, defaultValue);
+				try {
+					TABLE_PREFS_NODE.flush();
+				} catch (BackingStoreException e) {
+					e.printStackTrace();
+				}
+			}
+			return TABLE_PREFS_NODE.get(key, defaultValue);
+		}
+
+		@Override
+		public void putString(String key, String value) {
+			if (value == null) {
+				TABLE_PREFS_NODE.remove(key);
+			} else {
+				TABLE_PREFS_NODE.put(key, value);
+			}
 		}
 	}
 }

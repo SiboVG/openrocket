@@ -6,17 +6,20 @@ import java.util.Vector;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 
+/**
+ * An extension of DefaultTableColumnModel that allows to hide, show and move columns.
+ */
 public class XTableColumnModel extends DefaultTableColumnModel {
 	
 	/** Array of TableColumn objects in this model.
 	 *  Holds all column objects, regardless of their visibility
 	 */
-	protected Vector<TableColumn> allTableColumns = new Vector<TableColumn>();
+	protected Vector<TableColumn> allTableColumns = new Vector<>();
 	
 	/**
 	 * Creates an extended table column model.
 	 */
-	XTableColumnModel() {
+	public XTableColumnModel() {
 		super();
 	}
 	
@@ -26,7 +29,7 @@ public class XTableColumnModel extends DefaultTableColumnModel {
 	 * or its visibility status did not change.
 	 * <p>
 	 *
-	 * @param aColumn        the column to show/hide
+	 * @param column        the column to show/hide
 	 * @param visible its new visibility status
 	 */
 	// listeners will receive columnAdded()/columnRemoved() event
@@ -118,6 +121,12 @@ public class XTableColumnModel extends DefaultTableColumnModel {
 		allTableColumns.add(column);
 		super.addColumn(column);
 	}
+
+	public void addColumns(TableColumn ... columns) {
+		for (TableColumn column : columns) {
+			addColumn(column);
+		}
+	}
 	
 	/** Removes <code>column</code> from this column model.
 	 * Posts <code>columnRemoved</code> event.
@@ -134,7 +143,7 @@ public class XTableColumnModel extends DefaultTableColumnModel {
 		super.removeColumn(column);
 	}
 	
-	/** 
+	/**
 	 * Moves the column from <code>oldIndex</code> to <code>newIndex</code>.
 	 * Posts  <code>columnMoved</code> event.
 	 * Will not move any columns if <code>oldIndex</code> equals <code>newIndex</code>.

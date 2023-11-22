@@ -9,7 +9,9 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import java.awt.Component;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EventObject;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -18,6 +20,8 @@ import java.util.stream.Stream;
  * A popup menu for a JTableHeader that allows the user to show/hide columns.
  */
 public class TableHeaderPopupMenu extends JPopupMenu {
+    private List<TableHeaderChangeListener> listeners = new ArrayList<>();
+
     public TableHeaderPopupMenu(JTable table) {
         super();
         TableColumnModel columnModel = table.getColumnModel();
@@ -38,6 +42,14 @@ public class TableHeaderPopupMenu extends JPopupMenu {
             });
             add(item);
         });
+    }
+
+    public void addTableHeaderChangeListener(TableHeaderChangeListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeTableHeaderChangeListener(TableHeaderChangeListener listener) {
+        listeners.remove(listener);
     }
 
     @Override
@@ -63,6 +75,7 @@ public class TableHeaderPopupMenu extends JPopupMenu {
         } else {
             stream(this).forEach(me -> me.getComponent().setEnabled(true));
         }
+        listeners.forEach(listener -> listener.tableHeaderChanged(new EventObject(this)));
     }
 
     private int getIndexToAddAt(JPopupMenu menu, TableColumn column, TableColumnModel columnModel) {
@@ -85,6 +98,10 @@ public class TableHeaderPopupMenu extends JPopupMenu {
     private static Stream<MenuElement> stream(MenuElement me) {
         return Stream.of(me.getSubElements())
                 .flatMap(m -> Stream.concat(Stream.of(m), stream(m)));
+    }
+
+    public interface TableHeaderChangeListener {
+        void tableHeaderChanged(EventObject event);
     }
 }
 

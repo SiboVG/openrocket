@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serial;
 import java.util.Comparator;
+import java.util.EventObject;
 
 import javax.swing.AbstractAction;
 import javax.swing.InputMap;
@@ -42,10 +43,12 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
 import net.sf.openrocket.arch.SystemInfo;
+import net.sf.openrocket.document.DocumentPreferences;
 import net.sf.openrocket.gui.components.CsvOptionPanel;
 import net.sf.openrocket.gui.util.FileHelper;
 import net.sf.openrocket.gui.util.GUIUtil;
 import net.sf.openrocket.gui.util.SwingPreferences;
+import net.sf.openrocket.gui.util.TableUIPreferences;
 import net.sf.openrocket.gui.util.UITheme;
 import net.sf.openrocket.gui.widgets.SaveFileChooser;
 import net.sf.openrocket.gui.widgets.TableHeaderPopupMenu;
@@ -89,9 +92,10 @@ import net.sf.openrocket.utils.TableRowTraversalPolicy;
 import static net.sf.openrocket.gui.main.BasicFrame.SHORTCUT_KEY;
 
 @SuppressWarnings("serial")
-public class SimulationPanel extends JPanel {
+public class SimulationPanel extends JPanel implements TableHeaderPopupMenu.TableHeaderChangeListener {
 	private static final Logger log = LoggerFactory.getLogger(SimulationPanel.class);
 	private static final Translator trans = Application.getTranslator();
+	private final DocumentPreferences docPrefs;
 
 
 	private static final Color WARNING_COLOR = Color.RED;
@@ -106,7 +110,7 @@ public class SimulationPanel extends JPanel {
 
 	private final OpenRocketDocument document;
 
-	private final ColumnTableModel simulationTableModel;
+	private final SimulationTableModel simulationTableModel;
 	private final JTable simulationTable;
 
 	private final JButton editButton;
@@ -128,12 +132,12 @@ public class SimulationPanel extends JPanel {
 	private final SimulationAction selectedSimsExportAction;
 
 	private int[] previousSelection = null;
-	private JMenuItem exportSimTableToCSVMenuItem;
 
 	public SimulationPanel(OpenRocketDocument doc) {
 		super(new MigLayout("fill", "[grow][][][][][][grow]"));
 
 		this.document = doc;
+		this.docPrefs = this.document.getDocumentPreferences();
 
 
 		// Simulation actions
@@ -198,8 +202,11 @@ public class SimulationPanel extends JPanel {
 		simulationTable.setDefaultRenderer(Object.class, new JLabelRenderer());
 		simulationTableModel.setColumnWidths(simulationTable.getColumnModel());
 		simulationTable.setFillsViewportHeight(true);
-		simulationTable.getTableHeader().setComponentPopupMenu(new TableHeaderPopupMenu(simulationTable));
-
+		TableHeaderPopupMenu tableHeaderPopupMenu = new TableHeaderPopupMenu(simulationTable);
+		tableHeaderPopupMenu.addTableHeaderChangeListener(this);
+		simulationTable.getTableHeader().setComponentPopupMenu(tableHeaderPopupMenu);
+		TableUIPreferences.loadTableUIPreferences(simulationTable, "simulationTable", docPrefs,
+				false, true, true);
 
 		// Don't render the header text of the Status column
 		TableCellRenderer defaultHeaderRenderer = simulationTable.getTableHeader().getDefaultRenderer();
@@ -299,6 +306,12 @@ public class SimulationPanel extends JPanel {
 				if (!(event instanceof SimulationChangeEvent))
 					return;
 				fireMaintainSelection();
+			}
+
+			@Override
+			public void documentSaving(DocumentChangeEvent event) {
+				TableUIPreferences.storeTableUIPreferences(simulationTable, "simulationTable", docPrefs,
+						false, true, true);
 			}
 		});
 
@@ -840,6 +853,13 @@ public class SimulationPanel extends JPanel {
 				break;
 			simulationTable.addRowSelectionInterval(row, row);
 		}
+	}
+
+	@Override
+	public void tableHeaderChanged(EventObject event) {
+		// Simulation table header changed, we need to store this in the document preferences => fire doc change, so we
+		// ensure you first save the document before closing it, risking losing the changed header pref
+		document.stateChanged(new DocumentChangeEvent(this));
 	}
 
 	public abstract static class SimulationAction extends AbstractAction {
