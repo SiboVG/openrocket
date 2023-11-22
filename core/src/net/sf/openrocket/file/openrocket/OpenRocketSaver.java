@@ -7,6 +7,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.*;
 
+import net.sf.openrocket.document.DocumentPreferences;
 import net.sf.openrocket.file.openrocket.savers.PhotoStudioSaver;
 import net.sf.openrocket.logging.ErrorSet;
 import net.sf.openrocket.logging.WarningSet;
@@ -106,6 +107,9 @@ public class OpenRocketSaver extends RocketSaver {
 
 		// Save PhotoSettings
 		savePhotoSettings(document.getPhotoSettings());
+
+		// Save document preferences
+		saveDocumentPreferences(document.getDocumentPreferences());
 		
 		indent--;
 		writeln("</openrocket>");
@@ -216,22 +220,22 @@ public class OpenRocketSaver extends RocketSaver {
 		/*
 		 * NOTE:  Remember to update the supported versions in DocumentConfig as well!
 		 * 
-		 * File version 1.9 is required for:
+		 * File version 1.10 is required for:
 		 *  - new-style positioning
 		 *  - external/parallel booster stages
 		 *  - external pods
 		 *  - Rail Buttons
 		 *  - Flight event source saving
 		 *  
-		 * Otherwise use version 1.9.
+		 * Otherwise use version 1.10.
 		 */
 		
 		/////////////////
-		// Version 1.9 //
+		// Version 1.10 //
 		/////////////////
 		// for any new-style positioning:  'axialoffset', 'angleoffset', 'radiusoffset' tags
 		// these tags are used for any RocketComponent child classes positioning... so... ALL the classes.
-		return FILE_VERSION_DIVISOR + 9;
+		return FILE_VERSION_DIVISOR + 10;
 		
 	}
 	
@@ -371,7 +375,7 @@ public class OpenRocketSaver extends RocketSaver {
 			if (config != null) {
 				for (String key : config.keySet()) {
 					Object value = config.get(key, null);
-					writeEntry(key, value);
+					writeEntry("entry", key, value, false);
 				}
 			}
 			indent--;
@@ -441,35 +445,72 @@ public class OpenRocketSaver extends RocketSaver {
 		indent--;
 		writeln("</photostudio>");
 	}
-	
-	
-	private void writeEntry(String key, Object value) throws IOException {
+
+	private void saveDocumentPreferences(DocumentPreferences docPrefs) throws IOException {
+		log.debug("Saving Document Preferences");
+
+		writeln("<docprefs>");
+		indent++;
+
+		Map<String, DocumentPreferences.DocumentPreference> prefs = docPrefs.getPreferencesMap();
+		for (Map.Entry<String, DocumentPreferences.DocumentPreference> entry : prefs.entrySet()) {
+			DocumentPreferences.DocumentPreference pref = entry.getValue();
+			writeEntry("pref", entry.getKey(), pref.getValue(), true);
+		}
+
+		indent--;
+		writeln("</docprefs>");
+	}
+
+	/**
+	 * Write an entry element, which has a key and type attribute, and a value, to the output.
+	 * For example: <entry key="key" type="string">value</entry>
+	 * @param tagName The tag name (e.g. 'entry')
+	 * @param key The key attribute value
+	 * @param value The value to store
+	 * @param saveNumbersWithExplicitType If true, numbers will be stored with an explicit type attribute ('integer' or 'double'),
+	 *                                    if false, save simply as 'number'
+	 * @throws IOException
+	 */
+	private void writeEntry(String tagName, String key, Object value, boolean saveNumbersWithExplicitType) throws IOException {
 		if (value == null) {
 			return;
 		}
 		String keyAttr;
-		
+
 		if (key != null) {
 			keyAttr = "key=\"" + key + "\" ";
 		} else {
 			keyAttr = "";
 		}
-		
+
+		final String openTag = "<" + tagName + " ";
+		final String closeTag = "</" + tagName + ">";
 		if (value instanceof Boolean) {
-			writeln("<entry " + keyAttr + "type=\"boolean\">" + value + "</entry>");
+			writeln(openTag + keyAttr + "type=\"boolean\">" + value + closeTag);
 		} else if (value instanceof Number) {
-			writeln("<entry " + keyAttr + "type=\"number\">" + value + "</entry>");
+			if (saveNumbersWithExplicitType) {
+				if (value instanceof Integer) {
+					writeln(openTag + keyAttr + "type=\"integer\">" + value + closeTag);
+				} else if (value instanceof Double) {
+					writeln(openTag + keyAttr + "type=\"double\">" + value + closeTag);
+				} else {
+					writeln(openTag + keyAttr + "type=\"number\">" + value + closeTag);
+				}
+			} else {
+				writeln(openTag + keyAttr + "type=\"number\">" + value + closeTag);
+			}
 		} else if (value instanceof String) {
-			writeln("<entry " + keyAttr + "type=\"string\">" + TextUtil.escapeXML((String) value) + "</entry>");
-		} else if (value instanceof List) {
-			List<?> list = (List<?>) value;
-			writeln("<entry " + keyAttr + "type=\"list\">");
+			writeln(openTag + keyAttr + "type=\"string\">" + TextUtil.escapeXML((String) value) + closeTag);
+		} else if (value instanceof List<?> list) {
+			// Nested element
+			writeln(openTag + keyAttr + "type=\"list\">");
 			indent++;
 			for (Object o : list) {
-				writeEntry(null, o);
+				writeEntry(tagName, null, o, saveNumbersWithExplicitType);
 			}
 			indent--;
-			writeln("</entry>");
+			writeln(closeTag);
 		} else {
 			// Unknown type
 			log.error("Unknown configuration value type " + value.getClass() + "  value=" + value);

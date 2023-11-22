@@ -38,7 +38,7 @@ import net.sf.openrocket.util.ArrayList;
 public class OpenRocketDocument implements ComponentChangeListener, StateChangeListener {
 	private static final Logger log = LoggerFactory.getLogger(OpenRocketDocument.class);
 	private static final ApplicationPreferences prefs = Application.getPreferences();
-	private static final DocumentPreferences docPrefs = new DocumentPreferences();
+	private final DocumentPreferences docPrefs = new DocumentPreferences();
 	private final List<String> file_extensions = Arrays.asList("ork", "ork.gz", "rkt", "rkt.gz");	// Possible extensions of an OpenRocket document
 	/**
 	 * The minimum number of undo levels that are stored.
@@ -848,6 +848,13 @@ public class OpenRocketDocument implements ComponentChangeListener, StateChangeL
 			l.documentChanged(event);
 		}
 	}
+
+	public void fireDocumentSavingEvent(DocumentChangeEvent event) {
+		DocumentChangeListener[] array = listeners.toArray(new DocumentChangeListener[0]);
+		for (DocumentChangeListener l : array) {
+			l.documentSaving(event);
+		}
+	}
 	
 	public String toSimulationDetail(){
 		StringBuilder str = new StringBuilder();
@@ -867,5 +874,9 @@ public class OpenRocketDocument implements ComponentChangeListener, StateChangeL
 
 	public void setPhotoSettings(Map<String, String> photoSettings) {
 		this.photoSettings = photoSettings;
+	}
+
+	public DocumentPreferences getDocumentPreferences() {
+		return docPrefs;
 	}
 }
