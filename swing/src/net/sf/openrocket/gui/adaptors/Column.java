@@ -9,6 +9,7 @@ import net.sf.openrocket.unit.UnitGroup;
 public abstract class Column {
 	private final String name;
 	private final String toolTip;
+	private boolean visible = true;
 	
 	/**
 	 * Create a new column with specified name.  Additionally, the {@link #getValueAt(int)}
@@ -92,7 +93,15 @@ public abstract class Column {
 	 */
 	public void setValueAt(int row, Object value ) {
 	}
-	
+
+	public boolean isVisible() {
+		return visible;
+	}
+
+	public void setVisible(boolean visible) {
+		this.visible = visible;
+	}
+
 	/**
 	 * Get the Comparator to use with this column.
 	 * 
