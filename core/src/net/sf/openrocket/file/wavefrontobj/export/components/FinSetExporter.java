@@ -27,7 +27,7 @@ public class FinSetExporter extends RocketComponentExporter<FinSet> {
         obj.setActiveGroupNames(groupName);
 
         final Coordinate[] points = component.getFinPointsWithRoot();
-        final Coordinate[] tabPoints = component.getTabPoints();
+        final Coordinate[] tabPoints = component.getTabPointsWithRoot();
         final Coordinate[] tabPointsReversed = new Coordinate[tabPoints.length];        // We need clockwise points for the PolygonExporter
         for (int i = 0; i < tabPoints.length; i++) {
             tabPointsReversed[i] = tabPoints[tabPoints.length - i - 1];
@@ -38,7 +38,7 @@ public class FinSetExporter extends RocketComponentExporter<FinSet> {
         boolean hasTabs = component.getTabLength() > 0 && component.getTabHeight() > 0;
 
         if (Float.compare(thickness, 0) == 0) {
-            warnings.add(Warning.OBJ_ZERO_THICKNESS, component.getName());
+            warnings.add(Warning.OBJ_ZERO_THICKNESS, component);
         }
 
         // Generate the fin meshes

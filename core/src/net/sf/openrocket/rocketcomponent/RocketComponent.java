@@ -15,8 +15,10 @@ import net.sf.openrocket.aerodynamics.AerodynamicForces;
 import net.sf.openrocket.aerodynamics.BarrowmanCalculator;
 import net.sf.openrocket.aerodynamics.FlightConditions;
 import net.sf.openrocket.logging.WarningSet;
+import net.sf.openrocket.rocketcomponent.position.AnglePositionable;
 import net.sf.openrocket.startup.Application;
 import net.sf.openrocket.startup.ApplicationPreferences;
+import net.sf.openrocket.util.ORColor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +32,6 @@ import net.sf.openrocket.rocketcomponent.position.RadiusMethod;
 import net.sf.openrocket.util.ArrayList;
 import net.sf.openrocket.util.BugException;
 import net.sf.openrocket.util.ChangeSource;
-import net.sf.openrocket.util.Color;
 import net.sf.openrocket.util.ComponentChangeAdapter;
 import net.sf.openrocket.util.Coordinate;
 import net.sf.openrocket.util.Invalidator;
@@ -100,7 +101,7 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 	protected Coordinate position = new Coordinate();
 
 	// Color of the component, null means to use the default color
-	private Color color = null;
+	private ORColor color = null;
 	private LineStyle lineStyle = null;
 	
 	
@@ -136,7 +137,10 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 	
 	// Preset component this component is based upon
 	private ComponentPreset presetComponent = null;
-	
+
+	// If set to true, presets will not be cleared
+	private boolean ignorePresetClearing = false;
+
 	// The realistic appearance of this component
 	private Appearance appearance = null;
 
@@ -520,7 +524,7 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 	 * Return the color of the object to use in 2D figures, or <code>null</code>
 	 * to use the default color.
 	 */
-	public final Color getColor() {
+	public final ORColor getColor() {
 		mutex.verify();
 		return color;
 	}
@@ -528,7 +532,7 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 	/**
 	 * Set the color of the object to use in 2D figures.
 	 */
-	public final void setColor(Color c) {
+	public final void setColor(ORColor c) {
 		for (RocketComponent listener : configListeners) {
 			listener.setColor(c);
 		}
@@ -1085,7 +1089,12 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 	public int getInstanceCount() {
 		return 1;
 	}
-	
+
+	public void setInstanceCount(int count) {
+		// Do nothing
+		log.warn("setInstanceCount called on component that does not support multiple instances");
+	}
+
 	/**
 	 * Get the user-defined name of the component.
 	 */
@@ -1176,10 +1185,11 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 	 * preset values.
 	 * 
 	 * @param preset	the preset component to load, or <code>null</code> to clear the preset.
+	 * @param params    extra parameters to be used in the preset loading
 	 */
-	public final void loadPreset(ComponentPreset preset) {
+	public final void loadPreset(ComponentPreset preset, Object...params) {
 		for (RocketComponent listener : configListeners) {
-			listener.loadPreset(preset);
+			listener.loadPreset(preset, params);
 		}
 
 		if (presetComponent == preset) {
@@ -1211,8 +1221,11 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 			if (rocket != null) {
 				rocket.freeze();
 			}
-			
-			loadFromPreset(preset);
+
+			if (params == null || params.length == 0)
+				loadFromPreset(preset);
+			else
+				loadFromPreset(preset, params);
 			
 			this.presetComponent = preset;
 			
@@ -1224,8 +1237,11 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 
 		fireComponentChangeEvent(ComponentChangeEvent.NONFUNCTIONAL_CHANGE);
 	}
-	
-	
+
+	public final void loadPreset(ComponentPreset preset) {
+		loadPreset(preset, (Object[]) null);
+	}
+
 	/**
 	 * Load component properties from the specified preset.  The preset is guaranteed
 	 * to be of the correct type.
@@ -1235,15 +1251,20 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 	 * <p>
 	 * This method must FIRST perform the preset loading and THEN call super.loadFromPreset().
 	 * This is because mass setting requires the dimensions to be set beforehand.
-	 * 
+	 *
 	 * @param preset	the preset to load from
+	 * @param params    extra parameters to be used in the preset loading
 	 */
-	protected void loadFromPreset(ComponentPreset preset) {
+	protected void loadFromPreset(ComponentPreset preset, Object...params) {
 		if (preset.has(ComponentPreset.LENGTH)) {
 			this.length = preset.get(ComponentPreset.LENGTH);
 		}
 	}
-	
+
+	protected void loadFromPreset(ComponentPreset preset) {
+		loadFromPreset(preset, (Object[]) null);
+	}
+
 	
 	/**
 	 * Clear the current component preset.  This does not affect the component properties
@@ -1254,14 +1275,16 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 			listener.clearPreset();
 		}
 
-		if (presetComponent == null)
+		if (presetComponent == null || ignorePresetClearing)
 			return;
 		presetComponent = null;
 		fireComponentChangeEvent(ComponentChangeEvent.NONFUNCTIONAL_CHANGE);
 	}
-	
-	
-	
+
+	public void setIgnorePresetClearing(boolean ignorePresetClearing) {
+		this.ignorePresetClearing = ignorePresetClearing;
+	}
+
 	/**
 	 * Returns the unique ID of the component.
 	 *
@@ -2036,7 +2059,7 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 	
 	
 	/**
-	 * Move a child to another position.
+	 * Move a child to another position within this component.
 	 *
 	 * @param component	the component to move
 	 * @param index	the component's new position
@@ -2365,12 +2388,16 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 	 */
 	public final RocketComponent findComponent(String idToFind) {
 		checkState();
+		mutex.lock("findComponent");
 		Iterator<RocketComponent> iter = this.iterator(true);
 		while (iter.hasNext()) {
 			final RocketComponent c = iter.next();
-			if (c.getID().equals(idToFind))
+			if (c.getID().equals(idToFind)) {
+				mutex.unlock("findComponent");
 				return c;
+			}
 		}
+		mutex.unlock("findComponent");
 		return null;
 	}
 
@@ -2421,6 +2448,68 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 		while (c.getChildCount() > 0)
 			c = c.getChild(c.getChildCount() - 1);
 		return c;
+	}
+
+	/**
+	 * Split the current multi-instance component into multiple single-instance components.
+	 * @param freezeRocket whether to freeze the rocket while splitting
+	 * @return list of all the split components
+	 */
+	public List<RocketComponent> splitInstances(boolean freezeRocket) {
+		final Rocket rocket = getRocket();
+		RocketComponent parent = getParent();
+		int index = parent.getChildPosition(this);
+		int count = getInstanceCount();
+		double angleOffset = getAngleOffset();
+
+		List<RocketComponent> splitComponents = new java.util.ArrayList<>();		// List of all the split components
+
+		try {
+			// Freeze rocket
+			if (freezeRocket) {
+				rocket.freeze();
+			}
+
+			// Split the components
+			if (count > 1) {
+				parent.removeChild(index, true);			// Remove the original component
+				for (int i = 0; i < count; i++) {
+					RocketComponent copy = this.copy();
+					copy.setInstanceCount(1);
+					if (copy instanceof AnglePositionable) {
+						((AnglePositionable) copy).setAngleOffset(angleOffset + i * 2 * Math.PI / count);
+					}
+					copy.setName(copy.getName() + " #" + (i + 1));
+					copy.setOverrideMass(getOverrideMass() / count);
+					parent.addChild(copy, index + i, true);		// Add the new component
+
+					splitComponents.add(copy);
+				}
+			} else {
+				splitComponents.add(this);
+			}
+
+			// Split components for listeners
+			for (RocketComponent listener : configListeners) {
+				if (listener.getClass().isAssignableFrom(this.getClass())) {
+					listener.splitInstances(false);
+					this.removeConfigListener(listener);
+				}
+			}
+		} finally {
+			// Unfreeze rocket
+			if (freezeRocket) {
+				rocket.thaw();
+			}
+		}
+
+		fireComponentChangeEvent(ComponentChangeEvent.TREE_CHANGE);
+
+		return splitComponents;
+	}
+
+	public List<RocketComponent> splitInstances() {
+		return splitInstances(true);
 	}
 
 	///////////  Event handling  //////////
@@ -2542,7 +2631,7 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 		if (listener == null) {
 			return false;
 		}
-		if (listener.getConfigListeners().size() > 0) {
+		if (!listener.getConfigListeners().isEmpty()) {
 			throw new IllegalArgumentException("Listener already has config listeners");
 		}
 		if (configListeners.contains(listener) || listener == this) {
@@ -2732,6 +2821,7 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 	
 	protected static final double ringLongitudinalUnitInertia(double outerRadius,
 			double innerRadius, double length) {
+		// axis is through center of mass
 		// 1/12 * (3 * (r1^2 + r2^2) + h^2)
 		return (3 * (MathUtil.pow2(innerRadius) + MathUtil.pow2(outerRadius)) + MathUtil.pow2(length)) / 12;
 	}
@@ -2829,7 +2919,7 @@ public abstract class RocketComponent implements ChangeSource, Cloneable, Iterab
 	}
 	
 	protected void invalidate() {
-		invalidator.invalidate();
+		invalidator.invalidateMe();
 	}
 	
 	

@@ -24,11 +24,10 @@ import net.sf.openrocket.simulation.RK4SimulationStepper;
 import net.sf.openrocket.util.BugException;
 import net.sf.openrocket.util.BuildProperties;
 import net.sf.openrocket.util.ChangeSource;
-import net.sf.openrocket.util.Color;
+import net.sf.openrocket.util.ORColor;
 import net.sf.openrocket.util.GeodeticComputationStrategy;
 import net.sf.openrocket.util.LineStyle;
 import net.sf.openrocket.util.MathUtil;
-import net.sf.openrocket.util.ORPreferences;
 import net.sf.openrocket.util.StateChangeListener;
 import net.sf.openrocket.util.UniqueID;
 
@@ -44,10 +43,10 @@ public abstract class ApplicationPreferences implements ChangeSource, ORPreferen
 	
 	public static final String DEFAULT_MACH_NUMBER = "DefaultMachNumber";
 
-	// ApplicationPreferences related to units
+	// Preferences related to units
 	public static final String DISPLAY_SECONDARY_STABILITY = "DisplaySecondaryStability";
 
-	// ApplicationPreferences related to data export
+	// Preferences related to data export
 	public static final String EXPORT_FIELD_SEPARATOR = "ExportFieldSeparator";
 	public static final String EXPORT_DECIMAL_PLACES = "ExportDecimalPlaces";
 	public static final String EXPORT_EXPONENTIAL_NOTATION = "ExportExponentialNotation";
@@ -91,14 +90,14 @@ public abstract class ApplicationPreferences implements ChangeSource, ORPreferen
 	private static final String EXPORT_USER_DIRECTORIES = "ExportUserDirectories";
 	private static final String EXPORT_WINDOW_INFORMATION = "ExportWindowInformation";
 	
-	//ApplicationPreferences related to 3D graphics
+	//Preferences related to 3D graphics
 	public static final String OPENGL_ENABLED = "OpenGLIsEnabled";
 	public static final String OPENGL_ENABLE_AA = "OpenGLAntialiasingIsEnabled";
 	public static final String OPENGL_USE_FBO = "OpenGLUseFBO";
 	
 	public static final String ROCKET_INFO_FONT_SIZE = "RocketInfoFontSize";
 	
-	//ApplicationPreferences Related to Simulations
+	//Preferences Related to Simulations
 	
 	public static final String CONFIRM_DELETE_SIMULATION = "ConfirmDeleteSimulation";
 	public static final String AUTO_RUN_SIMULATIONS = "AutoRunSimulations";
@@ -139,7 +138,11 @@ public abstract class ApplicationPreferences implements ChangeSource, ORPreferen
 	private static final String OBJ_ORIG_X_OFFS = "OrigXOffs";
 	private static final String OBJ_ORIG_Y_OFFS = "OrigYOffs";
 	private static final String OBJ_ORIG_Z_OFFS = "OrigZOffs";
-	
+
+	// SVG export options
+	public static final String SVG_STROKE_COLOR = "SVGStrokeColor";
+	public static final String SVG_STROKE_WIDTH = "SVGStrokeWidth";
+
 	private static final AtmosphericModel ISA_ATMOSPHERIC_MODEL = new ExtendedISAModel();
 	
 	/*
@@ -230,7 +233,7 @@ public abstract class ApplicationPreferences implements ChangeSource, ORPreferen
 
 
 	/*
-	 * *********************** Unit ApplicationPreferences *******************************************
+	 * *********************** Unit Preferences *******************************************
 	 */
 
 	/**
@@ -908,13 +911,13 @@ public abstract class ApplicationPreferences implements ChangeSource, ORPreferen
 	}
 	
 	/**
-	 * get a net.sf.openrocket.util.Color object for the given key.
+	 * get a net.sf.openrocket.util.ORColor object for the given key.
 	 * @param key
 	 * @param defaultValue
 	 * @return
 	 */
-	public final Color getColor(String key, Color defaultValue) {
-		Color c = parseColor(getString(key, null));
+	public final ORColor getColor(String key, ORColor defaultValue) {
+		ORColor c = parseColor(getString(key, null));
 		if (c == null) {
 			return defaultValue;
 		}
@@ -922,20 +925,20 @@ public abstract class ApplicationPreferences implements ChangeSource, ORPreferen
 	}
 	
 	/**
-	 * set a net.sf.openrocket.util.Color preference value for the given key.
+	 * set a net.sf.openrocket.util.ORColor preference value for the given key.
 	 * @param key
 	 * @param value
 	 */
-	public final void putColor(String key, Color value) {
+	public final void putColor(String key, ORColor value) {
 		putString(key, stringifyColor(value));
 	}
 	
 	/**
-	 * Helper function to convert a string representation into a net.sf.openrocket.util.Color object.
+	 * Helper function to convert a string representation into a net.sf.openrocket.util.ORColor object.
 	 * @param color
 	 * @return
 	 */
-	protected static Color parseColor(String color) {
+	protected static ORColor parseColor(String color) {
 		if (color == null) {
 			return null;
 		}
@@ -946,7 +949,7 @@ public abstract class ApplicationPreferences implements ChangeSource, ORPreferen
 				int red = MathUtil.clamp(Integer.parseInt(rgb[0]), 0, 255);
 				int green = MathUtil.clamp(Integer.parseInt(rgb[1]), 0, 255);
 				int blue = MathUtil.clamp(Integer.parseInt(rgb[2]), 0, 255);
-				return new Color(red, green, blue);
+				return new ORColor(red, green, blue);
 			} catch (NumberFormatException ignore) {
 			}
 		}
@@ -954,12 +957,12 @@ public abstract class ApplicationPreferences implements ChangeSource, ORPreferen
 	}
 	
 	/**
-	 * Helper function to convert a net.sf.openrocket.util.Color object into a
+	 * Helper function to convert a net.sf.openrocket.util.ORColor object into a
 	 * String before storing in a preference.
 	 * @param color
 	 * @return
 	 */
-	protected static String stringifyColor(Color color) {
+	protected static String stringifyColor(ORColor color) {
 		String string = color.getRed() + "," + color.getGreen() + "," + color.getBlue();
 		return string;
 	}
@@ -1099,7 +1102,43 @@ public abstract class ApplicationPreferences implements ChangeSource, ORPreferen
 
 		return options;
 	}
-	
+
+	/**
+	 * Returns the stroke color used for the SVG.
+	 *
+	 * @return the stroke color for the SVG
+	 */
+	public Color getSVGStrokeColor() {
+		return getColor(SVG_STROKE_COLOR, ORColor.fromAWTColor(Color.BLACK)).toAWTColor();
+	}
+
+	/**
+	 * Sets the stroke color used for the SVG.
+	 *
+	 * @param c the stroke color to set
+	 */
+	public void setSVGStrokeColor(Color c) {
+		putColor(SVG_STROKE_COLOR, ORColor.fromAWTColor(c));
+	}
+
+	/**
+	 * Returns the stroke width used for the SVG in mm.
+	 *
+	 * @return the stroke width for the SVG
+	 */
+	public double getSVGStrokeWidth() {
+		return getDouble(SVG_STROKE_WIDTH, 0.1);
+	}
+
+	/**
+	 * Sets the stroke width used for the SVG in mm.
+	 *
+	 * @param width the stroke width to set
+	 */
+	public void setSVGStrokeWidth(double width) {
+		putDouble(SVG_STROKE_WIDTH, width);
+	}
+
 	/*
 	 * Within a holder class so they will load only when needed.
 	 */

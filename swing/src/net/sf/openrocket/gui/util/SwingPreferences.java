@@ -21,11 +21,13 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 import net.sf.openrocket.communication.AssetHandler.UpdatePlatform;
+import net.sf.openrocket.database.Databases;
 import net.sf.openrocket.rocketcomponent.BodyComponent;
 import net.sf.openrocket.rocketcomponent.FinSet;
 import net.sf.openrocket.rocketcomponent.InternalComponent;
 import net.sf.openrocket.rocketcomponent.LaunchLug;
 import net.sf.openrocket.rocketcomponent.MassObject;
+import net.sf.openrocket.rocketcomponent.NoseCone;
 import net.sf.openrocket.rocketcomponent.ParallelStage;
 import net.sf.openrocket.rocketcomponent.PodSet;
 import net.sf.openrocket.rocketcomponent.RailButton;
@@ -35,6 +37,7 @@ import net.sf.openrocket.rocketcomponent.TubeFinSet;
 import net.sf.openrocket.startup.ApplicationPreferences;
 import net.sf.openrocket.simulation.SimulationOptionsInterface;
 import net.sf.openrocket.util.ORPreferences;
+import net.sf.openrocket.util.ORColor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,7 +102,7 @@ public class SwingPreferences extends ApplicationPreferences implements Simulati
 	
 	private Preferences PREFNODE;
 	private ORPreferences tablePreferences;
-	
+
 	
 	public SwingPreferences() {
 		Preferences root = Preferences.userRoot();
@@ -410,20 +413,20 @@ public class SwingPreferences extends ApplicationPreferences implements Simulati
 		storeVersion();
 	}
 
-	public net.sf.openrocket.util.Color getDefaultColor(Class<? extends RocketComponent> c) {
+	public ORColor getDefaultColor(Class<? extends RocketComponent> c) {
 		String color = get("componentColors", c, DEFAULT_COLORS);
 		if (color == null)
-			return net.sf.openrocket.util.Color.fromAWTColor(getUIThemeAsTheme().getTextColor());
+			return ORColor.fromAWTColor(getUIThemeAsTheme().getTextColor());
 
-		net.sf.openrocket.util.Color clr = parseColor(color);
+		ORColor clr = parseColor(color);
 		if (clr != null) {
 			return clr;
 		} else {
-			return net.sf.openrocket.util.Color.fromAWTColor(getUIThemeAsTheme().getTextColor());
+			return ORColor.fromAWTColor(getUIThemeAsTheme().getTextColor());
 		}
 	}
 
-	public final void setDefaultColor(Class<? extends RocketComponent> c, net.sf.openrocket.util.Color color) {
+	public final void setDefaultColor(Class<? extends RocketComponent> c, ORColor color) {
 		if (color == null)
 			return;
 		putString("componentColors", c.getSimpleName(), stringifyColor(color));
@@ -686,12 +689,12 @@ public class SwingPreferences extends ApplicationPreferences implements Simulati
 	}
 	
 	/**
-	 * this class returns a java.awt.Color object for the specified key.
+	 * this class returns a java.awt.ORColor object for the specified key.
 	 * you can pass (java.awt.Color) null to the second argument to
 	 * disambiguate
 	 */
 	public Color getColor(String key, Color defaultValue) {
-		net.sf.openrocket.util.Color c = super.getColor(key, (net.sf.openrocket.util.Color) null);
+		ORColor c = super.getColor(key, (ORColor) null);
 		if (c == null) {
 			return defaultValue;
 		}
@@ -702,7 +705,7 @@ public class SwingPreferences extends ApplicationPreferences implements Simulati
 	 * 
 	 */
 	public void putColor(String key, Color value) {
-		net.sf.openrocket.util.Color c = ColorConversion.fromAwtColor(value);
+		ORColor c = ColorConversion.fromAwtColor(value);
 		super.putColor(key, c);
 	}
 	
@@ -786,7 +789,10 @@ public class SwingPreferences extends ApplicationPreferences implements Simulati
 	
 	
 	////  Material storage
-	
+	public void loadDefaultComponentMaterials() {
+		setDefaultComponentMaterial(FinSet.class, Databases.findMaterial(Material.Type.BULK, "Balsa"));
+		setDefaultComponentMaterial(NoseCone.class, Databases.findMaterial(Material.Type.BULK, "Polystyrene"));
+	}
 	
 	/**
 	 * Add a user-defined material to the preferences.  The preferences are

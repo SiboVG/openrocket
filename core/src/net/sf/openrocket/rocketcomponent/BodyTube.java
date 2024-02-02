@@ -116,8 +116,8 @@ public class BodyTube extends SymmetricComponent implements BoxBounded, MotorMou
 	@Override
 	public void setOuterRadius(double radius) {
 		for (RocketComponent listener : configListeners) {
-			if (listener instanceof BodyTube) {
-				((BodyTube) listener).setOuterRadius(radius);
+			if (listener instanceof Coaxial) {
+				((Coaxial) listener).setOuterRadius(radius);
 			}
 		}
 
@@ -251,8 +251,8 @@ public class BodyTube extends SymmetricComponent implements BoxBounded, MotorMou
 	@Override
 	public void setInnerRadius(double r) {
 		for (RocketComponent listener : configListeners) {
-			if (listener instanceof BodyTube) {
-				((BodyTube) listener).setInnerRadius(r);
+			if (listener instanceof Coaxial) {
+				((Coaxial) listener).setInnerRadius(r);
 			}
 		}
 
@@ -328,8 +328,15 @@ public class BodyTube extends SymmetricComponent implements BoxBounded, MotorMou
 		return (MathUtil.pow2(getInnerRadius()) + MathUtil.pow2(getOuterRadius())) / 2;
 	}
 	
-	
-	
+	@Override
+	public double getComponentWetArea() {
+		return Math.PI * getOuterRadius() * 2 * getLength();
+	}
+
+	@Override
+	public double getComponentPlanformArea() {
+		return getOuterRadius() * 2 * getLength();
+	}
 	
 	/**
 	 * Helper function for cylinder volume.
@@ -392,10 +399,10 @@ public class BodyTube extends SymmetricComponent implements BoxBounded, MotorMou
 	@Override 
 	public void setMotorConfig(MotorConfiguration newMotorConfig, FlightConfigurationId fcid){
 		for (RocketComponent listener : configListeners) {
-			if (listener instanceof BodyTube) {
+			if (listener instanceof MotorMount) {
 				if (newMotorConfig != null) {
-					BodyTube tube = (BodyTube) listener;
-					MotorConfiguration config = tube.getMotorConfig(fcid);
+					MotorMount mount = (MotorMount) listener;
+					MotorConfiguration config = mount.getMotorConfig(fcid);
 					config.copyFrom(newMotorConfig);
 				}
 			}
@@ -433,8 +440,8 @@ public class BodyTube extends SymmetricComponent implements BoxBounded, MotorMou
 	@Override
     public void setMotorMount(boolean _active){
 		for (RocketComponent listener : configListeners) {
-			if (listener instanceof BodyTube) {
-				((BodyTube) listener).setMotorMount(_active);
+			if (listener instanceof MotorMount) {
+				((MotorMount) listener).setMotorMount(_active);
 			}
 		}
 
@@ -473,8 +480,8 @@ public class BodyTube extends SymmetricComponent implements BoxBounded, MotorMou
 	@Override
 	public void setMotorOverhang(double overhang) {
 		for (RocketComponent listener : configListeners) {
-			if (listener instanceof BodyTube) {
-				((BodyTube) listener).setMotorOverhang(overhang);
+			if (listener instanceof MotorMount) {
+				((MotorMount) listener).setMotorOverhang(overhang);
 			}
 		}
 
