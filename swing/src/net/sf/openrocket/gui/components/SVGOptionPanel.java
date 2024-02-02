@@ -5,7 +5,7 @@ import net.sf.openrocket.gui.SpinnerEditor;
 import net.sf.openrocket.gui.adaptors.DoubleModel;
 import net.sf.openrocket.l10n.Translator;
 import net.sf.openrocket.startup.Application;
-import net.sf.openrocket.startup.Preferences;
+import net.sf.openrocket.startup.ApplicationPreferences;
 import net.sf.openrocket.unit.UnitGroup;
 
 import javax.swing.JLabel;
@@ -15,7 +15,7 @@ import java.awt.Color;
 
 public class SVGOptionPanel extends JPanel {
 	private static final Translator trans = Application.getTranslator();
-	private static final Preferences prefs = Application.getPreferences();
+	private static final ApplicationPreferences prefs = Application.getPreferences();
 
 	private final ColorChooserButton colorChooser;
 	private double strokeWidth = 0.1;

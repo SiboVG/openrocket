@@ -1,5 +1,6 @@
 package net.sf.openrocket.startup;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.EventObject;
@@ -28,6 +29,7 @@ import net.sf.openrocket.util.ORColor;
 import net.sf.openrocket.util.GeodeticComputationStrategy;
 import net.sf.openrocket.util.LineStyle;
 import net.sf.openrocket.util.MathUtil;
+import net.sf.openrocket.util.ORPreferences;
 import net.sf.openrocket.util.StateChangeListener;
 import net.sf.openrocket.util.UniqueID;
 
