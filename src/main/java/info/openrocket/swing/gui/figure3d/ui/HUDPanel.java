@@ -1,9 +1,9 @@
 package info.openrocket.swing.gui.figure3d.ui;
 
-import info.openrocket.swing.gui.figure3d.scene.orchestration.Scene3DOrchestrator;
 import info.openrocket.core.rocketcomponent.ComponentChangeEvent;
 import info.openrocket.core.rocketcomponent.Rocket;
 import info.openrocket.core.util.StateChangeListener;
+import info.openrocket.swing.gui.figure3d.scene.orchestration.Scene3DOrchestrator;
 import info.openrocket.swing.gui.figureelements.RocketInfo;
 
 import javax.swing.JPanel;

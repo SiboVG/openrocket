@@ -1,10 +1,10 @@
 package info.openrocket.swing.gui.figure3d.core.geometry.components;
 
+import info.openrocket.core.motor.Motor;
 import info.openrocket.swing.gui.figure3d.constants.RenderingConstants;
 import info.openrocket.swing.gui.figure3d.core.geometry.Mesh;
 import info.openrocket.swing.gui.figure3d.core.geometry.Vertex;
 import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguration;
-import info.openrocket.core.motor.Motor;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 

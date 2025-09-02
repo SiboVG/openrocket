@@ -7,7 +7,16 @@ import info.openrocket.swing.gui.figure3d.window.WindowManager;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL33;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
+import static org.lwjgl.opengl.GL11.GL_LINEAR;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_MIN_FILTER;
+import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
+import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
+import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 

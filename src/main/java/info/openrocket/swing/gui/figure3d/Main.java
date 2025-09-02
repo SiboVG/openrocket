@@ -1,13 +1,14 @@
 package info.openrocket.swing.gui.figure3d;
 
+import info.openrocket.core.rocketcomponent.Rocket;
 import info.openrocket.swing.gui.figure3d.ui.GLScenePanel;
 import info.openrocket.swing.gui.figure3d.ui.HUDPanel;
-import info.openrocket.core.rocketcomponent.Rocket;
 import info.openrocket.swing.gui.figureelements.RocketInfo;
 import org.lwjgl.opengl.GL;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+import java.awt.Dimension;
 
 /**
  * Main application entry point for the OpenRocket 3D visualization engine.

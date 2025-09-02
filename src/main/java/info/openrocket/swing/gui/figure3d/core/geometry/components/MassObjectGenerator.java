@@ -1,12 +1,12 @@
 package info.openrocket.swing.gui.figure3d.core.geometry.components;
 
+import info.openrocket.core.rocketcomponent.MassObject;
+import info.openrocket.core.util.RocketComponentUtils;
 import info.openrocket.swing.gui.figure3d.constants.RenderingConstants;
 import info.openrocket.swing.gui.figure3d.core.geometry.Mesh;
 import info.openrocket.swing.gui.figure3d.core.geometry.Vertex;
 import info.openrocket.swing.gui.figure3d.scene.properties.GraphicsQualitySettings;
 import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguration;
-import info.openrocket.core.rocketcomponent.MassObject;
-import info.openrocket.core.util.RocketComponentUtils;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 

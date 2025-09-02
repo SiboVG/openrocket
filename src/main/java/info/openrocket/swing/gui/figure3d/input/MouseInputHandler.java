@@ -4,9 +4,9 @@ import info.openrocket.swing.gui.figure3d.window.CursorQuery;
 
 import java.awt.Point;
 
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_CONTROL;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_ALT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_CONTROL;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;

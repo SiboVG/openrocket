@@ -1,16 +1,16 @@
 package info.openrocket.swing.gui.figure3d.ui;
 
+import info.openrocket.core.rocketcomponent.Rocket;
 import info.openrocket.swing.gui.figure3d.DemoFactory;
-import info.openrocket.swing.gui.figure3d.export.PngExporter;
+import info.openrocket.swing.gui.figure3d.core.geometry.RocketMeshBuilder;
 import info.openrocket.swing.gui.figure3d.export.ImageExporter;
+import info.openrocket.swing.gui.figure3d.export.PngExporter;
 import info.openrocket.swing.gui.figure3d.input.KeyboardHandler;
 import info.openrocket.swing.gui.figure3d.materials.Texture;
 import info.openrocket.swing.gui.figure3d.rendering.Shader;
 import info.openrocket.swing.gui.figure3d.rendering.backgrounds.SolidColorBackground;
-import info.openrocket.swing.gui.figure3d.core.geometry.RocketMeshBuilder;
 import info.openrocket.swing.gui.figure3d.scene.core.SceneView;
 import info.openrocket.swing.gui.figure3d.scene.orchestration.Scene3DOrchestrator;
-import info.openrocket.core.rocketcomponent.Rocket;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.awt.AWTGLCanvas;
 import org.lwjgl.opengl.awt.GLData;
@@ -34,12 +34,37 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL12.*;
-import static org.lwjgl.opengl.GL13.*;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL11.GL_BLEND;
+import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
+import static org.lwjgl.opengl.GL11.GL_FLOAT;
+import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
+import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL11.glBlendFunc;
+import static org.lwjgl.opengl.GL11.glDisable;
+import static org.lwjgl.opengl.GL11.glDrawArrays;
+import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11.glTexSubImage2D;
+import static org.lwjgl.opengl.GL11.glViewport;
+import static org.lwjgl.opengl.GL12.GL_BGRA;
+import static org.lwjgl.opengl.GL12.GL_UNSIGNED_INT_8_8_8_8_REV;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
+import static org.lwjgl.opengl.GL13.glActiveTexture;
+import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
+import static org.lwjgl.opengl.GL15.glBindBuffer;
+import static org.lwjgl.opengl.GL15.glBufferData;
+import static org.lwjgl.opengl.GL15.glDeleteBuffers;
+import static org.lwjgl.opengl.GL15.glGenBuffers;
+import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
+import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
+import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_SRGB;
+import static org.lwjgl.opengl.GL30.glBindVertexArray;
+import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
+import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 /**
  * AWTGLCanvas-backed scene panel for Swing integration.

@@ -1,15 +1,14 @@
 package info.openrocket.swing.gui.figure3d.scene.orchestration;
 
-import info.openrocket.swing.gui.figure3d.core.geometry.RocketMeshBuilder;
-import info.openrocket.swing.gui.figure3d.materials.Appearance3D;
-import info.openrocket.swing.gui.figure3d.materials.AppearanceFactory;
-
-import info.openrocket.swing.gui.figure3d.scene.core.SceneObject;
-import info.openrocket.swing.gui.figure3d.scene.core.SceneView;
 import info.openrocket.core.rocketcomponent.ComponentChangeEvent;
 import info.openrocket.core.rocketcomponent.ComponentChangeListener;
 import info.openrocket.core.rocketcomponent.Rocket;
 import info.openrocket.core.rocketcomponent.RocketComponent;
+import info.openrocket.swing.gui.figure3d.core.geometry.RocketMeshBuilder;
+import info.openrocket.swing.gui.figure3d.materials.Appearance3D;
+import info.openrocket.swing.gui.figure3d.materials.AppearanceFactory;
+import info.openrocket.swing.gui.figure3d.scene.core.SceneObject;
+import info.openrocket.swing.gui.figure3d.scene.core.SceneView;
 
 import java.util.ArrayList;
 import java.util.List;

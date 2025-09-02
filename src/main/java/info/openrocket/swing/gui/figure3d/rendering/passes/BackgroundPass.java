@@ -3,7 +3,6 @@ package info.openrocket.swing.gui.figure3d.rendering.passes;
 import info.openrocket.swing.gui.figure3d.rendering.Shader;
 import info.openrocket.swing.gui.figure3d.rendering.ShaderProgram;
 import info.openrocket.swing.gui.figure3d.rendering.TextureBinder;
-import com.example.rendering.backgrounds.*;
 import info.openrocket.swing.gui.figure3d.rendering.backgrounds.Background;
 import info.openrocket.swing.gui.figure3d.rendering.backgrounds.GradientBackground;
 import info.openrocket.swing.gui.figure3d.rendering.backgrounds.HDRIBackground;
@@ -19,7 +18,19 @@ import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
+import static org.lwjgl.opengl.GL11.GL_LEQUAL;
+import static org.lwjgl.opengl.GL11.GL_LESS;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.GL_TRIANGLE_STRIP;
+import static org.lwjgl.opengl.GL11.glClear;
+import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glDepthFunc;
+import static org.lwjgl.opengl.GL11.glDepthMask;
+import static org.lwjgl.opengl.GL11.glDisable;
+import static org.lwjgl.opengl.GL11.glEnable;
 
 /**
  * Multi-technique background rendering pass for diverse environmental effects.

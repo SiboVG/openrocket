@@ -1,16 +1,5 @@
 package info.openrocket.swing.gui.figure3d.rendering.passes;
 
-import info.openrocket.swing.gui.figure3d.core.geometry.components.CGCaretGenerator;
-import info.openrocket.swing.gui.figure3d.core.geometry.components.CPCaretGenerator;
-import info.openrocket.swing.gui.figure3d.rendering.Renderable;
-import info.openrocket.swing.gui.figure3d.rendering.RenderableMesh;
-import info.openrocket.swing.gui.figure3d.rendering.Shader;
-import info.openrocket.swing.gui.figure3d.rendering.ShaderProgram;
-import info.openrocket.swing.gui.figure3d.scene.core.SceneView;
-import info.openrocket.swing.gui.figure3d.core.geometry.RocketMeshBuilder;
-import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguration;
-import info.openrocket.swing.gui.figure3d.utils.VectorUtils;
-import info.openrocket.swing.gui.figure3d.window.WindowManager;
 import info.openrocket.core.aerodynamics.AerodynamicCalculator;
 import info.openrocket.core.aerodynamics.BarrowmanCalculator;
 import info.openrocket.core.aerodynamics.FlightConditions;
@@ -19,6 +8,17 @@ import info.openrocket.core.masscalc.MassCalculator;
 import info.openrocket.core.rocketcomponent.FlightConfiguration;
 import info.openrocket.core.rocketcomponent.Rocket;
 import info.openrocket.core.util.Coordinate;
+import info.openrocket.swing.gui.figure3d.core.geometry.RocketMeshBuilder;
+import info.openrocket.swing.gui.figure3d.core.geometry.components.CGCaretGenerator;
+import info.openrocket.swing.gui.figure3d.core.geometry.components.CPCaretGenerator;
+import info.openrocket.swing.gui.figure3d.rendering.Renderable;
+import info.openrocket.swing.gui.figure3d.rendering.RenderableMesh;
+import info.openrocket.swing.gui.figure3d.rendering.Shader;
+import info.openrocket.swing.gui.figure3d.rendering.ShaderProgram;
+import info.openrocket.swing.gui.figure3d.scene.core.SceneView;
+import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguration;
+import info.openrocket.swing.gui.figure3d.utils.VectorUtils;
+import info.openrocket.swing.gui.figure3d.window.WindowManager;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 

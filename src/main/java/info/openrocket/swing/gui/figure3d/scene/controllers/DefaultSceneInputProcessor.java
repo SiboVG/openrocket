@@ -1,12 +1,12 @@
 package info.openrocket.swing.gui.figure3d.scene.controllers;
 
+import info.openrocket.core.rocketcomponent.RocketComponent;
 import info.openrocket.swing.gui.figure3d.core.math.Raycaster;
 import info.openrocket.swing.gui.figure3d.input.InputState;
 import info.openrocket.swing.gui.figure3d.scene.core.Light;
 import info.openrocket.swing.gui.figure3d.scene.core.SceneObject;
 import info.openrocket.swing.gui.figure3d.scene.core.SceneView;
 import info.openrocket.swing.gui.figure3d.scene.properties.ViewportDimensions;
-import info.openrocket.core.rocketcomponent.RocketComponent;
 import org.joml.Vector3f;
 
 import java.awt.Point;

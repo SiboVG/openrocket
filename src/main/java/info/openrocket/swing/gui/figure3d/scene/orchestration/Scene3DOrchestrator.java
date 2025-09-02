@@ -1,24 +1,24 @@
 package info.openrocket.swing.gui.figure3d.scene.orchestration;
 
+import info.openrocket.core.rocketcomponent.Rocket;
 import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
 import info.openrocket.swing.gui.figure3d.animation.PoseProvider;
-import info.openrocket.swing.gui.figure3d.core.math.Raycaster;
 import info.openrocket.swing.gui.figure3d.core.math.DefaultRaycaster;
+import info.openrocket.swing.gui.figure3d.core.math.Raycaster;
 import info.openrocket.swing.gui.figure3d.input.InputState;
 import info.openrocket.swing.gui.figure3d.rendering.RealisticRenderer;
-import info.openrocket.swing.gui.figure3d.scene.core.SceneView;
-import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguration;
-import info.openrocket.swing.gui.figure3d.scene.properties.DisplaySettings;
-import info.openrocket.swing.gui.figure3d.scene.properties.ViewportDimensions;
-import info.openrocket.swing.gui.figure3d.scene.core.Scene;
-import info.openrocket.swing.gui.figure3d.scene.controllers.CameraControls;
-import info.openrocket.swing.gui.figure3d.scene.controllers.CameraController;
-import info.openrocket.swing.gui.figure3d.scene.controllers.SceneInputProcessor;
-import info.openrocket.swing.gui.figure3d.scene.controllers.DefaultSceneInputProcessor;
-import info.openrocket.swing.gui.figure3d.scene.core.Camera;
-import info.openrocket.core.rocketcomponent.Rocket;
-import info.openrocket.swing.gui.figure3d.scene.events.ExportListener;
 import info.openrocket.swing.gui.figure3d.rendering.Renderer;
+import info.openrocket.swing.gui.figure3d.scene.controllers.CameraController;
+import info.openrocket.swing.gui.figure3d.scene.controllers.CameraControls;
+import info.openrocket.swing.gui.figure3d.scene.controllers.DefaultSceneInputProcessor;
+import info.openrocket.swing.gui.figure3d.scene.controllers.SceneInputProcessor;
+import info.openrocket.swing.gui.figure3d.scene.core.Camera;
+import info.openrocket.swing.gui.figure3d.scene.core.Scene;
+import info.openrocket.swing.gui.figure3d.scene.core.SceneView;
+import info.openrocket.swing.gui.figure3d.scene.events.ExportListener;
+import info.openrocket.swing.gui.figure3d.scene.properties.DisplaySettings;
+import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguration;
+import info.openrocket.swing.gui.figure3d.scene.properties.ViewportDimensions;
 
 import java.util.ArrayList;
 import java.util.List;

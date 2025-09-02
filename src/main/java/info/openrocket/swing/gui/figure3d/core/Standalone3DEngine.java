@@ -1,24 +1,27 @@
 package info.openrocket.swing.gui.figure3d.core;
 
+import info.openrocket.core.rocketcomponent.Rocket;
 import info.openrocket.swing.gui.figure3d.DemoFactory;
-import info.openrocket.swing.gui.figure3d.export.PngExporter;
+import info.openrocket.swing.gui.figure3d.core.geometry.RocketMeshBuilder;
 import info.openrocket.swing.gui.figure3d.export.ImageExporter;
+import info.openrocket.swing.gui.figure3d.export.PngExporter;
 import info.openrocket.swing.gui.figure3d.input.KeyboardHandler;
 import info.openrocket.swing.gui.figure3d.input.MouseInputHandler;
 import info.openrocket.swing.gui.figure3d.scene.core.SceneView;
 import info.openrocket.swing.gui.figure3d.scene.orchestration.Scene3DOrchestrator;
-import info.openrocket.swing.gui.figure3d.core.geometry.RocketMeshBuilder;
-import info.openrocket.swing.gui.figure3d.window.GLFWWindowManager;
-import info.openrocket.swing.gui.figure3d.window.WindowManager;
 import info.openrocket.swing.gui.figure3d.window.CursorQuery;
 import info.openrocket.swing.gui.figure3d.window.FramebufferAware;
+import info.openrocket.swing.gui.figure3d.window.GLFWWindowManager;
 import info.openrocket.swing.gui.figure3d.window.KeyboardEventSource;
-import info.openrocket.core.rocketcomponent.Rocket;
+import info.openrocket.swing.gui.figure3d.window.WindowManager;
 
 import java.io.IOException;
 
 import static org.lwjgl.glfw.GLFW.glfwGetTime;
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
+import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11.glViewport;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER_SRGB;
 
 public class Standalone3DEngine implements Runnable {

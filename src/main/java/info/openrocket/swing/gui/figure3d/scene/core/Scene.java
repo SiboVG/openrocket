@@ -1,15 +1,15 @@
 package info.openrocket.swing.gui.figure3d.scene.core;
 
+import info.openrocket.core.rocketcomponent.Rocket;
+import info.openrocket.core.rocketcomponent.RocketComponent;
+import info.openrocket.swing.gui.figure3d.core.math.Raycaster;
 import info.openrocket.swing.gui.figure3d.core.particles.ParticleEmitter;
 import info.openrocket.swing.gui.figure3d.rendering.backgrounds.Background;
 import info.openrocket.swing.gui.figure3d.rendering.backgrounds.SolidColorBackground;
-import info.openrocket.swing.gui.figure3d.core.math.Raycaster;
-import info.openrocket.swing.gui.figure3d.scene.controllers.LightManager;
 import info.openrocket.swing.gui.figure3d.scene.controllers.LightController;
-import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguration;
+import info.openrocket.swing.gui.figure3d.scene.controllers.LightManager;
 import info.openrocket.swing.gui.figure3d.scene.events.SelectionListener;
-import info.openrocket.core.rocketcomponent.Rocket;
-import info.openrocket.core.rocketcomponent.RocketComponent;
+import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;

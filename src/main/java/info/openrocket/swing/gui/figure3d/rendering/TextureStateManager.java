@@ -4,8 +4,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL13.*;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_MAG_FILTER;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_MIN_FILTER;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_S;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_T;
+import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL11.glTexParameteri;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
+import static org.lwjgl.opengl.GL13.glActiveTexture;
 
 /**
  * Optimized OpenGL texture state manager for performance-critical rendering.

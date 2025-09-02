@@ -1,15 +1,16 @@
 package info.openrocket.swing.gui.figure3d.rendering;
 
-import info.openrocket.swing.gui.figure3d.core.particles.flame.FlameEmitter;
+import info.openrocket.core.rocketcomponent.Rocket;
 import info.openrocket.swing.gui.figure3d.core.particles.ParticleEmitter;
+import info.openrocket.swing.gui.figure3d.core.particles.flame.FlameEmitter;
 import info.openrocket.swing.gui.figure3d.rendering.backgrounds.GradientBackground;
 import info.openrocket.swing.gui.figure3d.rendering.backgrounds.SolidColorBackground;
 import info.openrocket.swing.gui.figure3d.rendering.passes.BackgroundPass;
+import info.openrocket.swing.gui.figure3d.rendering.passes.CaretsPass;
 import info.openrocket.swing.gui.figure3d.rendering.passes.FXAAPass;
 import info.openrocket.swing.gui.figure3d.rendering.passes.GeometryPass;
 import info.openrocket.swing.gui.figure3d.rendering.passes.MotionBlurPass;
 import info.openrocket.swing.gui.figure3d.rendering.passes.OutlinePass;
-import info.openrocket.swing.gui.figure3d.rendering.passes.CaretsPass;
 import info.openrocket.swing.gui.figure3d.rendering.passes.RenderPass;
 import info.openrocket.swing.gui.figure3d.rendering.passes.ScreenTexturePass;
 import info.openrocket.swing.gui.figure3d.scene.core.Camera;
@@ -18,7 +19,6 @@ import info.openrocket.swing.gui.figure3d.scene.core.SceneView;
 import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguration;
 import info.openrocket.swing.gui.figure3d.utils.ColorUtils;
 import info.openrocket.swing.gui.figure3d.window.WindowManager;
-import info.openrocket.core.rocketcomponent.Rocket;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;

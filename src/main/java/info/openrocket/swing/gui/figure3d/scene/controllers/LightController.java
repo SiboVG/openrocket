@@ -1,6 +1,7 @@
 package info.openrocket.swing.gui.figure3d.scene.controllers;
 
 import info.openrocket.swing.gui.figure3d.scene.core.Light;
+
 import java.util.List;
 
 /**

@@ -1,7 +1,7 @@
 package info.openrocket.swing.gui.figure3d.scene.controllers;
 
-import info.openrocket.swing.gui.figure3d.scene.core.Camera;
 import info.openrocket.core.rocketcomponent.Rocket;
+import info.openrocket.swing.gui.figure3d.scene.core.Camera;
 
 /**
  * Abstraction for camera control behaviors used by the orchestrator.

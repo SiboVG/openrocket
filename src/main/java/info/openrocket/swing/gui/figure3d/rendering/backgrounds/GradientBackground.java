@@ -1,8 +1,7 @@
 package info.openrocket.swing.gui.figure3d.rendering.backgrounds;
 
-import org.joml.Vector3f;
-
 import info.openrocket.swing.gui.figure3d.utils.ColorUtils;
+import org.joml.Vector3f;
 
 /**
  * Vertical gradient background renderer for atmospheric and horizon effects.

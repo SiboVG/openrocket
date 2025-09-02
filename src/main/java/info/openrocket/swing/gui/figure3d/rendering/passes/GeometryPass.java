@@ -1,24 +1,35 @@
 package info.openrocket.swing.gui.figure3d.rendering.passes;
 
+import info.openrocket.core.rocketcomponent.BodyComponent;
 import info.openrocket.swing.gui.figure3d.materials.Appearance3D;
-import info.openrocket.swing.gui.figure3d.rendering.RealisticRenderer;
-import info.openrocket.swing.gui.figure3d.scene.properties.DisplaySettings;
-import info.openrocket.swing.gui.figure3d.rendering.MaterialBinder;
 import info.openrocket.swing.gui.figure3d.rendering.DefaultMaterialBinder;
+import info.openrocket.swing.gui.figure3d.rendering.MaterialBinder;
+import info.openrocket.swing.gui.figure3d.rendering.RealisticRenderer;
 import info.openrocket.swing.gui.figure3d.rendering.ShaderProgram;
 import info.openrocket.swing.gui.figure3d.rendering.TextureBinder;
-import info.openrocket.swing.gui.figure3d.scene.core.SceneView;
 import info.openrocket.swing.gui.figure3d.scene.core.SceneObject;
+import info.openrocket.swing.gui.figure3d.scene.core.SceneView;
+import info.openrocket.swing.gui.figure3d.scene.properties.DisplaySettings;
 import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguration;
 import info.openrocket.swing.gui.figure3d.window.WindowManager;
-import info.openrocket.core.rocketcomponent.BodyComponent;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_BLEND;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
+import static org.lwjgl.opengl.GL11.GL_FILL;
+import static org.lwjgl.opengl.GL11.GL_FRONT_AND_BACK;
+import static org.lwjgl.opengl.GL11.GL_LINE;
+import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.glBlendFunc;
+import static org.lwjgl.opengl.GL11.glDepthMask;
+import static org.lwjgl.opengl.GL11.glDisable;
+import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11.glPolygonMode;
 
 /**
  * Primary geometry rendering pass for 3D scene objects.

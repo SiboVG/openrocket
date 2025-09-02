@@ -1,15 +1,15 @@
 package info.openrocket.swing.gui.figure3d.core.geometry.components;
 
-import info.openrocket.swing.gui.figure3d.constants.RenderingConstants;
-import info.openrocket.swing.gui.figure3d.core.geometry.Mesh;
-import info.openrocket.swing.gui.figure3d.core.geometry.Vertex;
-import info.openrocket.swing.gui.figure3d.scene.properties.GraphicsQualitySettings;
-import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguration;
 import info.openrocket.core.rocketcomponent.EllipticalFinSet;
 import info.openrocket.core.rocketcomponent.FinSet;
 import info.openrocket.core.rocketcomponent.SymmetricComponent;
 import info.openrocket.core.rocketcomponent.position.AxialMethod;
 import info.openrocket.core.util.Coordinate;
+import info.openrocket.swing.gui.figure3d.constants.RenderingConstants;
+import info.openrocket.swing.gui.figure3d.core.geometry.Mesh;
+import info.openrocket.swing.gui.figure3d.core.geometry.Vertex;
+import info.openrocket.swing.gui.figure3d.scene.properties.GraphicsQualitySettings;
+import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguration;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.locationtech.jts.geom.Geometry;

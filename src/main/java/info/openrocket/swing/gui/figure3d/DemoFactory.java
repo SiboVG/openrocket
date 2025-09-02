@@ -1,16 +1,5 @@
 package info.openrocket.swing.gui.figure3d;
 
-import info.openrocket.swing.gui.figure3d.input.KeyBindings;
-import info.openrocket.swing.gui.figure3d.materials.Appearance3D;
-import info.openrocket.swing.gui.figure3d.materials.Texture;
-import info.openrocket.swing.gui.figure3d.rendering.backgrounds.GradientBackground;
-import info.openrocket.swing.gui.figure3d.rendering.backgrounds.HDRIBackground;
-import info.openrocket.swing.gui.figure3d.rendering.backgrounds.SkyboxBackground;
-import info.openrocket.swing.gui.figure3d.rendering.backgrounds.SolidColorBackground;
-import info.openrocket.swing.gui.figure3d.scene.core.Scene;
-import info.openrocket.swing.gui.figure3d.scene.core.SceneView;
-import info.openrocket.swing.gui.figure3d.scene.orchestration.Scene3DOrchestrator;
-import info.openrocket.swing.gui.figure3d.core.geography.TerrainGenerator;
 import info.openrocket.core.appearance.Appearance;
 import info.openrocket.core.appearance.Decal;
 import info.openrocket.core.appearance.defaults.DefaultAppearance;
@@ -39,6 +28,17 @@ import info.openrocket.core.rocketcomponent.TrapezoidFinSet;
 import info.openrocket.core.rocketcomponent.position.AxialMethod;
 import info.openrocket.core.util.Coordinate;
 import info.openrocket.core.util.ORColor;
+import info.openrocket.swing.gui.figure3d.core.geography.TerrainGenerator;
+import info.openrocket.swing.gui.figure3d.input.KeyBindings;
+import info.openrocket.swing.gui.figure3d.materials.Appearance3D;
+import info.openrocket.swing.gui.figure3d.materials.Texture;
+import info.openrocket.swing.gui.figure3d.rendering.backgrounds.GradientBackground;
+import info.openrocket.swing.gui.figure3d.rendering.backgrounds.HDRIBackground;
+import info.openrocket.swing.gui.figure3d.rendering.backgrounds.SkyboxBackground;
+import info.openrocket.swing.gui.figure3d.rendering.backgrounds.SolidColorBackground;
+import info.openrocket.swing.gui.figure3d.scene.core.Scene;
+import info.openrocket.swing.gui.figure3d.scene.core.SceneView;
+import info.openrocket.swing.gui.figure3d.scene.orchestration.Scene3DOrchestrator;
 import org.joml.Vector3f;
 
 import java.io.File;

@@ -1,11 +1,11 @@
 package info.openrocket.swing.gui.figure3d.rendering;
 
+import info.openrocket.core.rocketcomponent.BodyComponent;
 import info.openrocket.swing.gui.figure3d.materials.Appearance3D;
 import info.openrocket.swing.gui.figure3d.materials.Texture;
 import info.openrocket.swing.gui.figure3d.scene.core.SceneObject;
 import info.openrocket.swing.gui.figure3d.scene.properties.DisplaySettings;
 import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguration;
-import info.openrocket.core.rocketcomponent.BodyComponent;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL33;
