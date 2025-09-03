@@ -34,6 +34,16 @@ open module info.openrocket.swing {
 	requires org.apache.commons.lang3;
 	requires java.management;
 
+	requires lwjgl3.awt;
+	requires org.lwjgl.stb;
+	requires org.lwjgl.opengl;
+	requires org.lwjgl.glfw;
+	requires org.lwjgl.jawt;
+
+	requires org.joml;
+	requires org.locationtech.jts;
+	requires java.net.http;
+
 	// Service providers
 	// Also edit swing/src/main/resources/META-INF/services !! (until gradle-modules-plugin supports service
 	// copying, see https://github.com/java9-modularity/gradle-modules-plugin/issues/85)

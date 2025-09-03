@@ -1,3 +1,5 @@
+import org.gradle.internal.os.OperatingSystem
+
 plugins {
     id "com.github.johnrengelman.shadow"
     id 'java'
@@ -62,6 +64,38 @@ extraJavaModuleInfo {
     automaticModule('obj-0.4.0.jar', 'de.javagl.obj')
 }
 
+ext {
+    lwjglVersion = "3.3.6"
+    lwjgl3AwtVersion = "0.2.3"
+    jomlVersion = "1.10.8"
+
+    switch (OperatingSystem.current()) {
+        case OperatingSystem.FREE_BSD:
+            lwjglNatives = "natives-freebsd"
+            break
+        case OperatingSystem.LINUX:
+            lwjglNatives = "natives-linux"
+            def osArch = System.getProperty("os.arch")
+            if (osArch.startsWith("arm") || osArch.startsWith("aarch64")) {
+                lwjglNatives += osArch.contains("64") || osArch.startsWith("armv8") ? "-arm64" : "-arm32"
+            } else if  (osArch.startsWith("ppc")) {
+                lwjglNatives += "-ppc64le"
+            } else if  (osArch.startsWith("riscv")) {
+                lwjglNatives += "-riscv64"
+            }
+            break
+        case OperatingSystem.MAC_OS:
+            lwjglNatives = System.getProperty("os.arch").startsWith("aarch64") ? "natives-macos-arm64" : "natives-macos"
+            break
+        case OperatingSystem.WINDOWS:
+            def osArch = System.getProperty("os.arch")
+            lwjglNatives = osArch.contains("64")
+                    ? "natives-windows${osArch.startsWith("aarch64") ? "-arm64" : ""}"
+                    : "natives-windows-x86"
+            break
+    }
+}
+
 dependencies {
     implementation(project(path: ':core', configuration: 'default'))
 
@@ -92,4 +126,21 @@ dependencies {
     implementation group: 'org.jogamp.jogl', name: 'jogl-all-main', version: '2.5.0'
 
     testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.0'
+
+    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+
+    implementation "org.lwjgl:lwjgl"
+    implementation "org.lwjgl:lwjgl-glfw"
+    implementation "org.lwjgl:lwjgl-opengl"
+    implementation "org.lwjgl:lwjgl-stb"
+    implementation "org.lwjgl:lwjgl-jawt"   // only if you really need JAWT
+
+    // Natives are needed only at runtime
+    runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
+
+    implementation "org.lwjglx:lwjgl3-awt:${lwjgl3AwtVersion}"
+    implementation "org.joml:joml:${jomlVersion}"
 }
