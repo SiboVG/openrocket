@@ -89,6 +89,7 @@ import info.openrocket.core.file.GeneralRocketSaver;
 import info.openrocket.core.file.RocketLoadException;
 import info.openrocket.core.file.rasaero.RASAeroCommonConstants;
 import info.openrocket.core.file.svg.export.SVGExportOptions;
+import info.openrocket.core.file.dxf.export.DXFExportOptions;
 import info.openrocket.core.l10n.Translator;
 import info.openrocket.core.logging.Markers;
 import info.openrocket.core.rocketcomponent.ComponentChangeEvent;
@@ -110,6 +111,8 @@ import info.openrocket.swing.gui.configdialog.ComponentConfigDialog;
 import info.openrocket.swing.gui.customexpression.CustomExpressionDialog;
 import info.openrocket.swing.gui.export.SVGRocketPartsExporter;
 import info.openrocket.swing.gui.export.SvgOptionsDialog;
+import info.openrocket.swing.gui.export.DXFRocketPartsExporter;
+import info.openrocket.swing.gui.export.DxfOptionsDialog;
 import info.openrocket.swing.gui.dialogs.AboutDialog;
 import info.openrocket.swing.gui.dialogs.BugReportDialog;
 import info.openrocket.swing.gui.dialogs.componentanalysis.ComponentAnalysisDialog;
@@ -589,6 +592,18 @@ private static final Translator trans = Application.getTranslator();
 			}
 		});
 		exportSubMenu.add(exportSvgProfiles);
+
+		//////		Export DXF profiles
+		JMenuItem exportDxfProfiles = new JMenuItem(trans.get("main.menu.file.exportAs.DXFProfiles"));
+		exportDxfProfiles.setIcon(Icons.EXPORT_SVG); // Reuse SVG icon for now
+		exportDxfProfiles.getAccessibleContext().setAccessibleDescription(trans.get("main.menu.file.exportAs.DXFProfiles.desc"));
+		exportDxfProfiles.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				exportDxfProfilesAction();
+			}
+		});
+		exportSubMenu.add(exportDxfProfiles);
 
 		fileMenu.add(exportSubMenu);
 		fileMenu.addSeparator();
@@ -2105,6 +2120,133 @@ private static final Translator trans = Application.getTranslator();
 			return;
 		}
 		exportSvgProfilesAction(selectedComponents);
+	}
+
+	/**
+	 * Export all exportable components from the document as DXF profiles.
+	 */
+	private void exportDxfProfilesAction() {
+		exportDxfProfilesAction(null);
+	}
+
+	/**
+	 * Export selected components as DXF profiles.
+	 */
+	private void exportDxfProfilesAction(List<RocketComponent> components) {
+		// Get currently selected components from design (if components parameter is null)
+		List<RocketComponent> initiallySelected = components;
+		if (initiallySelected == null) {
+			initiallySelected = getSelectedComponents();
+			if (initiallySelected == null) {
+				initiallySelected = new ArrayList<>();
+			}
+		}
+		
+		// Show DXF options dialog first
+		DxfOptionsDialog optionsDialog = new DxfOptionsDialog(BasicFrame.this, document, initiallySelected);
+		optionsDialog.setFromPreferences(prefs);
+		if (!optionsDialog.showDialog()) {
+			return; // User cancelled
+		}
+
+		// Get the selected tab to determine export type
+		int selectedTab = optionsDialog.getSelectedTab();
+		
+		// Get options from dialog (includes spacing)
+		DXFExportOptions options = optionsDialog.getExportOptions();
+
+		// Now show file chooser
+		JFileChooser chooser = new JFileChooser();
+		chooser.setFileFilter(FileHelper.DXF_FILTER);
+
+		SwingPreferences swingPrefs = (SwingPreferences) Application.getPreferences();
+		File defaultDir = swingPrefs.getDefaultDirectory();
+		if (defaultDir != null) {
+			chooser.setCurrentDirectory(defaultDir);
+		}
+
+		// Determine default filename based on selected tab
+		String defaultName;
+		String fileSuffix;
+		if (selectedTab == DxfOptionsDialog.COMPONENTS_TAB) {
+			// Components tab
+			if (components != null && !components.isEmpty()) {
+				if (components.size() == 1) {
+					defaultName = components.get(0).getName();
+					if (defaultName == null || defaultName.isBlank()) {
+						defaultName = components.get(0).getComponentName();
+					}
+				} else {
+					defaultName = "components";
+				}
+			} else {
+				defaultName = document.getRocket().getName();
+				if (defaultName == null || defaultName.isBlank()) {
+					defaultName = "rocket";
+				}
+			}
+			fileSuffix = "-profile.dxf";
+		} else {
+			// Fin Guides tab (future)
+			defaultName = document.getRocket().getName();
+			if (defaultName == null || defaultName.isBlank()) {
+				defaultName = "rocket";
+			}
+			fileSuffix = "-finguides.dxf";
+		}
+		File parentDir = defaultDir != null ? defaultDir : new File(System.getProperty("user.home", "."));
+		chooser.setSelectedFile(new File(parentDir, defaultName + fileSuffix));
+
+		if (chooser.showSaveDialog(BasicFrame.this) != JFileChooser.APPROVE_OPTION) {
+			return;
+		}
+
+		File target = FileHelper.forceExtension(chooser.getSelectedFile(), "dxf");
+		if (!FileHelper.confirmWrite(target, BasicFrame.this)) {
+			return;
+		}
+
+		swingPrefs.setDefaultDirectory(chooser.getCurrentDirectory());
+
+		// Save DXF preferences (reuse SVG preferences)
+		prefs.setSVGStrokeColor(optionsDialog.getStrokeColor());
+		prefs.setSVGStrokeWidth(optionsDialog.getStrokeWidth());
+		prefs.setSVGDrawCrosshair(optionsDialog.isDrawCrosshair());
+		prefs.setSVGCrosshairColor(optionsDialog.getCrosshairColor());
+		prefs.setSVGCrosshairSize(optionsDialog.getCrosshairSize());
+		prefs.setSVGShowLabels(optionsDialog.isShowLabels());
+		prefs.setSVGLabelColor(optionsDialog.getLabelColor());
+
+		try {
+			if (selectedTab == DxfOptionsDialog.COMPONENTS_TAB) {
+				// Export components
+				List<RocketComponent> selectedComponents = optionsDialog.getSelectedComponents();
+				if (!selectedComponents.isEmpty()) {
+					new DXFRocketPartsExporter().export(selectedComponents, target, options);
+				} else {
+					new DXFRocketPartsExporter().export(document, target, options);
+				}
+				log.info(Markers.USER_MARKER, "Exported DXF profiles to {}", target.getAbsolutePath());
+			}
+			// TODO: other tabs here (e.g. fin guides)
+		} catch (UnsupportedOperationException ex) {
+			log.warn("Fin guide export not implemented", ex);
+			JOptionPane.showMessageDialog(BasicFrame.this,
+					trans.get("SVGOptionPanel.finGuides.notImplemented"),
+					trans.get("SVGOptionPanel.finGuides.notImplemented.title"),
+					JOptionPane.INFORMATION_MESSAGE);
+		} catch (IllegalStateException noParts) {
+			JOptionPane.showMessageDialog(BasicFrame.this,
+					trans.get("main.menu.file.exportAs.DXFProfiles.empty"),
+					trans.get("main.menu.file.exportAs.DXFProfiles.title"),
+					JOptionPane.INFORMATION_MESSAGE);
+		} catch (Exception ex) {
+			log.warn("Failed to export DXF", ex);
+			JOptionPane.showMessageDialog(BasicFrame.this,
+					String.format(trans.get("main.menu.file.exportAs.DXFProfiles.error"), ex.getMessage()),
+					trans.get("main.menu.file.exportAs.DXFProfiles.title"),
+					JOptionPane.ERROR_MESSAGE);
+		}
 	}
 
 

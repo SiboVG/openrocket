@@ -73,6 +73,10 @@ public final class FileHelper {
 	public static final FileFilter SVG_FILTER =
 			new SimpleFileFilter(trans.get("FileHelper.SVG_FILTER"), ".svg");
 
+	/** File filter for DXF files (*.dxf) */
+	public static final FileFilter DXF_FILTER =
+			new SimpleFileFilter(trans.get("FileHelper.DXF_FILTER"), ".dxf");
+
 	/** File filter for XML files (*.xml) */
 	public static final FileFilter XML_FILTER =
 			new SimpleFileFilter(trans.get("FileHelper.XML_FILTER"), ".xml");
