@@ -23,6 +23,9 @@ import java.util.Set;
 public class DXFBuilder {
 	private static final double OR_UNIT_TO_DXF_UNIT = 1000; // OpenRocket units are in meters, DXF units are in mm
 	private static final String DEFAULT_ACADVER = "AC1015"; // AutoCAD 2000 (supports LWPOLYLINE)
+	// DXF lineweight uses 1/100 mm units, with a practical max of 2.11 mm.
+	private static final int MIN_DXF_LINEWEIGHT = 1;
+	private static final int MAX_DXF_LINEWEIGHT = 211;
 	
 	private final List<DXFEntity> entities;
 	private double minX = Double.MAX_VALUE;
@@ -32,6 +35,7 @@ public class DXFBuilder {
 	private double originX = 0.0;
 	private double originY = 0.0;
 	private int nextHandle = 1;
+	private Integer defaultLineweight;
 
 	/**
 	 * Supported horizontal text anchoring, matching SVG's naming.
@@ -50,13 +54,15 @@ public class DXFBuilder {
 		final String subclass;
 		final String layer;
 		final int colorIndex;
+		final Integer lineweight;
 		final List<String> data; // group code/value pairs (without common entity attributes)
 		
-		DXFEntity(String type, String subclass, String layer, int colorIndex) {
+		DXFEntity(String type, String subclass, String layer, int colorIndex, Integer lineweight) {
 			this.type = type;
 			this.subclass = subclass;
 			this.layer = layer;
 			this.colorIndex = colorIndex;
+			this.lineweight = lineweight;
 			this.data = new ArrayList<>();
 		}
 	}
@@ -66,6 +72,14 @@ public class DXFBuilder {
 	 */
 	public DXFBuilder() {
 		this.entities = new ArrayList<>();
+	}
+
+	/**
+	 * Sets the default lineweight (stroke width) applied to new entities.
+	 * Uses DXF lineweight units (1/100 mm) and clamps to valid DXF bounds.
+	 */
+	public void setDefaultLineweightMm(double strokeWidthMm) {
+		this.defaultLineweight = toDxfLineweight(strokeWidthMm);
 	}
 	
 	/**
@@ -118,6 +132,18 @@ public class DXFBuilder {
 		if (r > g) return (r > 128) ? 6 : 5;
 		return (g > 128) ? 4 : 5;
 	}
+
+	/**
+	 * Converts a stroke width in mm to DXF lineweight units (1/100 mm).
+	 */
+	private Integer toDxfLineweight(double strokeWidthMm) {
+		if (!Double.isFinite(strokeWidthMm) || strokeWidthMm <= 0.0) {
+			return null;
+		}
+		int lineweight = (int) Math.round(strokeWidthMm * 100.0);
+		lineweight = Math.max(MIN_DXF_LINEWEIGHT, Math.min(MAX_DXF_LINEWEIGHT, lineweight));
+		return lineweight;
+	}
 	
 	/**
 	 * Formats a double value for DXF output.
@@ -141,20 +167,23 @@ public class DXFBuilder {
 		}
 		
 		String resolvedLayer = normalizeLayer(layer, "PROFILES");
-		DXFEntity entity = new DXFEntity("LWPOLYLINE", "AcDbPolyline", resolvedLayer, colorToDxfIndex(stroke));
+		DXFEntity entity = new DXFEntity("LWPOLYLINE", "AcDbPolyline", resolvedLayer, colorToDxfIndex(stroke), defaultLineweight);
 		
 		// LWPOLYLINE group codes
 		entity.data.add("90"); // Number of vertices
-		entity.data.add(String.valueOf(coordinates.length));
-		entity.data.add("70"); // Polyline flag (1 = closed)
 		// Check if path is closed
 		boolean closed = coordinates.length > 2 &&
 				Math.abs(coordinates[0].getX() - coordinates[coordinates.length-1].getX()) < 1e-10 &&
 				Math.abs(coordinates[0].getY() - coordinates[coordinates.length-1].getY()) < 1e-10;
+		// Avoid duplicating the closing point when the path is explicitly closed.
+		int vertexCount = closed ? coordinates.length - 1 : coordinates.length;
+		entity.data.add(String.valueOf(vertexCount));
+		entity.data.add("70"); // Polyline flag (1 = closed)
 		entity.data.add(closed ? "1" : "0");
 		
 		// Add vertices (X, Y coordinates)
-		for (CoordinateIF coord : coordinates) {
+		for (int i = 0; i < vertexCount; i++) {
+			CoordinateIF coord = coordinates[i];
 			double x = toDxfUnits(coord.getX() + xPos + originX);
 			double y = toDxfUnits(coord.getY() + yPos + originY);
 			updateBounds(x, y);
@@ -200,7 +229,7 @@ public class DXFBuilder {
 	 */
 	public void addCircle(double centerX, double centerY, double radius, Color stroke, String layer) {
 		String resolvedLayer = normalizeLayer(layer, "PROFILES");
-		DXFEntity entity = new DXFEntity("CIRCLE", "AcDbCircle", resolvedLayer, colorToDxfIndex(stroke));
+		DXFEntity entity = new DXFEntity("CIRCLE", "AcDbCircle", resolvedLayer, colorToDxfIndex(stroke), defaultLineweight);
 		
 		double cx = toDxfUnits(centerX + originX);
 		double cy = toDxfUnits(centerY + originY);
@@ -240,7 +269,7 @@ public class DXFBuilder {
 	 */
 	public void addLine(double startX, double startY, double endX, double endY, Color stroke, String layer) {
 		String resolvedLayer = normalizeLayer(layer, "PROFILES");
-		DXFEntity entity = new DXFEntity("LINE", "AcDbLine", resolvedLayer, colorToDxfIndex(stroke));
+		DXFEntity entity = new DXFEntity("LINE", "AcDbLine", resolvedLayer, colorToDxfIndex(stroke), defaultLineweight);
 		
 		double x1 = toDxfUnits(startX + originX);
 		double y1 = toDxfUnits(startY + originY);
@@ -307,7 +336,7 @@ public class DXFBuilder {
 		
 		String resolvedLayer = normalizeLayer(layer, "LABELS");
 		TextAnchor resolvedAnchor = (anchor != null) ? anchor : TextAnchor.MIDDLE;
-		DXFEntity entity = new DXFEntity("TEXT", "AcDbText", resolvedLayer, colorToDxfIndex(color));
+		DXFEntity entity = new DXFEntity("TEXT", "AcDbText", resolvedLayer, colorToDxfIndex(color), defaultLineweight);
 		
 		double dxfX = toDxfUnits(x + originX);
 		double dxfY = toDxfUnits(y + originY);
@@ -636,6 +665,10 @@ public class DXFBuilder {
 		writer.println(entity.layer);
 		writer.println("62");
 		writer.println(String.valueOf(entity.colorIndex));
+		if (entity.lineweight != null) {
+			writer.println("370");
+			writer.println(String.valueOf(entity.lineweight));
+		}
 		if (entity.subclass != null && !entity.subclass.isEmpty()) {
 			writer.println("100");
 			writer.println(entity.subclass);

@@ -41,6 +41,7 @@ public class DXFRocketPartsExporter {
 		}
 
 		DXFBuilder builder = new DXFBuilder();
+		builder.setDefaultLineweightMm(options.getStrokeWidthMm());
 		double rowWidth = calculateRowWidth(parts, options);
 
 		layoutParts(builder, parts, rowWidth, options);
@@ -56,6 +57,7 @@ public class DXFRocketPartsExporter {
 		}
 
 		DXFBuilder builder = new DXFBuilder();
+		builder.setDefaultLineweightMm(options.getStrokeWidthMm());
 		double rowWidth = calculateRowWidth(parts, options);
 
 		layoutParts(builder, parts, rowWidth, options);
@@ -282,4 +284,3 @@ public class DXFRocketPartsExporter {
 		}
 	}
 }
-

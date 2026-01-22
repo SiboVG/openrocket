@@ -86,4 +86,30 @@ class DXFBuilderTest {
 		Assertions.assertTrue(foundCentered, "Expected a TEXT entity with centered alignment (72=1)");
 	}
 
+	@Test
+	void entitiesIncludeLineweightWhenConfigured() throws Exception {
+		DXFBuilder builder = new DXFBuilder();
+		builder.setDefaultLineweightMm(0.25);
+		builder.addLine(0, 0, 0.01, 0, Color.BLACK, "PROFILES");
+
+		File dxfFile = File.createTempFile("dxf-lineweight", ".dxf");
+		builder.writeToFile(dxfFile);
+
+		List<String> lines = Files.readAllLines(dxfFile.toPath());
+		List<List<String>> entities = DxfTestUtil.extractEntities(lines);
+
+		boolean foundLineweight = false;
+		for (List<String> entityLines : entities) {
+			for (int i = 0; i + 1 < entityLines.size(); i += 2) {
+				if ("370".equals(entityLines.get(i)) && "25".equals(entityLines.get(i + 1))) {
+					foundLineweight = true;
+					break;
+				}
+			}
+			if (foundLineweight) {
+				break;
+			}
+		}
+		Assertions.assertTrue(foundLineweight, "Expected lineweight 25 (0.25mm) on entity");
+	}
 }

@@ -13,6 +13,7 @@ import info.openrocket.core.rocketcomponent.position.AxialMethod;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public final class ComponentDxfExportService {
@@ -21,14 +22,14 @@ public final class ComponentDxfExportService {
 
 	public static void exportFinSet(FinSet finSet, File destination, DXFExportOptions options)
 			throws IOException {
-		DXFBuilder builder = new DXFBuilder();
+		DXFBuilder builder = createBuilder(options);
 		info.openrocket.core.file.dxf.export.FinDxfExporter.drawFinSet(finSet, builder, 0, 0, options);
 		builder.writeToFile(destination);
 	}
 
 	public static void exportCenteringRing(CenteringRing ring, File destination, DXFExportOptions options)
 			throws IOException {
-		DXFBuilder builder = new DXFBuilder();
+		DXFBuilder builder = createBuilder(options);
 		List<InnerTube> mounts = findSupportingMotorMounts(ring);
 		RingDxfExporter.drawCenteringRing(ring, builder, options,
 				RingDxfExporter.holesFromMotorMounts(mounts));
@@ -37,9 +38,18 @@ public final class ComponentDxfExportService {
 
 	public static void exportBulkhead(Bulkhead bulkhead, File destination, DXFExportOptions options)
 			throws IOException {
-		DXFBuilder builder = new DXFBuilder();
-		RingDxfExporter.drawBulkhead(bulkhead, builder, options, java.util.Collections.emptyList());
+		DXFBuilder builder = createBuilder(options);
+		RingDxfExporter.drawBulkhead(bulkhead, builder, options, Collections.emptyList());
 		builder.writeToFile(destination);
+	}
+
+	/**
+	 * Build a DXF builder configured with export options.
+	 */
+	private static DXFBuilder createBuilder(DXFExportOptions options) {
+		DXFBuilder builder = new DXFBuilder();
+		builder.setDefaultLineweightMm(options.getStrokeWidthMm());
+		return builder;
 	}
 
 	public static List<InnerTube> findSupportingMotorMounts(CenteringRing ring) {
@@ -71,4 +81,3 @@ public final class ComponentDxfExportService {
 		return ringTop <= tubeBottom && tubeTop <= ringBottom;
 	}
 }
-
