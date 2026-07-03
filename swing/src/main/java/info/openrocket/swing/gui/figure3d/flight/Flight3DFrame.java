@@ -1,0 +1,149 @@
+package info.openrocket.swing.gui.figure3d.flight;
+
+import info.openrocket.core.document.OpenRocketDocument;
+import info.openrocket.core.document.Simulation;
+import info.openrocket.core.l10n.Translator;
+import info.openrocket.core.startup.Application;
+import info.openrocket.swing.gui.util.GUIUtil;
+
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+import java.awt.Dimension;
+import java.awt.Window;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+@SuppressWarnings("serial")
+public class Flight3DFrame extends JFrame {
+	private static final Map<Window, Flight3DFrame> activeFramesByOwner = new IdentityHashMap<>();
+
+	private final Translator trans = Application.getTranslator();
+	private final Flight3DPanel flightPanel;
+	private final AtomicBoolean resourcesReleased = new AtomicBoolean(false);
+	private final Window ownerWindow;
+	private volatile OpenRocketDocument currentDocument;
+	private volatile Simulation currentSimulation;
+
+	private Flight3DFrame(OpenRocketDocument document, Simulation simulation, Window parent) {
+		this.ownerWindow = parent;
+		this.currentDocument = document;
+		this.currentSimulation = simulation;
+
+		setMinimumSize(new Dimension(320, 240));
+		setSize(1024, 768);
+		setTitle(createTitle(simulation));
+		flightPanel = new Flight3DPanel();
+		setContentPane(flightPanel);
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+		if (parent != null) {
+			parent.addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosing(WindowEvent e) {
+					dispose();
+				}
+			});
+		}
+
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowOpened(WindowEvent e) {
+				attachCurrentSimulationIfReady();
+			}
+
+			@Override
+			public void windowClosing(WindowEvent e) {
+				releaseResources();
+			}
+
+			@Override
+			public void windowClosed(WindowEvent e) {
+				if (ownerWindow != null && activeFramesByOwner.get(ownerWindow) == Flight3DFrame.this) {
+					activeFramesByOwner.remove(ownerWindow);
+				}
+			}
+		});
+
+		GUIUtil.rememberWindowSize(this);
+		setLocationByPlatform(true);
+		GUIUtil.rememberWindowPosition(this);
+		GUIUtil.setWindowIcons(this);
+	}
+
+	public static void openForSimulation(OpenRocketDocument document, Simulation simulation, Window parent) {
+		Flight3DFrame existingFrame = activeFramesByOwner.get(parent);
+		if (existingFrame != null && existingFrame.isDisplayable()) {
+			existingFrame.setSimulation(document, simulation);
+			existingFrame.setVisible(true);
+			existingFrame.toFront();
+			existingFrame.requestFocus();
+			return;
+		}
+
+		Flight3DFrame frame = new Flight3DFrame(document, simulation, parent);
+		activeFramesByOwner.put(parent, frame);
+		frame.setVisible(true);
+		frame.toFront();
+		frame.requestFocus();
+	}
+
+	private void setSimulation(OpenRocketDocument document, Simulation simulation) {
+		if (resourcesReleased.get()) {
+			return;
+		}
+		this.currentDocument = document;
+		this.currentSimulation = simulation;
+		setTitle(createTitle(simulation));
+		if (isShowing()) {
+			flightPanel.setSimulation(document, simulation);
+		}
+	}
+
+	@Override
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
+		if (visible) {
+			SwingUtilities.invokeLater(this::attachCurrentSimulationIfReady);
+		}
+	}
+
+	private void attachCurrentSimulationIfReady() {
+		if (resourcesReleased.get() || !isShowing()) {
+			return;
+		}
+		OpenRocketDocument doc = currentDocument;
+		Simulation sim = currentSimulation;
+		if (doc == null || sim == null) {
+			return;
+		}
+		flightPanel.setSimulation(doc, sim);
+	}
+
+	private void releaseResources() {
+		if (!resourcesReleased.compareAndSet(false, true)) {
+			return;
+		}
+		currentDocument = null;
+		currentSimulation = null;
+		flightPanel.clearDoc();
+	}
+
+	@Override
+	public void dispose() {
+		releaseResources();
+		super.dispose();
+	}
+
+	private String createTitle(Simulation simulation) {
+		String base = trans.checkIfKeyExists("Flight3DFrame.title")
+				? trans.get("Flight3DFrame.title")
+				: "3D Flight Replay";
+		if (simulation == null || simulation.getName() == null || simulation.getName().isBlank()) {
+			return base;
+		}
+		return base + " - " + simulation.getName();
+	}
+}
