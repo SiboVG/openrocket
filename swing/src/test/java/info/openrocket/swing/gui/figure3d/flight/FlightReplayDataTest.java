@@ -97,6 +97,48 @@ class FlightReplayDataTest extends BaseTestCase {
 		assertEquals(stageIntervals, replay.getBurnIntervals());
 	}
 
+	@Test
+	void closesOpenEndedBurnAtFlightEnd() {
+		Rocket rocket = new Rocket();
+		AxialStage stage = addStage(rocket);
+		BodyTube motorMount = new BodyTube();
+		stage.addChild(motorMount);
+
+		FlightDataBranch primary = branch("primary", 0.0, 10.0, 0.0, 10.0);
+		// Ignition with no matching burnout (e.g. simulation ended mid-burn).
+		primary.addEvent(new FlightEvent(FlightEvent.Type.IGNITION, 1.0, motorMount));
+
+		FlightReplayData replay = new FlightReplayData(new FlightData(primary), rocket);
+
+		List<FlightReplayData.BurnInterval> intervals = replay.getBurnIntervalsByStage().get(stage);
+		assertEquals(1, intervals.size());
+		assertEquals(1.0, intervals.get(0).start());
+		assertEquals(10.0, intervals.get(0).end(), "an unclosed burn should extend to the flight end time");
+	}
+
+	@Test
+	void keepsNonOverlappingBurnsSeparate() {
+		Rocket rocket = new Rocket();
+		AxialStage stage = addStage(rocket);
+		BodyTube motorMount = new BodyTube();
+		stage.addChild(motorMount);
+
+		FlightDataBranch primary = branch("primary", 0.0, 10.0, 0.0, 10.0);
+		primary.addEvent(new FlightEvent(FlightEvent.Type.IGNITION, 1.0, motorMount));
+		primary.addEvent(new FlightEvent(FlightEvent.Type.BURNOUT, 2.0, motorMount));
+		primary.addEvent(new FlightEvent(FlightEvent.Type.IGNITION, 5.0, motorMount));
+		primary.addEvent(new FlightEvent(FlightEvent.Type.BURNOUT, 6.0, motorMount));
+
+		FlightReplayData replay = new FlightReplayData(new FlightData(primary), rocket);
+
+		List<FlightReplayData.BurnInterval> intervals = replay.getBurnIntervalsByStage().get(stage);
+		assertEquals(2, intervals.size());
+		assertEquals(1.0, intervals.get(0).start());
+		assertEquals(2.0, intervals.get(0).end());
+		assertEquals(5.0, intervals.get(1).start());
+		assertEquals(6.0, intervals.get(1).end());
+	}
+
 	private static AxialStage addStage(Rocket rocket) {
 		AxialStage stage = new AxialStage();
 		rocket.addChild(stage);
