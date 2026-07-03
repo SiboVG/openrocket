@@ -90,6 +90,10 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		flightData = sim.getSimulatedData();
 		replayConfigurationId = sim.getFlightConfigurationId();
 		originalConfigurationId = doc.getRocket().getSelectedConfiguration().getFlightConfigurationID();
+		// The 3D scene is built from the rocket's selected configuration, so we switch it to the
+		// simulation's configuration here. This is a side effect on shared document state: the main
+		// design view's selected configuration changes too (a NONFUNCTIONAL_CHANGE, no undo entry)
+		// until this window closes, when clearDoc() restores originalConfigurationId.
 		doc.getRocket().setSelectedConfiguration(replayConfigurationId);
 
 		GLScenePanel panel = createCanvas("3D flight replay view unavailable");
