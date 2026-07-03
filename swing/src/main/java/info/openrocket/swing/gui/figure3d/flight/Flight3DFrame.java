@@ -7,7 +7,9 @@ import info.openrocket.core.startup.Application;
 import info.openrocket.swing.gui.util.GUIUtil;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
@@ -22,6 +24,7 @@ public class Flight3DFrame extends JFrame {
 
 	private final Translator trans = Application.getTranslator();
 	private final Flight3DPanel flightPanel;
+	private final PlaybackTransportBar transportBar;
 	private final AtomicBoolean resourcesReleased = new AtomicBoolean(false);
 	private final Window ownerWindow;
 	private volatile OpenRocketDocument currentDocument;
@@ -36,7 +39,12 @@ public class Flight3DFrame extends JFrame {
 		setSize(1024, 768);
 		setTitle(createTitle(simulation));
 		flightPanel = new Flight3DPanel();
-		setContentPane(flightPanel);
+		transportBar = new PlaybackTransportBar();
+		flightPanel.setReplayReadyCallback(transportBar::setReplay);
+		JPanel content = new JPanel(new BorderLayout());
+		content.add(flightPanel, BorderLayout.CENTER);
+		content.add(transportBar, BorderLayout.SOUTH);
+		setContentPane(content);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
 		if (parent != null) {
@@ -97,6 +105,7 @@ public class Flight3DFrame extends JFrame {
 		this.currentDocument = document;
 		this.currentSimulation = simulation;
 		setTitle(createTitle(simulation));
+		transportBar.clearReplay();
 		if (isShowing()) {
 			flightPanel.setSimulation(document, simulation);
 		}
@@ -129,6 +138,7 @@ public class Flight3DFrame extends JFrame {
 		currentDocument = null;
 		currentSimulation = null;
 		flightPanel.clearDoc();
+		transportBar.dispose();
 	}
 
 	@Override
