@@ -26,6 +26,7 @@ import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguratio
 import info.openrocket.swing.gui.figure3d.scene.properties.ViewportDimensions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -51,7 +52,7 @@ public class Scene3DOrchestrator {
 	private volatile PlaybackClock playbackClock = null;
 	private volatile PoseProvider flightPrimaryPoseProvider = null;
 	private volatile boolean followFlightCamera = false;
-	private volatile List<double[]> flightBurnIntervals = null;
+	private volatile Map<AxialStage, List<double[]>> flightBurnIntervalsByStage = null;
 
 	/**
 	 * Updates the orchestrator's knowledge of the window and framebuffer dimensions.
@@ -439,46 +440,65 @@ public class Scene3DOrchestrator {
 
 	private static PoseProvider providerForComponent(RocketComponent component,
 			Map<AxialStage, PoseProvider> providersByStage) {
+		AxialStage stage = stageForComponent(component);
+		return stage != null ? providersByStage.get(stage) : null;
+	}
+
+	private static AxialStage stageForComponent(RocketComponent component) {
+		if (component == null) {
+			return null;
+		}
 		try {
-			AxialStage stage = component instanceof AxialStage
-					? (AxialStage) component
-					: component.getStage();
-			return providersByStage.get(stage);
+			return component instanceof AxialStage stage ? stage : component.getStage();
 		} catch (IllegalStateException e) {
 			return null;
 		}
 	}
 
-	public void setFlightBurnIntervals(List<double[]> burnIntervals) {
-		if (burnIntervals == null) {
-			this.flightBurnIntervals = null;
+	/**
+	 * Sets the motor burn windows per stage so exhaust emitters flame only while their
+	 * own stage's motor is burning (a sustainer must not flame during a booster-only burn).
+	 */
+	public void setFlightBurnIntervals(Map<AxialStage, List<double[]>> burnIntervalsByStage) {
+		if (burnIntervalsByStage == null) {
+			this.flightBurnIntervalsByStage = null;
 			return;
 		}
-		List<double[]> copy = new ArrayList<>(burnIntervals.size());
-		for (double[] interval : burnIntervals) {
-			if (interval == null || interval.length < 2) {
-				continue;
+		Map<AxialStage, List<double[]>> copy = new HashMap<>();
+		for (Map.Entry<AxialStage, List<double[]>> entry : burnIntervalsByStage.entrySet()) {
+			List<double[]> intervals = new ArrayList<>();
+			for (double[] interval : entry.getValue()) {
+				if (interval != null && interval.length >= 2) {
+					intervals.add(new double[] { interval[0], interval[1] });
+				}
 			}
-			copy.add(new double[] { interval[0], interval[1] });
+			copy.put(entry.getKey(), List.copyOf(intervals));
 		}
-		this.flightBurnIntervals = List.copyOf(copy);
+		this.flightBurnIntervalsByStage = Map.copyOf(copy);
 	}
 
 	private void updateFlightParticleEmission(double time) {
-		List<double[]> intervals = flightBurnIntervals;
-		if (intervals == null) {
+		Map<AxialStage, List<double[]>> byStage = flightBurnIntervalsByStage;
+		if (byStage == null) {
 			return;
 		}
-		boolean active = false;
+		for (var emitter : scene.getParticleEmitters()) {
+			AxialStage stage = stageForComponent(emitter.getRocketComponent());
+			List<double[]> intervals = stage != null ? byStage.get(stage) : null;
+			emitter.setEmissionEnabled(isWithinAnyInterval(intervals, time));
+		}
+	}
+
+	private static boolean isWithinAnyInterval(List<double[]> intervals, double time) {
+		if (intervals == null) {
+			return false;
+		}
 		for (double[] interval : intervals) {
 			if (time >= interval[0] && time <= interval[1]) {
-				active = true;
-				break;
+				return true;
 			}
 		}
-		for (var emitter : scene.getParticleEmitters()) {
-			emitter.setEmissionEnabled(active);
-		}
+		return false;
 	}
 
 	public PlaybackClock getPlaybackClock() {

@@ -314,7 +314,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		GroundedPoseProviders groundedPoses = createGroundedPoseProviders(scene, replayData);
 		orchestrator.bindFlightPosesToRocket(groundedPoses.providersByStage(), groundedPoses.primaryProvider(),
 				replayData.getStartTime(), replayData.getEndTime());
-		orchestrator.setFlightBurnIntervals(toTimeline(replayData.getBurnIntervals()));
+		orchestrator.setFlightBurnIntervals(toStageTimeline(replayData.getBurnIntervalsByStage()));
 		orchestrator.setFollowFlightCamera(true);
 		PlaybackClock clock = orchestrator.getPlaybackClock();
 		if (clock != null) {
@@ -454,10 +454,15 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 				new Vector3f(0.78f, 0.88f, 0.74f)));
 	}
 
-	private List<double[]> toTimeline(List<FlightReplayData.BurnInterval> intervals) {
-		List<double[]> timeline = new java.util.ArrayList<>(intervals.size());
-		for (FlightReplayData.BurnInterval interval : intervals) {
-			timeline.add(new double[] { interval.start(), interval.end() });
+	private Map<AxialStage, List<double[]>> toStageTimeline(
+			Map<AxialStage, List<FlightReplayData.BurnInterval>> intervalsByStage) {
+		Map<AxialStage, List<double[]>> timeline = new LinkedHashMap<>();
+		for (Map.Entry<AxialStage, List<FlightReplayData.BurnInterval>> entry : intervalsByStage.entrySet()) {
+			List<double[]> stageIntervals = new java.util.ArrayList<>(entry.getValue().size());
+			for (FlightReplayData.BurnInterval interval : entry.getValue()) {
+				stageIntervals.add(new double[] { interval.start(), interval.end() });
+			}
+			timeline.put(entry.getKey(), stageIntervals);
 		}
 		return timeline;
 	}
