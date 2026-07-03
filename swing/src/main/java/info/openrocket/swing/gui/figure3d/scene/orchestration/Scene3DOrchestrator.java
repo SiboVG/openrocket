@@ -162,6 +162,7 @@ public class Scene3DOrchestrator {
 		long currentFrameTime = System.nanoTime();
 		float deltaTime = (currentFrameTime - lastFrameTime) / 1e9f;
 		lastFrameTime = currentFrameTime;
+		float particleDeltaTime = deltaTime;
 
 		// Process all input events
 		inputHandler.processInput();
@@ -171,11 +172,18 @@ public class Scene3DOrchestrator {
 
 		// --- Simulation playback (if bound) ---
 		if (playbackClock != null) {
+			double previousPlaybackTime = playbackClock.getTime();
 			playbackClock.update(deltaTime);
 			double t = playbackClock.getTime();
+			particleDeltaTime = (float) Math.max(0.0, t - previousPlaybackTime);
 			for (var obj : scene.getObjects()) {
 				if (obj.hasPoseProvider()) {
 					obj.applyPoseAtTime(t);
+				}
+			}
+			for (var emitter : scene.getParticleEmitters()) {
+				if (emitter.hasPoseProvider()) {
+					emitter.applyPoseAtTime(t);
 				}
 			}
 			PoseProvider primaryProvider = flightPrimaryPoseProvider;
@@ -185,7 +193,9 @@ public class Scene3DOrchestrator {
 			updateFlightParticleEmission(t);
 		}
 
-		scene.updateParticles(deltaTime);
+		if (particleDeltaTime > 0.0f) {
+			scene.updateParticles(particleDeltaTime);
+		}
 	}
 
 	/**
@@ -376,6 +386,12 @@ public class Scene3DOrchestrator {
 					obj.setPoseProvider(provider);
 				}
 			}
+			for (var emitter : scene.getParticleEmitters()) {
+				if (emitter.getRocketComponent() != null) {
+					emitter.setPoseProvider(provider);
+					emitter.applyPoseAtTime(provider.getStartTime());
+				}
+			}
 		});
 		this.flightPrimaryPoseProvider = provider;
 		this.playbackClock = new PlaybackClock(provider.getStartTime(), provider.getEndTime());
@@ -403,6 +419,17 @@ public class Scene3DOrchestrator {
 				PoseProvider provider = providerForComponent(component, providersByStage);
 				if (provider != null) {
 					obj.setPoseProvider(provider);
+				}
+			}
+			for (var emitter : scene.getParticleEmitters()) {
+				RocketComponent component = emitter.getRocketComponent();
+				if (component == null) {
+					continue;
+				}
+				PoseProvider provider = providerForComponent(component, providersByStage);
+				if (provider != null) {
+					emitter.setPoseProvider(provider);
+					emitter.applyPoseAtTime(startTime);
 				}
 			}
 		});

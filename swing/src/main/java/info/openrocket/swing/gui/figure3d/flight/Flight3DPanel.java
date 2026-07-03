@@ -4,13 +4,16 @@ import info.openrocket.core.arch.SystemInfo;
 import info.openrocket.core.document.OpenRocketDocument;
 import info.openrocket.core.document.Simulation;
 import info.openrocket.core.l10n.Translator;
+import info.openrocket.core.rocketcomponent.AxialStage;
 import info.openrocket.core.rocketcomponent.FlightConfigurationId;
+import info.openrocket.core.rocketcomponent.RocketComponent;
 import info.openrocket.core.simulation.FlightData;
 import info.openrocket.core.simulation.FlightDataBranch;
 import info.openrocket.core.simulation.FlightDataType;
 import info.openrocket.core.startup.Application;
 import info.openrocket.swing.gui.figure3d.SharedCanvasRenderScheduler;
 import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
+import info.openrocket.swing.gui.figure3d.animation.PoseProvider;
 import info.openrocket.swing.gui.figure3d.constants.RenderingConstants;
 import info.openrocket.swing.gui.figure3d.core.geometry.Mesh;
 import info.openrocket.swing.gui.figure3d.core.geometry.basic.PlaneGenerator;
@@ -22,6 +25,8 @@ import info.openrocket.swing.gui.figure3d.scene.orchestration.Scene3DOrchestrato
 import info.openrocket.swing.gui.figure3d.scene.properties.DisplaySettings;
 import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguration;
 import info.openrocket.swing.gui.figure3d.ui.GLScenePanel;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +37,9 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.awt.GridBagLayout;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 
@@ -304,7 +311,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		disableComponentSelection(scene);
 
 		FlightReplayData replayData = new FlightReplayData(data, doc.getRocket());
-		orchestrator.bindFlightPosesToRocket(replayData.getProvidersByStage(), replayData.getPrimaryProvider(),
+		GroundedPoseProviders groundedPoses = createGroundedPoseProviders(scene, replayData);
+		orchestrator.bindFlightPosesToRocket(groundedPoses.providersByStage(), groundedPoses.primaryProvider(),
 				replayData.getStartTime(), replayData.getEndTime());
 		orchestrator.setFlightBurnIntervals(toTimeline(replayData.getBurnIntervals()));
 		orchestrator.setFollowFlightCamera(true);
@@ -336,6 +344,77 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		SceneObject ground = new SceneObject(groundMesh, new Vector3f(0.0f, 0.0f, 0.0f), groundAppearance);
 		ground.setSelectable(false);
 		scene.addObject(ground);
+	}
+
+	private GroundedPoseProviders createGroundedPoseProviders(SceneView scene, FlightReplayData replayData) {
+		float groundLift = computeStartGroundLift(scene, replayData.getProvidersByStage(), replayData.getStartTime());
+		if (groundLift <= 1.0e-4f) {
+			return new GroundedPoseProviders(replayData.getProvidersByStage(), replayData.getPrimaryProvider());
+		}
+
+		Vector3f offset = new Vector3f(0.0f, groundLift, 0.0f);
+		Map<AxialStage, PoseProvider> adjusted = new LinkedHashMap<>();
+		for (Map.Entry<AxialStage, PoseProvider> entry : replayData.getProvidersByStage().entrySet()) {
+			adjusted.put(entry.getKey(), new OffsetPoseProvider(entry.getValue(), offset));
+		}
+		return new GroundedPoseProviders(adjusted, new OffsetPoseProvider(replayData.getPrimaryProvider(), offset));
+	}
+
+	private float computeStartGroundLift(SceneView scene, Map<AxialStage, PoseProvider> providersByStage,
+			double startTime) {
+		float minY = Float.POSITIVE_INFINITY;
+		Matrix4f dynamicTransform = new Matrix4f();
+		Matrix4f modelTransform = new Matrix4f();
+		Vector3f boundsMin = new Vector3f();
+		Vector3f boundsMax = new Vector3f();
+		Vector3f corner = new Vector3f();
+
+		for (SceneObject obj : scene.getObjects()) {
+			RocketComponent component = obj.getRocketComponent();
+			if (component == null) {
+				continue;
+			}
+			PoseProvider provider = providerForComponent(component, providersByStage);
+			if (provider == null) {
+				continue;
+			}
+			dynamicTransform.identity()
+					.translate(provider.getPosition(startTime))
+					.rotate(provider.getOrientation(startTime));
+			modelTransform.set(dynamicTransform).mul(obj.getModelMatrix());
+
+			Mesh mesh = obj.getMesh();
+			mesh.getBoundsMin(boundsMin);
+			mesh.getBoundsMax(boundsMax);
+			for (int x = 0; x < 2; x++) {
+				for (int y = 0; y < 2; y++) {
+					for (int z = 0; z < 2; z++) {
+						corner.set(
+								x == 0 ? boundsMin.x : boundsMax.x,
+								y == 0 ? boundsMin.y : boundsMax.y,
+								z == 0 ? boundsMin.z : boundsMax.z);
+						modelTransform.transformPosition(corner);
+						minY = Math.min(minY, corner.y);
+					}
+				}
+			}
+		}
+
+		if (!Float.isFinite(minY) || minY >= 0.0f) {
+			return 0.0f;
+		}
+		return -minY;
+	}
+
+	private PoseProvider providerForComponent(RocketComponent component, Map<AxialStage, PoseProvider> providersByStage) {
+		try {
+			AxialStage stage = component instanceof AxialStage
+					? (AxialStage) component
+					: component.getStage();
+			return providersByStage.get(stage);
+		} catch (IllegalStateException e) {
+			return null;
+		}
 	}
 
 	private float computeGroundSize(FlightData data) {
@@ -381,6 +460,50 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			timeline.add(new double[] { interval.start(), interval.end() });
 		}
 		return timeline;
+	}
+
+	private record GroundedPoseProviders(Map<AxialStage, PoseProvider> providersByStage,
+										 PoseProvider primaryProvider) {
+	}
+
+	private static final class OffsetPoseProvider implements PoseProvider {
+		private final PoseProvider delegate;
+		private final Vector3f offset;
+
+		private OffsetPoseProvider(PoseProvider delegate, Vector3f offset) {
+			this.delegate = delegate;
+			this.offset = new Vector3f(offset);
+		}
+
+		@Override
+		public Vector3f getPosition(double t) {
+			return new Vector3f(delegate.getPosition(t)).add(offset);
+		}
+
+		@Override
+		public Quaternionf getOrientation(double t) {
+			return delegate.getOrientation(t);
+		}
+
+		@Override
+		public Vector3f getLinearVelocity(double t) {
+			return delegate.getLinearVelocity(t);
+		}
+
+		@Override
+		public Vector3f getAngularVelocity(double t) {
+			return delegate.getAngularVelocity(t);
+		}
+
+		@Override
+		public double getStartTime() {
+			return delegate.getStartTime();
+		}
+
+		@Override
+		public double getEndTime() {
+			return delegate.getEndTime();
+		}
 	}
 
 	private void restoreOriginalConfiguration() {

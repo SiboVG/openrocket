@@ -48,11 +48,83 @@ class FlightPoseProviderTest {
 		addPoint(branch, 1.0, 1.0, 0.0, 0.0);
 
 		Quaternionf orientation = FlightPoseProvider.fromFlightDataBranch(branch).getOrientation(0.5);
-		Vector3f longAxis = orientation.transform(new Vector3f(0.0f, 1.0f, 0.0f));
+		Vector3f longAxis = orientation.transform(new Vector3f(-1.0f, 0.0f, 0.0f));
 
 		assertEquals(1.0f, longAxis.x, 1e-5);
 		assertEquals(0.0f, longAxis.y, 1e-5);
 		assertEquals(0.0f, longAxis.z, 1e-5);
+	}
+
+	@Test
+	void orientationThetaIsElevationFromHorizontal() {
+		FlightDataBranch branch = new FlightDataBranch("vertical",
+				FlightDataType.TYPE_TIME,
+				FlightDataType.TYPE_POSITION_X,
+				FlightDataType.TYPE_POSITION_Y,
+				FlightDataType.TYPE_ALTITUDE,
+				FlightDataType.TYPE_ORIENTATION_THETA,
+				FlightDataType.TYPE_ORIENTATION_PHI);
+		addPoint(branch, 0.0, 0.0, 0.0, 0.0);
+		addOrientation(branch, Math.PI / 2.0, 0.0);
+
+		Quaternionf orientation = FlightPoseProvider.fromFlightDataBranch(branch).getOrientation(0.0);
+		Vector3f noseAxis = orientation.transform(new Vector3f(-1.0f, 0.0f, 0.0f));
+		Vector3f aftAxis = orientation.transform(new Vector3f(1.0f, 0.0f, 0.0f));
+
+		assertEquals(0.0f, noseAxis.x, 1e-5);
+		assertEquals(1.0f, noseAxis.y, 1e-5);
+		assertEquals(0.0f, noseAxis.z, 1e-5);
+		assertEquals(0.0f, aftAxis.x, 1e-5);
+		assertEquals(-1.0f, aftAxis.y, 1e-5);
+		assertEquals(0.0f, aftAxis.z, 1e-5);
+	}
+
+	@Test
+	void orientationPhiZeroPointsNorth() {
+		FlightDataBranch branch = new FlightDataBranch("north",
+				FlightDataType.TYPE_TIME,
+				FlightDataType.TYPE_POSITION_X,
+				FlightDataType.TYPE_POSITION_Y,
+				FlightDataType.TYPE_ALTITUDE,
+				FlightDataType.TYPE_ORIENTATION_THETA,
+				FlightDataType.TYPE_ORIENTATION_PHI);
+		addPoint(branch, 0.0, 0.0, 0.0, 0.0);
+		addOrientation(branch, 0.0, 0.0);
+
+		Quaternionf orientation = FlightPoseProvider.fromFlightDataBranch(branch).getOrientation(0.0);
+		Vector3f noseAxis = orientation.transform(new Vector3f(-1.0f, 0.0f, 0.0f));
+
+		assertEquals(0.0f, noseAxis.x, 1e-5);
+		assertEquals(0.0f, noseAxis.y, 1e-5);
+		assertEquals(-1.0f, noseAxis.z, 1e-5);
+	}
+
+	@Test
+	void fallsBackToHorizontalDistanceAndDirectionWhenXYChannelsAreMissing() {
+		FlightDataBranch branch = new FlightDataBranch("xy",
+				FlightDataType.TYPE_TIME,
+				FlightDataType.TYPE_POSITION_XY,
+				FlightDataType.TYPE_POSITION_DIRECTION,
+				FlightDataType.TYPE_ALTITUDE);
+		branch.addPoint();
+		branch.setValue(FlightDataType.TYPE_TIME, 0.0);
+		branch.setValue(FlightDataType.TYPE_POSITION_XY, 2.0);
+		branch.setValue(FlightDataType.TYPE_POSITION_DIRECTION, 0.0);
+		branch.setValue(FlightDataType.TYPE_ALTITUDE, 0.0);
+		branch.addPoint();
+		branch.setValue(FlightDataType.TYPE_TIME, 1.0);
+		branch.setValue(FlightDataType.TYPE_POSITION_XY, 2.0);
+		branch.setValue(FlightDataType.TYPE_POSITION_DIRECTION, Math.PI / 2.0);
+		branch.setValue(FlightDataType.TYPE_ALTITUDE, 0.0);
+
+		FlightPoseProvider provider = FlightPoseProvider.fromFlightDataBranch(branch);
+		Vector3f north = provider.getPosition(0.0);
+		Vector3f east = provider.getPosition(1.0);
+
+		assertEquals(0.0f, north.x, 1e-5);
+		assertEquals(-2.0f * RenderingConstants.WORLD_SCALE, north.z, 1e-5);
+		assertEquals(2.0f * RenderingConstants.WORLD_SCALE, east.x, 1e-5);
+		assertEquals(0.0f, east.z, 1e-5);
 	}
 
 	private static FlightDataBranch branchWithOrientation() {

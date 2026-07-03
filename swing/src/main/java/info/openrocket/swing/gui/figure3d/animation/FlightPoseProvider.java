@@ -10,19 +10,21 @@ import java.util.List;
 
 /**
  * Samples a {@link FlightDataBranch} as an engine-space position and orientation.
- * Position uses east, north, and altitude data; orientation uses theta and phi
- * when available and otherwise follows the sampled velocity.
+ * Position uses east, north, and altitude data; orientation uses elevation and
+ * azimuth when available and otherwise follows the sampled velocity.
  */
 public final class FlightPoseProvider implements PoseProvider {
+	private static final Vector3f LOCAL_NOSE_AXIS = new Vector3f(-1, 0, 0);
+
 	private final double[] t;
 	private final double[] east, north, alt;
-	private final double[] thetaZenith;     // optional
+	private final double[] thetaElevation;  // optional
 	private final double[] phiAzimuth;      // optional
 
 	private FlightPoseProvider(double[] t, double[] east, double[] north, double[] alt,
-							   double[] thetaZenith, double[] phiAzimuth) {
+							   double[] thetaElevation, double[] phiAzimuth) {
 		this.t = t; this.east = east; this.north = north; this.alt = alt;
-		this.thetaZenith = thetaZenith; this.phiAzimuth = phiAzimuth;
+		this.thetaElevation = thetaElevation; this.phiAzimuth = phiAzimuth;
 	}
 
 	// ---------- Factory ----------
@@ -43,9 +45,9 @@ public final class FlightPoseProvider implements PoseProvider {
 				northL = new ArrayList<>(rXY.size());
 				for (int i = 0; i < Math.min(rXY.size(), dirL.size()); i++) {
 					double r = nz(rXY.get(i));
-					double th = nz(dirL.get(i)); // measured from east CCW -> engine x/z mapping below
-					eastL.add(r * Math.cos(th));
-					northL.add(r * Math.sin(th));
+					double th = nz(dirL.get(i)); // 0 = north, positive toward east
+					eastL.add(r * Math.sin(th));
+					northL.add(r * Math.cos(th));
 				}
 			}
 		}
@@ -58,8 +60,8 @@ public final class FlightPoseProvider implements PoseProvider {
 		if (altL == null) throw new IllegalArgumentException("FlightDataBranch lacks altitude channel");
 
 		// Optional orientation
-		List<Double> thetaL = branch.get(FlightDataType.TYPE_ORIENTATION_THETA); // 0 = up
-		List<Double> phiL   = branch.get(FlightDataType.TYPE_ORIENTATION_PHI);   // azimuth from east, CCW
+		List<Double> thetaL = branch.get(FlightDataType.TYPE_ORIENTATION_THETA); // elevation: 0 = horizontal, pi/2 = up
+		List<Double> phiL   = branch.get(FlightDataType.TYPE_ORIENTATION_PHI);   // 0 = north, positive toward east
 
 		// Length align (defensive)
 		int n = minLen(tL, eastL, northL, altL);
@@ -87,15 +89,17 @@ public final class FlightPoseProvider implements PoseProvider {
 
 	@Override
 	public Quaternionf getOrientation(double time) {
-		// Preferred: explicit zenith/azimuth
-		if (thetaZenith != null && phiAzimuth != null) {
-			float th = sample(t, thetaZenith, time); // 0 = up (+Y)
-			float ph = sample(t, phiAzimuth,  time); // 0 = +X (east), CCW towards +Z in OR -> -Z in engine
-			Vector3f horiz = new Vector3f((float)Math.cos(ph), 0f, (float)-Math.sin(ph)); // -Z for engine
-			Vector3f dir = new Vector3f(horiz).mul((float)Math.sin(th))
-					.add(0f, (float)Math.cos(th), 0f)
+		// Preferred: explicit elevation/azimuth
+		if (thetaElevation != null && phiAzimuth != null) {
+			float th = sample(t, thetaElevation, time);
+			float ph = sample(t, phiAzimuth,  time);
+			float horizontal = (float) Math.cos(th);
+			Vector3f dir = new Vector3f(
+					horizontal * (float) Math.sin(ph),
+					(float) Math.sin(th),
+					-horizontal * (float) Math.cos(ph))
 					.normalize();
-			return new Quaternionf().rotateTo(new Vector3f(0,1,0), dir);
+			return new Quaternionf().rotateTo(LOCAL_NOSE_AXIS, dir);
 		}
 
 		// Fallback: face the velocity (central difference of position)
@@ -105,7 +109,7 @@ public final class FlightPoseProvider implements PoseProvider {
 		Vector3f v = p1.sub(p0, new Vector3f());
 		if (v.lengthSquared() < 1e-12f) return new Quaternionf(); // no rotation
 		v.normalize();
-		return new Quaternionf().rotateTo(new Vector3f(0,1,0), v);
+		return new Quaternionf().rotateTo(LOCAL_NOSE_AXIS, v);
 	}
 
 	@Override public double getStartTime() { return t[0]; }

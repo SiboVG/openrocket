@@ -1,6 +1,9 @@
 package info.openrocket.swing.gui.figure3d.particles;
 
+import info.openrocket.core.rocketcomponent.RocketComponent;
+import info.openrocket.swing.gui.figure3d.animation.PoseProvider;
 import info.openrocket.swing.gui.figure3d.constants.RenderingConstants;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -16,11 +19,17 @@ public abstract class ParticleEmitter {
 	protected List<Particle> staticParticles;
 	protected Vector3f emitterPosition;
 	protected Vector3f direction;
+	private final Vector3f baseEmitterPosition;
+	private final Vector3f baseDirection;
+	private final Vector3f scratchPosePosition = new Vector3f();
+	private final Vector3f scratchPoseDirection = new Vector3f();
 	protected float timeSinceLastCreation;
 	protected final ParticleSettings settings;
 
 	protected boolean isStaticMode;
 	private boolean emissionEnabled = true;
+	private RocketComponent rocketComponent;
+	private PoseProvider poseProvider;
 	protected float staticCaptureTime;
 	protected float currentTime;
 	protected final long baseSeed;
@@ -37,6 +46,8 @@ public abstract class ParticleEmitter {
 		this.staticParticles = new ArrayList<>();
 		this.emitterPosition = new Vector3f(emitterPosition);
 		this.direction = new Vector3f(direction);
+		this.baseEmitterPosition = new Vector3f(emitterPosition);
+		this.baseDirection = new Vector3f(direction);
 		this.settings = settings;
 		this.timeSinceLastCreation = 0;
 		this.isStaticMode = false;
@@ -93,6 +104,42 @@ public abstract class ParticleEmitter {
 
 	public void setDirection(Vector3f direction) {
 		this.direction.set(direction);
+	}
+
+	public void setRocketComponent(RocketComponent rocketComponent) {
+		this.rocketComponent = rocketComponent;
+	}
+
+	public RocketComponent getRocketComponent() {
+		return rocketComponent;
+	}
+
+	public void setPoseProvider(PoseProvider poseProvider) {
+		this.poseProvider = poseProvider;
+	}
+
+	public PoseProvider getPoseProvider() {
+		return poseProvider;
+	}
+
+	public boolean hasPoseProvider() {
+		return poseProvider != null;
+	}
+
+	public void applyPoseAtTime(double time) {
+		if (poseProvider == null) {
+			return;
+		}
+
+		Vector3f position = poseProvider.getPosition(time);
+		Quaternionf orientation = poseProvider.getOrientation(time);
+		scratchPosePosition.set(baseEmitterPosition);
+		orientation.transform(scratchPosePosition);
+		emitterPosition.set(position).add(scratchPosePosition);
+
+		scratchPoseDirection.set(baseDirection);
+		orientation.transform(scratchPoseDirection);
+		direction.set(scratchPoseDirection).normalize();
 	}
 
 	protected float nextRandomFloat() {
