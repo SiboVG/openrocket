@@ -1,6 +1,8 @@
 package info.openrocket.swing.gui.figure3d.scene.orchestration;
 
+import info.openrocket.core.rocketcomponent.AxialStage;
 import info.openrocket.core.rocketcomponent.Rocket;
+import info.openrocket.core.rocketcomponent.RocketComponent;
 import info.openrocket.core.util.CoordinateIF;
 import info.openrocket.core.startup.Application;
 import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
@@ -23,6 +25,7 @@ import info.openrocket.swing.gui.figure3d.scene.properties.Figure3DPreferences;
 import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguration;
 import info.openrocket.swing.gui.figure3d.scene.properties.ViewportDimensions;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -44,6 +47,7 @@ public class Scene3DOrchestrator {
 
 	private long lastFrameTime;
 	private volatile PlaybackClock playbackClock = null;
+	private volatile PoseProvider flightPrimaryPoseProvider = null;
 
 	/**
 	 * Updates the orchestrator's knowledge of the window and framebuffer dimensions.
@@ -363,7 +367,49 @@ public class Scene3DOrchestrator {
 				}
 			}
 		});
+		this.flightPrimaryPoseProvider = provider;
 		this.playbackClock = new PlaybackClock(provider.getStartTime(), provider.getEndTime());
+	}
+
+	/**
+	 * Binds replay providers by stage so separated stages can follow their own
+	 * simulation branches.
+	 */
+	public void bindFlightPosesToRocket(Map<AxialStage, PoseProvider> providersByStage, PoseProvider primaryProvider,
+			double startTime, double endTime) {
+		if (providersByStage == null || providersByStage.isEmpty()) {
+			throw new IllegalArgumentException("providersByStage is empty");
+		}
+		if (primaryProvider == null) {
+			throw new IllegalArgumentException("primaryProvider is null");
+		}
+
+		enqueueGlTask(() -> {
+			for (var obj : scene.getObjects()) {
+				RocketComponent component = obj.getRocketComponent();
+				if (component == null) {
+					continue;
+				}
+				PoseProvider provider = providerForComponent(component, providersByStage);
+				if (provider != null) {
+					obj.setPoseProvider(provider);
+				}
+			}
+		});
+		this.flightPrimaryPoseProvider = primaryProvider;
+		this.playbackClock = new PlaybackClock(startTime, endTime);
+	}
+
+	private static PoseProvider providerForComponent(RocketComponent component,
+			Map<AxialStage, PoseProvider> providersByStage) {
+		try {
+			AxialStage stage = component instanceof AxialStage
+					? (AxialStage) component
+					: component.getStage();
+			return providersByStage.get(stage);
+		} catch (IllegalStateException e) {
+			return null;
+		}
 	}
 
 	public PlaybackClock getPlaybackClock() {
