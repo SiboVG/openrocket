@@ -376,28 +376,6 @@ public class Scene3DOrchestrator {
 
 	// ---------- Simulation control helpers ----------
 
-	/** Bind a pose to all rocket component objects and initialize the playback clock. */
-	public void bindFlightPoseToRocket(PoseProvider provider) {
-		if (provider == null) {
-			throw new IllegalArgumentException("pose provider null");
-		}
-		enqueueGlTask(() -> {
-			for (var obj : scene.getObjects()) {
-				if (obj.getRocketComponent() != null) {
-					obj.setPoseProvider(provider);
-				}
-			}
-			for (var emitter : scene.getParticleEmitters()) {
-				if (emitter.getRocketComponent() != null) {
-					emitter.setPoseProvider(provider);
-					emitter.applyPoseAtTime(provider.getStartTime());
-				}
-			}
-		});
-		this.flightPrimaryPoseProvider = provider;
-		this.playbackClock = new PlaybackClock(provider.getStartTime(), provider.getEndTime());
-	}
-
 	/**
 	 * Binds replay providers by stage so separated stages can follow their own
 	 * simulation branches.
