@@ -1,6 +1,7 @@
 package info.openrocket.swing.gui.figure3d.flight;
 
 import info.openrocket.core.rocketcomponent.AxialStage;
+import info.openrocket.core.rocketcomponent.BodyTube;
 import info.openrocket.core.rocketcomponent.Rocket;
 import info.openrocket.core.simulation.FlightData;
 import info.openrocket.core.simulation.FlightDataBranch;
@@ -71,6 +72,28 @@ class FlightReplayDataTest {
 		assertEquals(2, events.size());
 		assertEquals(FlightEvent.Type.LAUNCH, events.get(0).getType());
 		assertEquals(FlightEvent.Type.APOGEE, events.get(1).getType());
+	}
+
+	@Test
+	void extractsAndMergesBurnIntervalsByStage() {
+		Rocket rocket = new Rocket();
+		AxialStage stage = addStage(rocket);
+		BodyTube motorMount = new BodyTube();
+		stage.addChild(motorMount);
+
+		FlightDataBranch primary = branch("primary", 0.0, 10.0, 0.0, 10.0);
+		primary.addEvent(new FlightEvent(FlightEvent.Type.IGNITION, 1.0, motorMount));
+		primary.addEvent(new FlightEvent(FlightEvent.Type.IGNITION, 1.5, motorMount));
+		primary.addEvent(new FlightEvent(FlightEvent.Type.BURNOUT, 2.0, motorMount));
+		primary.addEvent(new FlightEvent(FlightEvent.Type.BURNOUT, 3.0, motorMount));
+
+		FlightReplayData replay = new FlightReplayData(new FlightData(primary), rocket);
+
+		List<FlightReplayData.BurnInterval> stageIntervals = replay.getBurnIntervalsByStage().get(stage);
+		assertEquals(1, stageIntervals.size());
+		assertEquals(1.0, stageIntervals.get(0).start());
+		assertEquals(3.0, stageIntervals.get(0).end());
+		assertEquals(stageIntervals, replay.getBurnIntervals());
 	}
 
 	private static AxialStage addStage(Rocket rocket) {

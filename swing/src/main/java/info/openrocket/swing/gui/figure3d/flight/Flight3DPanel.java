@@ -283,11 +283,19 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		config.getDisplay().setMode(DisplaySettings.RenderMode.FINISHED);
 		config.getVisualEffects().setCaretsVisible(false);
 		config.getVisualEffects().setRotateRocketOnDrag(false);
+		config.getVisualEffects().setParticleEffectsEnabled(true);
+		config.getVisualEffects().setFlameParticlesEnabled(true);
+		config.getVisualEffects().setSmokeParticlesEnabled(true);
+		config.getVisualEffects().setSparkParticlesEnabled(false);
+		config.getVisualEffects().setStaticParticles(false);
+		orchestrator.rebuildRocketScene(false);
+		scene = orchestrator.getScene();
 		disableComponentSelection(scene);
 
 		FlightReplayData replayData = new FlightReplayData(data, doc.getRocket());
 		orchestrator.bindFlightPosesToRocket(replayData.getProvidersByStage(), replayData.getPrimaryProvider(),
 				replayData.getStartTime(), replayData.getEndTime());
+		orchestrator.setFlightBurnIntervals(toTimeline(replayData.getBurnIntervals()));
 		orchestrator.setFollowFlightCamera(true);
 		PlaybackClock clock = orchestrator.getPlaybackClock();
 		if (clock != null) {
@@ -306,6 +314,14 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			obj.setSelected(false);
 			obj.setSelectable(false);
 		}
+	}
+
+	private List<double[]> toTimeline(List<FlightReplayData.BurnInterval> intervals) {
+		List<double[]> timeline = new java.util.ArrayList<>(intervals.size());
+		for (FlightReplayData.BurnInterval interval : intervals) {
+			timeline.add(new double[] { interval.start(), interval.end() });
+		}
+		return timeline;
 	}
 
 	private void restoreOriginalConfiguration() {

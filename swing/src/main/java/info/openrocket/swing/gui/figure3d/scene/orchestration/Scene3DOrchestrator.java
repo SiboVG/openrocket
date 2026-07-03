@@ -25,6 +25,8 @@ import info.openrocket.swing.gui.figure3d.scene.properties.Figure3DPreferences;
 import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguration;
 import info.openrocket.swing.gui.figure3d.scene.properties.ViewportDimensions;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -49,6 +51,7 @@ public class Scene3DOrchestrator {
 	private volatile PlaybackClock playbackClock = null;
 	private volatile PoseProvider flightPrimaryPoseProvider = null;
 	private volatile boolean followFlightCamera = false;
+	private volatile List<double[]> flightBurnIntervals = null;
 
 	/**
 	 * Updates the orchestrator's knowledge of the window and framebuffer dimensions.
@@ -165,7 +168,6 @@ public class Scene3DOrchestrator {
 
 		// Update camera and scene
 		cameraController.update();
-		scene.updateParticles(deltaTime);
 
 		// --- Simulation playback (if bound) ---
 		if (playbackClock != null) {
@@ -180,7 +182,10 @@ public class Scene3DOrchestrator {
 			if (followFlightCamera && primaryProvider != null) {
 				cameraController.getCamera().setCenterOfInterest(primaryProvider.getPosition(t));
 			}
+			updateFlightParticleEmission(t);
 		}
+
+		scene.updateParticles(deltaTime);
 	}
 
 	/**
@@ -414,6 +419,38 @@ public class Scene3DOrchestrator {
 			return providersByStage.get(stage);
 		} catch (IllegalStateException e) {
 			return null;
+		}
+	}
+
+	public void setFlightBurnIntervals(List<double[]> burnIntervals) {
+		if (burnIntervals == null) {
+			this.flightBurnIntervals = null;
+			return;
+		}
+		List<double[]> copy = new ArrayList<>(burnIntervals.size());
+		for (double[] interval : burnIntervals) {
+			if (interval == null || interval.length < 2) {
+				continue;
+			}
+			copy.add(new double[] { interval[0], interval[1] });
+		}
+		this.flightBurnIntervals = List.copyOf(copy);
+	}
+
+	private void updateFlightParticleEmission(double time) {
+		List<double[]> intervals = flightBurnIntervals;
+		if (intervals == null) {
+			return;
+		}
+		boolean active = false;
+		for (double[] interval : intervals) {
+			if (time >= interval[0] && time <= interval[1]) {
+				active = true;
+				break;
+			}
+		}
+		for (var emitter : scene.getParticleEmitters()) {
+			emitter.setEmissionEnabled(active);
 		}
 	}
 

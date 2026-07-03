@@ -20,6 +20,7 @@ public abstract class ParticleEmitter {
 	protected final ParticleSettings settings;
 
 	protected boolean isStaticMode;
+	private boolean emissionEnabled = true;
 	protected float staticCaptureTime;
 	protected float currentTime;
 	protected final long baseSeed;
@@ -58,6 +59,11 @@ public abstract class ParticleEmitter {
 		}
 
 		updateParticleList(deltaTime);
+
+		if (!emissionEnabled) {
+			timeSinceLastCreation = 0.0f;
+			return;
+		}
 
 		// Create new particles
 		emitPendingParticles(deltaTime);
@@ -120,6 +126,14 @@ public abstract class ParticleEmitter {
 
 	public boolean isStaticMode() {
 		return isStaticMode;
+	}
+
+	public void setEmissionEnabled(boolean emissionEnabled) {
+		this.emissionEnabled = emissionEnabled;
+	}
+
+	public boolean isEmissionEnabled() {
+		return emissionEnabled;
 	}
 
 	public float getStaticCaptureTime() {
