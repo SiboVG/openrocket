@@ -6,15 +6,23 @@ import info.openrocket.core.document.Simulation;
 import info.openrocket.core.l10n.Translator;
 import info.openrocket.core.rocketcomponent.FlightConfigurationId;
 import info.openrocket.core.simulation.FlightData;
+import info.openrocket.core.simulation.FlightDataBranch;
+import info.openrocket.core.simulation.FlightDataType;
 import info.openrocket.core.startup.Application;
 import info.openrocket.swing.gui.figure3d.SharedCanvasRenderScheduler;
 import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
+import info.openrocket.swing.gui.figure3d.constants.RenderingConstants;
+import info.openrocket.swing.gui.figure3d.core.geometry.Mesh;
+import info.openrocket.swing.gui.figure3d.core.geometry.basic.PlaneGenerator;
+import info.openrocket.swing.gui.figure3d.materials.Appearance3D;
+import info.openrocket.swing.gui.figure3d.rendering.backgrounds.GradientBackground;
 import info.openrocket.swing.gui.figure3d.scene.core.SceneObject;
 import info.openrocket.swing.gui.figure3d.scene.core.SceneView;
 import info.openrocket.swing.gui.figure3d.scene.orchestration.Scene3DOrchestrator;
 import info.openrocket.swing.gui.figure3d.scene.properties.DisplaySettings;
 import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguration;
 import info.openrocket.swing.gui.figure3d.ui.GLScenePanel;
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +45,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private static final SharedCanvasRenderScheduler RENDER_SCHEDULER = SharedCanvasRenderScheduler.getInstance();
 	private static final long RENDER_SHUTDOWN_TIMEOUT_MS = 2_000;
 	private static final int STARTUP_RENDER_DELAY_MS = 120;
+	private static final float MIN_GROUND_SIZE = 500.0f;
 
 	private OpenRocketDocument document;
 	private Simulation simulation;
@@ -290,6 +299,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		config.getVisualEffects().setStaticParticles(false);
 		orchestrator.rebuildRocketScene(false);
 		scene = orchestrator.getScene();
+		addGroundReference(scene, data);
+		applyFlightBackground(scene);
 		disableComponentSelection(scene);
 
 		FlightReplayData replayData = new FlightReplayData(data, doc.getRocket());
@@ -314,6 +325,54 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			obj.setSelected(false);
 			obj.setSelectable(false);
 		}
+	}
+
+	private void addGroundReference(SceneView scene, FlightData data) {
+		float size = computeGroundSize(data);
+		Mesh groundMesh = PlaneGenerator.create(size, size, 1.0f, 1.0f);
+		Appearance3D groundAppearance = new Appearance3D(new Vector3f(0.22f, 0.30f, 0.20f));
+		groundAppearance.setUnlit(true);
+		groundAppearance.setShine(0.05f);
+		SceneObject ground = new SceneObject(groundMesh, new Vector3f(0.0f, 0.0f, 0.0f), groundAppearance);
+		ground.setSelectable(false);
+		scene.addObject(ground);
+	}
+
+	private float computeGroundSize(FlightData data) {
+		double maxHorizontalMeters = 0.0;
+		for (FlightDataBranch branch : data.getBranches()) {
+			List<Double> east = branch.get(FlightDataType.TYPE_POSITION_X);
+			List<Double> north = branch.get(FlightDataType.TYPE_POSITION_Y);
+			if (east != null && north != null) {
+				int count = Math.min(east.size(), north.size());
+				for (int i = 0; i < count; i++) {
+					double x = valueOrZero(east.get(i));
+					double y = valueOrZero(north.get(i));
+					maxHorizontalMeters = Math.max(maxHorizontalMeters, Math.hypot(x, y));
+				}
+				continue;
+			}
+			List<Double> horizontal = branch.get(FlightDataType.TYPE_POSITION_XY);
+			if (horizontal != null) {
+				for (Double value : horizontal) {
+					maxHorizontalMeters = Math.max(maxHorizontalMeters, valueOrZero(value));
+				}
+			}
+		}
+		return Math.max(MIN_GROUND_SIZE, (float) (maxHorizontalMeters * RenderingConstants.WORLD_SCALE * 3.0));
+	}
+
+	private static double valueOrZero(Double value) {
+		if (value == null || Double.isNaN(value) || Double.isInfinite(value)) {
+			return 0.0;
+		}
+		return value;
+	}
+
+	private void applyFlightBackground(SceneView scene) {
+		scene.setBackground(new GradientBackground(
+				new Vector3f(0.70f, 0.82f, 0.96f),
+				new Vector3f(0.78f, 0.88f, 0.74f)));
 	}
 
 	private List<double[]> toTimeline(List<FlightReplayData.BurnInterval> intervals) {
