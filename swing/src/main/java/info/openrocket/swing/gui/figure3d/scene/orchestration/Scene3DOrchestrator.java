@@ -48,6 +48,7 @@ public class Scene3DOrchestrator {
 	private long lastFrameTime;
 	private volatile PlaybackClock playbackClock = null;
 	private volatile PoseProvider flightPrimaryPoseProvider = null;
+	private volatile boolean followFlightCamera = false;
 
 	/**
 	 * Updates the orchestrator's knowledge of the window and framebuffer dimensions.
@@ -174,6 +175,10 @@ public class Scene3DOrchestrator {
 				if (obj.hasPoseProvider()) {
 					obj.applyPoseAtTime(t);
 				}
+			}
+			PoseProvider primaryProvider = flightPrimaryPoseProvider;
+			if (followFlightCamera && primaryProvider != null) {
+				cameraController.getCamera().setCenterOfInterest(primaryProvider.getPosition(t));
 			}
 		}
 	}
@@ -414,5 +419,9 @@ public class Scene3DOrchestrator {
 
 	public PlaybackClock getPlaybackClock() {
 		return playbackClock;
+	}
+
+	public void setFollowFlightCamera(boolean followFlightCamera) {
+		this.followFlightCamera = followFlightCamera;
 	}
 }
