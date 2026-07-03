@@ -347,7 +347,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	}
 
 	private GroundedPoseProviders createGroundedPoseProviders(SceneView scene, FlightReplayData replayData) {
-		float groundLift = computeStartGroundLift(scene, replayData.getProvidersByStage(), replayData.getStartTime());
+		float groundLift = computeStartGroundLift(scene, replayData.getProvidersByStage(),
+				replayData.getPrimaryProvider(), replayData.getStartTime());
 		if (groundLift <= 1.0e-4f) {
 			return new GroundedPoseProviders(replayData.getProvidersByStage(), replayData.getPrimaryProvider());
 		}
@@ -361,49 +362,67 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	}
 
 	private float computeStartGroundLift(SceneView scene, Map<AxialStage, PoseProvider> providersByStage,
-			double startTime) {
+			PoseProvider primaryProvider, double startTime) {
 		float minY = Float.POSITIVE_INFINITY;
+		int contributingObjects = 0;
 		Matrix4f dynamicTransform = new Matrix4f();
 		Matrix4f modelTransform = new Matrix4f();
 		Vector3f boundsMin = new Vector3f();
 		Vector3f boundsMax = new Vector3f();
-		Vector3f corner = new Vector3f();
 
 		for (SceneObject obj : scene.getObjects()) {
 			RocketComponent component = obj.getRocketComponent();
 			if (component == null) {
 				continue;
 			}
+			Mesh mesh = obj.getMesh();
+			if (mesh == null) {
+				continue;
+			}
+			// Fall back to the primary (sustainer) trajectory when a component's stage has no
+			// dedicated provider, so the lift is always measured from real geometry and never
+			// silently collapses to zero (which would leave the rocket sunk into the ground).
 			PoseProvider provider = providerForComponent(component, providersByStage);
 			if (provider == null) {
-				continue;
+				provider = primaryProvider;
 			}
 			dynamicTransform.identity()
 					.translate(provider.getPosition(startTime))
 					.rotate(provider.getOrientation(startTime));
 			modelTransform.set(dynamicTransform).mul(obj.getModelMatrix());
 
-			Mesh mesh = obj.getMesh();
 			mesh.getBoundsMin(boundsMin);
 			mesh.getBoundsMax(boundsMax);
-			for (int x = 0; x < 2; x++) {
-				for (int y = 0; y < 2; y++) {
-					for (int z = 0; z < 2; z++) {
-						corner.set(
-								x == 0 ? boundsMin.x : boundsMax.x,
-								y == 0 ? boundsMin.y : boundsMax.y,
-								z == 0 ? boundsMin.z : boundsMax.z);
-						modelTransform.transformPosition(corner);
-						minY = Math.min(minY, corner.y);
-					}
+			minY = Math.min(minY, lowestTransformedCornerY(boundsMin, boundsMax, modelTransform));
+			contributingObjects++;
+		}
+
+		float groundLift = (!Float.isFinite(minY) || minY >= 0.0f) ? 0.0f : -minY;
+		log.info("Flight replay ground seating: {} rocket object(s), lowest Y {}, applying lift {}",
+				contributingObjects, Float.isFinite(minY) ? minY : Float.NaN, groundLift);
+		return groundLift;
+	}
+
+	/**
+	 * Returns the minimum world-space Y of a mesh's axis-aligned bounds after the given
+	 * transform. Pure geometry (no GL state), so it is unit-testable in isolation.
+	 */
+	static float lowestTransformedCornerY(Vector3f boundsMin, Vector3f boundsMax, Matrix4f transform) {
+		float minY = Float.POSITIVE_INFINITY;
+		Vector3f corner = new Vector3f();
+		for (int x = 0; x < 2; x++) {
+			for (int y = 0; y < 2; y++) {
+				for (int z = 0; z < 2; z++) {
+					corner.set(
+							x == 0 ? boundsMin.x : boundsMax.x,
+							y == 0 ? boundsMin.y : boundsMax.y,
+							z == 0 ? boundsMin.z : boundsMax.z);
+					transform.transformPosition(corner);
+					minY = Math.min(minY, corner.y);
 				}
 			}
 		}
-
-		if (!Float.isFinite(minY) || minY >= 0.0f) {
-			return 0.0f;
-		}
-		return -minY;
+		return minY;
 	}
 
 	private PoseProvider providerForComponent(RocketComponent component, Map<AxialStage, PoseProvider> providersByStage) {
