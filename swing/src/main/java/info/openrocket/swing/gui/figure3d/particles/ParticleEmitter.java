@@ -23,6 +23,8 @@ public abstract class ParticleEmitter {
 	private final Vector3f baseDirection;
 	private final Vector3f scratchPosePosition = new Vector3f();
 	private final Vector3f scratchPoseDirection = new Vector3f();
+	private final Vector3f inheritedVelocity = new Vector3f();
+	private float velocityInheritanceFactor = 1.0f;
 	protected float timeSinceLastCreation;
 	protected final ParticleSettings settings;
 
@@ -140,6 +142,27 @@ public abstract class ParticleEmitter {
 		scratchPoseDirection.set(baseDirection);
 		orientation.transform(scratchPoseDirection);
 		direction.set(scratchPoseDirection).normalize();
+
+		Vector3f velocity = poseProvider.getLinearVelocity(time);
+		if (velocity != null) {
+			inheritedVelocity.set(velocity).mul(velocityInheritanceFactor);
+		} else {
+			inheritedVelocity.zero();
+		}
+	}
+
+	/**
+	 * Sets how much of the emitter's world velocity newly spawned particles inherit.
+	 */
+	public void setVelocityInheritanceFactor(float factor) {
+		this.velocityInheritanceFactor = factor;
+	}
+
+	/**
+	 * Adds the inherited emitter velocity to a particle's initial velocity.
+	 */
+	protected void addInheritedVelocity(Vector3f velocity) {
+		velocity.add(inheritedVelocity);
 	}
 
 	protected float nextRandomFloat() {

@@ -220,6 +220,7 @@ public class FlameEmitter extends ParticleEmitter {
 			nextRandomSignedFloat() * 2.0f * flickerIntensity
 		);
 
+		addInheritedVelocity(velocity);
 		particles.add(new Particle(position, velocity, color, size, life, orientation, angularVelocity));
 	}
 }

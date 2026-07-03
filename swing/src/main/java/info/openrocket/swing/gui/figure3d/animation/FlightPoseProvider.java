@@ -112,6 +112,23 @@ public final class FlightPoseProvider implements PoseProvider {
 		return new Quaternionf().rotateTo(LOCAL_NOSE_AXIS, v);
 	}
 
+	@Override
+	public Vector3f getLinearVelocity(double time) {
+		// Central finite difference of world position. The sample interval is clamped
+		// to the flight's time range so the divisor matches the actual span used, which
+		// yields a finite (and zero) velocity right at the start and end of the flight.
+		final double eps = 0.02; // 20 ms
+		double lo = Math.max(getStartTime(), time - eps);
+		double hi = Math.min(getEndTime(), time + eps);
+		double span = hi - lo;
+		if (span <= 1e-9) {
+			return new Vector3f();
+		}
+		Vector3f p0 = getPosition(lo);
+		Vector3f p1 = getPosition(hi);
+		return p1.sub(p0, p1).div((float) span);
+	}
+
 	@Override public double getStartTime() { return t[0]; }
 	@Override public double getEndTime()   { return t[t.length - 1]; }
 

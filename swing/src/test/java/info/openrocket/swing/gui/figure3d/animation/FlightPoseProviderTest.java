@@ -127,6 +127,29 @@ class FlightPoseProviderTest {
 		assertEquals(0.0f, east.z, 1e-5);
 	}
 
+	@Test
+	void linearVelocityMatchesPositionSlope() {
+		// Position rises from alt 0 at t=0 to alt 10 at t=10, i.e. 1 m/s upward = WORLD_SCALE u/s.
+		FlightPoseProvider provider = FlightPoseProvider.fromFlightDataBranch(branchWithOrientation());
+
+		Vector3f velocity = provider.getLinearVelocity(5.0);
+
+		assertEquals(0.2 * RenderingConstants.WORLD_SCALE, velocity.x, 1e-3);
+		assertEquals(0.2 * RenderingConstants.WORLD_SCALE, velocity.y, 1e-3);
+		assertEquals(-0.4 * RenderingConstants.WORLD_SCALE, velocity.z, 1e-3);
+	}
+
+	@Test
+	void linearVelocityIsFiniteAtBranchEnds() {
+		FlightPoseProvider provider = FlightPoseProvider.fromFlightDataBranch(branchWithOrientation());
+
+		Vector3f atStart = provider.getLinearVelocity(provider.getStartTime());
+		Vector3f atEnd = provider.getLinearVelocity(provider.getEndTime());
+
+		assertEquals(0.2 * RenderingConstants.WORLD_SCALE, atStart.y, 1e-3);
+		assertEquals(0.2 * RenderingConstants.WORLD_SCALE, atEnd.y, 1e-3);
+	}
+
 	private static FlightDataBranch branchWithOrientation() {
 		FlightDataBranch branch = new FlightDataBranch("pose",
 				FlightDataType.TYPE_TIME,

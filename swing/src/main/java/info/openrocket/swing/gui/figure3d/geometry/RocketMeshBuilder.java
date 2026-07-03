@@ -419,6 +419,8 @@ public final class RocketMeshBuilder {
 					SmokeSettings.medium(config, settings.getSmokeColor(),
 							settings.getSmokeOpacity(), settings.getExhaustScale()));
 			smokeEmitter.setRocketComponent(mountComponent);
+			// Smoke inherits only part of the rocket's velocity so the trail lags behind slightly.
+			smokeEmitter.setVelocityInheritanceFactor(0.6f);
 			if (time != null) {
 				smokeEmitter.captureStaticParticles(time);
 			}

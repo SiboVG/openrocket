@@ -79,6 +79,7 @@ public class SparkEmitter extends ParticleEmitter {
 		float b = settings.minColor.z + colorFactor * (settings.maxColor.z - settings.minColor.z);
 		Vector3f color = new Vector3f(r, g, b);
 
+		addInheritedVelocity(velocity);
 		particles.add(new Particle(position, velocity, color, size, life));
 	}
 

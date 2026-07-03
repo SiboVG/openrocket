@@ -110,6 +110,7 @@ public class SmokeEmitter extends ParticleEmitter {
 			nextRandomSignedFloat() * 0.3f  // Z axis rotation speed
 		);
 
+		addInheritedVelocity(velocity);
 		particles.add(new Particle(position, velocity, color, size, life, orientation, angularVelocity));
 	}
 }
