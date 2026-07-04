@@ -65,7 +65,7 @@ class FlightMetricsPanel extends JPanel {
 		}
 
 		simulationLabel.setText(orEmpty(simulation.getName()));
-		configLabel.setText(orEmpty(simulation.getSimulatedConfigurationDescription()));
+		configLabel.setText(orEmpty(configurationName(simulation)));
 
 		FlightData data = simulation.getSimulatedData();
 		FlightDataBranch branch = data.getBranch(0);
@@ -143,6 +143,14 @@ class FlightMetricsPanel extends JPanel {
 		label.setForeground(new Color(0xE8EAED));
 		label.setFont(new Font(Font.MONOSPACED, Font.BOLD, 12));
 		return label;
+	}
+
+	private static String configurationName(Simulation simulation) {
+		try {
+			return simulation.getActiveConfiguration().getName();
+		} catch (RuntimeException e) {
+			return null;
+		}
 	}
 
 	private static String orEmpty(String value) {
