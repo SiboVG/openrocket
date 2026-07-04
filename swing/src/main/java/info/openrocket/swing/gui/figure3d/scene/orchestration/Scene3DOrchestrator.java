@@ -395,25 +395,32 @@ public class Scene3DOrchestrator {
 				if (component == null) {
 					continue;
 				}
-				PoseProvider provider = providerForComponent(component, providersByStage);
-				if (provider != null) {
-					obj.setPoseProvider(provider);
-				}
+				// Fall back to the primary (sustainer) trajectory when a component's stage has
+				// no dedicated branch, so every rocket object flies with the rocket instead of
+				// being stranded at the launch pad while the follow camera chases the rocket up.
+				obj.setPoseProvider(providerOrPrimary(component, providersByStage, primaryProvider));
 			}
+			int emitterCount = 0;
 			for (var emitter : scene.getParticleEmitters()) {
 				RocketComponent component = emitter.getRocketComponent();
-				if (component == null) {
-					continue;
-				}
-				PoseProvider provider = providerForComponent(component, providersByStage);
-				if (provider != null) {
-					emitter.setPoseProvider(provider);
-					emitter.applyPoseAtTime(startTime);
-				}
+				PoseProvider provider = component != null
+						? providerOrPrimary(component, providersByStage, primaryProvider)
+						: primaryProvider;
+				emitter.setPoseProvider(provider);
+				emitter.applyPoseAtTime(startTime);
+				emitterCount++;
 			}
+			log.info("Flight replay bound poses: {} rocket object(s), {} particle emitter(s) attached to a trajectory",
+					scene.getObjects().size(), emitterCount);
 		});
 		this.flightPrimaryPoseProvider = primaryProvider;
 		this.playbackClock = new PlaybackClock(startTime, endTime);
+	}
+
+	private static PoseProvider providerOrPrimary(RocketComponent component,
+			Map<AxialStage, PoseProvider> providersByStage, PoseProvider primaryProvider) {
+		PoseProvider provider = providerForComponent(component, providersByStage);
+		return provider != null ? provider : primaryProvider;
 	}
 
 	private static PoseProvider providerForComponent(RocketComponent component,
@@ -463,6 +470,12 @@ public class Scene3DOrchestrator {
 		for (var emitter : scene.getParticleEmitters()) {
 			AxialStage stage = stageForComponent(emitter.getRocketComponent());
 			List<double[]> intervals = stage != null ? byStage.get(stage) : null;
+			if (intervals == null) {
+				// Burn window unknown for this emitter's stage: keep it emitting rather than
+				// forcing it dark, so a mapping gap never leaves the rocket with no exhaust.
+				emitter.setEmissionEnabled(true);
+				continue;
+			}
 			emitter.setEmissionEnabled(isWithinAnyInterval(intervals, time));
 		}
 	}
