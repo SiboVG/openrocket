@@ -2,6 +2,7 @@ package info.openrocket.swing.gui.figure3d.scene.controllers;
 
 import info.openrocket.core.rocketcomponent.Rocket;
 import info.openrocket.swing.gui.figure3d.scene.graph.Camera;
+import org.joml.Vector3f;
 
 import java.util.function.Consumer;
 
@@ -41,6 +42,13 @@ public interface CameraControls {
 		return (float) Math.max(0.25, 1.0 / zoomScale);
 	}
 	boolean isZoomFitting();
+
+	/** Rocket geometric center in world coordinates, or null if empty. */
+	Vector3f computeRocketCenter();
+
+	/** Rocket model-space bounding-box size, or null if empty. */
+	Vector3f computeRocketSize();
+
 	Camera getCamera();
 	void addCameraChangeListener(Consumer<Camera> listener);
 	void removeCameraChangeListener(Consumer<Camera> listener);

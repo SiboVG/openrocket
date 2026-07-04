@@ -148,6 +148,41 @@ public class CameraController implements CameraControls {
 	}
 
 	@Override
+	public Vector3f computeRocketCenter() {
+		if (rocket == null) {
+			return null;
+		}
+		BoundingBox bounds = rocket.getBoundingBox();
+		if (bounds == null || bounds.isEmpty()) {
+			return null;
+		}
+		CoordinateIF minBounds = bounds.min.multiply(RenderingConstants.WORLD_SCALE);
+		CoordinateIF maxBounds = bounds.max.multiply(RenderingConstants.WORLD_SCALE);
+		Vector3f localCenter = new Vector3f(
+				(float) ((minBounds.getX() + maxBounds.getX()) * 0.5),
+				(float) ((minBounds.getY() + maxBounds.getY()) * 0.5),
+				(float) ((minBounds.getZ() + maxBounds.getZ()) * 0.5));
+		return scene.transformRocketPoint(localCenter, new Vector3f());
+	}
+
+	@Override
+	public Vector3f computeRocketSize() {
+		if (rocket == null) {
+			return null;
+		}
+		BoundingBox bounds = rocket.getBoundingBox();
+		if (bounds == null || bounds.isEmpty()) {
+			return null;
+		}
+		CoordinateIF minBounds = bounds.min.multiply(RenderingConstants.WORLD_SCALE);
+		CoordinateIF maxBounds = bounds.max.multiply(RenderingConstants.WORLD_SCALE);
+		return new Vector3f(
+				(float) (maxBounds.getX() - minBounds.getX()),
+				(float) (maxBounds.getY() - minBounds.getY()),
+				(float) (maxBounds.getZ() - minBounds.getZ()));
+	}
+
+	@Override
 	public void resetView() {
 		camera.setSideView();
 		camera.resetViewOffset();
