@@ -87,6 +87,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private final List<TrailPath> trailPaths = new ArrayList<>();
 	private final List<SceneObject> dynamicTrails = new ArrayList<>();
 	private SceneObject positionMarker;
+	private FlightOrientationGizmo orientationGizmo;
 	private volatile PlaybackClock playbackClock;
 	private volatile Scene3DOrchestrator activeOrchestrator;
 	private float trailRadius = 1.0f;
@@ -146,7 +147,11 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		Scene3DOrchestrator orchestrator = activeOrchestrator;
 		if (orchestrator != null) {
 			orchestrator.setFlightFrameListener(null);
+			if (orchestrator.getRenderer() != null) {
+				orchestrator.getRenderer().setFrameOverlay(null);
+			}
 		}
+		orientationGizmo = null;
 		stopRenderLoop();
 		if (glPanel != null) {
 			RENDER_SCHEDULER.awaitQuiescence(RENDER_SHUTDOWN_TIMEOUT_MS);
@@ -381,6 +386,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		this.activeOrchestrator = orchestrator;
 		this.lastRebuildFraction = -1.0;
 		orchestrator.setFlightFrameListener(this::onFlightFrame);
+
+		orientationGizmo = new FlightOrientationGizmo();
+		orchestrator.getRenderer().setFrameOverlay(orientationGizmo);
 
 		BiConsumer<PlaybackClock, FlightReplayData> callback = replayReadyCallback;
 		if (callback != null && clock != null) {
