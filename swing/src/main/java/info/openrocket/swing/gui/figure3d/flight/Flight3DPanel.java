@@ -18,6 +18,7 @@ import info.openrocket.swing.gui.figure3d.constants.GeometryConstants;
 import info.openrocket.swing.gui.figure3d.constants.RenderingConstants;
 import info.openrocket.swing.gui.figure3d.core.geometry.Mesh;
 import info.openrocket.swing.gui.figure3d.core.geometry.basic.PlaneGenerator;
+import info.openrocket.swing.gui.figure3d.geometry.basic.TrajectoryTrailGenerator;
 import info.openrocket.swing.gui.figure3d.materials.Appearance3D;
 import info.openrocket.swing.gui.figure3d.rendering.backgrounds.GradientBackground;
 import info.openrocket.swing.gui.figure3d.scene.controllers.CameraControls;
@@ -40,9 +41,12 @@ import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 
@@ -334,6 +338,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		orchestrator.setFlightRocketCenterOffset(orchestrator.getCameraController().computeRocketCenter());
 		computeTrajectoryBounds(orchestrator.getCameraController(), groundedPoses,
 				replayData.getStartTime(), replayData.getEndTime());
+		addTrajectoryTrails(scene, groundedPoses, replayData.getStartTime(), replayData.getEndTime());
 		applyCameraMode(orchestrator, cameraMode);
 
 		PlaybackClock clock = orchestrator.getPlaybackClock();
@@ -417,6 +422,41 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		for (SceneObject obj : scene.getObjects()) {
 			obj.setSelected(false);
 			obj.setSelectable(false);
+		}
+	}
+
+	/**
+	 * Adds a visible tube along each flight path. At the whole-flight zoom the rocket itself is
+	 * only a few pixels, so the trail is what makes the trajectory legible.
+	 */
+	private void addTrajectoryTrails(SceneView scene, GroundedPoseProviders poses, double startTime, double endTime) {
+		Vector3f dimensions = trajectoryDimensions;
+		if (dimensions == null) {
+			return;
+		}
+		float maxExtent = Math.max(dimensions.x, Math.max(dimensions.y, dimensions.z));
+		float radius = Math.max(maxExtent * 0.003f, 1.0f);
+
+		Set<PoseProvider> uniqueProviders = Collections.newSetFromMap(new IdentityHashMap<>());
+		uniqueProviders.add(poses.primaryProvider());
+		uniqueProviders.addAll(poses.providersByStage().values());
+
+		for (PoseProvider provider : uniqueProviders) {
+			List<Vector3f> path = new ArrayList<>();
+			int samples = 240;
+			for (int i = 0; i <= samples; i++) {
+				double t = startTime + (endTime - startTime) * i / samples;
+				path.add(provider.getPosition(t));
+			}
+			Mesh trailMesh = TrajectoryTrailGenerator.create(path, radius, 8);
+			if (trailMesh.getVertices().isEmpty()) {
+				continue;
+			}
+			Appearance3D appearance = new Appearance3D(new Vector3f(1.0f, 0.55f, 0.15f));
+			appearance.setUnlit(true);
+			SceneObject trailObject = new SceneObject(trailMesh, new Vector3f(0.0f, 0.0f, 0.0f), appearance);
+			trailObject.setSelectable(false);
+			scene.addObject(trailObject);
 		}
 	}
 
