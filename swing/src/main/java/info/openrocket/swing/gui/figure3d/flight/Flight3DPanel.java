@@ -18,6 +18,7 @@ import info.openrocket.swing.gui.figure3d.constants.GeometryConstants;
 import info.openrocket.swing.gui.figure3d.constants.RenderingConstants;
 import info.openrocket.swing.gui.figure3d.core.geometry.Mesh;
 import info.openrocket.swing.gui.figure3d.core.geometry.basic.PlaneGenerator;
+import info.openrocket.swing.gui.figure3d.geometry.basic.SphereGenerator;
 import info.openrocket.swing.gui.figure3d.geometry.basic.TrajectoryTrailGenerator;
 import info.openrocket.swing.gui.figure3d.materials.Appearance3D;
 import info.openrocket.swing.gui.figure3d.rendering.backgrounds.GradientBackground;
@@ -81,7 +82,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private static final Vector3f BOOSTER_FUTURE_COLOR = new Vector3f(0.40f, 0.24f, 0.12f);
 	private static final Vector3f BOOSTER_PAST_COLOR = new Vector3f(1.0f, 0.55f, 0.18f);
 	private final List<TrailPath> trailPaths = new ArrayList<>();
+	private final List<SceneObject> staticTrailObjects = new ArrayList<>();
 	private final List<SceneObject> dynamicPastTrails = new ArrayList<>();
+	private SceneObject positionMarker;
 	private volatile PlaybackClock playbackClock;
 	private volatile Scene3DOrchestrator activeOrchestrator;
 	private float trailRadius = 1.0f;
@@ -148,7 +151,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		restoreOriginalConfiguration();
 		pendingCanvasRebuild.set(null);
 		trailPaths.clear();
+		staticTrailObjects.clear();
 		dynamicPastTrails.clear();
+		positionMarker = null;
 		playbackClock = null;
 		activeOrchestrator = null;
 		lastTrailSplitIndex = -1;
@@ -401,6 +406,11 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	}
 
 	private void applyCameraMode(Scene3DOrchestrator orchestrator, FlightCameraMode mode) {
+		// The path trail runs through the rocket's center, so it clips the rocket up close: show
+		// the trail and position marker only in the whole-flight overview.
+		boolean overview = mode == FlightCameraMode.OVERVIEW;
+		orchestrator.enqueueGlTask(() -> setTrailDecorationsVisible(overview));
+
 		if (mode == FlightCameraMode.FOLLOW) {
 			orchestrator.setFollowFlightCamera(true);
 		} else if (trajectoryCenter != null && trajectoryDimensions != null) {
@@ -464,13 +474,16 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private void buildTrajectoryTrails(SceneView scene, GroundedPoseProviders poses, Vector3f centerOffset,
 			double startTime, double endTime) {
 		trailPaths.clear();
+		staticTrailObjects.clear();
 		dynamicPastTrails.clear();
+		positionMarker = null;
 		Vector3f dimensions = trajectoryDimensions;
 		if (dimensions == null) {
 			return;
 		}
 		float maxExtent = Math.max(dimensions.x, Math.max(dimensions.y, dimensions.z));
 		trailRadius = Math.max(maxExtent * 0.003f, 1.0f);
+		boolean overviewVisible = cameraMode == FlightCameraMode.OVERVIEW;
 
 		PoseProvider primary = poses.primaryProvider();
 		List<Vector3f> primaryPath = samplePath(primary, centerOffset, startTime, endTime);
@@ -493,7 +506,34 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			if (mesh.getVertices().isEmpty()) {
 				continue;
 			}
-			addTrailObject(scene, mesh, trail.active() ? ACTIVE_FUTURE_COLOR : BOOSTER_FUTURE_COLOR);
+			SceneObject trailObject = addTrailObject(scene, mesh, trail.active() ? ACTIVE_FUTURE_COLOR : BOOSTER_FUTURE_COLOR);
+			trailObject.setVisible(overviewVisible);
+			staticTrailObjects.add(trailObject);
+		}
+
+		// A bright marker at the rocket's current center — the rocket itself is sub-pixel at the
+		// whole-flight zoom, so this shows where it is along the trail. Hidden in follow mode.
+		Mesh markerMesh = SphereGenerator.create(trailRadius * 2.5f, 16, 12);
+		Appearance3D markerAppearance = new Appearance3D(new Vector3f(1.0f, 0.95f, 0.35f));
+		markerAppearance.setUnlit(true);
+		positionMarker = new SceneObject(markerMesh,
+				centerOffset != null ? new Vector3f(centerOffset) : new Vector3f(), markerAppearance);
+		positionMarker.setSelectable(false);
+		positionMarker.setRenderOnTop(true);
+		positionMarker.setPoseProvider(primary);
+		positionMarker.setVisible(overviewVisible);
+		scene.addObject(positionMarker);
+	}
+
+	private void setTrailDecorationsVisible(boolean visible) {
+		for (SceneObject trailObject : staticTrailObjects) {
+			trailObject.setVisible(visible);
+		}
+		for (SceneObject trailObject : dynamicPastTrails) {
+			trailObject.setVisible(visible);
+		}
+		if (positionMarker != null) {
+			positionMarker.setVisible(visible);
 		}
 	}
 
@@ -521,12 +561,13 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		return 0;
 	}
 
-	private void addTrailObject(SceneView scene, Mesh mesh, Vector3f color) {
+	private SceneObject addTrailObject(SceneView scene, Mesh mesh, Vector3f color) {
 		Appearance3D appearance = new Appearance3D(new Vector3f(color));
 		appearance.setUnlit(true);
 		SceneObject trailObject = new SceneObject(mesh, new Vector3f(0.0f, 0.0f, 0.0f), appearance);
 		trailObject.setSelectable(false);
 		scene.addObject(trailObject);
+		return trailObject;
 	}
 
 	private void startTrailUpdates() {
@@ -587,6 +628,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			appearance.setUnlit(true);
 			SceneObject trailObject = new SceneObject(mesh, new Vector3f(0.0f, 0.0f, 0.0f), appearance);
 			trailObject.setSelectable(false);
+			trailObject.setVisible(cameraMode == FlightCameraMode.OVERVIEW);
 			scene.addObject(trailObject);
 			dynamicPastTrails.add(trailObject);
 		}

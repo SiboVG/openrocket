@@ -40,6 +40,7 @@ public class SceneObject {
 	private boolean isSelectable = true;				// Whether this object can be selected by the user
 	private boolean renderOnTop = false;				// Whether this object should always render on top of others
 	private boolean originAxis = false;
+	private volatile boolean visible = true;
 	private boolean cleaned = false;
 
 	private DragListener onDragListener = null;		// A listener that defines what happens when this object is dragged.
@@ -231,6 +232,14 @@ public class SceneObject {
 
 	public void setOriginAxis(boolean originAxis) {
 		this.originAxis = originAxis;
+	}
+
+	public boolean isVisible() {
+		return visible;
+	}
+
+	public void setVisible(boolean visible) {
+		this.visible = visible;
 	}
 
 	public void setOnDragListener(DragListener listener) {

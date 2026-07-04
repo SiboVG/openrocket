@@ -104,7 +104,7 @@ public class GeometryPass implements RenderPass {
 
 	private boolean hasTransparentObjects(SceneView scene) {
 		for (SceneObject object : scene.getObjects()) {
-			if (TransparencyPolicy.isTransparent(object, config)) {
+			if (object.isVisible() && TransparencyPolicy.isTransparent(object, config)) {
 				return true;
 			}
 		}
@@ -201,6 +201,9 @@ public class GeometryPass implements RenderPass {
 
 	/** Renders one object after applying its material and display-mode overrides. */
 	private void renderObject(SceneObject object, boolean forceHideInnerSurfaces) {
+		if (!object.isVisible()) {
+			return;
+		}
 		materialBinder.bind(object, mainShader, mainShaderUniforms, config, textureStateManager);
 		if (forceHideInnerSurfaces) {
 			glUniform1i(mainShaderUniforms.hideInnerSurfaces, 1);
