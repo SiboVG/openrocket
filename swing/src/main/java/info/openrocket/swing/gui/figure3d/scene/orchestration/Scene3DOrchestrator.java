@@ -24,6 +24,7 @@ import info.openrocket.swing.gui.figure3d.scene.graph.Scene;
 import info.openrocket.swing.gui.figure3d.scene.properties.Figure3DPreferences;
 import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguration;
 import info.openrocket.swing.gui.figure3d.scene.properties.ViewportDimensions;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,6 +53,12 @@ public class Scene3DOrchestrator {
 	private volatile PlaybackClock playbackClock = null;
 	private volatile PoseProvider flightPrimaryPoseProvider = null;
 	private volatile boolean followFlightCamera = false;
+	// Engine-CS offset from the rocket's origin (nose) to its geometric center, so the follow
+	// camera orbits the rocket's middle instead of its tip.
+	private volatile Vector3f flightRocketCenterOffset = null;
+	private volatile Vector3f flightTrajectoryCenter = null;
+	private volatile Vector3f flightTrajectoryDimensions = null;
+	private volatile boolean pendingTrajectoryFit = false;
 	private volatile Map<AxialStage, List<double[]>> flightBurnIntervalsByStage = null;
 
 	/**
@@ -188,8 +195,23 @@ public class Scene3DOrchestrator {
 				}
 			}
 			PoseProvider primaryProvider = flightPrimaryPoseProvider;
+			Camera camera = cameraController.getCamera();
 			if (followFlightCamera && primaryProvider != null) {
-				cameraController.getCamera().setCenterOfInterest(primaryProvider.getPosition(t));
+				Vector3f pivot = primaryProvider.getPosition(t);
+				Vector3f centerOffset = flightRocketCenterOffset;
+				if (centerOffset != null) {
+					pivot.add(primaryProvider.getOrientation(t).transform(new Vector3f(centerOffset)));
+				}
+				camera.setCenterOfInterest(pivot);
+			} else if (pendingTrajectoryFit) {
+				pendingTrajectoryFit = false;
+				Vector3f center = flightTrajectoryCenter;
+				Vector3f dimensions = flightTrajectoryDimensions;
+				if (center != null && dimensions != null) {
+					camera.setCenterOfInterest(center);
+					camera.fitBounds(dimensions);
+					camera.resetViewOffset();
+				}
 			}
 			updateFlightParticleEmission(t);
 		}
@@ -498,5 +520,22 @@ public class Scene3DOrchestrator {
 
 	public void setFollowFlightCamera(boolean followFlightCamera) {
 		this.followFlightCamera = followFlightCamera;
+	}
+
+	/** Engine-CS offset from the rocket origin to its geometric center for the follow-camera pivot. */
+	public void setFlightRocketCenterOffset(Vector3f offset) {
+		this.flightRocketCenterOffset = offset != null ? new Vector3f(offset) : null;
+	}
+
+	/**
+	 * Frames the whole flight: disables follow mode and requests a one-shot fit of the camera to
+	 * the given trajectory bounding box (applied on the render thread). The user can then orbit
+	 * and zoom freely around the entire flight.
+	 */
+	public void fitFlightTrajectory(Vector3f center, Vector3f dimensions) {
+		this.flightTrajectoryCenter = center != null ? new Vector3f(center) : null;
+		this.flightTrajectoryDimensions = dimensions != null ? new Vector3f(dimensions) : null;
+		this.followFlightCamera = false;
+		this.pendingTrajectoryFit = true;
 	}
 }

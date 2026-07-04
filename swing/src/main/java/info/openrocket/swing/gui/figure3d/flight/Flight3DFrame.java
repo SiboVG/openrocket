@@ -41,6 +41,7 @@ public class Flight3DFrame extends JFrame {
 		flightPanel = new Flight3DPanel();
 		transportBar = new PlaybackTransportBar();
 		flightPanel.setReplayReadyCallback(transportBar::setReplay);
+		transportBar.setCameraModeListener(flightPanel::setCameraMode);
 		JPanel content = new JPanel(new BorderLayout());
 		content.add(flightPanel, BorderLayout.CENTER);
 		content.add(transportBar, BorderLayout.SOUTH);

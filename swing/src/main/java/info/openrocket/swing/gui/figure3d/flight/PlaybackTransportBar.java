@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.function.Consumer;
 
 @SuppressWarnings("serial")
 class PlaybackTransportBar extends JPanel {
@@ -50,10 +51,12 @@ class PlaybackTransportBar extends JPanel {
 			new SpeedOption(2.0),
 			new SpeedOption(4.0)
 	});
+	private final JComboBox<FlightCameraMode> cameraModeCombo = new JComboBox<>(FlightCameraMode.values());
 	private final JLabel timeLabel = new JLabel("0.00 / 0.00 s", SwingConstants.RIGHT);
 	private final Timer pollTimer = new Timer(POLL_INTERVAL_MS, e -> pollClock());
 
 	private PlaybackClock clock;
+	private Consumer<FlightCameraMode> cameraModeListener;
 	private boolean userIsDragging;
 	private boolean programmaticUpdate;
 
@@ -63,6 +66,14 @@ class PlaybackTransportBar extends JPanel {
 		JPanel leftControls = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
 		leftControls.add(playPauseButton);
 		leftControls.add(speedCombo);
+		cameraModeCombo.setSelectedItem(FlightCameraMode.OVERVIEW);
+		cameraModeCombo.setToolTipText("Camera mode");
+		cameraModeCombo.addActionListener(e -> {
+			if (cameraModeListener != null) {
+				cameraModeListener.accept((FlightCameraMode) cameraModeCombo.getSelectedItem());
+			}
+		});
+		leftControls.add(cameraModeCombo);
 		add(leftControls, BorderLayout.WEST);
 
 		scrubSlider.setMinimum(0);
@@ -96,6 +107,10 @@ class PlaybackTransportBar extends JPanel {
 		});
 		playPauseButton.addActionListener(e -> togglePlayback());
 		setControlsEnabled(false);
+	}
+
+	void setCameraModeListener(Consumer<FlightCameraMode> listener) {
+		this.cameraModeListener = listener;
 	}
 
 	void setReplay(PlaybackClock clock, FlightReplayData replayData) {

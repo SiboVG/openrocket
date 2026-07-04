@@ -20,6 +20,7 @@ import info.openrocket.swing.gui.figure3d.core.geometry.Mesh;
 import info.openrocket.swing.gui.figure3d.core.geometry.basic.PlaneGenerator;
 import info.openrocket.swing.gui.figure3d.materials.Appearance3D;
 import info.openrocket.swing.gui.figure3d.rendering.backgrounds.GradientBackground;
+import info.openrocket.swing.gui.figure3d.scene.controllers.CameraControls;
 import info.openrocket.swing.gui.figure3d.scene.core.SceneObject;
 import info.openrocket.swing.gui.figure3d.scene.core.SceneView;
 import info.openrocket.swing.gui.figure3d.scene.orchestration.Scene3DOrchestrator;
@@ -38,6 +39,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.awt.GridBagLayout;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +67,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private volatile BiConsumer<PlaybackClock, FlightReplayData> replayReadyCallback;
 	private volatile long earliestRenderAtMs;
 	private volatile boolean renderLoopRunning = false;
+	private volatile FlightCameraMode cameraMode = FlightCameraMode.OVERVIEW;
+	private volatile Vector3f trajectoryCenter;
+	private volatile Vector3f trajectoryDimensions;
 
 	Flight3DPanel() {
 		setLayout(new BorderLayout());
@@ -323,16 +328,88 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		int burnWindowCount = burnTimeline.values().stream().mapToInt(List::size).sum();
 		log.info("Flight replay: {} stage(s) with {} total motor burn window(s)", burnTimeline.size(), burnWindowCount);
 		orchestrator.setFlightBurnIntervals(burnTimeline);
-		orchestrator.setFollowFlightCamera(true);
+
+		// Reuse the design-view rocket-center computation so the follow camera orbits the
+		// rocket's middle, not its nose. Compute the whole-flight framing for the default view.
+		orchestrator.setFlightRocketCenterOffset(orchestrator.getCameraController().computeRocketCenter());
+		computeTrajectoryBounds(orchestrator.getCameraController(), groundedPoses,
+				replayData.getStartTime(), replayData.getEndTime());
+		applyCameraMode(orchestrator, cameraMode);
+
 		PlaybackClock clock = orchestrator.getPlaybackClock();
 		if (clock != null) {
 			clock.setRate(0.0);
 		}
-		orchestrator.focusOnRocket();
 		BiConsumer<PlaybackClock, FlightReplayData> callback = replayReadyCallback;
 		if (callback != null && clock != null) {
 			SwingUtilities.invokeLater(() -> callback.accept(clock, replayData));
 		}
+	}
+
+	/**
+	 * Switches the replay camera behaviour. Safe to call from the EDT: the orchestrator methods
+	 * set volatile flags applied on the render thread.
+	 */
+	void setCameraMode(FlightCameraMode mode) {
+		this.cameraMode = mode;
+		GLScenePanel panel = glPanel;
+		if (panel == null) {
+			return;
+		}
+		Scene3DOrchestrator orchestrator = panel.getScene3DOrchestrator();
+		if (orchestrator != null) {
+			applyCameraMode(orchestrator, mode);
+		}
+	}
+
+	FlightCameraMode getCameraMode() {
+		return cameraMode;
+	}
+
+	private void applyCameraMode(Scene3DOrchestrator orchestrator, FlightCameraMode mode) {
+		if (mode == FlightCameraMode.FOLLOW) {
+			orchestrator.setFollowFlightCamera(true);
+		} else if (trajectoryCenter != null && trajectoryDimensions != null) {
+			orchestrator.fitFlightTrajectory(trajectoryCenter, trajectoryDimensions);
+		} else {
+			orchestrator.setFollowFlightCamera(false);
+			orchestrator.focusOnRocket();
+		}
+	}
+
+	private void computeTrajectoryBounds(CameraControls cameraControls, GroundedPoseProviders poses,
+			double startTime, double endTime) {
+		Vector3f min = new Vector3f(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
+		Vector3f max = new Vector3f(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
+
+		List<PoseProvider> providers = new ArrayList<>(poses.providersByStage().values());
+		providers.add(poses.primaryProvider());
+		int samples = 240;
+		for (PoseProvider provider : providers) {
+			for (int i = 0; i <= samples; i++) {
+				double t = startTime + (endTime - startTime) * i / samples;
+				Vector3f position = provider.getPosition(t);
+				min.min(position);
+				max.max(position);
+			}
+		}
+
+		if (!Float.isFinite(min.x) || !Float.isFinite(max.x)) {
+			trajectoryCenter = null;
+			trajectoryDimensions = null;
+			return;
+		}
+
+		// Pad by the rocket's largest dimension so its body is not clipped at the trajectory ends.
+		Vector3f rocketSize = cameraControls.computeRocketSize();
+		float pad = rocketSize != null
+				? Math.max(rocketSize.x, Math.max(rocketSize.y, rocketSize.z)) * 0.5f
+				: 0.0f;
+		min.sub(pad, pad, pad);
+		max.add(pad, pad, pad);
+
+		trajectoryCenter = new Vector3f(min).add(max).mul(0.5f);
+		trajectoryDimensions = new Vector3f(max).sub(min);
 	}
 
 	private void disableComponentSelection(SceneView scene) {
