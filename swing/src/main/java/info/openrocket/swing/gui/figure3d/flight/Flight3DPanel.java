@@ -75,6 +75,22 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private volatile Vector3f trajectoryCenter;
 	private volatile Vector3f trajectoryDimensions;
 
+	private static final int TRAIL_SAMPLES = 240;
+	private static final Vector3f ACTIVE_FUTURE_COLOR = new Vector3f(0.16f, 0.42f, 0.28f);
+	private static final Vector3f ACTIVE_PAST_COLOR = new Vector3f(0.35f, 1.0f, 0.55f);
+	private static final Vector3f BOOSTER_FUTURE_COLOR = new Vector3f(0.40f, 0.24f, 0.12f);
+	private static final Vector3f BOOSTER_PAST_COLOR = new Vector3f(1.0f, 0.55f, 0.18f);
+	private final List<TrailPath> trailPaths = new ArrayList<>();
+	private final List<SceneObject> dynamicPastTrails = new ArrayList<>();
+	private volatile PlaybackClock playbackClock;
+	private volatile Scene3DOrchestrator activeOrchestrator;
+	private float trailRadius = 1.0f;
+	private int lastTrailSplitIndex = -1;
+	private javax.swing.Timer trailUpdateTimer;
+
+	private record TrailPath(List<Vector3f> points, boolean active) {
+	}
+
 	Flight3DPanel() {
 		setLayout(new BorderLayout());
 	}
@@ -123,6 +139,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 	void clearDoc() {
 		debug("clearDoc");
+		stopTrailUpdates();
 		stopRenderLoop();
 		if (glPanel != null) {
 			RENDER_SCHEDULER.awaitQuiescence(RENDER_SHUTDOWN_TIMEOUT_MS);
@@ -130,6 +147,11 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		}
 		restoreOriginalConfiguration();
 		pendingCanvasRebuild.set(null);
+		trailPaths.clear();
+		dynamicPastTrails.clear();
+		playbackClock = null;
+		activeOrchestrator = null;
+		lastTrailSplitIndex = -1;
 		document = null;
 		simulation = null;
 		flightData = null;
@@ -335,16 +357,23 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 		// Reuse the design-view rocket-center computation so the follow camera orbits the
 		// rocket's middle, not its nose. Compute the whole-flight framing for the default view.
-		orchestrator.setFlightRocketCenterOffset(orchestrator.getCameraController().computeRocketCenter());
+		Vector3f rocketCenterOffset = orchestrator.getCameraController().computeRocketCenter();
+		orchestrator.setFlightRocketCenterOffset(rocketCenterOffset);
 		computeTrajectoryBounds(orchestrator.getCameraController(), groundedPoses,
 				replayData.getStartTime(), replayData.getEndTime());
-		addTrajectoryTrails(scene, groundedPoses, replayData.getStartTime(), replayData.getEndTime());
+		buildTrajectoryTrails(scene, groundedPoses, rocketCenterOffset,
+				replayData.getStartTime(), replayData.getEndTime());
 		applyCameraMode(orchestrator, cameraMode);
 
 		PlaybackClock clock = orchestrator.getPlaybackClock();
 		if (clock != null) {
 			clock.setRate(0.0);
 		}
+		this.playbackClock = clock;
+		this.activeOrchestrator = orchestrator;
+		this.lastTrailSplitIndex = -1;
+		SwingUtilities.invokeLater(this::startTrailUpdates);
+
 		BiConsumer<PlaybackClock, FlightReplayData> callback = replayReadyCallback;
 		if (callback != null && clock != null) {
 			SwingUtilities.invokeLater(() -> callback.accept(clock, replayData));
@@ -426,37 +455,140 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	}
 
 	/**
-	 * Adds a visible tube along each flight path. At the whole-flight zoom the rocket itself is
-	 * only a few pixels, so the trail is what makes the trajectory legible.
+	 * Builds a visible tube along each stage-center flight path. At the whole-flight zoom the
+	 * rocket itself is only a few pixels, so the trail is what makes the trajectory legible.
+	 * The full path is drawn faded ("still to come"); a brighter overlay grows over the elapsed
+	 * portion as the flight plays (see {@link #rebuildPastTrails}). The active sustainer path and
+	 * separated-booster paths use different hues.
 	 */
-	private void addTrajectoryTrails(SceneView scene, GroundedPoseProviders poses, double startTime, double endTime) {
+	private void buildTrajectoryTrails(SceneView scene, GroundedPoseProviders poses, Vector3f centerOffset,
+			double startTime, double endTime) {
+		trailPaths.clear();
+		dynamicPastTrails.clear();
 		Vector3f dimensions = trajectoryDimensions;
 		if (dimensions == null) {
 			return;
 		}
 		float maxExtent = Math.max(dimensions.x, Math.max(dimensions.y, dimensions.z));
-		float radius = Math.max(maxExtent * 0.003f, 1.0f);
+		trailRadius = Math.max(maxExtent * 0.003f, 1.0f);
 
-		Set<PoseProvider> uniqueProviders = Collections.newSetFromMap(new IdentityHashMap<>());
-		uniqueProviders.add(poses.primaryProvider());
-		uniqueProviders.addAll(poses.providersByStage().values());
+		PoseProvider primary = poses.primaryProvider();
+		List<Vector3f> primaryPath = samplePath(primary, centerOffset, startTime, endTime);
+		trailPaths.add(new TrailPath(primaryPath, true));
 
-		for (PoseProvider provider : uniqueProviders) {
-			List<Vector3f> path = new ArrayList<>();
-			int samples = 240;
-			for (int i = 0; i <= samples; i++) {
-				double t = startTime + (endTime - startTime) * i / samples;
-				path.add(provider.getPosition(t));
-			}
-			Mesh trailMesh = TrajectoryTrailGenerator.create(path, radius, 8);
-			if (trailMesh.getVertices().isEmpty()) {
+		Set<PoseProvider> boosters = Collections.newSetFromMap(new IdentityHashMap<>());
+		boosters.addAll(poses.providersByStage().values());
+		boosters.remove(primary);
+		for (PoseProvider booster : boosters) {
+			List<Vector3f> full = samplePath(booster, centerOffset, startTime, endTime);
+			// Only plot a booster from where its path diverges from the sustainer (post-separation),
+			// since before separation it rides the same path and would z-fight the active trail.
+			int from = firstDivergenceIndex(full, primaryPath, trailRadius * 3.0f);
+			List<Vector3f> divergent = new ArrayList<>(full.subList(Math.max(0, from), full.size()));
+			trailPaths.add(new TrailPath(divergent, false));
+		}
+
+		for (TrailPath trail : trailPaths) {
+			Mesh mesh = TrajectoryTrailGenerator.create(trail.points(), trailRadius, 8);
+			if (mesh.getVertices().isEmpty()) {
 				continue;
 			}
-			Appearance3D appearance = new Appearance3D(new Vector3f(1.0f, 0.55f, 0.15f));
+			addTrailObject(scene, mesh, trail.active() ? ACTIVE_FUTURE_COLOR : BOOSTER_FUTURE_COLOR);
+		}
+	}
+
+	private List<Vector3f> samplePath(PoseProvider provider, Vector3f centerOffset, double startTime, double endTime) {
+		List<Vector3f> points = new ArrayList<>(TRAIL_SAMPLES + 1);
+		for (int i = 0; i <= TRAIL_SAMPLES; i++) {
+			double t = startTime + (endTime - startTime) * i / TRAIL_SAMPLES;
+			Vector3f position = provider.getPosition(t);
+			if (centerOffset != null) {
+				position.add(provider.getOrientation(t).transform(new Vector3f(centerOffset)));
+			}
+			points.add(position);
+		}
+		return points;
+	}
+
+	private static int firstDivergenceIndex(List<Vector3f> path, List<Vector3f> reference, float threshold) {
+		int count = Math.min(path.size(), reference.size());
+		float thresholdSquared = threshold * threshold;
+		for (int i = 0; i < count; i++) {
+			if (path.get(i).distanceSquared(reference.get(i)) > thresholdSquared) {
+				return i;
+			}
+		}
+		return 0;
+	}
+
+	private void addTrailObject(SceneView scene, Mesh mesh, Vector3f color) {
+		Appearance3D appearance = new Appearance3D(new Vector3f(color));
+		appearance.setUnlit(true);
+		SceneObject trailObject = new SceneObject(mesh, new Vector3f(0.0f, 0.0f, 0.0f), appearance);
+		trailObject.setSelectable(false);
+		scene.addObject(trailObject);
+	}
+
+	private void startTrailUpdates() {
+		stopTrailUpdates();
+		trailUpdateTimer = new javax.swing.Timer(150, e -> updatePastTrails());
+		trailUpdateTimer.start();
+	}
+
+	private void stopTrailUpdates() {
+		if (trailUpdateTimer != null) {
+			trailUpdateTimer.stop();
+			trailUpdateTimer = null;
+		}
+	}
+
+	private void updatePastTrails() {
+		PlaybackClock clock = playbackClock;
+		Scene3DOrchestrator orchestrator = activeOrchestrator;
+		if (clock == null || orchestrator == null || trailPaths.isEmpty()) {
+			return;
+		}
+		double span = Math.max(1.0e-9, clock.getEnd() - clock.getStart());
+		double fraction = Math.max(0.0, Math.min(1.0, (clock.getTime() - clock.getStart()) / span));
+		int splitIndex = (int) Math.round(fraction * TRAIL_SAMPLES);
+		if (splitIndex == lastTrailSplitIndex) {
+			return;
+		}
+		lastTrailSplitIndex = splitIndex;
+		orchestrator.enqueueGlTask(() -> rebuildPastTrails(orchestrator, splitIndex));
+	}
+
+	// Rebuilds the brighter "elapsed" overlay covering each path up to the current time. Runs on
+	// the GL thread. A slightly larger radius keeps it on top of the faded full path.
+	private void rebuildPastTrails(Scene3DOrchestrator orchestrator, int splitIndex) {
+		SceneView scene = orchestrator.getScene();
+		if (scene == null) {
+			return;
+		}
+		for (SceneObject trailObject : dynamicPastTrails) {
+			scene.getObjects().remove(trailObject);
+			trailObject.cleanup();
+		}
+		dynamicPastTrails.clear();
+		if (splitIndex < 1) {
+			return;
+		}
+		for (TrailPath trail : trailPaths) {
+			int end = Math.min(splitIndex + 1, trail.points().size());
+			if (end < 2) {
+				continue;
+			}
+			List<Vector3f> past = new ArrayList<>(trail.points().subList(0, end));
+			Mesh mesh = TrajectoryTrailGenerator.create(past, trailRadius * 1.35f, 8);
+			if (mesh.getVertices().isEmpty()) {
+				continue;
+			}
+			Appearance3D appearance = new Appearance3D(new Vector3f(trail.active() ? ACTIVE_PAST_COLOR : BOOSTER_PAST_COLOR));
 			appearance.setUnlit(true);
-			SceneObject trailObject = new SceneObject(trailMesh, new Vector3f(0.0f, 0.0f, 0.0f), appearance);
+			SceneObject trailObject = new SceneObject(mesh, new Vector3f(0.0f, 0.0f, 0.0f), appearance);
 			trailObject.setSelectable(false);
 			scene.addObject(trailObject);
+			dynamicPastTrails.add(trailObject);
 		}
 	}
 
