@@ -62,6 +62,7 @@ public class Scene3DOrchestrator {
 	private volatile boolean pendingTrajectoryFit = false;
 	private volatile boolean pendingFollowFit = false;
 	private volatile DoubleConsumer flightFrameListener = null;
+	private static final float FOLLOW_ZOOM_OUT_FACTOR = 1.8f;
 	private volatile Map<AxialStage, List<double[]>> flightBurnIntervalsByStage = null;
 
 	/**
@@ -203,8 +204,11 @@ public class Scene3DOrchestrator {
 				if (pendingFollowFit) {
 					// Frame the rocket at a sensible distance when entering follow mode, otherwise
 					// the camera keeps the far-out zoom left over from the whole-flight overview.
+					// Pull back a bit past the exact fit so the whole rocket stays in frame as it
+					// rotates through flight instead of being clipped.
 					pendingFollowFit = false;
 					cameraController.focusOnRocket();
+					camera.setDistance(camera.getDistance() * FOLLOW_ZOOM_OUT_FACTOR);
 				}
 				Vector3f pivot = primaryProvider.getPosition(t);
 				Vector3f centerOffset = flightRocketCenterOffset;
