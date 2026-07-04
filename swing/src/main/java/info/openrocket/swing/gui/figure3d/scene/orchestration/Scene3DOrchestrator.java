@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.DoubleConsumer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -60,6 +61,7 @@ public class Scene3DOrchestrator {
 	private volatile Vector3f flightTrajectoryDimensions = null;
 	private volatile boolean pendingTrajectoryFit = false;
 	private volatile boolean pendingFollowFit = false;
+	private volatile DoubleConsumer flightFrameListener = null;
 	private volatile Map<AxialStage, List<double[]>> flightBurnIntervalsByStage = null;
 
 	/**
@@ -221,6 +223,11 @@ public class Scene3DOrchestrator {
 				}
 			}
 			updateFlightParticleEmission(t);
+
+			DoubleConsumer frameListener = flightFrameListener;
+			if (frameListener != null) {
+				frameListener.accept(t);
+			}
 		}
 
 		if (particleDeltaTime > 0.0f) {
@@ -530,6 +537,11 @@ public class Scene3DOrchestrator {
 			this.pendingFollowFit = true;
 		}
 		this.followFlightCamera = followFlightCamera;
+	}
+
+	/** Invoked on the render thread each playback frame with the current playback time. */
+	public void setFlightFrameListener(DoubleConsumer listener) {
+		this.flightFrameListener = listener;
 	}
 
 	/** Engine-CS offset from the rocket origin to its geometric center for the follow-camera pivot. */

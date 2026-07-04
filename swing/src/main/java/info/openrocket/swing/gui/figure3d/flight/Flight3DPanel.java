@@ -77,6 +77,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private volatile Vector3f trajectoryDimensions;
 
 	private static final int TRAIL_SAMPLES = 240;
+	// Rebuild the elapsed/upcoming split when the playback fraction moves at least this much. Small
+	// enough that the boundary tracks the marker without a visible lag, large enough to bound churn.
+	private static final double TRAIL_REBUILD_THRESHOLD = 0.002;
 	private static final Vector3f ACTIVE_FUTURE_COLOR = new Vector3f(0.16f, 0.42f, 0.28f);
 	private static final Vector3f ACTIVE_PAST_COLOR = new Vector3f(0.35f, 1.0f, 0.55f);
 	private static final Vector3f BOOSTER_FUTURE_COLOR = new Vector3f(0.40f, 0.24f, 0.12f);
@@ -87,10 +90,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private volatile PlaybackClock playbackClock;
 	private volatile Scene3DOrchestrator activeOrchestrator;
 	private float trailRadius = 1.0f;
-	private int lastTrailSplitIndex = -1;
-	private javax.swing.Timer trailUpdateTimer;
+	private double lastRebuildFraction = -1.0;
 
-	private record TrailPath(List<Vector3f> points, boolean active) {
+	private record TrailPath(List<Vector3f> points, boolean active, double startFraction) {
 	}
 
 	Flight3DPanel() {
@@ -141,7 +143,10 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 	void clearDoc() {
 		debug("clearDoc");
-		stopTrailUpdates();
+		Scene3DOrchestrator orchestrator = activeOrchestrator;
+		if (orchestrator != null) {
+			orchestrator.setFlightFrameListener(null);
+		}
 		stopRenderLoop();
 		if (glPanel != null) {
 			RENDER_SCHEDULER.awaitQuiescence(RENDER_SHUTDOWN_TIMEOUT_MS);
@@ -154,7 +159,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		positionMarker = null;
 		playbackClock = null;
 		activeOrchestrator = null;
-		lastTrailSplitIndex = -1;
+		lastRebuildFraction = -1.0;
 		document = null;
 		simulation = null;
 		flightData = null;
@@ -374,8 +379,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		}
 		this.playbackClock = clock;
 		this.activeOrchestrator = orchestrator;
-		this.lastTrailSplitIndex = -1;
-		SwingUtilities.invokeLater(this::startTrailUpdates);
+		this.lastRebuildFraction = -1.0;
+		orchestrator.setFlightFrameListener(this::onFlightFrame);
 
 		BiConsumer<PlaybackClock, FlightReplayData> callback = replayReadyCallback;
 		if (callback != null && clock != null) {
@@ -484,7 +489,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 		PoseProvider primary = poses.primaryProvider();
 		List<Vector3f> primaryPath = samplePath(primary, centerOffset, startTime, endTime);
-		trailPaths.add(new TrailPath(primaryPath, true));
+		trailPaths.add(new TrailPath(primaryPath, true, 0.0));
 
 		Set<PoseProvider> boosters = Collections.newSetFromMap(new IdentityHashMap<>());
 		boosters.addAll(poses.providersByStage().values());
@@ -495,7 +500,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			// since before separation it rides the same path and would z-fight the active trail.
 			int from = firstDivergenceIndex(full, primaryPath, trailRadius * 3.0f);
 			List<Vector3f> divergent = new ArrayList<>(full.subList(Math.max(0, from), full.size()));
-			trailPaths.add(new TrailPath(divergent, false));
+			// The booster path covers global playback fractions [from/samples, 1], so elapsed
+			// coloring only starts once the flight passes its separation point.
+			trailPaths.add(new TrailPath(divergent, false, (double) from / TRAIL_SAMPLES));
 		}
 
 		// A bright marker at the rocket's current center — the rocket itself is sub-pixel at the
@@ -511,7 +518,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		positionMarker.setVisible(overviewVisible);
 		scene.addObject(positionMarker);
 
-		rebuildTrails(scene, 0);
+		rebuildTrails(scene, 0.0);
 	}
 
 	private void setTrailDecorationsVisible(boolean visible) {
@@ -556,42 +563,32 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		return trailObject;
 	}
 
-	private void startTrailUpdates() {
-		stopTrailUpdates();
-		trailUpdateTimer = new javax.swing.Timer(150, e -> updateTrailSplit());
-		trailUpdateTimer.start();
-	}
-
-	private void stopTrailUpdates() {
-		if (trailUpdateTimer != null) {
-			trailUpdateTimer.stop();
-			trailUpdateTimer = null;
-		}
-	}
-
-	private void updateTrailSplit() {
-		PlaybackClock clock = playbackClock;
+	// Invoked on the render thread every playback frame. Rebuilds the elapsed/upcoming split only
+	// when the playback fraction has moved enough, so the boundary tracks the smoothly-moving
+	// marker without the lag of a fixed-interval timer, and without rebuilding every single frame.
+	private void onFlightFrame(double time) {
 		Scene3DOrchestrator orchestrator = activeOrchestrator;
-		if (clock == null || orchestrator == null || trailPaths.isEmpty()) {
+		PlaybackClock clock = playbackClock;
+		if (orchestrator == null || clock == null || trailPaths.isEmpty()) {
 			return;
 		}
 		double span = Math.max(1.0e-9, clock.getEnd() - clock.getStart());
-		double fraction = Math.max(0.0, Math.min(1.0, (clock.getTime() - clock.getStart()) / span));
-		int splitIndex = (int) Math.round(fraction * TRAIL_SAMPLES);
-		if (splitIndex == lastTrailSplitIndex) {
+		double fraction = Math.max(0.0, Math.min(1.0, (time - clock.getStart()) / span));
+		if (lastRebuildFraction >= 0.0 && Math.abs(fraction - lastRebuildFraction) < TRAIL_REBUILD_THRESHOLD) {
 			return;
 		}
-		lastTrailSplitIndex = splitIndex;
-		orchestrator.enqueueGlTask(() -> rebuildTrails(orchestrator.getScene(), splitIndex));
+		lastRebuildFraction = fraction;
+		rebuildTrails(orchestrator.getScene(), fraction);
 	}
 
 	/**
-	 * Rebuilds each path as two non-overlapping tubes meeting end-to-end at the current time: a
-	 * bright "elapsed" segment and a faded "still to come" segment. Drawing them as separate
-	 * segments (rather than overlaying a bright tube on a faded full-length one) avoids the coaxial
-	 * z-fighting. Runs on the GL thread.
+	 * Rebuilds each path as two non-overlapping tubes meeting end-to-end at the current playback
+	 * time: a bright "elapsed" segment and a faded "still to come" segment. The join is an exact
+	 * interpolated point on the path (not a sample), so the boundary sits precisely under the
+	 * moving marker. Drawing them as separate segments (rather than overlaying a bright tube on a
+	 * faded full-length one) avoids coaxial z-fighting. Runs on the GL thread.
 	 */
-	private void rebuildTrails(SceneView scene, int splitIndex) {
+	private void rebuildTrails(SceneView scene, double fraction) {
 		if (scene == null) {
 			return;
 		}
@@ -603,14 +600,30 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 		boolean visible = cameraMode == FlightCameraMode.OVERVIEW;
 		for (TrailPath trail : trailPaths) {
-			int pointCount = trail.points().size();
-			int split = Math.max(0, Math.min(splitIndex, pointCount - 1));
-			// Elapsed segment: points[0..split].
-			addTrailSegment(scene, trail.points().subList(0, split + 1),
-					trail.active() ? ACTIVE_PAST_COLOR : BOOSTER_PAST_COLOR, visible);
-			// Upcoming segment: points[split..end] (shares the join vertex, extends the other way).
-			addTrailSegment(scene, trail.points().subList(split, pointCount),
-					trail.active() ? ACTIVE_FUTURE_COLOR : BOOSTER_FUTURE_COLOR, visible);
+			List<Vector3f> points = trail.points();
+			int pointCount = points.size();
+			if (pointCount < 2) {
+				continue;
+			}
+			double localFraction = (fraction - trail.startFraction())
+					/ Math.max(1.0e-9, 1.0 - trail.startFraction());
+			localFraction = Math.max(0.0, Math.min(1.0, localFraction));
+			double indexValue = localFraction * (pointCount - 1);
+			int index = Math.min((int) Math.floor(indexValue), pointCount - 2);
+			Vector3f boundary = new Vector3f(points.get(index))
+					.lerp(points.get(index + 1), (float) (indexValue - index));
+
+			if (localFraction > 0.0) {
+				List<Vector3f> elapsed = new ArrayList<>(points.subList(0, index + 1));
+				elapsed.add(boundary);
+				addTrailSegment(scene, elapsed, trail.active() ? ACTIVE_PAST_COLOR : BOOSTER_PAST_COLOR, visible);
+			}
+			if (localFraction < 1.0) {
+				List<Vector3f> upcoming = new ArrayList<>();
+				upcoming.add(new Vector3f(boundary));
+				upcoming.addAll(points.subList(index + 1, pointCount));
+				addTrailSegment(scene, upcoming, trail.active() ? ACTIVE_FUTURE_COLOR : BOOSTER_FUTURE_COLOR, visible);
+			}
 		}
 	}
 
