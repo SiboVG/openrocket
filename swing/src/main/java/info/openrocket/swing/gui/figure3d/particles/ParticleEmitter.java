@@ -1,9 +1,7 @@
 package info.openrocket.swing.gui.figure3d.particles;
 
 import info.openrocket.core.rocketcomponent.RocketComponent;
-import info.openrocket.swing.gui.figure3d.animation.PoseProvider;
 import info.openrocket.swing.gui.figure3d.constants.RenderingConstants;
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -19,19 +17,11 @@ public abstract class ParticleEmitter {
 	protected List<Particle> staticParticles;
 	protected Vector3f emitterPosition;
 	protected Vector3f direction;
-	private final Vector3f baseEmitterPosition;
-	private final Vector3f baseDirection;
-	private final Vector3f scratchPosePosition = new Vector3f();
-	private final Vector3f scratchPoseDirection = new Vector3f();
-	private final Vector3f inheritedVelocity = new Vector3f();
-	private float velocityInheritanceFactor = 1.0f;
 	protected float timeSinceLastCreation;
 	protected final ParticleSettings settings;
 
 	protected boolean isStaticMode;
-	private boolean emissionEnabled = true;
 	private RocketComponent rocketComponent;
-	private PoseProvider poseProvider;
 	protected float staticCaptureTime;
 	protected float currentTime;
 	protected final long baseSeed;
@@ -48,8 +38,6 @@ public abstract class ParticleEmitter {
 		this.staticParticles = new ArrayList<>();
 		this.emitterPosition = new Vector3f(emitterPosition);
 		this.direction = new Vector3f(direction);
-		this.baseEmitterPosition = new Vector3f(emitterPosition);
-		this.baseDirection = new Vector3f(direction);
 		this.settings = settings;
 		this.timeSinceLastCreation = 0;
 		this.isStaticMode = false;
@@ -72,11 +60,6 @@ public abstract class ParticleEmitter {
 		}
 
 		updateParticleList(deltaTime);
-
-		if (!emissionEnabled) {
-			timeSinceLastCreation = 0.0f;
-			return;
-		}
 
 		// Create new particles
 		emitPendingParticles(deltaTime);
@@ -116,55 +99,6 @@ public abstract class ParticleEmitter {
 		return rocketComponent;
 	}
 
-	public void setPoseProvider(PoseProvider poseProvider) {
-		this.poseProvider = poseProvider;
-	}
-
-	public PoseProvider getPoseProvider() {
-		return poseProvider;
-	}
-
-	public boolean hasPoseProvider() {
-		return poseProvider != null;
-	}
-
-	public void applyPoseAtTime(double time) {
-		if (poseProvider == null) {
-			return;
-		}
-
-		Vector3f position = poseProvider.getPosition(time);
-		Quaternionf orientation = poseProvider.getOrientation(time);
-		scratchPosePosition.set(baseEmitterPosition);
-		orientation.transform(scratchPosePosition);
-		emitterPosition.set(position).add(scratchPosePosition);
-
-		scratchPoseDirection.set(baseDirection);
-		orientation.transform(scratchPoseDirection);
-		direction.set(scratchPoseDirection).normalize();
-
-		Vector3f velocity = poseProvider.getLinearVelocity(time);
-		if (velocity != null) {
-			inheritedVelocity.set(velocity).mul(velocityInheritanceFactor);
-		} else {
-			inheritedVelocity.zero();
-		}
-	}
-
-	/**
-	 * Sets how much of the emitter's world velocity newly spawned particles inherit.
-	 */
-	public void setVelocityInheritanceFactor(float factor) {
-		this.velocityInheritanceFactor = factor;
-	}
-
-	/**
-	 * Adds the inherited emitter velocity to a particle's initial velocity.
-	 */
-	protected void addInheritedVelocity(Vector3f velocity) {
-		velocity.add(inheritedVelocity);
-	}
-
 	protected float nextRandomFloat() {
 		return random.nextFloat();
 	}
@@ -196,14 +130,6 @@ public abstract class ParticleEmitter {
 
 	public boolean isStaticMode() {
 		return isStaticMode;
-	}
-
-	public void setEmissionEnabled(boolean emissionEnabled) {
-		this.emissionEnabled = emissionEnabled;
-	}
-
-	public boolean isEmissionEnabled() {
-		return emissionEnabled;
 	}
 
 	public float getStaticCaptureTime() {

@@ -27,7 +27,6 @@ import info.openrocket.swing.gui.figure3d.scene.properties.ViewportDimensions;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.DoubleConsumer;
@@ -63,7 +62,6 @@ public class Scene3DOrchestrator {
 	private volatile boolean pendingFollowFit = false;
 	private volatile DoubleConsumer flightFrameListener = null;
 	private static final float FOLLOW_ZOOM_OUT_FACTOR = 1.8f;
-	private volatile Map<AxialStage, List<double[]>> flightBurnIntervalsByStage = null;
 
 	/**
 	 * Updates the orchestrator's knowledge of the window and framebuffer dimensions.
@@ -174,7 +172,6 @@ public class Scene3DOrchestrator {
 		long currentFrameTime = System.nanoTime();
 		float deltaTime = (currentFrameTime - lastFrameTime) / 1e9f;
 		lastFrameTime = currentFrameTime;
-		float particleDeltaTime = deltaTime;
 
 		// Process all input events
 		inputHandler.processInput();
@@ -184,18 +181,11 @@ public class Scene3DOrchestrator {
 
 		// --- Simulation playback (if bound) ---
 		if (playbackClock != null) {
-			double previousPlaybackTime = playbackClock.getTime();
 			playbackClock.update(deltaTime);
 			double t = playbackClock.getTime();
-			particleDeltaTime = (float) Math.max(0.0, t - previousPlaybackTime);
 			for (var obj : scene.getObjects()) {
 				if (obj.hasPoseProvider()) {
 					obj.applyPoseAtTime(t);
-				}
-			}
-			for (var emitter : scene.getParticleEmitters()) {
-				if (emitter.hasPoseProvider()) {
-					emitter.applyPoseAtTime(t);
 				}
 			}
 			PoseProvider primaryProvider = flightPrimaryPoseProvider;
@@ -226,16 +216,14 @@ public class Scene3DOrchestrator {
 					camera.resetViewOffset();
 				}
 			}
-			updateFlightParticleEmission(t);
-
 			DoubleConsumer frameListener = flightFrameListener;
 			if (frameListener != null) {
 				frameListener.accept(t);
 			}
 		}
 
-		if (particleDeltaTime > 0.0f) {
-			scene.updateParticles(particleDeltaTime);
+		if (deltaTime > 0.0f) {
+			scene.updateParticles(deltaTime);
 		}
 	}
 
@@ -440,18 +428,8 @@ public class Scene3DOrchestrator {
 				// being stranded at the launch pad while the follow camera chases the rocket up.
 				obj.setPoseProvider(providerOrPrimary(component, providersByStage, primaryProvider));
 			}
-			int emitterCount = 0;
-			for (var emitter : scene.getParticleEmitters()) {
-				RocketComponent component = emitter.getRocketComponent();
-				PoseProvider provider = component != null
-						? providerOrPrimary(component, providersByStage, primaryProvider)
-						: primaryProvider;
-				emitter.setPoseProvider(provider);
-				emitter.applyPoseAtTime(startTime);
-				emitterCount++;
-			}
-			log.info("Flight replay bound poses: {} rocket object(s), {} particle emitter(s) attached to a trajectory",
-					scene.getObjects().size(), emitterCount);
+			log.info("Flight replay bound poses: {} rocket object(s) attached to a trajectory",
+					scene.getObjects().size());
 		});
 		this.flightPrimaryPoseProvider = primaryProvider;
 		this.playbackClock = new PlaybackClock(startTime, endTime);
@@ -478,58 +456,6 @@ public class Scene3DOrchestrator {
 		} catch (IllegalStateException e) {
 			return null;
 		}
-	}
-
-	/**
-	 * Sets the motor burn windows per stage so exhaust emitters flame only while their
-	 * own stage's motor is burning (a sustainer must not flame during a booster-only burn).
-	 */
-	public void setFlightBurnIntervals(Map<AxialStage, List<double[]>> burnIntervalsByStage) {
-		if (burnIntervalsByStage == null) {
-			this.flightBurnIntervalsByStage = null;
-			return;
-		}
-		Map<AxialStage, List<double[]>> copy = new HashMap<>();
-		for (Map.Entry<AxialStage, List<double[]>> entry : burnIntervalsByStage.entrySet()) {
-			List<double[]> intervals = new ArrayList<>();
-			for (double[] interval : entry.getValue()) {
-				if (interval != null && interval.length >= 2) {
-					intervals.add(new double[] { interval[0], interval[1] });
-				}
-			}
-			copy.put(entry.getKey(), List.copyOf(intervals));
-		}
-		this.flightBurnIntervalsByStage = Map.copyOf(copy);
-	}
-
-	private void updateFlightParticleEmission(double time) {
-		Map<AxialStage, List<double[]>> byStage = flightBurnIntervalsByStage;
-		if (byStage == null) {
-			return;
-		}
-		for (var emitter : scene.getParticleEmitters()) {
-			AxialStage stage = stageForComponent(emitter.getRocketComponent());
-			List<double[]> intervals = stage != null ? byStage.get(stage) : null;
-			if (intervals == null) {
-				// Burn window unknown for this emitter's stage: keep it emitting rather than
-				// forcing it dark, so a mapping gap never leaves the rocket with no exhaust.
-				emitter.setEmissionEnabled(true);
-				continue;
-			}
-			emitter.setEmissionEnabled(isWithinAnyInterval(intervals, time));
-		}
-	}
-
-	private static boolean isWithinAnyInterval(List<double[]> intervals, double time) {
-		if (intervals == null) {
-			return false;
-		}
-		for (double[] interval : intervals) {
-			if (time >= interval[0] && time <= interval[1]) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	public PlaybackClock getPlaybackClock() {

@@ -116,6 +116,12 @@ public class Particle implements Cloneable {
 		return update(deltaTime, GRAVITY);
 	}
 
+	/** Sets the remaining and total lifetime for externally scripted particles. */
+	public void setLifetime(float remainingLife, float maxLife) {
+		this.life = remainingLife;
+		this.maxLife = maxLife;
+	}
+
 	// Getter methods
 	public Vector3f getPosition() { return position; }
 	public Vector3f getColor() { return color; }
