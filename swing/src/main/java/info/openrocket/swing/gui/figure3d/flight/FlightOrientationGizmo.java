@@ -85,9 +85,12 @@ final class FlightOrientationGizmo implements FrameOverlay {
 			rotation.m30(0.0f);
 			rotation.m31(0.0f);
 			rotation.m32(0.0f);
+			// Distance chosen so the arrows (reach ~1.1) and their labels (centered at ~1.35, each
+			// spanning ~0.2) fit inside the square viewport with margin: half-width at this distance
+			// is tan(17.5 deg) * 6.5 ~= 2.05, comfortably beyond the label extent of ~1.56.
 			Matrix4f viewProjection = new Matrix4f()
 					.perspective((float) Math.toRadians(35.0), 1.0f, 0.1f, 100.0f)
-					.translate(0.0f, 0.0f, -4.0f)
+					.translate(0.0f, 0.0f, -6.5f)
 					.mul(rotation);
 			Matrix4f faceCamera = new Matrix4f(rotation).invert();
 
