@@ -25,6 +25,7 @@ public class Flight3DFrame extends JFrame {
 	private final Translator trans = Application.getTranslator();
 	private final Flight3DPanel flightPanel;
 	private final PlaybackTransportBar transportBar;
+	private final FlightMetricsPanel metricsPanel;
 	private final AtomicBoolean resourcesReleased = new AtomicBoolean(false);
 	private final Window ownerWindow;
 	private volatile OpenRocketDocument currentDocument;
@@ -40,9 +41,14 @@ public class Flight3DFrame extends JFrame {
 		setTitle(createTitle(simulation));
 		flightPanel = new Flight3DPanel();
 		transportBar = new PlaybackTransportBar();
-		flightPanel.setReplayReadyCallback(transportBar::setReplay);
+		metricsPanel = new FlightMetricsPanel();
+		flightPanel.setReplayReadyCallback((clock, replayData) -> {
+			transportBar.setReplay(clock, replayData);
+			metricsPanel.setReplay(currentSimulation, clock);
+		});
 		transportBar.setCameraModeListener(flightPanel::setCameraMode);
 		JPanel content = new JPanel(new BorderLayout());
+		content.add(metricsPanel, BorderLayout.NORTH);
 		content.add(flightPanel, BorderLayout.CENTER);
 		content.add(transportBar, BorderLayout.SOUTH);
 		setContentPane(content);
@@ -107,6 +113,7 @@ public class Flight3DFrame extends JFrame {
 		this.currentSimulation = simulation;
 		setTitle(createTitle(simulation));
 		transportBar.clearReplay();
+		metricsPanel.setReplay(null, null);
 		if (isShowing()) {
 			flightPanel.setSimulation(document, simulation);
 		}
@@ -140,6 +147,7 @@ public class Flight3DFrame extends JFrame {
 		currentSimulation = null;
 		flightPanel.clearDoc();
 		transportBar.dispose();
+		metricsPanel.dispose();
 	}
 
 	@Override
