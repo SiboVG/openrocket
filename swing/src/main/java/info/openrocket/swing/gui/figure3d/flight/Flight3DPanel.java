@@ -82,8 +82,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private static final Vector3f BOOSTER_FUTURE_COLOR = new Vector3f(0.40f, 0.24f, 0.12f);
 	private static final Vector3f BOOSTER_PAST_COLOR = new Vector3f(1.0f, 0.55f, 0.18f);
 	private final List<TrailPath> trailPaths = new ArrayList<>();
-	private final List<SceneObject> staticTrailObjects = new ArrayList<>();
-	private final List<SceneObject> dynamicPastTrails = new ArrayList<>();
+	private final List<SceneObject> dynamicTrails = new ArrayList<>();
 	private SceneObject positionMarker;
 	private volatile PlaybackClock playbackClock;
 	private volatile Scene3DOrchestrator activeOrchestrator;
@@ -151,8 +150,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		restoreOriginalConfiguration();
 		pendingCanvasRebuild.set(null);
 		trailPaths.clear();
-		staticTrailObjects.clear();
-		dynamicPastTrails.clear();
+		dynamicTrails.clear();
 		positionMarker = null;
 		playbackClock = null;
 		activeOrchestrator = null;
@@ -468,14 +466,13 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	 * Builds a visible tube along each stage-center flight path. At the whole-flight zoom the
 	 * rocket itself is only a few pixels, so the trail is what makes the trajectory legible.
 	 * The full path is drawn faded ("still to come"); a brighter overlay grows over the elapsed
-	 * portion as the flight plays (see {@link #rebuildPastTrails}). The active sustainer path and
+	 * portion as the flight plays (see {@link #rebuildTrails}). The active sustainer path and
 	 * separated-booster paths use different hues.
 	 */
 	private void buildTrajectoryTrails(SceneView scene, GroundedPoseProviders poses, Vector3f centerOffset,
 			double startTime, double endTime) {
 		trailPaths.clear();
-		staticTrailObjects.clear();
-		dynamicPastTrails.clear();
+		dynamicTrails.clear();
 		positionMarker = null;
 		Vector3f dimensions = trajectoryDimensions;
 		if (dimensions == null) {
@@ -501,16 +498,6 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			trailPaths.add(new TrailPath(divergent, false));
 		}
 
-		for (TrailPath trail : trailPaths) {
-			Mesh mesh = TrajectoryTrailGenerator.create(trail.points(), trailRadius, 8);
-			if (mesh.getVertices().isEmpty()) {
-				continue;
-			}
-			SceneObject trailObject = addTrailObject(scene, mesh, trail.active() ? ACTIVE_FUTURE_COLOR : BOOSTER_FUTURE_COLOR);
-			trailObject.setVisible(overviewVisible);
-			staticTrailObjects.add(trailObject);
-		}
-
 		// A bright marker at the rocket's current center — the rocket itself is sub-pixel at the
 		// whole-flight zoom, so this shows where it is along the trail. Hidden in follow mode.
 		Mesh markerMesh = SphereGenerator.create(trailRadius * 2.5f, 16, 12);
@@ -523,13 +510,12 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		positionMarker.setPoseProvider(primary);
 		positionMarker.setVisible(overviewVisible);
 		scene.addObject(positionMarker);
+
+		rebuildTrails(scene, 0);
 	}
 
 	private void setTrailDecorationsVisible(boolean visible) {
-		for (SceneObject trailObject : staticTrailObjects) {
-			trailObject.setVisible(visible);
-		}
-		for (SceneObject trailObject : dynamicPastTrails) {
+		for (SceneObject trailObject : dynamicTrails) {
 			trailObject.setVisible(visible);
 		}
 		if (positionMarker != null) {
@@ -572,7 +558,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 	private void startTrailUpdates() {
 		stopTrailUpdates();
-		trailUpdateTimer = new javax.swing.Timer(150, e -> updatePastTrails());
+		trailUpdateTimer = new javax.swing.Timer(150, e -> updateTrailSplit());
 		trailUpdateTimer.start();
 	}
 
@@ -583,7 +569,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		}
 	}
 
-	private void updatePastTrails() {
+	private void updateTrailSplit() {
 		PlaybackClock clock = playbackClock;
 		Scene3DOrchestrator orchestrator = activeOrchestrator;
 		if (clock == null || orchestrator == null || trailPaths.isEmpty()) {
@@ -596,42 +582,49 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			return;
 		}
 		lastTrailSplitIndex = splitIndex;
-		orchestrator.enqueueGlTask(() -> rebuildPastTrails(orchestrator, splitIndex));
+		orchestrator.enqueueGlTask(() -> rebuildTrails(orchestrator.getScene(), splitIndex));
 	}
 
-	// Rebuilds the brighter "elapsed" overlay covering each path up to the current time. Runs on
-	// the GL thread. A slightly larger radius keeps it on top of the faded full path.
-	private void rebuildPastTrails(Scene3DOrchestrator orchestrator, int splitIndex) {
-		SceneView scene = orchestrator.getScene();
+	/**
+	 * Rebuilds each path as two non-overlapping tubes meeting end-to-end at the current time: a
+	 * bright "elapsed" segment and a faded "still to come" segment. Drawing them as separate
+	 * segments (rather than overlaying a bright tube on a faded full-length one) avoids the coaxial
+	 * z-fighting. Runs on the GL thread.
+	 */
+	private void rebuildTrails(SceneView scene, int splitIndex) {
 		if (scene == null) {
 			return;
 		}
-		for (SceneObject trailObject : dynamicPastTrails) {
+		for (SceneObject trailObject : dynamicTrails) {
 			scene.getObjects().remove(trailObject);
 			trailObject.cleanup();
 		}
-		dynamicPastTrails.clear();
-		if (splitIndex < 1) {
+		dynamicTrails.clear();
+
+		boolean visible = cameraMode == FlightCameraMode.OVERVIEW;
+		for (TrailPath trail : trailPaths) {
+			int pointCount = trail.points().size();
+			int split = Math.max(0, Math.min(splitIndex, pointCount - 1));
+			// Elapsed segment: points[0..split].
+			addTrailSegment(scene, trail.points().subList(0, split + 1),
+					trail.active() ? ACTIVE_PAST_COLOR : BOOSTER_PAST_COLOR, visible);
+			// Upcoming segment: points[split..end] (shares the join vertex, extends the other way).
+			addTrailSegment(scene, trail.points().subList(split, pointCount),
+					trail.active() ? ACTIVE_FUTURE_COLOR : BOOSTER_FUTURE_COLOR, visible);
+		}
+	}
+
+	private void addTrailSegment(SceneView scene, List<Vector3f> points, Vector3f color, boolean visible) {
+		if (points.size() < 2) {
 			return;
 		}
-		for (TrailPath trail : trailPaths) {
-			int end = Math.min(splitIndex + 1, trail.points().size());
-			if (end < 2) {
-				continue;
-			}
-			List<Vector3f> past = new ArrayList<>(trail.points().subList(0, end));
-			Mesh mesh = TrajectoryTrailGenerator.create(past, trailRadius * 1.35f, 8);
-			if (mesh.getVertices().isEmpty()) {
-				continue;
-			}
-			Appearance3D appearance = new Appearance3D(new Vector3f(trail.active() ? ACTIVE_PAST_COLOR : BOOSTER_PAST_COLOR));
-			appearance.setUnlit(true);
-			SceneObject trailObject = new SceneObject(mesh, new Vector3f(0.0f, 0.0f, 0.0f), appearance);
-			trailObject.setSelectable(false);
-			trailObject.setVisible(cameraMode == FlightCameraMode.OVERVIEW);
-			scene.addObject(trailObject);
-			dynamicPastTrails.add(trailObject);
+		Mesh mesh = TrajectoryTrailGenerator.create(points, trailRadius, 8);
+		if (mesh.getVertices().isEmpty()) {
+			return;
 		}
+		SceneObject trailObject = addTrailObject(scene, mesh, color);
+		trailObject.setVisible(visible);
+		dynamicTrails.add(trailObject);
 	}
 
 	private void addGroundReference(SceneView scene, FlightData data) {
