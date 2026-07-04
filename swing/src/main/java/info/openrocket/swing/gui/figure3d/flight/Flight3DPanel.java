@@ -14,6 +14,7 @@ import info.openrocket.core.startup.Application;
 import info.openrocket.swing.gui.figure3d.SharedCanvasRenderScheduler;
 import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
 import info.openrocket.swing.gui.figure3d.animation.PoseProvider;
+import info.openrocket.swing.gui.figure3d.constants.GeometryConstants;
 import info.openrocket.swing.gui.figure3d.constants.RenderingConstants;
 import info.openrocket.swing.gui.figure3d.core.geometry.Mesh;
 import info.openrocket.swing.gui.figure3d.core.geometry.basic.PlaneGenerator;
@@ -318,7 +319,10 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		GroundedPoseProviders groundedPoses = createGroundedPoseProviders(scene, replayData);
 		orchestrator.bindFlightPosesToRocket(groundedPoses.providersByStage(), groundedPoses.primaryProvider(),
 				replayData.getStartTime(), replayData.getEndTime());
-		orchestrator.setFlightBurnIntervals(toStageTimeline(replayData.getBurnIntervalsByStage()));
+		Map<AxialStage, List<double[]>> burnTimeline = toStageTimeline(replayData.getBurnIntervalsByStage());
+		int burnWindowCount = burnTimeline.values().stream().mapToInt(List::size).sum();
+		log.info("Flight replay: {} stage(s) with {} total motor burn window(s)", burnTimeline.size(), burnWindowCount);
+		orchestrator.setFlightBurnIntervals(burnTimeline);
 		orchestrator.setFollowFlightCamera(true);
 		PlaybackClock clock = orchestrator.getPlaybackClock();
 		if (clock != null) {
@@ -341,7 +345,10 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 	private void addGroundReference(SceneView scene, FlightData data) {
 		float size = computeGroundSize(data);
-		Mesh groundMesh = PlaneGenerator.create(size, size, 1.0f, 1.0f);
+		// CLOCKWISE winding makes the plane's up-facing side the front face (same as
+		// TerrainGenerator), so the ground is visible from above instead of culled.
+		Mesh groundMesh = PlaneGenerator.create(size, size, 1.0f, 1.0f,
+				GeometryConstants.WindingOrder.CLOCKWISE);
 		Appearance3D groundAppearance = new Appearance3D(new Vector3f(0.22f, 0.30f, 0.20f));
 		groundAppearance.setUnlit(true);
 		groundAppearance.setShine(0.05f);
