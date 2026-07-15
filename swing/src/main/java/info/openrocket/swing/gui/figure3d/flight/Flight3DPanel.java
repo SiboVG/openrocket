@@ -129,7 +129,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	}
 
 	/** One smoke particle of the trail: a fixed world position revealed at its birth time. */
-	private record SmokePuff(Vector3f position, double birthTime, float size) {
+	private record SmokePuff(Vector3f position, double birthTime, float size, Vector3f color) {
 	}
 
 	/** One particle of a flame plume, in the rocket's local frame (nose toward -X). */
@@ -425,7 +425,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 				replayData.getStartTime(), replayData.getEndTime());
 		addEventMarkers(scene, replayData, groundedPoses.primaryProvider(), rocketCenterOffset);
 		buildExhaustGeometry(scene, orchestrator.getCameraController(), config, groundedPoses,
-				burnTimeline, rocketCenterOffset);
+				replayData, burnTimeline, rocketCenterOffset);
 		applyCameraMode(orchestrator, cameraMode);
 
 		PlaybackClock clock = orchestrator.getPlaybackClock();
@@ -588,7 +588,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	 * exact state continuous playback would have produced. Runs on the GL thread.
 	 */
 	private void buildExhaustGeometry(SceneView scene, CameraControls cameraControls,
-			RenderingConfiguration config, GroundedPoseProviders poses,
+			RenderingConfiguration config, GroundedPoseProviders poses, FlightReplayData replayData,
 			Map<AxialStage, List<double[]>> burnTimeline, Vector3f centerOffset) {
 		smokePuffs.clear();
 		flameJets.clear();
@@ -623,6 +623,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			}
 			addFlameJet(scene, config, provider, entry.getValue(), nozzleLocal, rocketLength);
 		}
+		addEventBursts(replayData, poses.primaryProvider(), centerOffset, puffSize);
 		log.info("Flight replay exhaust: {} smoke puff(s), {} flame jet(s)", smokePuffs.size(), flameJets.size());
 	}
 
@@ -657,7 +658,45 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 						(jitter.nextFloat() - 0.5f) * spacing,
 						(jitter.nextFloat() - 0.5f) * spacing,
 						(jitter.nextFloat() - 0.5f) * spacing);
-				smokePuffs.add(new SmokePuff(puffCenter, t, size));
+				smokePuffs.add(new SmokePuff(puffCenter, t, size, SMOKE_COLOR));
+			}
+		}
+	}
+
+	/**
+	 * Adds a burst of white smoke puffs where an ejection charge fires and a smaller one
+	 * where a stage separates, so the events read visually along the flight. The bursts ride
+	 * the same aging pipeline as the trail puffs.
+	 */
+	private void addEventBursts(FlightReplayData replayData, PoseProvider primary, Vector3f centerOffset,
+			float puffSize) {
+		Vector3f burstColor = new Vector3f(0.96f, 0.96f, 0.97f);
+		for (var event : replayData.getAllEvents()) {
+			int puffs;
+			switch (event.getType()) {
+				case EJECTION_CHARGE -> puffs = 12;
+				case STAGE_SEPARATION -> puffs = 6;
+				default -> {
+					continue;
+				}
+			}
+			double t = event.getTime();
+			if (t < replayData.getStartTime() || t > replayData.getEndTime()) {
+				continue;
+			}
+			Vector3f center = primary.getPosition(t);
+			if (centerOffset != null) {
+				center.add(primary.getOrientation(t).transform(new Vector3f(centerOffset)));
+			}
+			Random jitter = new Random(Double.hashCode(t) * 127L + puffs);
+			float scatter = trailRadius * 1.5f;
+			for (int i = 0; i < puffs; i++) {
+				Vector3f position = new Vector3f(center).add(
+						(jitter.nextFloat() - 0.5f) * 2.0f * scatter,
+						(jitter.nextFloat() - 0.5f) * 2.0f * scatter,
+						(jitter.nextFloat() - 0.5f) * 2.0f * scatter);
+				float size = puffSize * (0.8f + 0.6f * jitter.nextFloat());
+				smokePuffs.add(new SmokePuff(position, t, size, burstColor));
 			}
 		}
 	}
@@ -720,7 +759,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 				float ageRatio = (float) Math.min(0.78, 0.78 * age / SMOKE_GROWTH_SECONDS);
 				particle.position.set(puff.position())
 						.add(0.0f, (float) Math.min(age, 30.0) * SMOKE_RISE_RATE * trailRadius, 0.0f);
-				particle.color.set(SMOKE_COLOR);
+				particle.color.set(puff.color());
 				particle.size = puff.size();
 				particle.setLifetime(1.0f - ageRatio, 1.0f);
 				count++;
