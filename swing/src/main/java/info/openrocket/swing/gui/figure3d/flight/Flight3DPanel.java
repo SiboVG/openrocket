@@ -10,6 +10,7 @@ import info.openrocket.core.rocketcomponent.RocketComponent;
 import info.openrocket.core.simulation.FlightData;
 import info.openrocket.core.simulation.FlightDataBranch;
 import info.openrocket.core.simulation.FlightDataType;
+import info.openrocket.core.simulation.FlightEvent;
 import info.openrocket.core.startup.Application;
 import info.openrocket.swing.gui.figure3d.SharedCanvasRenderScheduler;
 import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
@@ -117,6 +118,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private final List<SmokePuff> smokePuffs = new ArrayList<>();
 	private final List<FlameJet> flameJets = new ArrayList<>();
 	private final List<SceneObject> eventMarkers = new ArrayList<>();
+	private final List<ParachuteCanopy> parachutes = new ArrayList<>();
 	private SmokeEmitter smokePuppet;
 	private SceneObject positionMarker;
 	private FlightOrientationGizmo orientationGizmo;
@@ -138,6 +140,11 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 	private record FlameJet(FlameEmitter emitter, PoseProvider provider, List<double[]> burnWindows,
 			List<FlameShapePoint> shape) {
+	}
+
+	/** A canopy shown above a descending stage between deployment and touchdown. */
+	private record ParachuteCanopy(SceneObject object, PoseProvider provider, double deployTime,
+			double endTime, float riseOffset) {
 	}
 
 	Flight3DPanel() {
@@ -208,6 +215,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		smokePuffs.clear();
 		flameJets.clear();
 		eventMarkers.clear();
+		parachutes.clear();
 		smokePuppet = null;
 		positionMarker = null;
 		playbackClock = null;
@@ -624,7 +632,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			addFlameJet(scene, config, provider, entry.getValue(), nozzleLocal, rocketLength);
 		}
 		addEventBursts(replayData, poses.primaryProvider(), centerOffset, puffSize);
-		log.info("Flight replay exhaust: {} smoke puff(s), {} flame jet(s)", smokePuffs.size(), flameJets.size());
+		addParachutes(scene, replayData, poses, rocketLength);
+		log.info("Flight replay exhaust: {} smoke puff(s), {} flame jet(s), {} parachute(s)",
+				smokePuffs.size(), flameJets.size(), parachutes.size());
 	}
 
 	/**
@@ -661,6 +671,61 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 				smokePuffs.add(new SmokePuff(puffCenter, t, size, SMOKE_COLOR));
 			}
 		}
+	}
+
+	/**
+	 * Adds a canopy above each stage with a recovery deployment event, shown from the moment
+	 * of deployment until touchdown so the slowed descent visually makes sense. The canopy
+	 * stays upright regardless of how the stage tumbles.
+	 */
+	private void addParachutes(SceneView scene, FlightReplayData replayData, GroundedPoseProviders poses,
+			float rocketLength) {
+		parachutes.clear();
+		List<Double> groundHits = new ArrayList<>();
+		for (var event : replayData.getAllEvents()) {
+			if (event.getType() == FlightEvent.Type.GROUND_HIT) {
+				groundHits.add(event.getTime());
+			}
+		}
+		Collections.sort(groundHits);
+		for (var event : replayData.getAllEvents()) {
+			if (event.getType() != FlightEvent.Type.RECOVERY_DEVICE_DEPLOYMENT) {
+				continue;
+			}
+			PoseProvider provider = providerForEventSource(event.getSource(), poses);
+			// The canopy disappears at the first touchdown after its deployment (each stage
+			// lands at its own time; without a per-branch mapping this is the best estimate).
+			double end = replayData.getEndTime();
+			for (double hit : groundHits) {
+				if (hit >= event.getTime()) {
+					end = hit;
+					break;
+				}
+			}
+			Mesh mesh = SphereGenerator.create(rocketLength * 0.6f, 20, 12);
+			Appearance3D appearance = new Appearance3D(new Vector3f(0.9f, 0.3f, 0.2f));
+			SceneObject canopy = new SceneObject(mesh, new Vector3f(), appearance);
+			canopy.setSelectable(false);
+			canopy.setVisible(false);
+			scene.addObject(canopy);
+			parachutes.add(new ParachuteCanopy(canopy, provider, event.getTime(), end,
+					rocketLength * 0.9f));
+		}
+	}
+
+	private static PoseProvider providerForEventSource(RocketComponent source, GroundedPoseProviders poses) {
+		if (source != null) {
+			try {
+				AxialStage stage = source instanceof AxialStage axialStage ? axialStage : source.getStage();
+				PoseProvider provider = poses.providersByStage().get(stage);
+				if (provider != null) {
+					return provider;
+				}
+			} catch (IllegalStateException e) {
+				// Component not attached to a stage; fall through to the primary trajectory.
+			}
+		}
+		return poses.primaryProvider();
 	}
 
 	/**
@@ -765,6 +830,18 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 				count++;
 			}
 			trim(particles, count);
+		}
+
+		for (ParachuteCanopy parachute : parachutes) {
+			boolean deployed = time >= parachute.deployTime() && time <= parachute.endTime();
+			parachute.object().setVisible(deployed);
+			if (!deployed) {
+				continue;
+			}
+			Vector3f position = parachute.provider().getPosition(time);
+			parachute.object().getModelMatrix()
+					.translation(position.x, position.y + parachute.riseOffset(), position.z)
+					.scale(1.0f, 0.45f, 1.0f);
 		}
 
 		for (FlameJet jet : flameJets) {
