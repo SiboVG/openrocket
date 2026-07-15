@@ -39,6 +39,8 @@ import static org.lwjgl.opengl.GL11.glCullFace;
 import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glViewport;
+import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
+import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 
 /**
  * Main OpenGL 3.1 renderer for a figure3d scene.

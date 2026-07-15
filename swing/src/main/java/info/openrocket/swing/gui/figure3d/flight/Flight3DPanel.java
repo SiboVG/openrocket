@@ -231,7 +231,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 	private GLScenePanel createCanvas(String unavailableMessage) {
 		try {
-			return new GLScenePanel(document.getRocket(), null, false);
+			return new GLScenePanel(document.getRocket(), null);
 		} catch (UnsatisfiedLinkError | ExceptionInInitializerError e) {
 			log.warn("{}: LWJGL native libraries not found for {}/{}.",
 					unavailableMessage, System.getProperty("os.name"), System.getProperty("os.arch"), e);
@@ -242,7 +242,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private void installCanvas(GLScenePanel panel) {
 		glPanel = panel;
 		panel.setInitializationHook(this::initializeFlightPanelOnGlThread);
-		panel.setBlankDefaultFramebufferCallback(() -> requestCanvasRebuild(panel));
+		panel.setGraphicsResetCallback(() -> requestCanvasRebuild(panel));
 		panel.setGlInitFailureCallback(() -> SwingUtilities.invokeLater(() -> showGLInitFailureUI(panel)));
 		earliestRenderAtMs = System.currentTimeMillis() + STARTUP_RENDER_DELAY_MS;
 		add(panel, BorderLayout.CENTER);
@@ -282,7 +282,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		if (panel == null) {
 			return;
 		}
-		if (panel.glInitFailed) {
+		if (panel.hasGlInitFailed()) {
 			stopRenderLoop();
 			return;
 		}
@@ -377,7 +377,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 	private void disposeCurrentCanvas(GLScenePanel panel) {
 		panel.setInitializationHook(null);
-		panel.setBlankDefaultFramebufferCallback(null);
+		panel.setGraphicsResetCallback(null);
 		if (IS_MACOS) {
 			// Keep the same teardown order as PhotoPanel: detach first so cleanup avoids
 			// re-entering the macOS JAWT surface path after peer teardown has begun.
@@ -476,14 +476,28 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	}
 
 	private void applyCameraMode(Scene3DOrchestrator orchestrator, FlightCameraMode mode) {
-		// The path trail runs through the rocket's center, so it clips the rocket up close: show
-		// the trail and position marker only in the distant views.
+		// The path trail runs through the rocket's center, so it clips the rocket up close:
+		// show it only in the distant views, and the position marker only in the overview.
 		boolean distantView = mode == FlightCameraMode.OVERVIEW || mode == FlightCameraMode.PAD;
-		orchestrator.enqueueGlTask(() -> setTrailDecorationsVisible(distantView));
+		boolean markerView = mode == FlightCameraMode.OVERVIEW;
+		orchestrator.enqueueGlTask(() -> setTrailDecorationsVisible(distantView, markerView));
 
 		switch (mode) {
 			case FOLLOW -> orchestrator.setFollowFlightCamera(true);
-			case ONBOARD -> orchestrator.setOnboardFlightCamera(rocketLengthWorld(orchestrator) * 2.5f);
+			case ONBOARD -> {
+				// A camera mounted on the side of the rocket, looking up along the body
+				// toward the nose (the nose points toward -X in the rocket's local frame).
+				float length = rocketLengthWorld(orchestrator);
+				Vector3f size = orchestrator.getCameraController().computeRocketSize();
+				float halfWidth = size != null ? Math.max(size.y, size.z) * 0.5f : length * 0.05f;
+				Vector3f center = orchestrator.getCameraController().computeRocketCenter();
+				Vector3f centerLocal = center != null ? new Vector3f(center) : new Vector3f();
+				Vector3f eyeLocal = new Vector3f(centerLocal)
+						.add(length * 0.15f, 0.0f, halfWidth + length * 0.08f);
+				Vector3f targetLocal = new Vector3f(centerLocal)
+						.add(-length * 0.55f, 0.0f, halfWidth * 0.35f);
+				orchestrator.setOnboardFlightCamera(eyeLocal, targetLocal);
+			}
 			case PAD -> {
 				// A launch-footage viewpoint: a few meters out from the pad at head height.
 				float away = Math.max(7.0f * RenderingConstants.WORLD_SCALE,
@@ -729,17 +743,19 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		};
 		float arrowLength = rocketLength * 1.2f;
 		float arrowDistance = rocketLength * 2.4f;
+		float arrowHeadRadius = rocketLength * 0.11f;
 		for (CompassArrow arrow : arrows) {
-			Mesh arrowMesh = AxesGenerator.createArrowMesh(arrowLength, rocketLength * 0.06f,
-					rocketLength * 0.45f, rocketLength * 0.18f);
+			Mesh arrowMesh = AxesGenerator.createArrowMesh(arrowLength, rocketLength * 0.05f,
+					rocketLength * 0.45f, arrowHeadRadius);
 			Appearance3D appearance = new Appearance3D(arrow.color());
 			appearance.setUnlit(true);
 			SceneObject compassArrow = new SceneObject(arrowMesh, new Vector3f(), appearance);
 			compassArrow.setSelectable(false);
-			// Rotate the +X arrow to its cardinal direction and push it out from the pad.
+			// Rotate the +X arrow to its cardinal direction and push it out from the pad,
+			// lifted so the arrowhead clears the ground plane instead of clipping into it.
 			compassArrow.getModelMatrix()
 					.rotationY(arrow.yawRadians())
-					.translate(arrowDistance, rocketLength * 0.06f, 0.0f);
+					.translate(arrowDistance, arrowHeadRadius * 1.3f, 0.0f);
 			scene.addObject(compassArrow);
 		}
 
@@ -754,7 +770,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			List<Vector3f> circle = new ArrayList<>(98);
 			for (int i = 0; i <= 97; i++) {
 				double angle = 2.0 * Math.PI * i / 96.0;
-				circle.add(new Vector3f((float) (Math.cos(angle) * radius), ringTube,
+				// Lifted a little more than the tube radius so the ring clears the ground.
+				circle.add(new Vector3f((float) (Math.cos(angle) * radius), ringTube * 1.4f,
 						(float) (Math.sin(angle) * radius)));
 			}
 			Mesh ringMesh = TrajectoryTrailGenerator.create(circle, ringTube, 6);
@@ -984,15 +1001,22 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		return false;
 	}
 
-	private void setTrailDecorationsVisible(boolean visible) {
+	// The trajectory decorations show in the distant views; the rocket position marker only
+	// in the whole-flight overview (up close the rocket itself is visible and the marker,
+	// sized for the trajectory scale, would dwarf it).
+	private boolean isDistantView() {
+		return cameraMode == FlightCameraMode.OVERVIEW || cameraMode == FlightCameraMode.PAD;
+	}
+
+	private void setTrailDecorationsVisible(boolean trailsVisible, boolean markerVisible) {
 		for (SceneObject trailObject : dynamicTrails) {
-			trailObject.setVisible(visible);
+			trailObject.setVisible(trailsVisible);
 		}
 		for (SceneObject marker : eventMarkers) {
-			marker.setVisible(visible);
+			marker.setVisible(trailsVisible);
 		}
 		if (positionMarker != null) {
-			positionMarker.setVisible(visible);
+			positionMarker.setVisible(markerVisible);
 		}
 	}
 
@@ -1003,7 +1027,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private void addEventMarkers(SceneView scene, FlightReplayData replayData, PoseProvider primary,
 			Vector3f centerOffset) {
 		eventMarkers.clear();
-		boolean visible = cameraMode == FlightCameraMode.OVERVIEW;
+		boolean visible = isDistantView();
 		for (var event : FlightEventMarkers.selectDisplayEvents(replayData.getAllEvents())) {
 			double t = event.getTime();
 			if (t < replayData.getStartTime() || t > replayData.getEndTime()) {
@@ -1095,7 +1119,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		}
 		dynamicTrails.clear();
 
-		boolean visible = cameraMode == FlightCameraMode.OVERVIEW;
+		boolean visible = isDistantView();
 		for (TrailPath trail : trailPaths) {
 			List<Vector3f> points = trail.points();
 			int pointCount = points.size();

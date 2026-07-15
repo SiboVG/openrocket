@@ -1,10 +1,10 @@
 package info.openrocket.swing.gui.figure3d.flight;
 
 import info.openrocket.swing.gui.figure3d.constants.RenderingConstants;
-import info.openrocket.swing.gui.figure3d.core.geometry.IntList;
-import info.openrocket.swing.gui.figure3d.core.geometry.Mesh;
-import info.openrocket.swing.gui.figure3d.core.geometry.Vertex;
-import info.openrocket.swing.gui.figure3d.core.geometry.basic.AxesGenerator;
+import info.openrocket.swing.gui.figure3d.geometry.IntList;
+import info.openrocket.swing.gui.figure3d.geometry.Mesh;
+import info.openrocket.swing.gui.figure3d.geometry.Vertex;
+import info.openrocket.swing.gui.figure3d.geometry.basic.AxesGenerator;
 import info.openrocket.swing.gui.figure3d.rendering.FrameOverlay;
 import info.openrocket.swing.gui.figure3d.rendering.GLRenderableMesh;
 import info.openrocket.swing.gui.figure3d.rendering.GLShader;
@@ -43,6 +43,8 @@ final class FlightOrientationGizmo implements FrameOverlay {
 	private static final Vector3f LABEL_COLOR = new Vector3f(0.96f, 0.96f, 0.98f);
 
 	private final GLShader shader;
+	private final int mvpUniform;
+	private final int colorUniform;
 	private final Renderable arrow;
 	private final List<Cardinal> cardinals = new ArrayList<>();
 
@@ -51,6 +53,8 @@ final class FlightOrientationGizmo implements FrameOverlay {
 
 	FlightOrientationGizmo() {
 		shader = new GLShader("/shaders/gizmo_vertex.glsl", "/shaders/gizmo_fragment.glsl");
+		mvpUniform = shader.requireUniformLocation("mvp");
+		colorUniform = shader.requireUniformLocation("color");
 		arrow = new GLRenderableMesh(originArrow());
 
 		cardinals.add(new Cardinal(new Vector3f(0, 0, -1), new Vector3f(0.95f, 0.27f, 0.27f), letter('N')));
@@ -101,8 +105,8 @@ final class FlightOrientationGizmo implements FrameOverlay {
 
 			for (Cardinal cardinal : cardinals) {
 				model.identity().rotate(orientation.rotationTo(X_AXIS, cardinal.direction()));
-				shader.setUniformMatrix4f("mvp", mvp.set(viewProjection).mul(model));
-				shader.setUniformVector3f("color", cardinal.color());
+				shader.setUniformMatrix4f(mvpUniform, mvp.set(viewProjection).mul(model));
+				shader.setUniformVector3f(colorUniform, cardinal.color());
 				arrow.render();
 			}
 
@@ -114,8 +118,8 @@ final class FlightOrientationGizmo implements FrameOverlay {
 						.translate(new Vector3f(cardinal.direction()).mul(1.35f))
 						.mul(faceCamera)
 						.scale(0.42f);
-				shader.setUniformMatrix4f("mvp", mvp.set(viewProjection).mul(model));
-				shader.setUniformVector3f("color", LABEL_COLOR);
+				shader.setUniformMatrix4f(mvpUniform, mvp.set(viewProjection).mul(model));
+				shader.setUniformVector3f(colorUniform, LABEL_COLOR);
 				cardinal.label().render();
 			}
 
