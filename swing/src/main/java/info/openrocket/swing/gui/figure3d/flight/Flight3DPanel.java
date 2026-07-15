@@ -116,6 +116,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private final List<SceneObject> dynamicTrails = new ArrayList<>();
 	private final List<SmokePuff> smokePuffs = new ArrayList<>();
 	private final List<FlameJet> flameJets = new ArrayList<>();
+	private final List<SceneObject> eventMarkers = new ArrayList<>();
 	private SmokeEmitter smokePuppet;
 	private SceneObject positionMarker;
 	private FlightOrientationGizmo orientationGizmo;
@@ -206,6 +207,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		dynamicTrails.clear();
 		smokePuffs.clear();
 		flameJets.clear();
+		eventMarkers.clear();
 		smokePuppet = null;
 		positionMarker = null;
 		playbackClock = null;
@@ -421,6 +423,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 				replayData.getStartTime(), replayData.getEndTime());
 		buildTrajectoryTrails(scene, groundedPoses, rocketCenterOffset,
 				replayData.getStartTime(), replayData.getEndTime());
+		addEventMarkers(scene, replayData, groundedPoses.primaryProvider(), rocketCenterOffset);
 		buildExhaustGeometry(scene, orchestrator.getCameraController(), config, groundedPoses,
 				burnTimeline, rocketCenterOffset);
 		applyCameraMode(orchestrator, cameraMode);
@@ -776,8 +779,41 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		for (SceneObject trailObject : dynamicTrails) {
 			trailObject.setVisible(visible);
 		}
+		for (SceneObject marker : eventMarkers) {
+			marker.setVisible(visible);
+		}
 		if (positionMarker != null) {
 			positionMarker.setVisible(visible);
+		}
+	}
+
+	/**
+	 * Places one colored marker sphere on the trajectory for each notable flight event
+	 * (burnout, apogee, deployment, ...). Colors match the scrub-slider event ticks.
+	 */
+	private void addEventMarkers(SceneView scene, FlightReplayData replayData, PoseProvider primary,
+			Vector3f centerOffset) {
+		eventMarkers.clear();
+		boolean visible = cameraMode == FlightCameraMode.OVERVIEW;
+		for (var event : FlightEventMarkers.selectDisplayEvents(replayData.getAllEvents())) {
+			double t = event.getTime();
+			if (t < replayData.getStartTime() || t > replayData.getEndTime()) {
+				continue;
+			}
+			Vector3f position = primary.getPosition(t);
+			if (centerOffset != null) {
+				position.add(primary.getOrientation(t).transform(new Vector3f(centerOffset)));
+			}
+			Mesh mesh = SphereGenerator.create(trailRadius * 1.2f, 12, 8);
+			Appearance3D appearance = new Appearance3D(FlightEventMarkers.colorOf(event.getType()));
+			appearance.setUnlit(true);
+			SceneObject marker = new SceneObject(mesh, new Vector3f(), appearance);
+			marker.setSelectable(false);
+			marker.setRenderOnTop(true);
+			marker.setVisible(visible);
+			marker.getModelMatrix().translation(position);
+			scene.addObject(marker);
+			eventMarkers.add(marker);
 		}
 	}
 

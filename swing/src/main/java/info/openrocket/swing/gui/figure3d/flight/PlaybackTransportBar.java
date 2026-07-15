@@ -242,7 +242,7 @@ class PlaybackTransportBar extends JPanel {
 		List<EventMarker> markers = new ArrayList<>();
 		for (FlightEvent event : replayData.getAllEvents()) {
 			if (MARKER_TYPES.contains(event.getType())) {
-				markers.add(new EventMarker(event.getTime(), event.getType().toString()));
+				markers.add(new EventMarker(event.getTime(), event.getType().toString(), event.getType()));
 			}
 		}
 		markers.sort(Comparator.comparingDouble(EventMarker::time));
@@ -265,7 +265,7 @@ class PlaybackTransportBar extends JPanel {
 		}
 	}
 
-	private record EventMarker(double time, String label) {
+	private record EventMarker(double time, String label, FlightEvent.Type type) {
 	}
 
 	private final class EventMarkerSlider extends JSlider {
@@ -298,9 +298,12 @@ class PlaybackTransportBar extends JPanel {
 			Graphics2D g2 = (Graphics2D) graphics.create();
 			try {
 				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-				g2.setColor(markerColor());
 				int y = getHeight() / 2 + 8;
 				for (EventMarker marker : markers) {
+					// Match the trajectory's event marker colors, so the slider ticks and the
+					// 3D markers read as the same events.
+					g2.setColor(FlightEventMarkers.hasColor(marker.type())
+							? FlightEventMarkers.awtColorOf(marker.type()) : markerColor());
 					int x = xForTime(marker.time());
 					g2.drawLine(x, y - 5, x, y + 5);
 				}
