@@ -477,18 +477,33 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 	private void applyCameraMode(Scene3DOrchestrator orchestrator, FlightCameraMode mode) {
 		// The path trail runs through the rocket's center, so it clips the rocket up close: show
-		// the trail and position marker only in the whole-flight overview.
-		boolean overview = mode == FlightCameraMode.OVERVIEW;
-		orchestrator.enqueueGlTask(() -> setTrailDecorationsVisible(overview));
+		// the trail and position marker only in the distant views.
+		boolean distantView = mode == FlightCameraMode.OVERVIEW || mode == FlightCameraMode.PAD;
+		orchestrator.enqueueGlTask(() -> setTrailDecorationsVisible(distantView));
 
-		if (mode == FlightCameraMode.FOLLOW) {
-			orchestrator.setFollowFlightCamera(true);
-		} else if (trajectoryCenter != null && trajectoryDimensions != null) {
-			orchestrator.fitFlightTrajectory(trajectoryCenter, trajectoryDimensions);
-		} else {
-			orchestrator.setFollowFlightCamera(false);
-			orchestrator.focusOnRocket();
+		switch (mode) {
+			case FOLLOW -> orchestrator.setFollowFlightCamera(true);
+			case ONBOARD -> orchestrator.setOnboardFlightCamera(rocketLengthWorld(orchestrator) * 2.5f);
+			case PAD -> {
+				// A launch-footage viewpoint: a few meters out from the pad at head height.
+				float away = Math.max(7.0f * RenderingConstants.WORLD_SCALE,
+						rocketLengthWorld(orchestrator) * 4.0f);
+				orchestrator.setPadFlightCamera(new Vector3f(away, 1.7f * RenderingConstants.WORLD_SCALE, away));
+			}
+			default -> {
+				if (trajectoryCenter != null && trajectoryDimensions != null) {
+					orchestrator.fitFlightTrajectory(trajectoryCenter, trajectoryDimensions);
+				} else {
+					orchestrator.setFollowFlightCamera(false);
+					orchestrator.focusOnRocket();
+				}
+			}
 		}
+	}
+
+	private static float rocketLengthWorld(Scene3DOrchestrator orchestrator) {
+		Vector3f size = orchestrator.getCameraController().computeRocketSize();
+		return size != null ? Math.max(size.x, 1.0f) : 20.0f;
 	}
 
 	private void computeTrajectoryBounds(CameraControls cameraControls, GroundedPoseProviders poses,
