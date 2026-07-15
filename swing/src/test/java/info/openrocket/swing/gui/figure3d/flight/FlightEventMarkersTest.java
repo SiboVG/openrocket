@@ -31,6 +31,15 @@ class FlightEventMarkersTest {
 	}
 
 	@Test
+	void ringStepFollowsOneTwoFiveProgression() {
+		assertEquals(1.0, Flight3DPanel.chooseRingStep(0.5));
+		assertEquals(2.0, Flight3DPanel.chooseRingStep(5.0));
+		assertEquals(50.0, Flight3DPanel.chooseRingStep(120.0));
+		assertEquals(100.0, Flight3DPanel.chooseRingStep(250.0));
+		assertEquals(500.0, Flight3DPanel.chooseRingStep(1200.0));
+	}
+
+	@Test
 	void markedTypesHaveDistinctColors() {
 		assertTrue(FlightEventMarkers.hasColor(FlightEvent.Type.APOGEE));
 		assertNotEquals(FlightEventMarkers.awtColorOf(FlightEvent.Type.APOGEE),

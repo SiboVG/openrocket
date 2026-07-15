@@ -18,6 +18,7 @@ import info.openrocket.swing.gui.figure3d.animation.PoseProvider;
 import info.openrocket.swing.gui.figure3d.constants.GeometryConstants;
 import info.openrocket.swing.gui.figure3d.constants.RenderingConstants;
 import info.openrocket.swing.gui.figure3d.geometry.Mesh;
+import info.openrocket.swing.gui.figure3d.geometry.basic.AxesGenerator;
 import info.openrocket.swing.gui.figure3d.geometry.basic.PlaneGenerator;
 import info.openrocket.swing.gui.figure3d.geometry.basic.SphereGenerator;
 import info.openrocket.swing.gui.figure3d.geometry.basic.TrajectoryTrailGenerator;
@@ -633,6 +634,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		}
 		addEventBursts(replayData, poses.primaryProvider(), centerOffset, puffSize);
 		addParachutes(scene, replayData, poses, rocketLength);
+		addLaunchSiteReference(scene, flightData, rocketLength);
 		log.info("Flight replay exhaust: {} smoke puff(s), {} flame jet(s), {} parachute(s)",
 				smokePuffs.size(), flameJets.size(), parachutes.size());
 	}
@@ -670,6 +672,82 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 						(jitter.nextFloat() - 0.5f) * spacing);
 				smokePuffs.add(new SmokePuff(puffCenter, t, size, SMOKE_COLOR));
 			}
+		}
+	}
+
+	/**
+	 * Adds static launch-site scenery: a pad disc with a launch rod at the origin, a compass
+	 * rose whose arrow colors match the orientation gizmo's cardinal letters, and faint
+	 * distance rings on the ground for scale.
+	 */
+	private void addLaunchSiteReference(SceneView scene, FlightData data, float rocketLength) {
+		// Pad disc, half sunk into the ground.
+		Mesh padMesh = SphereGenerator.create(rocketLength * 1.5f, 24, 12);
+		Appearance3D padAppearance = new Appearance3D(new Vector3f(0.32f, 0.32f, 0.34f));
+		padAppearance.setUnlit(true);
+		SceneObject pad = new SceneObject(padMesh, new Vector3f(), padAppearance);
+		pad.setSelectable(false);
+		pad.getModelMatrix().scaling(1.0f, 0.08f, 1.0f);
+		scene.addObject(pad);
+
+		// Launch rod, standing beside the rocket.
+		float rodLength = rocketLength * 1.4f;
+		Mesh rodMesh = AxesGenerator.createArrowMesh(rodLength, rocketLength * 0.015f,
+				rocketLength * 0.02f, rocketLength * 0.015f);
+		Appearance3D rodAppearance = new Appearance3D(new Vector3f(0.55f, 0.55f, 0.58f));
+		rodAppearance.setUnlit(true);
+		SceneObject rod = new SceneObject(rodMesh, new Vector3f(), rodAppearance);
+		rod.setSelectable(false);
+		// The arrow points along +X; stand it upright with its base on the pad.
+		rod.getModelMatrix().translation(0.0f, rodLength * 0.5f, rocketLength * 0.08f)
+				.rotateZ((float) (Math.PI / 2.0));
+		scene.addObject(rod);
+
+		// Compass rose: four flat arrows matching the gizmo's cardinal colors.
+		record CompassArrow(float yawRadians, Vector3f color) {
+		}
+		CompassArrow[] arrows = {
+				new CompassArrow((float) (Math.PI / 2.0), new Vector3f(0.95f, 0.27f, 0.27f)),  // N = -Z
+				new CompassArrow(0.0f, new Vector3f(0.32f, 0.82f, 0.42f)),                     // E = +X
+				new CompassArrow((float) (-Math.PI / 2.0), new Vector3f(0.40f, 0.58f, 1.0f)),  // S = +Z
+				new CompassArrow((float) Math.PI, new Vector3f(1.0f, 0.82f, 0.22f))            // W = -X
+		};
+		float arrowLength = rocketLength * 1.2f;
+		float arrowDistance = rocketLength * 2.4f;
+		for (CompassArrow arrow : arrows) {
+			Mesh arrowMesh = AxesGenerator.createArrowMesh(arrowLength, rocketLength * 0.06f,
+					rocketLength * 0.45f, rocketLength * 0.18f);
+			Appearance3D appearance = new Appearance3D(arrow.color());
+			appearance.setUnlit(true);
+			SceneObject compassArrow = new SceneObject(arrowMesh, new Vector3f(), appearance);
+			compassArrow.setSelectable(false);
+			// Rotate the +X arrow to its cardinal direction and push it out from the pad.
+			compassArrow.getModelMatrix()
+					.rotationY(arrow.yawRadians())
+					.translate(arrowDistance, rocketLength * 0.06f, 0.0f);
+			scene.addObject(compassArrow);
+		}
+
+		// Distance rings, spaced on a 1-2-5 progression covering the flight's footprint.
+		double maxHorizontalMeters = computeMaxHorizontalMeters(data);
+		double stepMeters = chooseRingStep(maxHorizontalMeters);
+		float ringTube = Math.max(trailRadius * 0.15f, rocketLength * 0.02f);
+		int rings = 0;
+		for (double radiusMeters = stepMeters; radiusMeters <= maxHorizontalMeters && rings < 5;
+				radiusMeters += stepMeters, rings++) {
+			float radius = (float) (radiusMeters * RenderingConstants.WORLD_SCALE);
+			List<Vector3f> circle = new ArrayList<>(98);
+			for (int i = 0; i <= 97; i++) {
+				double angle = 2.0 * Math.PI * i / 96.0;
+				circle.add(new Vector3f((float) (Math.cos(angle) * radius), ringTube,
+						(float) (Math.sin(angle) * radius)));
+			}
+			Mesh ringMesh = TrajectoryTrailGenerator.create(circle, ringTube, 6);
+			Appearance3D appearance = new Appearance3D(new Vector3f(0.45f, 0.50f, 0.45f));
+			appearance.setUnlit(true);
+			SceneObject ring = new SceneObject(ringMesh, new Vector3f(), appearance);
+			ring.setSelectable(false);
+			scene.addObject(ring);
 		}
 	}
 
@@ -1149,6 +1227,11 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	}
 
 	private float computeGroundSize(FlightData data) {
+		return Math.max(MIN_GROUND_SIZE,
+				(float) (computeMaxHorizontalMeters(data) * RenderingConstants.WORLD_SCALE * 3.0));
+	}
+
+	private static double computeMaxHorizontalMeters(FlightData data) {
 		double maxHorizontalMeters = 0.0;
 		for (FlightDataBranch branch : data.getBranches()) {
 			List<Double> east = branch.get(FlightDataType.TYPE_POSITION_X);
@@ -1169,7 +1252,26 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 				}
 			}
 		}
-		return Math.max(MIN_GROUND_SIZE, (float) (maxHorizontalMeters * RenderingConstants.WORLD_SCALE * 3.0));
+		return maxHorizontalMeters;
+	}
+
+	/**
+	 * Picks the distance-ring spacing: the largest 1-2-5 progression value giving at least
+	 * two rings within the flight's maximum horizontal distance.
+	 */
+	static double chooseRingStep(double maxDistanceMeters) {
+		double target = Math.max(1.0, maxDistanceMeters / 2.0);
+		double best = 1.0;
+		for (double decade = 1.0; decade <= 1.0e9; decade *= 10.0) {
+			for (double factor : new double[] { 1.0, 2.0, 5.0 }) {
+				double candidate = decade * factor;
+				if (candidate > target) {
+					return best;
+				}
+				best = candidate;
+			}
+		}
+		return best;
 	}
 
 	private static double valueOrZero(Double value) {
