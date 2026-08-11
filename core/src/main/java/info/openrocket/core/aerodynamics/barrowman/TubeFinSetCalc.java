@@ -182,7 +182,10 @@ public class TubeFinSetCalc extends TubeCalc {
 
 		forces.setCroll(forces.getCrollForce() - forces.getCrollDamp());
 
-		forces.setCN(cna * MathUtil.min(conditions.getAOA(), STALL_ANGLE));
+		// Mirror the effective angle in reverse flow so CN returns to zero at 180 degrees.
+		double effectiveAOA = MathUtil.min(conditions.getAOA(),
+				Math.PI - conditions.getAOA(), STALL_ANGLE);
+		forces.setCN(cna * effectiveAOA);
 		forces.setCP(new Coordinate(x, 0, 0, cna));
 		forces.setCm(forces.getCN() * x / conditions.getRefLength());
 
