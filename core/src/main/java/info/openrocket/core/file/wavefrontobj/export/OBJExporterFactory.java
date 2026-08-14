@@ -9,33 +9,15 @@ import info.openrocket.core.file.wavefrontobj.DefaultMtlWriter;
 import info.openrocket.core.file.wavefrontobj.DefaultObj;
 import info.openrocket.core.file.wavefrontobj.ObjUtils;
 import info.openrocket.core.file.wavefrontobj.TriangulationHelper;
-import info.openrocket.core.file.wavefrontobj.export.components.BodyTubeExporter;
-import info.openrocket.core.file.wavefrontobj.export.components.FinSetExporter;
-import info.openrocket.core.file.wavefrontobj.export.components.LaunchLugExporter;
-import info.openrocket.core.file.wavefrontobj.export.components.MassObjectExporter;
-import info.openrocket.core.file.wavefrontobj.export.components.MotorExporter;
-import info.openrocket.core.file.wavefrontobj.export.components.RailButtonExporter;
-import info.openrocket.core.file.wavefrontobj.export.components.RocketComponentExporter;
-import info.openrocket.core.file.wavefrontobj.export.components.RingComponentExporter;
-import info.openrocket.core.file.wavefrontobj.export.components.TransitionExporter;
-import info.openrocket.core.file.wavefrontobj.export.components.TubeFinSetExporter;
 import info.openrocket.core.logging.WarningSet;
 import info.openrocket.core.motor.Motor;
 import info.openrocket.core.motor.MotorConfiguration;
-import info.openrocket.core.rocketcomponent.BodyTube;
 import info.openrocket.core.rocketcomponent.ComponentAssembly;
-import info.openrocket.core.rocketcomponent.FinSet;
 import info.openrocket.core.rocketcomponent.FlightConfiguration;
 import info.openrocket.core.rocketcomponent.InstanceContext;
 import info.openrocket.core.rocketcomponent.InstanceMap;
-import info.openrocket.core.rocketcomponent.LaunchLug;
-import info.openrocket.core.rocketcomponent.MassObject;
 import info.openrocket.core.rocketcomponent.MotorMount;
-import info.openrocket.core.rocketcomponent.RailButton;
-import info.openrocket.core.rocketcomponent.RingComponent;
 import info.openrocket.core.rocketcomponent.RocketComponent;
-import info.openrocket.core.rocketcomponent.Transition;
-import info.openrocket.core.rocketcomponent.TubeFinSet;
 import info.openrocket.core.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,18 +56,6 @@ public class OBJExporterFactory {
     private final WarningSet warnings;
 
     private static final Logger log = LoggerFactory.getLogger(OBJExporterFactory.class);
-
-    // The different exporters for each component
-    private static final Map<Class<? extends RocketComponent>, ExporterFactory<?>> EXPORTER_MAP = Map.of(
-            BodyTube.class, (ExporterFactory<BodyTube>) BodyTubeExporter::new,
-            Transition.class, (ExporterFactory<Transition>) TransitionExporter::new,
-            LaunchLug.class, (ExporterFactory<LaunchLug>) LaunchLugExporter::new,
-            TubeFinSet.class, (ExporterFactory<TubeFinSet>) TubeFinSetExporter::new,
-            FinSet.class, (ExporterFactory<FinSet>) FinSetExporter::new,
-            RingComponent.class, (ExporterFactory<RingComponent>) RingComponentExporter::new,
-            MassObject.class, (ExporterFactory<MassObject>) MassObjectExporter::new,
-            RailButton.class, (ExporterFactory<RailButton>) RailButtonExporter::new
-    );
 
     /**
      * Exports a list of rocket components to a Wavefront OBJ file.
@@ -239,24 +209,10 @@ public class OBJExporterFactory {
         }
     }
 
-    @SuppressWarnings("unchecked") // This is safe because of the structure we set up.
-    private <T extends RocketComponent> void handleComponent(DefaultObj obj, FlightConfiguration config, CoordTransform transformer,
-                                                             T component, String groupName, List<DefaultMtl> materials,
-                                                             ObjUtils.LevelOfDetail LOD, OBJExportOptions options,
-                                                             WarningSet warnings) {
-        ExporterFactory<T> factory = null;
-        Class<?> currentClass = component.getClass();
-
-        // Need to iterate over superclasses to find the correct exporter (otherwise e.g. a NoseCone would not work for the TransitionExporter)
-        while (RocketComponent.class.isAssignableFrom(currentClass) && factory == null) {
-            factory = (ExporterFactory<T>) EXPORTER_MAP.get(currentClass);
-            currentClass = currentClass.getSuperclass();
-        }
-
-        if (factory == null) {
-            throw new IllegalArgumentException("Unsupported component type: " + component.getClass().getName());
-        }
-
+    private void handleComponent(DefaultObj obj, FlightConfiguration config, CoordTransform transformer,
+                                 RocketComponent component, String groupName, List<DefaultMtl> materials,
+                                 ObjUtils.LevelOfDetail LOD, OBJExportOptions options,
+                                 WarningSet warnings) {
         // Export material
         if (options.isExportAppearance()) {
             String materialName = "mat_" + groupName;
@@ -272,9 +228,8 @@ public class OBJExporterFactory {
         }
 
         // Export component
-        final RocketComponentExporter<T> exporter = factory.create(obj, config, transformer, component, groupName, LOD,
+        RocketComponentMeshExporter.addComponent(obj, config, transformer, component, groupName, LOD,
                 options.isExportAllInstances(), warnings);
-        exporter.addToObj();
 
         // Export motor
         if (component instanceof MotorMount && options.isExportMotors()) {
@@ -291,9 +246,8 @@ public class OBJExporterFactory {
             }
 
             // Export the motor geometry
-            MotorExporter motorExporter = new MotorExporter(obj, config, transformer, component, groupName, LOD,
+            RocketComponentMeshExporter.addMotor(obj, config, transformer, component, groupName, LOD,
                     options.isExportAllInstances(), warnings);
-            motorExporter.addToObj();
         }
     }
 
@@ -332,9 +286,4 @@ public class OBJExporterFactory {
         }
     }
 
-    interface ExporterFactory<T extends RocketComponent> {
-        RocketComponentExporter<T> create(DefaultObj obj, FlightConfiguration config, CoordTransform transformer,
-                                          T component, String groupName, ObjUtils.LevelOfDetail LOD,
-                                          boolean exportAllInstances, WarningSet warnings);
-    }
 }

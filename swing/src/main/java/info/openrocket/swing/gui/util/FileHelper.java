@@ -53,6 +53,10 @@ public final class FileHelper {
 	public static final FileFilter WAVEFRONT_OBJ_FILTER =
 			new SimpleFileFilter(trans.get("FileHelper.WAVEFRONT_OBJ_FILTER"), ".obj");
 
+	/** File filter for ISO 10303 STEP CAD files (*.step) */
+	public static final FileFilter STEP_FILTER =
+			new SimpleFileFilter(trans.get("FileHelper.STEP_FILTER"), ".step");
+
 	/** File filter for OpenRocket components and presets (*.orc) */
 	public static final FileFilter OPEN_ROCKET_COMPONENT_FILTER =
 			new SimpleFileFilter(trans.get("FileHelper.OPEN_ROCKET_COMPONENT_FILTER"), ".orc", ".orc.gz");

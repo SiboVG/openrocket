@@ -92,6 +92,12 @@ public class DesignFileSaveAsFileChooser extends SaveFileChooser {
 				}
 
 				break;
+			case STEP:
+				defaultFilename = FileHelper.forceExtension(defaultFilename, "step");
+				this.setDialogTitle(trans.get("saveAs.step.title"));
+				this.addChoosableFileFilter(FileHelper.STEP_FILTER);
+				this.setFileFilter(FileHelper.STEP_FILTER);
+				break;
 		}
 		
 		final RememberFilenamePropertyListener listener = new RememberFilenamePropertyListener();
@@ -148,5 +154,3 @@ class RememberFilenamePropertyListener implements PropertyChangeListener {
 		}
 	}
 }
-
-

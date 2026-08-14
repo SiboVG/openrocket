@@ -75,6 +75,8 @@ import net.miginfocom.swing.MigLayout;
 
 import info.openrocket.core.file.wavefrontobj.export.OBJExportOptions;
 import info.openrocket.core.file.wavefrontobj.export.OBJExporterFactory;
+import info.openrocket.core.file.step.STEPExportOptions;
+import info.openrocket.core.file.step.STEPExporterFactory;
 import info.openrocket.core.logging.ErrorSet;
 import info.openrocket.core.logging.WarningSet;
 import info.openrocket.core.appearance.DecalImage;
@@ -106,6 +108,7 @@ import info.openrocket.core.util.TestRockets;
 
 import info.openrocket.swing.gui.configdialog.SaveDesignInfoPanel;
 import info.openrocket.swing.gui.dialogs.ErrorWarningDialog;
+import info.openrocket.swing.gui.export.STEPOptionsDialog;
 import info.openrocket.swing.gui.components.StyledLabel;
 import info.openrocket.swing.gui.configdialog.ComponentConfigDialog;
 import info.openrocket.swing.gui.customexpression.CustomExpressionDialog;
@@ -292,6 +295,7 @@ private static final Translator trans = Application.getTranslator();
 
 			popupMenu.addSeparator();
 			popupMenu.add(actions.getExportOBJAction());
+			popupMenu.add(actions.getExportSTEPAction());
 			popupMenu.add(actions.getExportSVGAction());
 
 			popupMenu.addPopupMenuListener(new PopupMenuListener() {
@@ -594,6 +598,24 @@ private static final Translator trans = Application.getTranslator();
 			}
 		});
 		exportSubMenu.add(exportOBJ);
+
+		////// 		Export STEP
+		JMenuItem exportSTEP = new JMenuItem(trans.get("main.menu.file.exportAs.STEP"));
+		exportSTEP.setIcon(Icons.deriveMenuIcon(Icons.EXPORT_3D));
+		exportSTEP.getAccessibleContext().setAccessibleDescription(trans.get("main.menu.file.exportAs.STEP.desc"));
+		exportSTEP.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				exportSTEPAction();
+			}
+		});
+		selectionModel.addDocumentSelectionListener(new DocumentSelectionListener() {
+			@Override
+			public void valueChanged(int changeType) {
+				exportSTEP.setEnabled(getSelectedComponents() != null && !getSelectedComponents().isEmpty());
+			}
+		});
+		exportSubMenu.add(exportSTEP);
 
 		//////		Export SVG profiles
 		JMenuItem exportSvgProfiles = new JMenuItem(trans.get("main.menu.file.exportAs.SVGProfiles"));
@@ -2012,6 +2034,70 @@ private static final Translator trans = Application.getTranslator();
 
 		return true;
 	}
+
+	////	BEGIN STEP Save/Export Action
+	/**
+	 * Opens the STEP options dialog followed by the file chooser, then writes the
+	 * selected component geometry.
+	 *
+	 * @return true when the export completed, otherwise false
+	 */
+	public boolean exportSTEPAction() {
+		try {
+			List<RocketComponent> selectedComponents = getSelectedComponents();
+			STEPExportOptions initialOptions = prefs.loadSTEPExportOptions(document.getRocket());
+			STEPOptionsDialog optionsDialog = new STEPOptionsDialog(BasicFrame.this, initialOptions,
+					selectedComponents, document.getRocket());
+			if (!optionsDialog.showDialog()) {
+				return false;
+			}
+			optionsDialog.storeOptions(document, prefs);
+
+			File file = openFileSaveAsDialog(FileType.STEP);
+			if (file == null) {
+				return false;
+			}
+
+			file = FileHelper.forceExtension(file, "step");
+			STEPExportOptions options = document.getDefaultSTEPOptions();
+			if (options.isExportAsSeparateFiles() || FileHelper.confirmWrite(file, BasicFrame.this)) {
+				return saveSTEPFile(file, options);
+			}
+			return false;
+		} catch (IOException exception) {
+			FileHelper.errorWriting(exception, BasicFrame.this);
+			return false;
+		} finally {
+			restoreFocus();
+		}
+	}
+
+	/**
+	 * Performs the STEP serialization after the options dialog has stored its values.
+	 *
+	 * @param file destination STEP file or base path for separate files
+	 * @param options selected STEP options
+	 * @return true when writing completed
+	 * @throws IOException if a destination cannot be written
+	 */
+	private boolean saveSTEPFile(File file, STEPExportOptions options) throws IOException {
+		WarningSet warnings = new WarningSet();
+		STEPExporterFactory exporter = new STEPExporterFactory(getSelectedComponents(),
+				rocket.getSelectedConfiguration(), file, options, warnings);
+		try {
+			exporter.doExport();
+		} catch (IllegalArgumentException exception) {
+			throw new IOException(exception.getLocalizedMessage(), exception);
+		}
+
+		if (!warnings.isEmpty()) {
+			WarningDialog.showWarnings(this,
+					trans.get("BasicFrame.WarningDialog.saving.txt1") + " '" + file.getName() + "'.",
+					trans.get("BasicFrame.WarningDialog.saving.title"), warnings);
+		}
+		return true;
+	}
+	////	END STEP Save/Export Action
 
 	/**
 	 * Export SVG profiles. If components are provided, exports only those components;

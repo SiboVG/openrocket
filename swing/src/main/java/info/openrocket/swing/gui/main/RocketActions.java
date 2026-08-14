@@ -105,6 +105,7 @@ public class RocketActions {
 	private final RocketAction moveUpAction;
 	private final RocketAction moveDownAction;
 	private final RocketAction exportOBJAction;
+	private final RocketAction exportSTEPAction;
 	private final RocketAction exportSVGAction;
 	private final RocketAction toggleVisibilityAction;
 	private final RocketAction toggleVisibilityContextMenuAction;
@@ -135,6 +136,7 @@ public class RocketActions {
 		this.moveUpAction = new MoveUpAction();
 		this.moveDownAction = new MoveDownAction();
 		this.exportOBJAction = new ExportOBJAction();
+		this.exportSTEPAction = new ExportSTEPAction();
 		this.exportSVGAction = new ExportSVGAction();
 		this.toggleVisibilityAction = new ToggleVisibilityAction();
 		this.toggleVisibilityContextMenuAction = new ContextMenuToggleVisibilityAction();
@@ -188,6 +190,7 @@ public class RocketActions {
 		moveUpAction.clipboardChanged();
 		moveDownAction.clipboardChanged();
 		exportOBJAction.clipboardChanged();
+		exportSTEPAction.clipboardChanged();
 		exportSVGAction.clipboardChanged();
 		toggleVisibilityAction.clipboardChanged();
 		toggleVisibilityContextMenuAction.clipboardChanged();
@@ -244,6 +247,10 @@ public class RocketActions {
 
 	public Action getExportOBJAction() {
 		return exportOBJAction;
+	}
+
+	public Action getExportSTEPAction() {
+		return exportSTEPAction;
 	}
 
 	public Action getExportSVGAction() {
@@ -1292,6 +1299,20 @@ public class RocketActions {
 	}
 
 
+	private static boolean containsMassiveComponent(List<RocketComponent> components) {
+		for (RocketComponent component : components) {
+			if (component.isMassive()) {
+				return true;
+			}
+			for (RocketComponent child : component.getAllChildren()) {
+				if (child.isMassive()) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	private class ExportOBJAction extends RocketAction {
 		private static final long serialVersionUID = 1L;
 
@@ -1319,18 +1340,29 @@ public class RocketActions {
 			this.setEnabled(containsMassiveComponent);
 		}
 
-		private static boolean containsMassiveComponent(List<RocketComponent> components) {
-			for (RocketComponent component : components) {
-				if (component.isMassive()) {
-					return true;
-				}
-				for (RocketComponent child : component.getAllChildren()) {
-					if (child.isMassive()) {
-						return true;
-					}
-				}
+	}
+
+	private class ExportSTEPAction extends RocketAction {
+		private static final long serialVersionUID = 1L;
+
+		public ExportSTEPAction() {
+			putValue(NAME, trans.get("RocketActions.ExportSTEPAct.ExportSTEP"));
+			putValue(SMALL_ICON, Icons.EXPORT_3D);
+			putValue(SHORT_DESCRIPTION, trans.get("RocketActions.ExportSTEPAct.ttip.ExportSTEP"));
+			clipboardChanged();
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent event) {
+			if (selectionModel.getSelectedComponents().isEmpty()) {
+				return;
 			}
-			return false;
+			parentFrame.exportSTEPAction();
+		}
+
+		@Override
+		public void clipboardChanged() {
+			setEnabled(containsMassiveComponent(selectionModel.getSelectedComponents()));
 		}
 	}
 

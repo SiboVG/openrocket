@@ -489,6 +489,26 @@ public class ObjUtils {
      * @param obj The obj file to remove the offset from
      */
     public static void removeVertexOffset(DefaultObj obj, CoordTransform transformer) {
+        FloatTuple offset = getVertexOffset(obj, transformer);
+
+        for (int i = 0; i < obj.getNumVertices(); i++) {
+            FloatTuple vertex = obj.getVertex(i);
+            final float x = vertex.getX() - offset.getX();
+            final float y = vertex.getY() - offset.getY();
+            final float z = vertex.getZ() - offset.getZ();
+            obj.setVertex(i, new DefaultFloatTuple(x, y, z));
+        }
+    }
+
+    /**
+     * Calculates the translation removed by {@link #removeVertexOffset(DefaultObj, CoordTransform)}.
+     * This allows non-mesh geometry to use the same export-origin convention.
+     *
+     * @param obj object whose current vertex bounds define the export extent
+     * @param transformer coordinate transform that identifies the axial axis
+     * @return offset in the transformed coordinate system
+     */
+    public static FloatTuple getVertexOffset(DefaultObj obj, CoordTransform transformer) {
         final FloatTupleBounds bounds = obj.getVertexBounds();
         final FloatTuple min = bounds.getMin();
         final FloatTuple max = bounds.getMax();
@@ -523,14 +543,7 @@ public class ObjUtils {
         final float offsetX = (maxX + minX) / 2;
         final float offsetY = (maxY + minY) / 2;
         final float offsetZ = (maxZ + minZ) / 2;
-
-        for (int i = 0; i < obj.getNumVertices(); i++) {
-            FloatTuple vertex = obj.getVertex(i);
-            final float x = vertex.getX() - offsetX;
-            final float y = vertex.getY() - offsetY;
-            final float z = vertex.getZ() - offsetZ;
-            obj.setVertex(i, new DefaultFloatTuple(x, y, z));
-        }
+        return new DefaultFloatTuple(offsetX, offsetY, offsetZ);
     }
 
     /**

@@ -634,6 +634,9 @@ public abstract class Warning extends Message {
 	/** Zero-thickness component can cause issues for 3D printing */
 	public static final Warning OBJ_ZERO_THICKNESS = new Other(trans.get("Warning.OBJ_ZERO_THICKNESS"), MessagePriority.LOW);
 
+	/** STEP geometry contains one or more open or non-solid surface models. */
+	public static final Warning STEP_SURFACE_MODEL = new Other(trans.get("Warning.STEP_SURFACE_MODEL"), MessagePriority.LOW);
+
 	/** A <code>Warning</code> that stage separation occurred at other than the last stage */
 	public static final Warning SEPARATION_ORDER = new Other(trans.get("Warning.SEPARATION_ORDER"), MessagePriority.NORMAL);
 

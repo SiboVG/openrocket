@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.prefs.Preferences;
 
 import info.openrocket.core.arch.SystemInfo;
 import info.openrocket.core.database.Databases;
@@ -16,6 +17,7 @@ import info.openrocket.core.file.wavefrontobj.Axis;
 import info.openrocket.core.file.wavefrontobj.CoordTransform;
 import info.openrocket.core.file.wavefrontobj.ObjUtils;
 import info.openrocket.core.file.wavefrontobj.export.OBJExportOptions;
+import info.openrocket.core.file.step.STEPExportOptions;
 import info.openrocket.core.material.Material;
 import info.openrocket.core.models.atmosphere.AtmosphericModel;
 import info.openrocket.core.models.atmosphere.ExtendedISAModel;
@@ -193,6 +195,15 @@ public abstract class ApplicationPreferences implements ChangeSource, ORPreferen
 	private static final String OBJ_ORIG_Y_OFFS = "OrigYOffs";
 	private static final String OBJ_ORIG_Z_OFFS = "OrigZOffs";
 
+	// STEP export options
+	private static final String STEP_EXPORT_OPTIONS_NODE = "STEPExportOptions";
+	private static final String STEP_EXPORT_CHILDREN = "ExportChildren";
+	private static final String STEP_EXPORT_ALL_INSTANCES = "ExportAllInstances";
+	private static final String STEP_EXPORT_MOTORS = "ExportMotors";
+	private static final String STEP_EXPORT_AS_SEPARATE_FILES = "ExportAsSeparateFiles";
+	private static final String STEP_REMOVE_OFFSET = "RemoveOffset";
+	private static final String STEP_LOD = "LOD";
+
 	// SVG export options
 	public static final String SVG_STROKE_COLOR = "SVGStrokeColor";
 	public static final String SVG_STROKE_WIDTH = "SVGStrokeWidth";
@@ -252,9 +263,9 @@ public abstract class ApplicationPreferences implements ChangeSource, ORPreferen
 	
 	public abstract void putString(String directory, String key, String value);
 	
-	public abstract java.util.prefs.Preferences getNode(String nodeName);
+	public abstract Preferences getNode(String nodeName);
 
-	public abstract java.util.prefs.Preferences getPreferences();
+	public abstract Preferences getPreferences();
 
 	public File getDefaultDirectory() {
 		String file = getString(ApplicationPreferences.DEFAULT_DIRECTORY, null);
@@ -1454,8 +1465,8 @@ public abstract class ApplicationPreferences implements ChangeSource, ORPreferen
 	public void saveOBJExportOptions(OBJExportOptions options) {
 		// ! Don't forget to update the loadOBJExportOptions method and OBJOptionChooser.storeOptions if you add new options !
 
-		java.util.prefs.Preferences preferences = getPreferences();
-		java.util.prefs.Preferences objExportOptionsNode = preferences.node(OBJ_EXPORT_OPTIONS_NODE);
+		Preferences preferences = getPreferences();
+		Preferences objExportOptionsNode = preferences.node(OBJ_EXPORT_OPTIONS_NODE);
 
 		objExportOptionsNode.putBoolean(OBJ_EXPORT_CHILDREN, options.isExportChildren());
 		objExportOptionsNode.putBoolean(OBJ_EXPORT_ALL_INSTANCES, options.isExportAllInstances());
@@ -1472,7 +1483,7 @@ public abstract class ApplicationPreferences implements ChangeSource, ORPreferen
 		objExportOptionsNode.put(OBJ_LOD, options.getLOD().getExportLabel());
 
 		// Save CoordTransform
-		java.util.prefs.Preferences coordTransformNode = objExportOptionsNode.node(OBJ_TRANSFORMER_NODE);
+		Preferences coordTransformNode = objExportOptionsNode.node(OBJ_TRANSFORMER_NODE);
 		CoordTransform transform = options.getTransformer();
 
 		coordTransformNode.put(OBJ_X_AXIS, transform.getXAxis().toString());
@@ -1484,8 +1495,8 @@ public abstract class ApplicationPreferences implements ChangeSource, ORPreferen
 	}
 
 	public OBJExportOptions loadOBJExportOptions(Rocket rocket) {
-		java.util.prefs.Preferences preferences = getPreferences();
-		java.util.prefs.Preferences objExportOptionsNode = preferences.node(OBJ_EXPORT_OPTIONS_NODE);
+		Preferences preferences = getPreferences();
+		Preferences objExportOptionsNode = preferences.node(OBJ_EXPORT_OPTIONS_NODE);
 
 		// By default, we will use options optimized for 3D printing (most-used case)
 		OBJExportOptions options = new OBJExportOptions(rocket);
@@ -1507,7 +1518,7 @@ public abstract class ApplicationPreferences implements ChangeSource, ORPreferen
 				objExportOptionsNode.get(OBJ_LOD, ObjUtils.LevelOfDetail.HIGH_QUALITY.getExportLabel())));
 
 		// Load CoordTransform
-		java.util.prefs.Preferences coordTransformNode = objExportOptionsNode.node(OBJ_TRANSFORMER_NODE);
+		Preferences coordTransformNode = objExportOptionsNode.node(OBJ_TRANSFORMER_NODE);
 
 		Axis xAxis = Axis.fromString(coordTransformNode.get(OBJ_X_AXIS, Axis.Y.toString()));
 		Axis yAxis = Axis.fromString(coordTransformNode.get(OBJ_Y_AXIS, Axis.Z.toString()));
@@ -1519,6 +1530,40 @@ public abstract class ApplicationPreferences implements ChangeSource, ORPreferen
 		CoordTransform transform = new CoordTransform(xAxis, yAxis, zAxis, origXOffs, origYOffs, origZOffs);
 		options.setTransformer(transform);
 
+		return options;
+	}
+
+	/**
+	 * Persists the user's STEP export choices.
+	 *
+	 * @param options options to store
+	 */
+	public void saveSTEPExportOptions(STEPExportOptions options) {
+		Preferences stepOptionsNode = getPreferences().node(STEP_EXPORT_OPTIONS_NODE);
+		stepOptionsNode.putBoolean(STEP_EXPORT_CHILDREN, options.isExportChildren());
+		stepOptionsNode.putBoolean(STEP_EXPORT_ALL_INSTANCES, options.isExportAllInstances());
+		stepOptionsNode.putBoolean(STEP_EXPORT_MOTORS, options.isExportMotors());
+		stepOptionsNode.putBoolean(STEP_EXPORT_AS_SEPARATE_FILES, options.isExportAsSeparateFiles());
+		stepOptionsNode.putBoolean(STEP_REMOVE_OFFSET, options.isRemoveOffset());
+		stepOptionsNode.put(STEP_LOD, options.getLevelOfDetail().getExportLabel());
+	}
+
+	/**
+	 * Loads STEP export choices and supplies stable CAD-oriented defaults.
+	 *
+	 * @param rocket rocket used to initialize the coordinate transform
+	 * @return stored or default STEP options
+	 */
+	public STEPExportOptions loadSTEPExportOptions(Rocket rocket) {
+		Preferences stepOptionsNode = getPreferences().node(STEP_EXPORT_OPTIONS_NODE);
+		STEPExportOptions options = new STEPExportOptions(rocket);
+		options.setExportChildren(stepOptionsNode.getBoolean(STEP_EXPORT_CHILDREN, false));
+		options.setExportAllInstances(stepOptionsNode.getBoolean(STEP_EXPORT_ALL_INSTANCES, true));
+		options.setExportMotors(stepOptionsNode.getBoolean(STEP_EXPORT_MOTORS, false));
+		options.setExportAsSeparateFiles(stepOptionsNode.getBoolean(STEP_EXPORT_AS_SEPARATE_FILES, false));
+		options.setRemoveOffset(stepOptionsNode.getBoolean(STEP_REMOVE_OFFSET, true));
+		options.setLevelOfDetail(ObjUtils.LevelOfDetail.fromExportLabel(
+				stepOptionsNode.get(STEP_LOD, ObjUtils.LevelOfDetail.NORMAL_QUALITY.getExportLabel())));
 		return options;
 	}
 
