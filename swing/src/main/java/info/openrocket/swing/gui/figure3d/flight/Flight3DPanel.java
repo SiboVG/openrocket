@@ -1499,8 +1499,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 	private void applyFlightBackground(SceneView scene) {
 		scene.setBackground(GradientBackground.worldAligned(
-				new Vector3f(0.70f, 0.82f, 0.96f),
-				new Vector3f(0.78f, 0.88f, 0.74f)));
+				new Vector3f(0.18f, 0.48f, 0.82f),
+				new Vector3f(0.76f, 0.87f, 0.96f)));
 	}
 
 	private Map<AxialStage, List<double[]>> toStageTimeline(

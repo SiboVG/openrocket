@@ -19,6 +19,7 @@ import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
@@ -79,6 +80,7 @@ class PlaybackTransportBar extends JPanel {
 	private boolean viewControlsEnabled;
 	private boolean userIsDragging;
 	private boolean programmaticUpdate;
+	private boolean eventMarkerClick;
 
 	PlaybackTransportBar() {
 		setLayout(new BorderLayout(8, 0));
@@ -128,18 +130,40 @@ class PlaybackTransportBar extends JPanel {
 		scrubSlider.setValue(0);
 		scrubSlider.setPaintTicks(false);
 		scrubSlider.setEnabled(false);
-		scrubSlider.addMouseListener(new MouseAdapter() {
+		MouseAdapter scrubMouseListener = new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
+				EventMarker marker = scrubSlider.findMarkerNear(e.getX(), e.getY());
+				if (marker != null) {
+					eventMarkerClick = true;
+					seekToTime(marker.time());
+					return;
+				}
 				userIsDragging = true;
 			}
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
+				if (eventMarkerClick) {
+					eventMarkerClick = false;
+					return;
+				}
 				seekToSliderValue();
 				userIsDragging = false;
 			}
-		});
+
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				scrubSlider.updateMarkerHover(e.getX(), e.getY());
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				scrubSlider.updateMarkerHover(-1, -1);
+			}
+		};
+		scrubSlider.addMouseListener(scrubMouseListener);
+		scrubSlider.addMouseMotionListener(scrubMouseListener);
 		scrubSlider.addChangeListener(this::handleSliderChanged);
 		add(scrubSlider, BorderLayout.CENTER);
 
@@ -203,6 +227,10 @@ class PlaybackTransportBar extends JPanel {
 
 	JButton getNextFrameButton() {
 		return nextFrameButton;
+	}
+
+	JSlider getScrubSlider() {
+		return scrubSlider;
 	}
 
 	void setReplayChangeListener(Runnable listener) {
@@ -337,7 +365,14 @@ class PlaybackTransportBar extends JPanel {
 		if (clock == null) {
 			return;
 		}
-		clock.setTime(sliderValueToTime(scrubSlider.getValue()));
+		seekToTime(sliderValueToTime(scrubSlider.getValue()));
+	}
+
+	private void seekToTime(double time) {
+		if (clock == null) {
+			return;
+		}
+		clock.setTime(time);
 		updateFromClock();
 		notifyReplayChanged();
 	}
@@ -434,6 +469,7 @@ class PlaybackTransportBar extends JPanel {
 
 	private final class EventMarkerSlider extends JSlider {
 		private List<EventMarker> markers = List.of();
+		private EventMarker hoveredMarker;
 
 		private EventMarkerSlider() {
 			setToolTipText("");
@@ -446,7 +482,7 @@ class PlaybackTransportBar extends JPanel {
 
 		@Override
 		public String getToolTipText(MouseEvent event) {
-			EventMarker marker = findMarkerNear(event.getX());
+			EventMarker marker = findMarkerNear(event.getX(), event.getY());
 			if (marker == null) {
 				return null;
 			}
@@ -462,22 +498,27 @@ class PlaybackTransportBar extends JPanel {
 			Graphics2D g2 = (Graphics2D) graphics.create();
 			try {
 				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-				int y = getHeight() / 2 + 8;
+				int y = markerY();
 				for (EventMarker marker : markers) {
 					// Match the trajectory's event marker colors, so the slider ticks and the
 					// 3D markers read as the same events.
 					g2.setColor(FlightEventMarkers.hasColor(marker.type())
 							? FlightEventMarkers.awtColorOf(marker.type()) : markerColor());
 					int x = xForTime(marker.time());
-					g2.drawLine(x, y - 5, x, y + 5);
+					g2.drawLine(x, y - 6, x, y + 5);
+					int diameter = marker == hoveredMarker ? 8 : 6;
+					g2.fillOval(x - diameter / 2, y - diameter / 2, diameter, diameter);
 				}
 			} finally {
 				g2.dispose();
 			}
 		}
 
-		private EventMarker findMarkerNear(int x) {
+		private EventMarker findMarkerNear(int x, int y) {
 			if (clock == null || markers.isEmpty()) {
+				return null;
+			}
+			if (Math.abs(markerY() - y) > 9) {
 				return null;
 			}
 			EventMarker nearest = null;
@@ -489,7 +530,23 @@ class PlaybackTransportBar extends JPanel {
 					nearestDistance = distance;
 				}
 			}
-			return nearestDistance <= 6 ? nearest : null;
+			return nearestDistance <= 8 ? nearest : null;
+		}
+
+		private void updateMarkerHover(int x, int y) {
+			EventMarker marker = findMarkerNear(x, y);
+			if (marker == hoveredMarker) {
+				return;
+			}
+			hoveredMarker = marker;
+			setCursor(marker != null
+					? Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+					: Cursor.getDefaultCursor());
+			repaint();
+		}
+
+		private int markerY() {
+			return getHeight() / 2 + 8;
 		}
 
 		private int xForTime(double time) {
