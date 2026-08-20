@@ -91,6 +91,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	// Rebuild the elapsed/upcoming split when the playback fraction moves at least this much. Small
 	// enough that the boundary tracks the marker without a visible lag, large enough to bound churn.
 	private static final double TRAIL_REBUILD_THRESHOLD = 1.0 / TRAIL_SAMPLES;
+	private static final float MIN_DECORATION_SCALE = 0.04f;
+	private static final float DECORATION_SCALE_REBUILD_THRESHOLD = 0.06f;
 	private static final Vector3f ACTIVE_FUTURE_COLOR = new Vector3f(0.16f, 0.42f, 0.28f);
 	private static final Vector3f ACTIVE_PAST_COLOR = new Vector3f(0.35f, 1.0f, 0.55f);
 	private static final Vector3f BOOSTER_FUTURE_COLOR = new Vector3f(0.40f, 0.24f, 0.12f);
@@ -130,6 +132,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private volatile PlaybackClock playbackClock;
 	private volatile Scene3DOrchestrator activeOrchestrator;
 	private float trailRadius = 1.0f;
+	private float trailDecorationScale = 1.0f;
+	private float trailDecorationRadius = 1.0f;
+	private float overviewFitDistance = Float.NaN;
 	private double lastRebuildFraction = -1.0;
 
 	private record TrailPath(List<Vector3f> points, boolean active, double startFraction) {
@@ -508,20 +513,6 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 		switch (mode) {
 			case FOLLOW -> orchestrator.setFollowFlightCamera(true);
-			case ONBOARD -> {
-				// A camera mounted on the side of the rocket, looking up along the body
-				// toward the nose (the nose points toward -X in the rocket's local frame).
-				float length = rocketLengthWorld(orchestrator);
-				Vector3f size = orchestrator.getCameraController().computeRocketSize();
-				float halfWidth = size != null ? Math.max(size.y, size.z) * 0.5f : length * 0.05f;
-				Vector3f center = orchestrator.getCameraController().computeRocketCenter();
-				Vector3f centerLocal = center != null ? new Vector3f(center) : new Vector3f();
-				Vector3f eyeLocal = new Vector3f(centerLocal)
-						.add(length * 0.15f, 0.0f, halfWidth + length * 0.08f);
-				Vector3f targetLocal = new Vector3f(centerLocal)
-						.add(-length * 0.55f, 0.0f, halfWidth * 0.35f);
-				orchestrator.setOnboardFlightCamera(eyeLocal, targetLocal);
-			}
 			case PAD -> {
 				// A launch-footage viewpoint: a few meters out from the pad at head height.
 				float away = Math.max(7.0f * RenderingConstants.WORLD_SCALE,
@@ -605,6 +596,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		}
 		float maxExtent = Math.max(dimensions.x, Math.max(dimensions.y, dimensions.z));
 		trailRadius = Math.max(maxExtent * 0.003f, 1.0f);
+		trailDecorationScale = 1.0f;
+		trailDecorationRadius = trailRadius;
+		overviewFitDistance = Float.NaN;
 		boolean overviewVisible = cameraMode == FlightCameraMode.OVERVIEW;
 
 		PoseProvider primary = poses.primaryProvider();
@@ -1126,11 +1120,46 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		}
 		double span = Math.max(1.0e-9, clock.getEnd() - clock.getStart());
 		double fraction = Math.max(0.0, Math.min(1.0, (time - clock.getStart()) / span));
-		if (lastRebuildFraction >= 0.0 && Math.abs(fraction - lastRebuildFraction) < TRAIL_REBUILD_THRESHOLD) {
+		CameraControls cameraControls = orchestrator.getCameraController();
+		float cameraDistance = cameraControls.getCamera().getDistance();
+		if (cameraMode == FlightCameraMode.OVERVIEW && cameraControls.isZoomFitting()) {
+			overviewFitDistance = cameraDistance;
+		}
+		float scale = decorationScale(cameraDistance, overviewFitDistance);
+		boolean scaleChanged = relativeDifference(scale, trailDecorationScale)
+				>= DECORATION_SCALE_REBUILD_THRESHOLD;
+		if (!scaleChanged && lastRebuildFraction >= 0.0
+				&& Math.abs(fraction - lastRebuildFraction) < TRAIL_REBUILD_THRESHOLD) {
 			return;
+		}
+		if (scaleChanged) {
+			trailDecorationScale = scale;
+			trailDecorationRadius = trailRadius * scale;
+			updateMarkerScale(scale);
 		}
 		lastRebuildFraction = fraction;
 		rebuildTrails(orchestrator.getScene(), fraction);
+	}
+
+	static float decorationScale(float cameraDistance, float overviewDistance) {
+		if (!Float.isFinite(cameraDistance) || !Float.isFinite(overviewDistance)
+				|| cameraDistance <= 0.0f || overviewDistance <= 0.0f) {
+			return 1.0f;
+		}
+		return Math.max(MIN_DECORATION_SCALE, Math.min(1.0f, cameraDistance / overviewDistance));
+	}
+
+	private static float relativeDifference(float first, float second) {
+		return Math.abs(first - second) / Math.max(Math.abs(second), 1.0e-6f);
+	}
+
+	private void updateMarkerScale(float scale) {
+		for (SceneObject marker : eventMarkers) {
+			marker.setUniformScale(scale);
+		}
+		if (positionMarker != null) {
+			positionMarker.setUniformScale(scale);
+		}
 	}
 
 	/**
@@ -1187,7 +1216,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		if (points.size() < 2) {
 			return;
 		}
-		Mesh mesh = TrajectoryTrailGenerator.create(points, trailRadius, 8);
+		Mesh mesh = TrajectoryTrailGenerator.create(points, trailDecorationRadius, 8);
 		if (mesh.getVertices().isEmpty()) {
 			return;
 		}

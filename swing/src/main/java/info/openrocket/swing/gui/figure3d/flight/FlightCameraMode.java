@@ -11,8 +11,6 @@ public enum FlightCameraMode {
 	OVERVIEW("Flight3DFrame.camera.overview"),
 	/** Keep the camera centered on the rocket as it flies. */
 	FOLLOW("Flight3DFrame.camera.follow"),
-	/** Ride just behind the rocket, close enough to see it up close through the flight. */
-	ONBOARD("Flight3DFrame.camera.onboard"),
 	/** A fixed camera near the pad that tracks the rocket, like real launch footage. */
 	PAD("Flight3DFrame.camera.pad");
 

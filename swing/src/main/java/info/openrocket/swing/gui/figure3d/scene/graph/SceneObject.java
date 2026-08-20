@@ -35,6 +35,7 @@ public class SceneObject {
 	private PoseProvider poseProvider = null;
 	private Matrix4f baseModelSnapshot = null;   // captured once, the first time we animate
 	private final Matrix4f dynamicTransform = new Matrix4f(); // T*R per-frame
+	private float uniformScale = 1.0f;
 
 	private boolean isSelected = false;					// Whether this object is currently selected
 	private boolean isSelectable = true;				// Whether this object can be selected by the user
@@ -270,6 +271,22 @@ public class SceneObject {
 
 	public Matrix4f getModelMatrix() {
 		return modelMatrix;
+	}
+
+	/**
+	 * Applies an absolute uniform visual scale without moving the object's origin. For animated
+	 * objects the scale is also retained in the captured base transform used by later poses.
+	 */
+	public void setUniformScale(float scale) {
+		if (!Float.isFinite(scale) || scale <= 0.0f) {
+			throw new IllegalArgumentException("scale must be finite and positive");
+		}
+		float factor = scale / uniformScale;
+		modelMatrix.scale(factor);
+		if (baseModelSnapshot != null) {
+			baseModelSnapshot.scale(factor);
+		}
+		uniformScale = scale;
 	}
 
 	public Appearance3D getAppearance() {

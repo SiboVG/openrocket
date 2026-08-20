@@ -27,7 +27,6 @@ import info.openrocket.swing.gui.figure3d.scene.graph.Scene;
 import info.openrocket.swing.gui.figure3d.scene.properties.Figure3DPreferences;
 import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguration;
 import info.openrocket.swing.gui.figure3d.scene.properties.ViewportDimensions;
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -59,8 +58,6 @@ public class Scene3DOrchestrator {
 		FREE,
 		/** Orbit pivot follows the rocket, framed to fit it. */
 		FOLLOW,
-		/** A camera rigidly attached to the rocket at a local offset, looking along it. */
-		ONBOARD,
 		/** Fixed eye position that turns to keep the rocket centered. */
 		PAD
 	}
@@ -78,9 +75,6 @@ public class Scene3DOrchestrator {
 	private volatile PlaybackClock playbackClock = null;
 	private volatile PoseProvider flightPrimaryPoseProvider = null;
 	private volatile FlightCameraBehavior flightCameraBehavior = FlightCameraBehavior.FREE;
-	// Rocket-local eye and look-target offsets for the ONBOARD behavior.
-	private volatile Vector3f onboardEyeLocal = null;
-	private volatile Vector3f onboardTargetLocal = null;
 	// World-space eye position for the PAD behavior.
 	private volatile Vector3f flightPadEye = null;
 	// Engine-CS offset from the rocket's origin (nose) to its geometric center, so the follow
@@ -216,21 +210,7 @@ public class Scene3DOrchestrator {
 			PoseProvider primaryProvider = flightPrimaryPoseProvider;
 			Camera camera = cameraController.getCamera();
 			FlightCameraBehavior behavior = flightCameraBehavior;
-			if (behavior == FlightCameraBehavior.ONBOARD && primaryProvider != null) {
-				// A camera bolted to the rocket: eye and look target are fixed offsets in the
-				// rocket's local frame, so the view rides the vehicle through the flight.
-				Vector3f eyeLocal = onboardEyeLocal;
-				Vector3f targetLocal = onboardTargetLocal;
-				if (eyeLocal != null && targetLocal != null) {
-					Vector3f position = primaryProvider.getPosition(t);
-					Quaternionf orientation = primaryProvider.getOrientation(t);
-					Vector3f eye = new Vector3f(position)
-							.add(orientation.transform(new Vector3f(eyeLocal)));
-					Vector3f target = new Vector3f(position)
-							.add(orientation.transform(new Vector3f(targetLocal)));
-					lookFrom(camera, eye, target);
-				}
-			} else if (behavior != FlightCameraBehavior.FREE && primaryProvider != null) {
+			if (behavior != FlightCameraBehavior.FREE && primaryProvider != null) {
 				Vector3f pivot = primaryProvider.getPosition(t);
 				Vector3f centerOffset = flightRocketCenterOffset;
 				if (centerOffset != null) {
@@ -547,16 +527,6 @@ public class Scene3DOrchestrator {
 		} else {
 			this.flightCameraBehavior = FlightCameraBehavior.FREE;
 		}
-	}
-
-	/**
-	 * Attaches the camera rigidly to the rocket: eye and look target are offsets in the
-	 * rocket's local frame (engine CS of the unposed rocket) applied to its flight pose.
-	 */
-	public void setOnboardFlightCamera(Vector3f eyeOffsetLocal, Vector3f targetOffsetLocal) {
-		this.onboardEyeLocal = eyeOffsetLocal != null ? new Vector3f(eyeOffsetLocal) : null;
-		this.onboardTargetLocal = targetOffsetLocal != null ? new Vector3f(targetOffsetLocal) : null;
-		this.flightCameraBehavior = FlightCameraBehavior.ONBOARD;
 	}
 
 	/** Watches the rocket from a fixed eye position near the pad, like launch footage. */

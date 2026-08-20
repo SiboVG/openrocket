@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -17,6 +18,22 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 class Flight3DPanelTest {
+	@Test
+	void replayCameraModesExcludeOnboardView() {
+		assertArrayEquals(new FlightCameraMode[] {
+				FlightCameraMode.OVERVIEW, FlightCameraMode.FOLLOW, FlightCameraMode.PAD
+		}, FlightCameraMode.values());
+	}
+
+	@Test
+	void trajectoryDecorationsShrinkAsTheCameraMovesCloser() {
+		assertEquals(1.0f, Flight3DPanel.decorationScale(1_000.0f, 1_000.0f), 1e-6f);
+		assertEquals(0.5f, Flight3DPanel.decorationScale(500.0f, 1_000.0f), 1e-6f);
+		assertEquals(0.1f, Flight3DPanel.decorationScale(100.0f, 1_000.0f), 1e-6f);
+		assertEquals(0.04f, Flight3DPanel.decorationScale(1.0f, 1_000.0f), 1e-6f);
+		assertEquals(1.0f, Flight3DPanel.decorationScale(2_000.0f, 1_000.0f), 1e-6f);
+	}
+
 	@Test
 	void dynamicTrailsAreRemovedThroughTheSceneMutationApi() {
 		SceneView scene = mock(SceneView.class);
