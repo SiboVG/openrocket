@@ -293,12 +293,12 @@ public class Icons {
 			"pix/icons/lucide/play-filled.svg",
 			"Play",
 			Map.of(
-					SVG_THEME_COLOR_RGB, SVG_DEFAULT_COLOR_KEY,
-					0x499C54, "OR.colors.green"
+					SVG_THEME_COLOR_RGB, "OR.colors.green"
 			));
 	public static final Icon PLAYBACK_PAUSE = loadSvgIcon(
 			"pix/icons/lucide/pause.svg",
-			"Pause");
+			"Pause",
+			"OR.colors.blue");
 	public static final Icon PLAYBACK_RESTART = loadSvgIcon(
 			"pix/icons/lucide/skip-back.svg",
 			"Back to beginning");
