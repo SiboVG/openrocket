@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 
@@ -75,9 +76,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private Simulation simulation;
 	private FlightData flightData;
 	private FlightConfigurationId replayConfigurationId;
-	private FlightConfigurationId originalConfigurationId;
 	private GLScenePanel glPanel;
 	private final AtomicReference<GLScenePanel> pendingCanvasRebuild = new AtomicReference<>();
+	private final AtomicLong replayGeneration = new AtomicLong();
 	private volatile BiConsumer<PlaybackClock, FlightReplayData> replayReadyCallback;
 	private volatile long earliestRenderAtMs;
 	private volatile boolean renderLoopRunning = false;
@@ -173,21 +174,13 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		simulation = sim;
 		flightData = sim.getSimulatedData();
 		replayConfigurationId = sim.getFlightConfigurationId();
-		originalConfigurationId = doc.getRocket().getSelectedConfiguration().getFlightConfigurationID();
-		// The 3D scene is built from the rocket's selected configuration, so we switch it to the
-		// simulation's configuration here. This is a side effect on shared document state: the main
-		// design view's selected configuration changes too (a NONFUNCTIONAL_CHANGE, no undo entry)
-		// until this window closes, when clearDoc() restores originalConfigurationId.
-		doc.getRocket().setSelectedConfiguration(replayConfigurationId);
 
 		GLScenePanel panel = createCanvas("3D flight replay view unavailable");
 		if (panel == null) {
-			restoreOriginalConfiguration();
 			document = null;
 			simulation = null;
 			flightData = null;
 			replayConfigurationId = null;
-			originalConfigurationId = null;
 			return;
 		}
 		installCanvas(panel);
@@ -197,12 +190,10 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 	void clearDoc() {
 		debug("clearDoc");
+		replayGeneration.incrementAndGet();
 		Scene3DOrchestrator orchestrator = activeOrchestrator;
 		if (orchestrator != null) {
 			orchestrator.setFlightFrameListener(null);
-			if (orchestrator.getRenderer() != null) {
-				orchestrator.getRenderer().setFrameOverlay(null);
-			}
 		}
 		orientationGizmo = null;
 		stopRenderLoop();
@@ -210,7 +201,6 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			RENDER_SCHEDULER.awaitQuiescence(RENDER_SHUTDOWN_TIMEOUT_MS);
 			disposeCurrentCanvas(glPanel);
 		}
-		restoreOriginalConfiguration();
 		pendingCanvasRebuild.set(null);
 		trailPaths.clear();
 		dynamicTrails.clear();
@@ -227,12 +217,11 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		simulation = null;
 		flightData = null;
 		replayConfigurationId = null;
-		originalConfigurationId = null;
 	}
 
 	private GLScenePanel createCanvas(String unavailableMessage) {
 		try {
-			return new GLScenePanel(document.getRocket(), null);
+			return new GLScenePanel(document.getRocket(), null, replayConfigurationId);
 		} catch (UnsatisfiedLinkError | ExceptionInInitializerError e) {
 			log.warn("{}: LWJGL native libraries not found for {}/{}.",
 					unavailableMessage, System.getProperty("os.name"), System.getProperty("os.arch"), e);
@@ -242,7 +231,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 	private void installCanvas(GLScenePanel panel) {
 		glPanel = panel;
-		panel.setInitializationHook(this::initializeFlightPanelOnGlThread);
+		long generation = replayGeneration.get();
+		panel.setInitializationHook(orchestrator ->
+				initializeFlightPanelOnGlThread(orchestrator, panel, generation));
 		panel.setGraphicsResetCallback(() -> requestCanvasRebuild(panel));
 		panel.setGlInitFailureCallback(() -> SwingUtilities.invokeLater(() -> showGLInitFailureUI(panel)));
 		earliestRenderAtMs = System.currentTimeMillis() + STARTUP_RENDER_DELAY_MS;
@@ -364,8 +355,6 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		}
 
 		disposeCurrentCanvas(failedPanel);
-		document.getRocket().setSelectedConfiguration(replayConfigurationId);
-
 		GLScenePanel panel = createCanvas("3D flight replay view unavailable during recovery");
 		if (panel == null) {
 			return;
@@ -394,7 +383,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		repaint();
 	}
 
-	private void initializeFlightPanelOnGlThread(Scene3DOrchestrator orchestrator) {
+	private void initializeFlightPanelOnGlThread(Scene3DOrchestrator orchestrator, GLScenePanel initializedPanel,
+			long generation) {
 		FlightData data = flightData;
 		OpenRocketDocument doc = document;
 		if (data == null || doc == null) {
@@ -452,7 +442,11 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 		BiConsumer<PlaybackClock, FlightReplayData> callback = replayReadyCallback;
 		if (callback != null && clock != null) {
-			SwingUtilities.invokeLater(() -> callback.accept(clock, replayData));
+			SwingUtilities.invokeLater(() -> {
+				if (generation == replayGeneration.get() && glPanel == initializedPanel && document == doc) {
+					callback.accept(clock, replayData);
+				}
+			});
 		}
 	}
 
@@ -1386,13 +1380,6 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		public double getEndTime() {
 			return delegate.getEndTime();
 		}
-	}
-
-	private void restoreOriginalConfiguration() {
-		if (document == null || originalConfigurationId == null) {
-			return;
-		}
-		document.getRocket().setSelectedConfiguration(originalConfigurationId);
 	}
 
 	private static void debug(String message) {

@@ -485,6 +485,11 @@ public class RealisticRenderer implements GLRenderer {
 
 	@Override
 	public void cleanup() {
+		FrameOverlay overlay = frameOverlay;
+		frameOverlay = null;
+		if (overlay != null) {
+			overlay.cleanup();
+		}
 		particleRenderer.cleanup();
 		flameRenderer.cleanup();
 		volumetricSmokeRenderer.cleanup();

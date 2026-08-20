@@ -110,7 +110,14 @@ public final class RocketMeshBuilder {
 	 * are allocated. Pair with {@link #prepareSnapshot} on the GL thread.</p>
 	 */
 	public static RocketSceneSnapshot buildSnapshot(Rocket rocket, RenderingConfiguration config) {
-		FlightConfiguration flightConfig = rocket.getSelectedConfiguration();
+		return buildSnapshot(rocket, config, null);
+	}
+
+	/** Builds a snapshot for a specific configuration without changing the UI selection. */
+	public static RocketSceneSnapshot buildSnapshot(Rocket rocket, RenderingConfiguration config,
+			FlightConfigurationId configurationId) {
+		FlightConfiguration flightConfig = configurationId != null
+				? rocket.getFlightConfiguration(configurationId) : rocket.getSelectedConfiguration();
 		InstanceMap lowestMotorInstances = flightConfig.getLowestMotorInstances();
 		List<RocketSceneSnapshot.ComponentInstance> componentInstances = new ArrayList<>();
 		List<RocketSceneSnapshot.MotorInstance> motorInstances = new ArrayList<>();

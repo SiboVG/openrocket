@@ -82,6 +82,14 @@ class FlightMetricsPanel extends JPanel {
 
 	void dispose() {
 		pollTimer.stop();
+		clock = null;
+		times = null;
+		altitude = null;
+		velocity = null;
+		acceleration = null;
+		east = null;
+		north = null;
+		clearValues();
 	}
 
 	private void refresh() {

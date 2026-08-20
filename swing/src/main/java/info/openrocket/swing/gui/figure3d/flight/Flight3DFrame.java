@@ -28,11 +28,18 @@ public class Flight3DFrame extends JFrame {
 	private final FlightMetricsPanel metricsPanel;
 	private final AtomicBoolean resourcesReleased = new AtomicBoolean(false);
 	private final Window ownerWindow;
+	private final WindowAdapter ownerWindowListener;
 	private volatile OpenRocketDocument currentDocument;
 	private volatile Simulation currentSimulation;
 
-	private Flight3DFrame(OpenRocketDocument document, Simulation simulation, Window parent) {
+	Flight3DFrame(OpenRocketDocument document, Simulation simulation, Window parent) {
 		this.ownerWindow = parent;
+		this.ownerWindowListener = new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent event) {
+				dispose();
+			}
+		};
 		this.currentDocument = document;
 		this.currentSimulation = simulation;
 
@@ -55,12 +62,7 @@ public class Flight3DFrame extends JFrame {
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
 		if (parent != null) {
-			parent.addWindowListener(new WindowAdapter() {
-				@Override
-				public void windowClosing(WindowEvent e) {
-					dispose();
-				}
-			});
+			parent.addWindowListener(ownerWindowListener);
 		}
 
 		addWindowListener(new WindowAdapter() {
@@ -145,6 +147,12 @@ public class Flight3DFrame extends JFrame {
 		}
 		currentDocument = null;
 		currentSimulation = null;
+		if (ownerWindow != null) {
+			ownerWindow.removeWindowListener(ownerWindowListener);
+		}
+		if (activeFramesByOwner.get(ownerWindow) == this) {
+			activeFramesByOwner.remove(ownerWindow);
+		}
 		flightPanel.clearDoc();
 		transportBar.dispose();
 		metricsPanel.dispose();

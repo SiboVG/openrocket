@@ -1,12 +1,14 @@
 package info.openrocket.swing.gui.figure3d.scene.orchestration;
 
 import info.openrocket.core.rocketcomponent.AxialStage;
+import info.openrocket.core.rocketcomponent.FlightConfigurationId;
 import info.openrocket.core.rocketcomponent.Rocket;
 import info.openrocket.core.rocketcomponent.RocketComponent;
 import info.openrocket.core.util.CoordinateIF;
 import info.openrocket.core.startup.Application;
 import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
 import info.openrocket.swing.gui.figure3d.animation.PoseProvider;
+import info.openrocket.swing.gui.figure3d.geometry.RocketMeshBuilder;
 import info.openrocket.swing.gui.figure3d.geometry.RocketSceneSnapshot;
 import info.openrocket.swing.gui.figure3d.math.DefaultRaycaster;
 import info.openrocket.swing.gui.figure3d.math.Raycaster;
@@ -393,6 +395,12 @@ public class Scene3DOrchestrator {
 	 */
 	public static Scene3DOrchestrator create(Rocket rocket, int windowWidth, int windowHeight,
 			int framebufferWidth, int framebufferHeight) throws Exception {
+		return create(rocket, windowWidth, windowHeight, framebufferWidth, framebufferHeight, null);
+	}
+
+	public static Scene3DOrchestrator create(Rocket rocket, int windowWidth, int windowHeight,
+			int framebufferWidth, int framebufferHeight, FlightConfigurationId renderedConfigurationId)
+			throws Exception {
 		ViewportDimensions viewport = new ViewportDimensions(
 				windowWidth, windowHeight, framebufferWidth, framebufferHeight);
 		Camera camera = Camera.builder()
@@ -408,7 +416,7 @@ public class Scene3DOrchestrator {
 				Application.getPreferences());
 
 		Scene scene = new Scene(rocket, camera, config);
-		return new Scene3DOrchestrator(rocket, viewport, camera, scene, config);
+		return new Scene3DOrchestrator(rocket, viewport, camera, scene, config, renderedConfigurationId);
 	}
 
 	/**
@@ -422,7 +430,7 @@ public class Scene3DOrchestrator {
 	 * @throws Exception if the renderer cannot be initialized
 	 */
 	private Scene3DOrchestrator(Rocket rocket, ViewportDimensions viewport, Camera camera, Scene scene,
-			RenderingConfiguration config) throws Exception {
+			RenderingConfiguration config, FlightConfigurationId renderedConfigurationId) throws Exception {
 		// 1. Initialize core components
 		this.viewport = viewport;
 		this.scene = scene;
@@ -437,7 +445,8 @@ public class Scene3DOrchestrator {
 		this.renderer.setDisplayScale(getDisplayScale());
 
 		// 3. Initialize controllers
-		this.cameraController = new CameraController(rocket, camera, scene, renderingConfiguration);
+		this.cameraController = new CameraController(rocket, camera, scene, renderingConfiguration,
+				renderedConfigurationId);
 		this.cameraController.initialize(rocket, viewport.getAspectRatio());
 		this.cameraController.addCameraChangeListener(ignored -> {
 			LightController lightController = this.scene.getLightController();
@@ -453,7 +462,11 @@ public class Scene3DOrchestrator {
 				renderingConfiguration);
 		this.inputHandler.updateDimensions(viewport);
 
-		this.rocketSynchronizer = new RocketSceneSynchronizer(this, this.scene, rocket);
+		this.rocketSynchronizer = renderedConfigurationId == null
+				? new RocketSceneSynchronizer(this, this.scene, rocket)
+				: new RocketSceneSynchronizer(this, this.scene, rocket,
+						() -> RocketMeshBuilder.buildSnapshot(rocket, renderingConfiguration,
+								renderedConfigurationId));
 		this.lastFrameTime = System.nanoTime();
 	}
 

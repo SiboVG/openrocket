@@ -1,6 +1,7 @@
 package info.openrocket.swing.gui.figure3d.scene.controllers;
 
 import info.openrocket.core.rocketcomponent.Rocket;
+import info.openrocket.core.rocketcomponent.FlightConfigurationId;
 import info.openrocket.core.util.BoundingBox;
 import info.openrocket.core.util.CoordinateIF;
 import info.openrocket.core.util.MathUtil;
@@ -31,6 +32,7 @@ public class CameraController implements CameraControls {
 	private final Camera camera;
 	private final SceneView scene;
 	private final RenderingConfiguration renderingConfiguration;
+	private final FlightConfigurationId renderedConfigurationId;
 	private final List<Consumer<Camera>> cameraChangeListeners = new CopyOnWriteArrayList<>();
 	private float focusedDistance;
 	private BoundingBox lastFittedRocketBounds;
@@ -49,10 +51,16 @@ public class CameraController implements CameraControls {
 	 */
 	public CameraController(Rocket rocket, Camera camera, SceneView scene,
 			RenderingConfiguration renderingConfiguration) {
+		this(rocket, camera, scene, renderingConfiguration, null);
+	}
+
+	public CameraController(Rocket rocket, Camera camera, SceneView scene,
+			RenderingConfiguration renderingConfiguration, FlightConfigurationId renderedConfigurationId) {
 		this.rocket = rocket;
 		this.camera = camera;
 		this.scene = scene;
 		this.renderingConfiguration = renderingConfiguration;
+		this.renderedConfigurationId = renderedConfigurationId;
 	}
 
 	/**
@@ -88,7 +96,7 @@ public class CameraController implements CameraControls {
 		if (rocket == null) {
 			return;
 		}
-		focusOnRocket(rocket.getBoundingBox());
+		focusOnRocket(getRocketBounds());
 	}
 
 	@Override
@@ -96,7 +104,7 @@ public class CameraController implements CameraControls {
 		if (rocket == null) {
 			return;
 		}
-		BoundingBox bounds = rocket.getBoundingBox();
+		BoundingBox bounds = getRocketBounds();
 		if (sameBounds(lastFittedRocketBounds, bounds)) {
 			return;
 		}
@@ -152,7 +160,7 @@ public class CameraController implements CameraControls {
 		if (rocket == null) {
 			return null;
 		}
-		BoundingBox bounds = rocket.getBoundingBox();
+		BoundingBox bounds = getRocketBounds();
 		if (bounds == null || bounds.isEmpty()) {
 			return null;
 		}
@@ -170,7 +178,7 @@ public class CameraController implements CameraControls {
 		if (rocket == null) {
 			return null;
 		}
-		BoundingBox bounds = rocket.getBoundingBox();
+		BoundingBox bounds = getRocketBounds();
 		if (bounds == null || bounds.isEmpty()) {
 			return null;
 		}
@@ -180,6 +188,13 @@ public class CameraController implements CameraControls {
 				(float) (maxBounds.getX() - minBounds.getX()),
 				(float) (maxBounds.getY() - minBounds.getY()),
 				(float) (maxBounds.getZ() - minBounds.getZ()));
+	}
+
+	private BoundingBox getRocketBounds() {
+		if (renderedConfigurationId == null) {
+			return rocket.getBoundingBox();
+		}
+		return rocket.getFlightConfiguration(renderedConfigurationId).getBoundingBoxAerodynamic();
 	}
 
 	@Override

@@ -137,7 +137,8 @@ final class FlightOrientationGizmo implements FrameOverlay {
 		}
 	}
 
-	void cleanup() {
+	@Override
+	public void cleanup() {
 		shader.cleanup();
 		arrow.cleanup();
 		for (Cardinal cardinal : cardinals) {

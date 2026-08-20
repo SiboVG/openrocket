@@ -14,4 +14,8 @@ public interface FrameOverlay {
 	 * @param height           the resolved frame height in pixels
 	 */
 	void render(Matrix4f cameraViewMatrix, int width, int height);
+
+	/** Releases context-owned resources while the renderer's GL context is current. */
+	default void cleanup() {
+	}
 }
