@@ -110,7 +110,14 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private static final Vector3f FLAME_TIP_COLOR = new Vector3f(1.0f, 0.45f, 0.10f);
 	// Puffs render small when fresh and expand to full size over this many seconds, so in
 	// follow mode the fresh smoke does not engulf the rocket.
-	private static final double SMOKE_GROWTH_SECONDS = 5.0;
+	static final double SMOKE_GROWTH_SECONDS = 5.0;
+	static final double SMOKE_HOLD_SECONDS = 10.0;
+	static final double SMOKE_FADE_SECONDS = 5.0;
+	private static final double SMOKE_LIFETIME_SECONDS =
+			SMOKE_GROWTH_SECONDS + SMOKE_HOLD_SECONDS + SMOKE_FADE_SECONDS;
+	// VolumetricSmokeRenderer begins fading at this particle age ratio. Reach it while
+	// growing, hold there, then advance through the renderer's fade range.
+	private static final float SMOKE_FADE_START_RATIO = 0.8f;
 	// A slow buoyant rise of the hanging trail, in trail-radii per second.
 	private static final float SMOKE_RISE_RATE = 0.02f;
 	private static final int SMOKE_PATH_SAMPLES = 256;
@@ -145,7 +152,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	}
 
 	/** One smoke particle of the trail: a fixed world position revealed at its birth time. */
-	private record SmokePuff(Vector3f position, double birthTime, float size, Vector3f color) {
+	record SmokePuff(Vector3f position, double birthTime, float size, Vector3f color) {
 	}
 
 	/** One particle of a flame plume, in the rocket's local frame (nose toward -X). */
@@ -1043,26 +1050,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private void updateExhaust(double time) {
 		SmokeEmitter smoke = smokePuppet;
 		if (smoke != null) {
-			List<Particle> particles = smoke.getParticles();
-			int count = 0;
-			for (SmokePuff puff : smokePuffs) {
-				double age = time - puff.birthTime();
-				if (age < 0.0) {
-					continue;
-				}
-				Particle particle = count < particles.size() ? particles.get(count) : appendBlank(particles);
-				// Grow to full size over a few seconds and hold; the renderer maps the age
-				// ratio to size growth and only fades in the last stretch, so the trail
-				// persists like a real launch column.
-				float ageRatio = (float) Math.min(0.78, 0.78 * age / SMOKE_GROWTH_SECONDS);
-				particle.position.set(puff.position())
-						.add(0.0f, (float) Math.min(age, 30.0) * SMOKE_RISE_RATE * trailRadius, 0.0f);
-				particle.color.set(puff.color());
-				particle.size = puff.size();
-				particle.setLifetime(1.0f - ageRatio, 1.0f);
-				count++;
-			}
-			trim(particles, count);
+			updateSmokeParticles(smoke.getParticles(), smokePuffs, time, trailRadius);
 		}
 
 		for (ParachuteCanopy parachute : parachutes) {
@@ -1111,6 +1099,37 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			}
 			trim(particles, count);
 		}
+	}
+
+	static void updateSmokeParticles(List<Particle> particles, List<SmokePuff> puffs,
+			double time, float radius) {
+		int count = 0;
+		for (SmokePuff puff : puffs) {
+			double age = time - puff.birthTime();
+			if (age < 0.0 || age >= SMOKE_LIFETIME_SECONDS) {
+				continue;
+			}
+			Particle particle = count < particles.size() ? particles.get(count) : appendBlank(particles);
+			particle.position.set(puff.position())
+					.add(0.0f, (float) Math.min(age, 30.0) * SMOKE_RISE_RATE * radius, 0.0f);
+			particle.color.set(puff.color());
+			particle.size = puff.size();
+			particle.setLifetime(1.0f - smokeAgeRatio(age), 1.0f);
+			count++;
+		}
+		trim(particles, count);
+	}
+
+	static float smokeAgeRatio(double age) {
+		if (age <= SMOKE_GROWTH_SECONDS) {
+			return SMOKE_FADE_START_RATIO * (float) Math.max(0.0, age / SMOKE_GROWTH_SECONDS);
+		}
+		double fadeStart = SMOKE_GROWTH_SECONDS + SMOKE_HOLD_SECONDS;
+		if (age <= fadeStart) {
+			return SMOKE_FADE_START_RATIO;
+		}
+		float fadeProgress = (float) Math.min(1.0, (age - fadeStart) / SMOKE_FADE_SECONDS);
+		return SMOKE_FADE_START_RATIO + (1.0f - SMOKE_FADE_START_RATIO) * fadeProgress;
 	}
 
 	private static Particle appendBlank(List<Particle> particles) {

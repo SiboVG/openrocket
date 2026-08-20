@@ -229,6 +229,7 @@ public class VolumetricSmokeRenderer implements ParticleSystemRenderer {
 				if (size < MIN_VISIBLE_PARTICLE_SIZE) continue;
 
 				float alpha = particleAlpha(ageRatio) * smokeEmitter.getOpacityMultiplier();
+				if (alpha <= 0.0f) continue;
 
 				vertexCount += createParticleBillboard(
 						particle.getPosition(), size, alpha, particle.getColor(), cameraPos);

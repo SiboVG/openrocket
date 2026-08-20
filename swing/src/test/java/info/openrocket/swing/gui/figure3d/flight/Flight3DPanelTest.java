@@ -3,6 +3,7 @@ package info.openrocket.swing.gui.figure3d.flight;
 import info.openrocket.swing.gui.figure3d.scene.graph.SceneObject;
 import info.openrocket.swing.gui.figure3d.scene.graph.SceneView;
 import info.openrocket.swing.gui.figure3d.geometry.Mesh;
+import info.openrocket.swing.gui.figure3d.particles.Particle;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,27 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class Flight3DPanelTest {
+	@Test
+	void replaySmokeGrowsHoldsFadesAndRemovesExpiredParticles() {
+		List<Particle> particles = new ArrayList<>();
+		List<Flight3DPanel.SmokePuff> puffs = List.of(new Flight3DPanel.SmokePuff(
+				new Vector3f(1.0f, 2.0f, 3.0f), 0.0, 4.0f, new Vector3f(0.8f)));
+
+		Flight3DPanel.updateSmokeParticles(particles, puffs, 0.0, 1.0f);
+		assertEquals(1, particles.size());
+		assertEquals(1.0f, particles.get(0).getLife(), 1e-6f);
+
+		double fadeStart = Flight3DPanel.SMOKE_GROWTH_SECONDS + Flight3DPanel.SMOKE_HOLD_SECONDS;
+		Flight3DPanel.updateSmokeParticles(particles, puffs,
+				fadeStart + Flight3DPanel.SMOKE_FADE_SECONDS / 2.0, 1.0f);
+		assertEquals(0.1f, particles.get(0).getLife(), 1e-6f,
+				"Halfway through the renderer's final 20% age range, smoke must be halfway faded");
+
+		Flight3DPanel.updateSmokeParticles(particles, puffs,
+				fadeStart + Flight3DPanel.SMOKE_FADE_SECONDS, 1.0f);
+		assertTrue(particles.isEmpty(), "A fully transparent smoke puff must be removed");
+	}
+
 	@Test
 	void parachuteAnchorUsesTheRenderedRecoveryDevicePosition() {
 		SceneView scene = mock(SceneView.class);
