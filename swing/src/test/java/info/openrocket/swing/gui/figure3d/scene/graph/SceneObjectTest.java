@@ -20,8 +20,11 @@ class SceneObjectTest {
 				new Vector3f(), mock(Appearance3D.class));
 
 		assertFalse(object.isRenderInForeground());
+		assertFalse(object.isForegroundDecoration());
 		object.setRenderInForeground(true);
+		object.setForegroundDecoration(true);
 		assertTrue(object.isRenderInForeground());
+		assertTrue(object.isForegroundDecoration());
 	}
 
 	@Test

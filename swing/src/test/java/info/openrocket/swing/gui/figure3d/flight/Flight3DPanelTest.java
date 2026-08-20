@@ -17,8 +17,25 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class Flight3DPanelTest {
+	@Test
+	void parachuteAnchorUsesTheRenderedRecoveryDevicePosition() {
+		SceneView scene = mock(SceneView.class);
+		SceneObject recoveryDeviceObject = mock(SceneObject.class);
+		info.openrocket.core.rocketcomponent.RocketComponent recoveryDevice =
+				mock(info.openrocket.core.rocketcomponent.RocketComponent.class);
+		when(recoveryDeviceObject.getRocketComponent()).thenReturn(recoveryDevice);
+		when(recoveryDeviceObject.getModelMatrix()).thenReturn(
+				new Matrix4f().translation(12.0f, 3.0f, -2.0f));
+		when(scene.getObjects()).thenReturn(List.of(recoveryDeviceObject));
+
+		Vector3f anchor = Flight3DPanel.findComponentAnchor(scene, recoveryDevice);
+
+		assertEquals(new Vector3f(12.0f, 3.0f, -2.0f), anchor);
+	}
+
 	@Test
 	void parachuteGeometryIsAnOpenDomeWithSuspensionLines() {
 		Flight3DPanel.ParachuteGeometry geometry = Flight3DPanel.createParachuteGeometry(10.0f);

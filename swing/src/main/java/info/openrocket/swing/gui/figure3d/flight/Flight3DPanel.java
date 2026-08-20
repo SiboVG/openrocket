@@ -157,7 +157,10 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 	/** A canopy and its lines, shown above a descending stage between deployment and touchdown. */
 	private record ParachuteCanopy(List<SceneObject> panels, List<SceneObject> suspensionLines,
-			PoseProvider provider, double deployTime, double endTime, float lineLength) {
+			PoseProvider provider, Vector3f packedLocation, double deployTime, double endTime, float lineLength) {
+		private ParachuteCanopy {
+			packedLocation = new Vector3f(packedLocation);
+		}
 	}
 
 	record ParachuteGeometry(List<Mesh> canopyPanels, List<Mesh> suspensionLines, float lineLength) {
@@ -643,6 +646,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		positionMarker = new SceneObject(markerMesh,
 				centerOffset != null ? new Vector3f(centerOffset) : new Vector3f(), markerAppearance);
 		positionMarker.setSelectable(false);
+		positionMarker.setForegroundDecoration(true);
 		positionMarker.setPoseProvider(primary);
 		positionMarker.setVisible(overviewVisible);
 		scene.addObject(positionMarker);
@@ -808,6 +812,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 				continue;
 			}
 			PoseProvider provider = providerForEventSource(event.getSource(), poses);
+			Vector3f packedLocation = findComponentAnchor(scene, event.getSource());
 			double end = replayData.getGroundHitTime(event, replayData.getEndTime());
 			ParachuteGeometry geometry = createParachuteGeometry(rocketLength);
 			List<SceneObject> panels = new ArrayList<>(geometry.canopyPanels().size());
@@ -827,9 +832,22 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 				lineAppearance.setUnlit(true);
 				lines.add(addHiddenParachuteObject(scene, lineMesh, lineAppearance));
 			}
-			parachutes.add(new ParachuteCanopy(panels, lines, provider, event.getTime(), end,
+			parachutes.add(new ParachuteCanopy(panels, lines, provider, packedLocation, event.getTime(), end,
 					geometry.lineLength()));
 		}
+	}
+
+	/** Returns the rendered component origin so the harness starts where the packed device sits. */
+	static Vector3f findComponentAnchor(SceneView scene, RocketComponent component) {
+		if (scene == null || component == null) {
+			return new Vector3f();
+		}
+		for (SceneObject object : scene.getObjects()) {
+			if (object.getRocketComponent() == component) {
+				return object.getModelMatrix().transformPosition(new Vector3f());
+			}
+		}
+		return new Vector3f();
 	}
 
 	private static SceneObject addHiddenParachuteObject(SceneView scene, Mesh mesh, Appearance3D appearance) {
@@ -1014,7 +1032,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			if (!deployed) {
 				continue;
 			}
-			Vector3f position = parachute.provider().getPosition(time);
+			Quaternionf orientation = parachute.provider().getOrientation(time);
+			Vector3f position = parachute.provider().getPosition(time)
+					.add(orientation.transform(new Vector3f(parachute.packedLocation())));
 			for (SceneObject panel : parachute.panels()) {
 				panel.getModelMatrix()
 						.translation(position.x, position.y + parachute.lineLength(), position.z)
@@ -1116,6 +1136,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			appearance.setUnlit(true);
 			SceneObject marker = new SceneObject(mesh, new Vector3f(), appearance);
 			marker.setSelectable(false);
+			marker.setForegroundDecoration(true);
 			marker.setVisible(visible);
 			marker.getModelMatrix().translation(position);
 			scene.addObject(marker);
@@ -1152,6 +1173,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		appearance.setUnlit(true);
 		SceneObject trailObject = new SceneObject(mesh, new Vector3f(0.0f, 0.0f, 0.0f), appearance);
 		trailObject.setSelectable(false);
+		trailObject.setForegroundDecoration(true);
 		scene.addObject(trailObject);
 		return trailObject;
 	}

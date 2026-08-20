@@ -41,6 +41,7 @@ public class SceneObject {
 	private boolean isSelectable = true;				// Whether this object can be selected by the user
 	private boolean renderOnTop = false;				// Whether this object should always render on top of others
 	private boolean renderInForeground = false;		// Whether opaque geometry gets a foreground redraw
+	private boolean foregroundDecoration = false;		// Whether this is omitted from foreground depth reconstruction
 	private boolean originAxis = false;
 	private volatile boolean visible = true;
 	private boolean cleaned = false;
@@ -185,6 +186,11 @@ public class SceneObject {
 		return renderInForeground;
 	}
 
+	/** @return whether this decorative object may be painted behind foreground geometry */
+	public boolean isForegroundDecoration() {
+		return foregroundDecoration;
+	}
+
 	public void setSelectable(boolean selectable) {
 		isSelectable = selectable;
 	}
@@ -242,6 +248,10 @@ public class SceneObject {
 	 */
 	public void setRenderInForeground(boolean renderInForeground) {
 		this.renderInForeground = renderInForeground;
+	}
+
+	public void setForegroundDecoration(boolean foregroundDecoration) {
+		this.foregroundDecoration = foregroundDecoration;
 	}
 
 	public boolean isOriginAxis() {

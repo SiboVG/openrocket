@@ -14,8 +14,14 @@ import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguratio
 import org.joml.Matrix4f;
 
 import static org.lwjgl.opengl.GL11.GL_BLEND;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
+import static org.lwjgl.opengl.GL11.GL_LEQUAL;
+import static org.lwjgl.opengl.GL11.GL_LESS;
+import static org.lwjgl.opengl.GL11.glClear;
+import static org.lwjgl.opengl.GL11.glColorMask;
+import static org.lwjgl.opengl.GL11.glDepthFunc;
 import static org.lwjgl.opengl.GL11.glDepthMask;
 import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glEnable;
@@ -94,13 +100,39 @@ public class GeometryPass implements RenderPass {
 	}
 
 	/**
-	 * Redraws focal opaque geometry without depth rejection. Its real depth is written back,
-	 * so the later transparency and particle passes still intersect it normally. Unlike
-	 * render-on-top, this happens before translucent effects and screen overlays.
+	 * Reconstructs opaque depth without decorative geometry, then redraws focal objects against
+	 * that depth. This preserves the focal object's own surface ordering and its occlusion by
+	 * real scene geometry while allowing it to paint over trajectory tubes and markers.
 	 */
 	private void renderOpaqueForeground(SceneView scene) {
-		glDisable(GL_DEPTH_TEST);
+		boolean hasForeground = false;
+		for (SceneObject object : scene.getObjects()) {
+			if (object.isVisible() && object.isRenderInForeground() && !object.isRenderOnTop()
+					&& !TransparencyPolicy.isTransparent(object, config)) {
+				hasForeground = true;
+				break;
+			}
+		}
+		if (!hasForeground) {
+			return;
+		}
+
+		glEnable(GL_DEPTH_TEST);
 		glDepthMask(true);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glColorMask(false, false, false, false);
+		try {
+			for (SceneObject object : scene.getObjects()) {
+				if (!object.isForegroundDecoration() && !object.isRenderOnTop()
+						&& !TransparencyPolicy.isTransparent(object, config)) {
+					renderObject(object, false);
+				}
+			}
+		} finally {
+			glColorMask(true, true, true, true);
+		}
+
+		glDepthFunc(GL_LEQUAL);
 		try {
 			for (SceneObject object : scene.getObjects()) {
 				if (object.isRenderInForeground() && !object.isRenderOnTop()
@@ -109,7 +141,7 @@ public class GeometryPass implements RenderPass {
 				}
 			}
 		} finally {
-			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_LESS);
 		}
 	}
 
