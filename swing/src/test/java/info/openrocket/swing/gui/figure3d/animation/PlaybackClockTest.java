@@ -29,6 +29,28 @@ class PlaybackClockTest {
 	}
 
 	@Test
+	void resumeDoesNotChargeTheTimeSpentWaitingForTheNextFrame() {
+		PlaybackClock clock = new PlaybackClock(0.0, 10.0);
+		clock.setRate(0.0);
+
+		clock.setRate(1.0);
+		clock.update(1.0);
+		assertEquals(0.0, clock.getTime());
+
+		clock.update(0.25);
+		assertEquals(0.25, clock.getTime());
+
+		clock.setRate(0.0);
+		clock.update(1.0);
+		clock.setRate(1.0);
+		clock.update(1.0);
+		assertEquals(0.25, clock.getTime());
+
+		clock.update(0.25);
+		assertEquals(0.5, clock.getTime());
+	}
+
+	@Test
 	void accumulatesAtPlaybackRateAndClampsAtEnds() {
 		PlaybackClock clock = new PlaybackClock(0.0, 3.0);
 
