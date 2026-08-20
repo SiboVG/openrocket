@@ -23,6 +23,8 @@ import java.util.UUID;
  */
 public final class FlightReplayData {
 	private final Map<AxialStage, PoseProvider> providersByStage;
+	private final List<AxialStage> stages;
+	private final Map<Integer, List<FlightEvent>> eventsByBranchStage;
 	private final PoseProvider primaryProvider;
 	private final double startTime;
 	private final double endTime;
@@ -44,7 +46,11 @@ public final class FlightReplayData {
 
 		List<BranchProvider> branchProviders = createBranchProviders(data);
 		this.primaryProvider = branchProviders.get(0).provider();
-		this.providersByStage = Map.copyOf(mapProvidersToStages(rocket, branchProviders));
+		List<AxialStage> sortedStages = new ArrayList<>(rocket.getStageList());
+		sortedStages.sort(Comparator.comparingInt(AxialStage::getStageNumber));
+		this.stages = List.copyOf(sortedStages);
+		this.providersByStage = Map.copyOf(mapProvidersToStages(stages, branchProviders));
+		this.eventsByBranchStage = Collections.unmodifiableMap(collectEventsByBranchStage(branchProviders));
 		this.startTime = branchProviders.stream()
 				.mapToDouble(branch -> branch.provider().getStartTime())
 				.min()
@@ -95,23 +101,39 @@ public final class FlightReplayData {
 		return burnIntervals;
 	}
 
+	/** Returns the current flight phase of each connected group of stages. */
+	public List<StageStatus> getStageStatuses(double time) {
+		List<StageStatus> statuses = new ArrayList<>();
+		for (List<AxialStage> group : connectedStageGroups(time)) {
+			statuses.add(new StageStatus(group, phaseFor(group, time)));
+		}
+		return List.copyOf(statuses);
+	}
+
 	private static List<BranchProvider> createBranchProviders(FlightData data) {
 		List<BranchProvider> providers = new ArrayList<>(data.getBranchCount());
 		for (FlightDataBranch branch : data.getBranches()) {
-			providers.add(new BranchProvider(data.getStageNr(branch), FlightPoseProvider.fromFlightDataBranch(branch)));
+			providers.add(new BranchProvider(data.getStageNr(branch), FlightPoseProvider.fromFlightDataBranch(branch),
+					List.copyOf(branch.getEvents())));
 		}
 		providers.sort(Comparator.comparingInt(BranchProvider::stageNumber));
 		return providers;
 	}
 
-	private static Map<AxialStage, PoseProvider> mapProvidersToStages(Rocket rocket,
+	private static Map<AxialStage, PoseProvider> mapProvidersToStages(List<AxialStage> stages,
 			List<BranchProvider> branchProviders) {
-		List<AxialStage> stages = new ArrayList<>(rocket.getStageList());
-		stages.sort(Comparator.comparingInt(AxialStage::getStageNumber));
-
 		Map<AxialStage, PoseProvider> result = new LinkedHashMap<>();
 		for (AxialStage stage : stages) {
 			result.put(stage, findProviderForStage(stage.getStageNumber(), branchProviders));
+		}
+		return result;
+	}
+
+	private static Map<Integer, List<FlightEvent>> collectEventsByBranchStage(
+			List<BranchProvider> branchProviders) {
+		Map<Integer, List<FlightEvent>> result = new LinkedHashMap<>();
+		for (BranchProvider branch : branchProviders) {
+			result.put(branch.stageNumber(), branch.events());
 		}
 		return result;
 	}
@@ -212,6 +234,81 @@ public final class FlightReplayData {
 		}
 	}
 
+	private List<List<AxialStage>> connectedStageGroups(double time) {
+		if (stages.isEmpty()) {
+			return List.of();
+		}
+		java.util.Set<Integer> separatedBoundaries = new java.util.HashSet<>();
+		for (FlightEvent event : allEvents) {
+			if (event.getType() != FlightEvent.Type.STAGE_SEPARATION || event.getTime() > time) {
+				continue;
+			}
+			AxialStage separatedStage = stageFor(event.getSource());
+			if (separatedStage != null) {
+				separatedBoundaries.add(separatedStage.getStageNumber());
+			}
+		}
+
+		List<List<AxialStage>> groups = new ArrayList<>();
+		List<AxialStage> current = new ArrayList<>();
+		for (AxialStage stage : stages) {
+			if (!current.isEmpty() && separatedBoundaries.contains(stage.getStageNumber())) {
+				groups.add(List.copyOf(current));
+				current.clear();
+			}
+			current.add(stage);
+		}
+		if (!current.isEmpty()) {
+			groups.add(List.copyOf(current));
+		}
+		return groups;
+	}
+
+	private FlightPhase phaseFor(List<AxialStage> group, double time) {
+		List<FlightEvent> branchEvents = eventsForStage(group.get(0).getStageNumber());
+		if (eventOccurred(branchEvents, FlightEvent.Type.GROUND_HIT, time)) {
+			return FlightPhase.LANDED;
+		}
+		if (eventOccurred(branchEvents, FlightEvent.Type.RECOVERY_DEVICE_DEPLOYMENT, time)) {
+			return FlightPhase.RECOVERY;
+		}
+		if (eventOccurred(branchEvents, FlightEvent.Type.TUMBLE, time)) {
+			return FlightPhase.TUMBLING;
+		}
+		for (AxialStage stage : group) {
+			for (BurnInterval interval : burnIntervalsByStage.getOrDefault(stage, List.of())) {
+				if (interval.contains(time)) {
+					return FlightPhase.UNDER_THRUST;
+				}
+			}
+		}
+		if (!eventOccurred(allEvents, FlightEvent.Type.LIFTOFF, time)) {
+			return FlightPhase.ON_PAD;
+		}
+		return FlightPhase.COASTING;
+	}
+
+	private List<FlightEvent> eventsForStage(int stageNumber) {
+		List<FlightEvent> selected = eventsByBranchStage.values().iterator().next();
+		int selectedStage = Integer.MIN_VALUE;
+		for (Map.Entry<Integer, List<FlightEvent>> entry : eventsByBranchStage.entrySet()) {
+			if (entry.getKey() <= stageNumber && entry.getKey() >= selectedStage) {
+				selected = entry.getValue();
+				selectedStage = entry.getKey();
+			}
+		}
+		return selected;
+	}
+
+	private static boolean eventOccurred(List<FlightEvent> events, FlightEvent.Type type, double time) {
+		for (FlightEvent event : events) {
+			if (event.getType() == type && event.getTime() <= time) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private static List<BurnInterval> mergeIntervals(List<BurnInterval> intervals) {
 		if (intervals.isEmpty()) {
 			return List.of();
@@ -241,6 +338,21 @@ public final class FlightReplayData {
 	public record BurnInterval(double start, double end) {
 		public boolean contains(double time) {
 			return time >= start && time <= end;
+		}
+	}
+
+	public enum FlightPhase {
+		ON_PAD,
+		UNDER_THRUST,
+		COASTING,
+		RECOVERY,
+		TUMBLING,
+		LANDED
+	}
+
+	public record StageStatus(List<AxialStage> stages, FlightPhase phase) {
+		public StageStatus {
+			stages = List.copyOf(stages);
 		}
 	}
 
@@ -274,6 +386,6 @@ public final class FlightReplayData {
 		}
 	}
 
-	private record BranchProvider(int stageNumber, PoseProvider provider) {
+	private record BranchProvider(int stageNumber, PoseProvider provider, List<FlightEvent> events) {
 	}
 }

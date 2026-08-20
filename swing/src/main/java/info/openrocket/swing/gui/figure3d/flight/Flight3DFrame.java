@@ -51,7 +51,7 @@ public class Flight3DFrame extends JFrame {
 		metricsPanel = new FlightMetricsPanel();
 		flightPanel.setReplayReadyCallback((clock, replayData) -> {
 			transportBar.setReplay(clock, replayData);
-			metricsPanel.setReplay(currentSimulation, clock);
+			metricsPanel.setReplay(currentSimulation, clock, replayData);
 		});
 		transportBar.setCameraModeListener(flightPanel::setCameraMode);
 		transportBar.setViewControlListeners(flightPanel::zoomOut, flightPanel::zoomIn,
@@ -118,7 +118,7 @@ public class Flight3DFrame extends JFrame {
 		this.currentSimulation = simulation;
 		setTitle(createTitle(simulation));
 		transportBar.clearReplay();
-		metricsPanel.setReplay(null, null);
+		metricsPanel.setReplay(null, null, null);
 		if (isShowing()) {
 			flightPanel.setSimulation(document, simulation);
 		}

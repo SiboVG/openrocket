@@ -166,6 +166,47 @@ class FlightReplayDataTest extends BaseTestCase {
 		assertEquals(6.0, intervals.get(1).end());
 	}
 
+	@Test
+	void groupsAttachedStagesAndReportsBranchSpecificFlightPhasesAfterSeparation() {
+		Rocket rocket = new Rocket();
+		AxialStage sustainer = addStage(rocket);
+		AxialStage booster = addStage(rocket);
+		BodyTube sustainerRecovery = new BodyTube();
+		BodyTube boosterMotor = new BodyTube();
+		sustainer.addChild(sustainerRecovery);
+		booster.addChild(boosterMotor);
+
+		FlightDataBranch primary = branch("primary", 0.0, 10.0, 0.0, 10.0);
+		FlightDataBranch separated = branch("booster", 2.0, 10.0, 2.0, 0.0);
+		primary.addEvent(new FlightEvent(FlightEvent.Type.LIFTOFF, 0.1));
+		primary.addEvent(new FlightEvent(FlightEvent.Type.IGNITION, 0.0, boosterMotor));
+		primary.addEvent(new FlightEvent(FlightEvent.Type.BURNOUT, 2.0, boosterMotor));
+		primary.addEvent(new FlightEvent(FlightEvent.Type.STAGE_SEPARATION, 2.0, booster));
+		primary.addEvent(new FlightEvent(FlightEvent.Type.RECOVERY_DEVICE_DEPLOYMENT, 4.0, sustainerRecovery));
+		primary.addEvent(new FlightEvent(FlightEvent.Type.GROUND_HIT, 8.0));
+		separated.addEvent(new FlightEvent(FlightEvent.Type.TUMBLE, 2.5));
+		separated.addEvent(new FlightEvent(FlightEvent.Type.GROUND_HIT, 6.0));
+
+		FlightReplayData replay = new FlightReplayData(new FlightData(primary, separated), rocket);
+
+		List<FlightReplayData.StageStatus> attached = replay.getStageStatuses(1.0);
+		assertEquals(1, attached.size());
+		assertEquals(List.of(sustainer, booster), attached.get(0).stages());
+		assertEquals(FlightReplayData.FlightPhase.UNDER_THRUST, attached.get(0).phase());
+
+		List<FlightReplayData.StageStatus> separatedStatuses = replay.getStageStatuses(3.0);
+		assertEquals(2, separatedStatuses.size());
+		assertEquals(FlightReplayData.FlightPhase.COASTING, separatedStatuses.get(0).phase());
+		assertEquals(FlightReplayData.FlightPhase.TUMBLING, separatedStatuses.get(1).phase());
+
+		assertEquals(FlightReplayData.FlightPhase.RECOVERY,
+				replay.getStageStatuses(5.0).get(0).phase());
+		assertEquals(FlightReplayData.FlightPhase.LANDED,
+				replay.getStageStatuses(7.0).get(1).phase());
+		assertEquals(FlightReplayData.FlightPhase.LANDED,
+				replay.getStageStatuses(9.0).get(0).phase());
+	}
+
 	private static AxialStage addStage(Rocket rocket) {
 		AxialStage stage = new AxialStage();
 		rocket.addChild(stage);

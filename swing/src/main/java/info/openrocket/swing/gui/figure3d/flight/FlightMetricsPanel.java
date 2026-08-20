@@ -15,10 +15,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import java.awt.Color;
+import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A compact telemetry strip for the flight replay: shows the simulation, its flight configuration,
@@ -38,9 +40,13 @@ class FlightMetricsPanel extends JPanel {
 	private final JLabel velocityLabel = valueLabel();
 	private final JLabel accelerationLabel = valueLabel();
 	private final JLabel positionLabel = valueLabel();
+	private final JPanel metricsGrid = new JPanel(new GridLayout(2, 4, 10, 2));
+	private final JPanel stageStatusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 7, 2));
 	private final Timer pollTimer = new Timer(POLL_INTERVAL_MS, e -> refresh());
 
 	private PlaybackClock clock;
+	private FlightReplayData replayData;
+	private List<FlightReplayData.StageStatus> displayedStageStatuses;
 	private List<Double> times;
 	private List<Double> altitude;
 	private List<Double> velocity;
@@ -49,9 +55,10 @@ class FlightMetricsPanel extends JPanel {
 	private List<Double> north;
 
 	FlightMetricsPanel() {
-		super(new GridLayout(2, 4, 10, 2));
+		super(new BorderLayout());
 		setBackground(new Color(0x1E1E1E));
 		setBorder(BorderFactory.createEmptyBorder(3, 8, 3, 8));
+		metricsGrid.setOpaque(false);
 		addField(trans.get("Flight3DFrame.metrics.simulation"), simulationLabel);
 		addField(trans.get("Flight3DFrame.metrics.configuration"), configLabel);
 		addField(trans.get("Flight3DFrame.metrics.time"), timeLabel);
@@ -59,10 +66,15 @@ class FlightMetricsPanel extends JPanel {
 		addField(trans.get("Flight3DFrame.metrics.velocity"), velocityLabel);
 		addField(trans.get("Flight3DFrame.metrics.acceleration"), accelerationLabel);
 		addField(trans.get("Flight3DFrame.metrics.position"), positionLabel);
+		add(metricsGrid, BorderLayout.CENTER);
+		stageStatusPanel.setOpaque(false);
+		add(stageStatusPanel, BorderLayout.SOUTH);
+		updateStageStatuses(List.of());
 	}
 
-	void setReplay(Simulation simulation, PlaybackClock clock) {
+	void setReplay(Simulation simulation, PlaybackClock clock, FlightReplayData replayData) {
 		this.clock = clock;
+		this.replayData = replayData;
 		if (simulation == null || clock == null || !simulation.hasSimulationData()) {
 			this.times = null;
 			pollTimer.stop();
@@ -89,6 +101,7 @@ class FlightMetricsPanel extends JPanel {
 	void dispose() {
 		pollTimer.stop();
 		clock = null;
+		replayData = null;
 		times = null;
 		altitude = null;
 		velocity = null;
@@ -108,6 +121,7 @@ class FlightMetricsPanel extends JPanel {
 		velocityLabel.setText(formatMetric(velocity, t, FlightDataType.TYPE_VELOCITY_TOTAL));
 		accelerationLabel.setText(formatMetric(acceleration, t, FlightDataType.TYPE_ACCELERATION_TOTAL));
 		positionLabel.setText(formatPosition(t));
+		updateStageStatuses(replayData != null ? replayData.getStageStatuses(t) : List.of());
 	}
 
 	private String formatMetric(List<Double> values, double t, FlightDataType type) {
@@ -140,6 +154,36 @@ class FlightMetricsPanel extends JPanel {
 				velocityLabel, accelerationLabel, positionLabel }) {
 			label.setText(EMPTY);
 		}
+		displayedStageStatuses = null;
+		updateStageStatuses(List.of());
+	}
+
+	private void updateStageStatuses(List<FlightReplayData.StageStatus> statuses) {
+		if (statuses.equals(displayedStageStatuses)) {
+			return;
+		}
+		displayedStageStatuses = List.copyOf(statuses);
+		stageStatusPanel.removeAll();
+		JLabel title = new JLabel(trans.get("Flight3DFrame.metrics.stageStates") + ":");
+		title.setForeground(new Color(0x9AA0A6));
+		title.setFont(title.getFont().deriveFont(Font.PLAIN, 11f));
+		stageStatusPanel.add(title);
+		if (statuses.isEmpty()) {
+			stageStatusPanel.add(valueLabel());
+		} else {
+			for (FlightReplayData.StageStatus status : statuses) {
+				JLabel chip = new JLabel(String.format(trans.get("Flight3DFrame.metrics.stageStatusFormat"),
+						stageGroupName(status), phaseName(status.phase())));
+				chip.setOpaque(true);
+				chip.setBackground(phaseColor(status.phase()));
+				chip.setForeground(new Color(0xFFFFFF));
+				chip.setFont(chip.getFont().deriveFont(Font.BOLD, 11f));
+				chip.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
+				stageStatusPanel.add(chip);
+			}
+		}
+		stageStatusPanel.revalidate();
+		stageStatusPanel.repaint();
 	}
 
 	private void addField(String name, JLabel valueLabel) {
@@ -150,7 +194,41 @@ class FlightMetricsPanel extends JPanel {
 		nameLabel.setFont(nameLabel.getFont().deriveFont(Font.PLAIN, 11f));
 		field.add(nameLabel);
 		field.add(valueLabel);
-		add(field);
+		metricsGrid.add(field);
+	}
+
+	private static String stageGroupName(FlightReplayData.StageStatus status) {
+		return status.stages().stream()
+				.map(stage -> {
+					String name = stage.getName();
+					return name == null || name.isBlank()
+							? String.format(trans.get("Flight3DFrame.metrics.stageFallback"),
+									stage.getStageNumber() + 1)
+							: name;
+				})
+				.collect(Collectors.joining(" + "));
+	}
+
+	private static String phaseName(FlightReplayData.FlightPhase phase) {
+		return switch (phase) {
+			case ON_PAD -> trans.get("Flight3DFrame.metrics.state.onPad");
+			case UNDER_THRUST -> trans.get("Flight3DFrame.metrics.state.underThrust");
+			case COASTING -> trans.get("Flight3DFrame.metrics.state.coasting");
+			case RECOVERY -> trans.get("Flight3DFrame.metrics.state.recovery");
+			case TUMBLING -> trans.get("Flight3DFrame.metrics.state.tumbling");
+			case LANDED -> trans.get("Flight3DFrame.metrics.state.landed");
+		};
+	}
+
+	private static Color phaseColor(FlightReplayData.FlightPhase phase) {
+		return switch (phase) {
+			case ON_PAD -> new Color(0x4B5563);
+			case UNDER_THRUST -> new Color(0xA64B17);
+			case COASTING -> new Color(0x385A7C);
+			case RECOVERY -> new Color(0x327052);
+			case TUMBLING -> new Color(0x8A3D46);
+			case LANDED -> new Color(0x555555);
+		};
 	}
 
 	private static JLabel valueLabel() {
