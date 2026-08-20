@@ -17,6 +17,7 @@ import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
 import info.openrocket.swing.gui.figure3d.animation.PoseProvider;
 import info.openrocket.swing.gui.figure3d.constants.GeometryConstants;
 import info.openrocket.swing.gui.figure3d.constants.RenderingConstants;
+import info.openrocket.swing.gui.figure3d.geometry.IntList;
 import info.openrocket.swing.gui.figure3d.geometry.Mesh;
 import info.openrocket.swing.gui.figure3d.geometry.basic.AxesGenerator;
 import info.openrocket.swing.gui.figure3d.geometry.basic.PlaneGenerator;
@@ -118,6 +119,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	// The default flame exposure is tuned for the pad view's tightly packed plume; the
 	// replay plume spreads its particles wider, so it needs more exposure to read as fire.
 	private static final float FLAME_EXPOSURE = 0.2f;
+	private static final int PARACHUTE_PANEL_COUNT = 8;
+	private static final float PARACHUTE_CANOPY_FLATTENING = 0.42f;
 
 	private final List<TrailPath> trailPaths = new ArrayList<>();
 	private final List<SceneObject> dynamicTrails = new ArrayList<>();
@@ -152,9 +155,12 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			List<FlameShapePoint> shape) {
 	}
 
-	/** A canopy shown above a descending stage between deployment and touchdown. */
-	private record ParachuteCanopy(SceneObject object, PoseProvider provider, double deployTime,
-			double endTime, float riseOffset) {
+	/** A canopy and its lines, shown above a descending stage between deployment and touchdown. */
+	private record ParachuteCanopy(List<SceneObject> panels, List<SceneObject> suspensionLines,
+			PoseProvider provider, double deployTime, double endTime, float lineLength) {
+	}
+
+	record ParachuteGeometry(List<Mesh> canopyPanels, List<Mesh> suspensionLines, float lineLength) {
 	}
 
 	Flight3DPanel() {
@@ -432,6 +438,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		config.getVisualEffects().setFlameExposureScale(FLAME_EXPOSURE);
 		orchestrator.rebuildRocketScene(false);
 		scene = orchestrator.getScene();
+		keepRocketInForeground(scene);
 		addGroundReference(scene, data);
 		applyFlightBackground(scene);
 		disableComponentSelection(scene);
@@ -578,6 +585,15 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		}
 	}
 
+	/** Keeps the animated rocket readable where the decorative centerline passes through it. */
+	private static void keepRocketInForeground(SceneView scene) {
+		for (SceneObject object : scene.getObjects()) {
+			if (object.getRocketComponent() != null) {
+				object.setRenderInForeground(true);
+			}
+		}
+	}
+
 	/**
 	 * Builds a visible tube along each stage-center flight path. At the whole-flight zoom the
 	 * rocket itself is only a few pixels, so the trail is what makes the trajectory legible.
@@ -627,7 +643,6 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		positionMarker = new SceneObject(markerMesh,
 				centerOffset != null ? new Vector3f(centerOffset) : new Vector3f(), markerAppearance);
 		positionMarker.setSelectable(false);
-		positionMarker.setRenderOnTop(true);
 		positionMarker.setPoseProvider(primary);
 		positionMarker.setVisible(overviewVisible);
 		scene.addObject(positionMarker);
@@ -684,7 +699,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		}
 		addEventBursts(replayData, poses, centerOffset, puffSize);
 		addParachutes(scene, replayData, poses, rocketLength);
-		addLaunchSiteReference(scene, flightData, rocketLength);
+		addLaunchSiteReference(scene, rocketLength);
 		log.info("Flight replay exhaust: {} smoke puff(s), {} flame jet(s), {} parachute(s)",
 				smokePuffs.size(), flameJets.size(), parachutes.size());
 	}
@@ -726,11 +741,10 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	}
 
 	/**
-	 * Adds static launch-site scenery: a pad disc with a launch rod at the origin, a compass
-	 * rose whose arrow colors match the orientation gizmo's cardinal letters, and faint
-	 * distance rings on the ground for scale.
+	 * Adds static launch-site scenery: a pad disc with a launch rod at the origin and a compass
+	 * rose whose arrow colors match the orientation gizmo's cardinal letters.
 	 */
-	private void addLaunchSiteReference(SceneView scene, FlightData data, float rocketLength) {
+	private void addLaunchSiteReference(SceneView scene, float rocketLength) {
 		// Pad disc, half sunk into the ground.
 		Mesh padMesh = SphereGenerator.create(rocketLength * 1.5f, 24, 12);
 		Appearance3D padAppearance = new Appearance3D(new Vector3f(0.32f, 0.32f, 0.34f));
@@ -779,29 +793,6 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 					.translate(arrowDistance, arrowHeadRadius * 1.3f, 0.0f);
 			scene.addObject(compassArrow);
 		}
-
-		// Distance rings, spaced on a 1-2-5 progression covering the flight's footprint.
-		double maxHorizontalMeters = computeMaxHorizontalMeters(data);
-		double stepMeters = chooseRingStep(maxHorizontalMeters);
-		float ringTube = Math.max(trailRadius * 0.15f, rocketLength * 0.02f);
-		int rings = 0;
-		for (double radiusMeters = stepMeters; radiusMeters <= maxHorizontalMeters && rings < 5;
-				radiusMeters += stepMeters, rings++) {
-			float radius = (float) (radiusMeters * RenderingConstants.WORLD_SCALE);
-			List<Vector3f> circle = new ArrayList<>(98);
-			for (int i = 0; i <= 97; i++) {
-				double angle = 2.0 * Math.PI * i / 96.0;
-				// Lifted a little more than the tube radius so the ring clears the ground.
-				circle.add(new Vector3f((float) (Math.cos(angle) * radius), ringTube * 1.4f,
-						(float) (Math.sin(angle) * radius)));
-			}
-			Mesh ringMesh = TrajectoryTrailGenerator.create(circle, ringTube, 6);
-			Appearance3D appearance = new Appearance3D(new Vector3f(0.45f, 0.50f, 0.45f));
-			appearance.setUnlit(true);
-			SceneObject ring = new SceneObject(ringMesh, new Vector3f(), appearance);
-			ring.setSelectable(false);
-			scene.addObject(ring);
-		}
 	}
 
 	/**
@@ -818,15 +809,67 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			}
 			PoseProvider provider = providerForEventSource(event.getSource(), poses);
 			double end = replayData.getGroundHitTime(event, replayData.getEndTime());
-			Mesh mesh = SphereGenerator.create(rocketLength * 0.6f, 20, 12);
-			Appearance3D appearance = new Appearance3D(new Vector3f(0.9f, 0.3f, 0.2f));
-			SceneObject canopy = new SceneObject(mesh, new Vector3f(), appearance);
-			canopy.setSelectable(false);
-			canopy.setVisible(false);
-			scene.addObject(canopy);
-			parachutes.add(new ParachuteCanopy(canopy, provider, event.getTime(), end,
-					rocketLength * 0.9f));
+			ParachuteGeometry geometry = createParachuteGeometry(rocketLength);
+			List<SceneObject> panels = new ArrayList<>(geometry.canopyPanels().size());
+			for (int i = 0; i < geometry.canopyPanels().size(); i++) {
+				Vector3f color = i % 2 == 0
+						? new Vector3f(0.92f, 0.18f, 0.12f)
+						: new Vector3f(1.0f, 0.82f, 0.56f);
+				Appearance3D appearance = new Appearance3D(color);
+				appearance.setShine(0.08f);
+				SceneObject panel = addHiddenParachuteObject(scene, geometry.canopyPanels().get(i), appearance);
+				panels.add(panel);
+			}
+
+			List<SceneObject> lines = new ArrayList<>(geometry.suspensionLines().size());
+			for (Mesh lineMesh : geometry.suspensionLines()) {
+				Appearance3D lineAppearance = new Appearance3D(new Vector3f(0.90f, 0.86f, 0.70f));
+				lineAppearance.setUnlit(true);
+				lines.add(addHiddenParachuteObject(scene, lineMesh, lineAppearance));
+			}
+			parachutes.add(new ParachuteCanopy(panels, lines, provider, event.getTime(), end,
+					geometry.lineLength()));
 		}
+	}
+
+	private static SceneObject addHiddenParachuteObject(SceneView scene, Mesh mesh, Appearance3D appearance) {
+		SceneObject object = new SceneObject(mesh, new Vector3f(), appearance);
+		object.setSelectable(false);
+		object.setVisible(false);
+		scene.addObject(object);
+		return object;
+	}
+
+	/** Builds an open, shallow canopy with radial suspension lines converging on the stage. */
+	static ParachuteGeometry createParachuteGeometry(float rocketLength) {
+		float radius = rocketLength * 0.6f;
+		float lineLength = rocketLength * 0.9f;
+		List<Mesh> panels = new ArrayList<>(PARACHUTE_PANEL_COUNT);
+		List<Mesh> lines = new ArrayList<>(PARACHUTE_PANEL_COUNT);
+		for (int i = 0; i < PARACHUTE_PANEL_COUNT; i++) {
+			float startAngle = (float) (2.0 * Math.PI * i / PARACHUTE_PANEL_COUNT);
+			float endAngle = (float) (2.0 * Math.PI * (i + 1) / PARACHUTE_PANEL_COUNT);
+			Mesh panel = SphereGenerator.create(radius, 3, 6, 0.0f, (float) (Math.PI / 2.0),
+					startAngle, endAngle);
+			panels.add(doubleSided(panel));
+
+			float angle = (startAngle + endAngle) * 0.5f;
+			Vector3f rim = new Vector3f(
+					radius * (float) Math.cos(angle), radius * (float) Math.sin(angle), 0.0f);
+			Vector3f harness = new Vector3f(0.0f, 0.0f, -lineLength);
+			lines.add(TrajectoryTrailGenerator.create(List.of(rim, harness), radius * 0.008f, 5));
+		}
+		return new ParachuteGeometry(List.copyOf(panels), List.copyOf(lines), lineLength);
+	}
+
+	private static Mesh doubleSided(Mesh mesh) {
+		IntList source = mesh.getIndices();
+		IntList indices = new IntList(source.size() * 2);
+		indices.addAll(source);
+		for (int i = 0; i + 2 < source.size(); i += 3) {
+			indices.addTriangle(source.get(i), source.get(i + 2), source.get(i + 1));
+		}
+		return new Mesh(mesh.getVertices(), indices);
 	}
 
 	private static PoseProvider providerForEventSource(RocketComponent source, GroundedPoseProviders poses) {
@@ -966,14 +1009,23 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 		for (ParachuteCanopy parachute : parachutes) {
 			boolean deployed = time >= parachute.deployTime() && time <= parachute.endTime();
-			parachute.object().setVisible(deployed);
+			parachute.panels().forEach(object -> object.setVisible(deployed));
+			parachute.suspensionLines().forEach(object -> object.setVisible(deployed));
 			if (!deployed) {
 				continue;
 			}
 			Vector3f position = parachute.provider().getPosition(time);
-			parachute.object().getModelMatrix()
-					.translation(position.x, position.y + parachute.riseOffset(), position.z)
-					.scale(1.0f, 0.45f, 1.0f);
+			for (SceneObject panel : parachute.panels()) {
+				panel.getModelMatrix()
+						.translation(position.x, position.y + parachute.lineLength(), position.z)
+						.rotateX((float) (-Math.PI / 2.0))
+						.scale(1.0f, 1.0f, PARACHUTE_CANOPY_FLATTENING);
+			}
+			for (SceneObject line : parachute.suspensionLines()) {
+				line.getModelMatrix()
+						.translation(position.x, position.y + parachute.lineLength(), position.z)
+						.rotateX((float) (-Math.PI / 2.0));
+			}
 		}
 
 		for (FlameJet jet : flameJets) {
@@ -1064,7 +1116,6 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			appearance.setUnlit(true);
 			SceneObject marker = new SceneObject(mesh, new Vector3f(), appearance);
 			marker.setSelectable(false);
-			marker.setRenderOnTop(true);
 			marker.setVisible(visible);
 			marker.getModelMatrix().translation(position);
 			scene.addObject(marker);
@@ -1356,25 +1407,6 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			}
 		}
 		return maxHorizontalMeters;
-	}
-
-	/**
-	 * Picks the distance-ring spacing: the largest 1-2-5 progression value giving at least
-	 * two rings within the flight's maximum horizontal distance.
-	 */
-	static double chooseRingStep(double maxDistanceMeters) {
-		double target = Math.max(1.0, maxDistanceMeters / 2.0);
-		double best = 1.0;
-		for (double decade = 1.0; decade <= 1.0e9; decade *= 10.0) {
-			for (double factor : new double[] { 1.0, 2.0, 5.0 }) {
-				double candidate = decade * factor;
-				if (candidate > target) {
-					return best;
-				}
-				best = candidate;
-			}
-		}
-		return best;
 	}
 
 	private static double valueOrZero(Double value) {

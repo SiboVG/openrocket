@@ -40,6 +40,7 @@ public class SceneObject {
 	private boolean isSelected = false;					// Whether this object is currently selected
 	private boolean isSelectable = true;				// Whether this object can be selected by the user
 	private boolean renderOnTop = false;				// Whether this object should always render on top of others
+	private boolean renderInForeground = false;		// Whether opaque geometry gets a foreground redraw
 	private boolean originAxis = false;
 	private volatile boolean visible = true;
 	private boolean cleaned = false;
@@ -176,6 +177,14 @@ public class SceneObject {
 		return renderOnTop;
 	}
 
+	/**
+	 * Returns whether this opaque object is redrawn after ordinary opaque geometry, while
+	 * still remaining behind translucent effects and overlays.
+	 */
+	public boolean isRenderInForeground() {
+		return renderInForeground;
+	}
+
 	public void setSelectable(boolean selectable) {
 		isSelectable = selectable;
 	}
@@ -225,6 +234,14 @@ public class SceneObject {
 
 	public void setRenderOnTop(boolean renderOnTop) {
 		this.renderOnTop = renderOnTop;
+	}
+
+	/**
+	 * Requests a foreground redraw for opaque geometry. This is intended for a focal object
+	 * that must remain legible through decorative geometry, not for general scene ordering.
+	 */
+	public void setRenderInForeground(boolean renderInForeground) {
+		this.renderInForeground = renderInForeground;
 	}
 
 	public boolean isOriginAxis() {

@@ -89,6 +89,28 @@ public class GeometryPass implements RenderPass {
 		} finally {
 			setTransparencyOutputMode(TransparencyOutputMode.SCENE_COLOR);
 		}
+
+		renderOpaqueForeground(scene);
+	}
+
+	/**
+	 * Redraws focal opaque geometry without depth rejection. Its real depth is written back,
+	 * so the later transparency and particle passes still intersect it normally. Unlike
+	 * render-on-top, this happens before translucent effects and screen overlays.
+	 */
+	private void renderOpaqueForeground(SceneView scene) {
+		glDisable(GL_DEPTH_TEST);
+		glDepthMask(true);
+		try {
+			for (SceneObject object : scene.getObjects()) {
+				if (object.isRenderInForeground() && !object.isRenderOnTop()
+						&& !TransparencyPolicy.isTransparent(object, config)) {
+					renderObject(object, false);
+				}
+			}
+		} finally {
+			glEnable(GL_DEPTH_TEST);
+		}
 	}
 
 	/**

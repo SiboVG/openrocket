@@ -8,10 +8,22 @@ import org.joml.Vector3f;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 class SceneObjectTest {
+	@Test
+	void foregroundRedrawIsOptIn() {
+		SceneObject object = SceneObject.withRenderable(null, mock(Mesh.class), mock(Renderable.class),
+				new Vector3f(), mock(Appearance3D.class));
+
+		assertFalse(object.isRenderInForeground());
+		object.setRenderInForeground(true);
+		assertTrue(object.isRenderInForeground());
+	}
+
 	@Test
 	void uniformVisualScalePreservesTheObjectOrigin() {
 		SceneObject object = SceneObject.withRenderable(null, mock(Mesh.class), mock(Renderable.class),

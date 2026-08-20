@@ -2,6 +2,7 @@ package info.openrocket.swing.gui.figure3d.flight;
 
 import info.openrocket.swing.gui.figure3d.scene.graph.SceneObject;
 import info.openrocket.swing.gui.figure3d.scene.graph.SceneView;
+import info.openrocket.swing.gui.figure3d.geometry.Mesh;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,26 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 class Flight3DPanelTest {
+	@Test
+	void parachuteGeometryIsAnOpenDomeWithSuspensionLines() {
+		Flight3DPanel.ParachuteGeometry geometry = Flight3DPanel.createParachuteGeometry(10.0f);
+
+		assertEquals(8, geometry.canopyPanels().size());
+		assertEquals(8, geometry.suspensionLines().size());
+		assertEquals(9.0f, geometry.lineLength(), 1e-6f);
+
+		for (Mesh panel : geometry.canopyPanels()) {
+			Vector3f min = panel.getBoundsMin(new Vector3f());
+			Vector3f max = panel.getBoundsMax(new Vector3f());
+			assertTrue(min.z >= -1e-5f, "The canopy must not contain a lower hemisphere");
+			assertTrue(max.z > 0.0f, "Each fabric panel must rise into a dome");
+		}
+		for (Mesh line : geometry.suspensionLines()) {
+			assertEquals(-9.0f, line.getBoundsMin(new Vector3f()).z, 0.1f);
+			assertTrue(line.getBoundsMax(new Vector3f()).z > -0.1f);
+		}
+	}
+
 	@Test
 	void replayCameraModesExcludeOnboardView() {
 		assertArrayEquals(new FlightCameraMode[] {
