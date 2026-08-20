@@ -5,8 +5,22 @@ import org.joml.Vector3f;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class Flight3DPanelTest {
+
+	@Test
+	void pausedPanelRendersOnlyWhenMarkedDirty() {
+		Flight3DPanel panel = new Flight3DPanel();
+
+		assertTrue(panel.shouldRenderOnTick());
+		assertFalse(panel.shouldRenderOnTick());
+
+		panel.requestRenderNow();
+		assertTrue(panel.shouldRenderOnTick());
+		assertFalse(panel.shouldRenderOnTick());
+	}
 
 	@Test
 	void lowestCornerYFollowsTranslation() {

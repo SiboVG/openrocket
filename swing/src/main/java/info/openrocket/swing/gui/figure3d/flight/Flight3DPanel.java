@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
@@ -89,7 +90,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private static final int TRAIL_SAMPLES = 240;
 	// Rebuild the elapsed/upcoming split when the playback fraction moves at least this much. Small
 	// enough that the boundary tracks the marker without a visible lag, large enough to bound churn.
-	private static final double TRAIL_REBUILD_THRESHOLD = 0.002;
+	private static final double TRAIL_REBUILD_THRESHOLD = 1.0 / TRAIL_SAMPLES;
 	private static final Vector3f ACTIVE_FUTURE_COLOR = new Vector3f(0.16f, 0.42f, 0.28f);
 	private static final Vector3f ACTIVE_PAST_COLOR = new Vector3f(0.35f, 1.0f, 0.55f);
 	private static final Vector3f BOOSTER_FUTURE_COLOR = new Vector3f(0.40f, 0.24f, 0.12f);
@@ -122,6 +123,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private final List<FlameJet> flameJets = new ArrayList<>();
 	private final List<SceneObject> eventMarkers = new ArrayList<>();
 	private final List<ParachuteCanopy> parachutes = new ArrayList<>();
+	private final AtomicBoolean dirty = new AtomicBoolean(true);
 	private SmokeEmitter smokePuppet;
 	private SceneObject positionMarker;
 	private FlightOrientationGizmo orientationGizmo;
@@ -231,6 +233,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 	private void installCanvas(GLScenePanel panel) {
 		glPanel = panel;
+		panel.setRenderActivityCallback(this::markDirty);
+		panel.setRenderRequestCallback(this::requestRenderNow);
 		long generation = replayGeneration.get();
 		panel.setInitializationHook(orchestrator ->
 				initializeFlightPanelOnGlThread(orchestrator, panel, generation));
@@ -251,6 +255,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			return;
 		}
 		renderLoopRunning = true;
+		dirty.set(true);
 		RENDER_SCHEDULER.register(this);
 		RENDER_SCHEDULER.requestImmediate(this);
 	}
@@ -279,6 +284,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			return;
 		}
 		if (System.currentTimeMillis() < earliestRenderAtMs) {
+			dirty.set(true);
 			return;
 		}
 		if (!panel.isDisplayable() || !panel.isShowing()) {
@@ -298,7 +304,23 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 	@Override
 	public boolean shouldRenderOnTick() {
-		return true;
+		PlaybackClock clock = playbackClock;
+		if (clock != null && clock.getRate() != 0.0) {
+			dirty.set(false);
+			return true;
+		}
+		return dirty.getAndSet(false);
+	}
+
+	private void markDirty() {
+		dirty.set(true);
+	}
+
+	void requestRenderNow() {
+		markDirty();
+		if (renderLoopRunning) {
+			RENDER_SCHEDULER.requestImmediate(this);
+		}
 	}
 
 	@Override
@@ -368,6 +390,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private void disposeCurrentCanvas(GLScenePanel panel) {
 		panel.setInitializationHook(null);
 		panel.setGraphicsResetCallback(null);
+		panel.setRenderActivityCallback(null);
+		panel.setRenderRequestCallback(null);
 		if (IS_MACOS) {
 			// Keep the same teardown order as PhotoPanel: detach first so cleanup avoids
 			// re-entering the macOS JAWT surface path after peer teardown has begun.
@@ -475,7 +499,12 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		// show it only in the distant views, and the position marker only in the overview.
 		boolean distantView = mode == FlightCameraMode.OVERVIEW || mode == FlightCameraMode.PAD;
 		boolean markerView = mode == FlightCameraMode.OVERVIEW;
-		orchestrator.enqueueGlTask(() -> setTrailDecorationsVisible(distantView, markerView));
+		orchestrator.enqueueGlTask(() -> {
+			setTrailDecorationsVisible(distantView, markerView);
+			if (distantView) {
+				lastRebuildFraction = -1.0;
+			}
+		});
 
 		switch (mode) {
 			case FOLLOW -> orchestrator.setFollowFlightCamera(true);
@@ -1087,6 +1116,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	// marker without the lag of a fixed-interval timer, and without rebuilding every single frame.
 	private void onFlightFrame(double time) {
 		updateExhaust(time);
+		if (!isDistantView()) {
+			return;
+		}
 		Scene3DOrchestrator orchestrator = activeOrchestrator;
 		PlaybackClock clock = playbackClock;
 		if (orchestrator == null || clock == null || trailPaths.isEmpty()) {

@@ -4,8 +4,8 @@ import info.openrocket.core.util.MathUtil;
 
 /** Small playback clock with play/pause/speed and clamping. */
 public final class PlaybackClock {
-	private volatile double time;
-	private volatile double rate = 1.0;
+	private double time;
+	private double rate = 1.0;
 	private final double start, end;
 
 	public PlaybackClock(double start, double end) {
@@ -14,16 +14,16 @@ public final class PlaybackClock {
 		this.time = start;
 	}
 
-	public void update(double dtRealSeconds) {
+	public synchronized void update(double dtRealSeconds) {
 		time += rate * dtRealSeconds;
 		if (time < start) time = start;
 		if (time > end)   time = end;
 	}
 
-	public double getTime()        { return time; }
-	public void   setTime(double t){ time = MathUtil.clamp(t, start, end); }
-	public double getRate()        { return rate; }
-	public void   setRate(double r){ rate = r; }
+	public synchronized double getTime()        { return time; }
+	public synchronized void   setTime(double t){ time = MathUtil.clamp(t, start, end); }
+	public synchronized double getRate()        { return rate; }
+	public synchronized void   setRate(double r){ rate = r; }
 	public double getStart()       { return start; }
 	public double getEnd()         { return end; }
 }

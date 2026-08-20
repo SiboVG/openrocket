@@ -57,6 +57,7 @@ class PlaybackTransportBar extends JPanel {
 
 	private PlaybackClock clock;
 	private Consumer<FlightCameraMode> cameraModeListener;
+	private Runnable replayChangeListener;
 	private boolean userIsDragging;
 	private boolean programmaticUpdate;
 
@@ -113,6 +114,10 @@ class PlaybackTransportBar extends JPanel {
 		this.cameraModeListener = listener;
 	}
 
+	void setReplayChangeListener(Runnable listener) {
+		this.replayChangeListener = listener;
+	}
+
 	void setReplay(PlaybackClock clock, FlightReplayData replayData) {
 		this.clock = clock;
 		scrubSlider.setMarkers(createMarkers(replayData));
@@ -162,6 +167,7 @@ class PlaybackTransportBar extends JPanel {
 		}
 		updateButtonText();
 		updateFromClock();
+		notifyReplayChanged();
 	}
 
 	private void pollClock() {
@@ -176,7 +182,7 @@ class PlaybackTransportBar extends JPanel {
 	}
 
 	private void handleSliderChanged(ChangeEvent event) {
-		if (programmaticUpdate || clock == null || !userIsDragging) {
+		if (programmaticUpdate || clock == null) {
 			return;
 		}
 		seekToSliderValue();
@@ -188,6 +194,13 @@ class PlaybackTransportBar extends JPanel {
 		}
 		clock.setTime(sliderValueToTime(scrubSlider.getValue()));
 		updateFromClock();
+		notifyReplayChanged();
+	}
+
+	private void notifyReplayChanged() {
+		if (replayChangeListener != null) {
+			replayChangeListener.run();
+		}
 	}
 
 	private void updateFromClock() {
