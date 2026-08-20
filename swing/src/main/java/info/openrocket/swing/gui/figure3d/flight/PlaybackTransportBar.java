@@ -1,6 +1,8 @@
 package info.openrocket.swing.gui.figure3d.flight;
 
+import info.openrocket.core.l10n.Translator;
 import info.openrocket.core.simulation.FlightEvent;
+import info.openrocket.core.startup.Application;
 import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
 
 import javax.swing.JButton;
@@ -30,6 +32,7 @@ import java.util.function.Consumer;
 
 @SuppressWarnings("serial")
 class PlaybackTransportBar extends JPanel {
+	private static final Translator trans = Application.getTranslator();
 	private static final int SLIDER_STEPS = 10_000;
 	private static final int POLL_INTERVAL_MS = 100;
 	private static final EnumSet<FlightEvent.Type> MARKER_TYPES = EnumSet.of(
@@ -42,7 +45,7 @@ class PlaybackTransportBar extends JPanel {
 			FlightEvent.Type.RECOVERY_DEVICE_DEPLOYMENT,
 			FlightEvent.Type.GROUND_HIT);
 
-	private final JButton playPauseButton = new JButton("Play");
+	private final JButton playPauseButton = new JButton(trans.get("Flight3DFrame.play"));
 	private final EventMarkerSlider scrubSlider = new EventMarkerSlider();
 	private final JComboBox<SpeedOption> speedCombo = new JComboBox<>(new SpeedOption[] {
 			new SpeedOption(0.25),
@@ -52,7 +55,7 @@ class PlaybackTransportBar extends JPanel {
 			new SpeedOption(4.0)
 	});
 	private final JComboBox<FlightCameraMode> cameraModeCombo = new JComboBox<>(FlightCameraMode.values());
-	private final JLabel timeLabel = new JLabel("0.00 / 0.00 s", SwingConstants.RIGHT);
+	private final JLabel timeLabel = new JLabel(formatTime(0.0, 0.0), SwingConstants.RIGHT);
 	private final Timer pollTimer = new Timer(POLL_INTERVAL_MS, e -> pollClock());
 
 	private PlaybackClock clock;
@@ -68,7 +71,7 @@ class PlaybackTransportBar extends JPanel {
 		leftControls.add(playPauseButton);
 		leftControls.add(speedCombo);
 		cameraModeCombo.setSelectedItem(FlightCameraMode.OVERVIEW);
-		cameraModeCombo.setToolTipText("Camera mode");
+		cameraModeCombo.setToolTipText(trans.get("Flight3DFrame.cameraMode.ttip"));
 		cameraModeCombo.addActionListener(e -> {
 			if (cameraModeListener != null) {
 				cameraModeListener.accept((FlightCameraMode) cameraModeCombo.getSelectedItem());
@@ -220,11 +223,16 @@ class PlaybackTransportBar extends JPanel {
 	}
 
 	private void updateButtonText() {
-		playPauseButton.setText(clock != null && clock.getRate() != 0.0 ? "Pause" : "Play");
+		playPauseButton.setText(clock != null && clock.getRate() != 0.0
+				? trans.get("Flight3DFrame.pause") : trans.get("Flight3DFrame.play"));
 	}
 
 	private void updateTimeLabel(double time, double end) {
-		timeLabel.setText(String.format("%.2f / %.2f s", time, end));
+		timeLabel.setText(formatTime(time, end));
+	}
+
+	private static String formatTime(double time, double end) {
+		return String.format(trans.get("Flight3DFrame.timeFormat"), time, end);
 	}
 
 	private int timeToSliderValue(double time) {
@@ -299,7 +307,7 @@ class PlaybackTransportBar extends JPanel {
 			if (marker == null) {
 				return null;
 			}
-			return marker.label() + " @ " + String.format("%.2f s", marker.time());
+			return String.format(trans.get("Flight3DFrame.eventTimeFormat"), marker.label(), marker.time());
 		}
 
 		@Override

@@ -1,19 +1,23 @@
 package info.openrocket.swing.gui.figure3d.flight;
 
 import info.openrocket.core.document.Simulation;
+import info.openrocket.core.l10n.Translator;
 import info.openrocket.core.simulation.FlightData;
 import info.openrocket.core.simulation.FlightDataBranch;
 import info.openrocket.core.simulation.FlightDataType;
+import info.openrocket.core.startup.Application;
 import info.openrocket.core.unit.UnitGroup;
 import info.openrocket.core.util.MathUtil;
 import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
 
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.util.List;
 
 /**
@@ -23,6 +27,7 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 class FlightMetricsPanel extends JPanel {
+	private static final Translator trans = Application.getTranslator();
 	private static final int POLL_INTERVAL_MS = 100;
 	private static final String EMPTY = "—";
 
@@ -44,15 +49,16 @@ class FlightMetricsPanel extends JPanel {
 	private List<Double> north;
 
 	FlightMetricsPanel() {
-		super(new FlowLayout(FlowLayout.LEFT, 14, 4));
+		super(new GridLayout(2, 4, 10, 2));
 		setBackground(new Color(0x1E1E1E));
-		addField("Sim", simulationLabel);
-		addField("Config", configLabel);
-		addField("T", timeLabel);
-		addField("Alt", altitudeLabel);
-		addField("Vel", velocityLabel);
-		addField("Accel", accelerationLabel);
-		addField("Pos", positionLabel);
+		setBorder(BorderFactory.createEmptyBorder(3, 8, 3, 8));
+		addField(trans.get("Flight3DFrame.metrics.simulation"), simulationLabel);
+		addField(trans.get("Flight3DFrame.metrics.configuration"), configLabel);
+		addField(trans.get("Flight3DFrame.metrics.time"), timeLabel);
+		addField(trans.get("Flight3DFrame.metrics.altitude"), altitudeLabel);
+		addField(trans.get("Flight3DFrame.metrics.velocity"), velocityLabel);
+		addField(trans.get("Flight3DFrame.metrics.acceleration"), accelerationLabel);
+		addField(trans.get("Flight3DFrame.metrics.position"), positionLabel);
 	}
 
 	void setReplay(Simulation simulation, PlaybackClock clock) {
@@ -97,7 +103,7 @@ class FlightMetricsPanel extends JPanel {
 			return;
 		}
 		double t = clock.getTime();
-		timeLabel.setText(String.format("%.2f s", t));
+		timeLabel.setText(String.format(trans.get("Flight3DFrame.metrics.timeFormat"), t));
 		altitudeLabel.setText(formatMetric(altitude, t, FlightDataType.TYPE_ALTITUDE));
 		velocityLabel.setText(formatMetric(velocity, t, FlightDataType.TYPE_VELOCITY_TOTAL));
 		accelerationLabel.setText(formatMetric(acceleration, t, FlightDataType.TYPE_ACCELERATION_TOTAL));
@@ -125,7 +131,8 @@ class FlightMetricsPanel extends JPanel {
 			return EMPTY;
 		}
 		UnitGroup distance = FlightDataType.TYPE_POSITION_X.getUnitGroup();
-		return "E " + distance.toStringUnit(x) + ", N " + distance.toStringUnit(y);
+		return String.format(trans.get("Flight3DFrame.metrics.positionFormat"),
+				distance.toStringUnit(x), distance.toStringUnit(y));
 	}
 
 	private void clearValues() {

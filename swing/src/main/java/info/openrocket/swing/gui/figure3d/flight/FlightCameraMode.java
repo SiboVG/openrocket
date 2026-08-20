@@ -1,26 +1,30 @@
 package info.openrocket.swing.gui.figure3d.flight;
 
+import info.openrocket.core.l10n.Translator;
+import info.openrocket.core.startup.Application;
+
 /**
  * Camera behaviour for the 3D flight replay.
  */
 public enum FlightCameraMode {
 	/** Frame the entire flight trajectory; the user orbits/zooms around the whole path. */
-	OVERVIEW("Whole flight"),
+	OVERVIEW("Flight3DFrame.camera.overview"),
 	/** Keep the camera centered on the rocket as it flies. */
-	FOLLOW("Follow rocket"),
+	FOLLOW("Flight3DFrame.camera.follow"),
 	/** Ride just behind the rocket, close enough to see it up close through the flight. */
-	ONBOARD("Onboard"),
+	ONBOARD("Flight3DFrame.camera.onboard"),
 	/** A fixed camera near the pad that tracks the rocket, like real launch footage. */
-	PAD("Launch pad");
+	PAD("Flight3DFrame.camera.pad");
 
-	private final String label;
+	private static final Translator trans = Application.getTranslator();
+	private final String labelKey;
 
-	FlightCameraMode(String label) {
-		this.label = label;
+	FlightCameraMode(String labelKey) {
+		this.labelKey = labelKey;
 	}
 
 	@Override
 	public String toString() {
-		return label;
+		return trans.get(labelKey);
 	}
 }
