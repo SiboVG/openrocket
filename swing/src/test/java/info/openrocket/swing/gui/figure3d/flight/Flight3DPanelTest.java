@@ -2,9 +2,11 @@ package info.openrocket.swing.gui.figure3d.flight;
 
 import info.openrocket.swing.gui.figure3d.scene.graph.SceneObject;
 import info.openrocket.swing.gui.figure3d.scene.graph.SceneView;
+import info.openrocket.swing.gui.figure3d.animation.PoseProvider;
 import info.openrocket.swing.gui.figure3d.geometry.Mesh;
 import info.openrocket.swing.gui.figure3d.particles.Particle;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.junit.jupiter.api.Test;
 
@@ -19,8 +21,26 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyDouble;
 
 class Flight3DPanelTest {
+	@Test
+	void smokeStationsRemainContinuousWhenSeveralIntervalsAreCrossedPerPathSample() {
+		PoseProvider provider = mock(PoseProvider.class);
+		when(provider.getPosition(anyDouble())).thenAnswer(invocation ->
+				new Vector3f((float) (invocation.getArgument(0, Double.class) * 1_000.0), 0.0f, 0.0f));
+		when(provider.getOrientation(anyDouble())).thenReturn(new Quaternionf());
+
+		List<Flight3DPanel.SmokeStation> stations = Flight3DPanel.sampleSmokeStations(
+				provider, new Vector3f(), 0.0, 1.0, 3.0f, 400);
+
+		assertEquals(334, stations.size());
+		for (int i = 1; i < stations.size(); i++) {
+			assertEquals(3.0f, stations.get(i - 1).position().distance(stations.get(i).position()), 1e-4f);
+			assertEquals(stations.get(i).position().x / 1_000.0, stations.get(i).time(), 1e-6);
+		}
+	}
+
 	@Test
 	void replaySmokeGrowsFadesVisiblyAndRemovesExpiredParticles() {
 		List<Particle> particles = new ArrayList<>();

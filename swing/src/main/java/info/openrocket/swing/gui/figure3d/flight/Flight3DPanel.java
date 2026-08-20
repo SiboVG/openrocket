@@ -149,6 +149,10 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	record SmokePuff(Vector3f position, double birthTime, float size, Vector3f color) {
 	}
 
+	/** One evenly spaced exhaust position and its interpolated flight time. */
+	record SmokeStation(Vector3f position, double time) {
+	}
+
 	/** One particle of a flame plume, in the rocket's local frame (nose toward -X). */
 	private record FlameShapePoint(Vector3f localOffset, float ageRatio, float size) {
 	}
@@ -757,32 +761,63 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private void addSmokeColumn(PoseProvider provider, Vector3f nozzleLocal,
 			double burnStart, double burnEnd, float puffSize, float spacing) {
 		Random jitter = new Random(Double.hashCode(burnStart) * 31L + smokePuffs.size());
-		Vector3f previous = null;
-		double sinceLastPuff = spacing; // place a puff right at ignition
-		int stations = 0;
-		for (int i = 0; i <= SMOKE_PATH_SAMPLES && stations < MAX_PUFFS_PER_BURN; i++) {
-			double t = burnStart + (burnEnd - burnStart) * i / SMOKE_PATH_SAMPLES;
-			Vector3f position = provider.getPosition(t);
-			position.add(provider.getOrientation(t).transform(new Vector3f(nozzleLocal)));
-			if (previous != null) {
-				sinceLastPuff += position.distance(previous);
-			}
-			previous = position;
-			if (sinceLastPuff < spacing) {
-				continue;
-			}
-			sinceLastPuff = 0.0;
-			stations++;
-
+		for (SmokeStation station : sampleSmokeStations(provider, nozzleLocal,
+				burnStart, burnEnd, spacing, MAX_PUFFS_PER_BURN)) {
 			for (int j = 0; j < SMOKE_PARTICLES_PER_PUFF; j++) {
 				float size = puffSize * (0.7f + 0.6f * jitter.nextFloat());
-				Vector3f puffCenter = new Vector3f(position).add(
+				Vector3f puffCenter = new Vector3f(station.position()).add(
 						(jitter.nextFloat() - 0.5f) * spacing,
 						(jitter.nextFloat() - 0.5f) * spacing,
 						(jitter.nextFloat() - 0.5f) * spacing);
-				smokePuffs.add(new SmokePuff(puffCenter, t, size, SMOKE_COLOR));
+				smokePuffs.add(new SmokePuff(puffCenter, station.time(), size, SMOKE_COLOR));
 			}
 		}
+	}
+
+	/**
+	 * Converts the time-sampled nozzle path into exact spatial intervals. A fast rocket may
+	 * cross several intervals between adjacent samples, so every crossing is interpolated
+	 * instead of emitting only one puff for the whole sampled segment.
+	 */
+	static List<SmokeStation> sampleSmokeStations(PoseProvider provider, Vector3f nozzleLocal,
+			double burnStart, double burnEnd, float spacing, int maximumStations) {
+		if (spacing <= 0.0f || maximumStations <= 0) {
+			return List.of();
+		}
+
+		List<SmokeStation> stations = new ArrayList<>(maximumStations);
+		double previousTime = burnStart;
+		Vector3f previousPosition = nozzlePosition(provider, nozzleLocal, previousTime);
+		stations.add(new SmokeStation(new Vector3f(previousPosition), previousTime));
+		double travelled = 0.0;
+		double nextStationDistance = spacing;
+
+		for (int i = 1; i <= SMOKE_PATH_SAMPLES && stations.size() < maximumStations; i++) {
+			double time = burnStart + (burnEnd - burnStart) * i / SMOKE_PATH_SAMPLES;
+			Vector3f position = nozzlePosition(provider, nozzleLocal, time);
+			double segmentLength = position.distance(previousPosition);
+			double segmentEndDistance = travelled + segmentLength;
+
+			while (nextStationDistance <= segmentEndDistance && stations.size() < maximumStations) {
+				double fraction = segmentLength > 0.0
+						? (nextStationDistance - travelled) / segmentLength : 0.0;
+				Vector3f stationPosition = new Vector3f(previousPosition)
+						.lerp(position, (float) fraction);
+				double stationTime = previousTime + (time - previousTime) * fraction;
+				stations.add(new SmokeStation(stationPosition, stationTime));
+				nextStationDistance += spacing;
+			}
+
+			travelled = segmentEndDistance;
+			previousPosition = position;
+			previousTime = time;
+		}
+		return List.copyOf(stations);
+	}
+
+	private static Vector3f nozzlePosition(PoseProvider provider, Vector3f nozzleLocal, double time) {
+		Vector3f position = provider.getPosition(time);
+		return position.add(provider.getOrientation(time).transform(new Vector3f(nozzleLocal)));
 	}
 
 	/**
