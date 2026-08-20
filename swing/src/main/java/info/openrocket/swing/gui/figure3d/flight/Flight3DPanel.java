@@ -1417,7 +1417,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	}
 
 	private void applyFlightBackground(SceneView scene) {
-		scene.setBackground(new GradientBackground(
+		scene.setBackground(GradientBackground.worldAligned(
 				new Vector3f(0.70f, 0.82f, 0.96f),
 				new Vector3f(0.78f, 0.88f, 0.74f)));
 	}

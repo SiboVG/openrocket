@@ -38,6 +38,8 @@ public class CameraController implements CameraControls {
 	private BoundingBox lastFittedRocketBounds;
 	private Vector3f fittedCenter;
 	private Vector3f fittedDimensions;
+	private float fittedClosestDistanceFactor = Float.NaN;
+	private float fittedFarthestDistanceFactor = Float.NaN;
 	// Whether the camera should track the fitted distance. This is explicit state
 	// rather than "distance ≈ fitted distance" so that a resize-triggered re-fit
 	// cannot race with (and overwrite) a manual zoom that was applied in between.
@@ -137,11 +139,26 @@ public class CameraController implements CameraControls {
 
 	@Override
 	public void focusOnBounds(Vector3f center, Vector3f dimensions) {
+		focusOnBounds(center, dimensions, Float.NaN, Float.NaN);
+	}
+
+	@Override
+	public void focusOnBounds(Vector3f center, Vector3f dimensions,
+			float closestDistanceFactor, float farthestDistanceFactor) {
 		if (center == null || dimensions == null) {
 			return;
 		}
+		if (Float.isFinite(closestDistanceFactor) || Float.isFinite(farthestDistanceFactor)) {
+			if (!Float.isFinite(closestDistanceFactor) || closestDistanceFactor <= 0.0f
+					|| closestDistanceFactor > 1.0f
+					|| !Float.isFinite(farthestDistanceFactor) || farthestDistanceFactor <= 1.0f) {
+				throw new IllegalArgumentException("Fitted zoom factors must span the fitted distance");
+			}
+		}
 		fittedCenter = new Vector3f(center);
 		fittedDimensions = new Vector3f(dimensions);
+		fittedClosestDistanceFactor = closestDistanceFactor;
+		fittedFarthestDistanceFactor = farthestDistanceFactor;
 		lastFittedRocketBounds = null;
 		applyFittedBounds();
 	}
@@ -154,6 +171,11 @@ public class CameraController implements CameraControls {
 		camera.fitBounds(fittedDimensions);
 		camera.resetViewOffset();
 		focusedDistance = camera.getDistance();
+		if (Float.isFinite(fittedClosestDistanceFactor)) {
+			float closestDistance = Math.max(CameraConstants.MIN_DISTANCE,
+					focusedDistance * fittedClosestDistanceFactor);
+			camera.setZoomLimits(closestDistance, focusedDistance * fittedFarthestDistanceFactor);
+		}
 		zoomFitting = true;
 		scene.updateRocketPivotFromCamera();
 		notifyCameraChanged();

@@ -12,6 +12,9 @@ public class Camera {
 	// Let the shared zoom control reach 5% in 3D instead of stopping at 50%.
 	// Going much farther with a perspective camera would sacrifice useful depth precision.
 	private static final float FIT_MAX_ZOOM_FACTOR = 20.0f;
+	// Multiplicative zoom gives each wheel notch the same visible change at rocket and
+	// whole-flight scales. Additive world-unit steps become imperceptible on large bounds.
+	private static final float DOLLY_LOG_STEP = 0.12f;
 
 	private final Vector3f position = new Vector3f();
 	private boolean fixedCenterOfInterest;
@@ -275,7 +278,7 @@ public class Camera {
 	 * @param scrollAmount The distance to move. Positive is forward, negative is backward.
 	 */
 	public void dolly(float scrollAmount) {
-		distance -= scrollAmount;
+		distance *= (float) Math.exp(-scrollAmount * DOLLY_LOG_STEP);
 		distance = MathUtil.clamp(distance, minZoom, maxZoom);
 
 		updateProjectionMatrix();

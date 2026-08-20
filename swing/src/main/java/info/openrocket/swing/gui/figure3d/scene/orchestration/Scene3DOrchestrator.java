@@ -86,6 +86,8 @@ public class Scene3DOrchestrator {
 	private volatile boolean pendingFollowFit = false;
 	private volatile DoubleConsumer flightFrameListener = null;
 	private static final float FOLLOW_ZOOM_OUT_FACTOR = 1.8f;
+	private static final float OVERVIEW_CLOSEST_DISTANCE_FACTOR = 0.001f;
+	private static final float OVERVIEW_FARTHEST_DISTANCE_FACTOR = 20.0f;
 
 	/**
 	 * Updates the orchestrator's knowledge of the window and framebuffer dimensions.
@@ -243,7 +245,8 @@ public class Scene3DOrchestrator {
 				Vector3f center = flightTrajectoryCenter;
 				Vector3f dimensions = flightTrajectoryDimensions;
 				if (center != null && dimensions != null) {
-					cameraController.focusOnBounds(center, dimensions);
+					cameraController.focusOnBounds(center, dimensions,
+							OVERVIEW_CLOSEST_DISTANCE_FACTOR, OVERVIEW_FARTHEST_DISTANCE_FACTOR);
 				}
 			}
 			DoubleConsumer frameListener = flightFrameListener;

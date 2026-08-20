@@ -8,6 +8,7 @@ public class GradientBackground implements Background {
 
 	private final Vector3f topColor;
 	private final Vector3f bottomColor;
+	private final boolean worldAligned;
 
 	/**
 	 * Creates a new gradient background with specified top and bottom colors.
@@ -20,8 +21,21 @@ public class GradientBackground implements Background {
 	 * @param srgbBottomColor The bottom color in sRGB color space (typically ground color)
 	 */
 	public GradientBackground(Vector3f srgbTopColor, Vector3f srgbBottomColor) {
+		this(srgbTopColor, srgbBottomColor, false);
+	}
+
+	private GradientBackground(Vector3f srgbTopColor, Vector3f srgbBottomColor, boolean worldAligned) {
 		this.topColor = ColorUtils.srgbToLinear(srgbTopColor);
 		this.bottomColor = ColorUtils.srgbToLinear(srgbBottomColor);
+		this.worldAligned = worldAligned;
+	}
+
+	/**
+	 * Creates a horizon-like gradient aligned to world up. Pitching the camera changes the
+	 * visible sky/ground balance, unlike the ordinary screen-aligned design background.
+	 */
+	public static GradientBackground worldAligned(Vector3f srgbTopColor, Vector3f srgbBottomColor) {
+		return new GradientBackground(srgbTopColor, srgbBottomColor, true);
 	}
 
 	/**
@@ -40,6 +54,10 @@ public class GradientBackground implements Background {
 	 */
 	public Vector3f getBottomColor() {
 		return bottomColor;
+	}
+
+	public boolean isWorldAligned() {
+		return worldAligned;
 	}
 
 	@Override

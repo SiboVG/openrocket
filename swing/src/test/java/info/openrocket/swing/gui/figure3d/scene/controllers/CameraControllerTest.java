@@ -74,6 +74,20 @@ class CameraControllerTest {
 		assertTrue(context.camera.getDistance() > wideDistance);
 	}
 
+	@Test
+	void resizePreservesTheExpandedWholeFlightZoomRange() {
+		TestContext context = createContext(new BoundingBox(
+				new Coordinate(0.0, -1.0, -0.5), new Coordinate(10.0, 1.0, 0.5)));
+		context.controller.focusOnBounds(new Vector3f(120.0f, 450.0f, -30.0f),
+				new Vector3f(1_000.0f, 3_000.0f, 500.0f), 0.001f, 20.0f);
+
+		context.controller.resize(0.5f);
+		float resizedFitDistance = context.camera.getDistance();
+		context.camera.setDistance(0.0f);
+
+		assertEquals(resizedFitDistance * 0.001f, context.camera.getDistance(), 1e-4f);
+	}
+
 	private static TestContext createContext(BoundingBox initialBounds) {
 		AtomicReference<BoundingBox> bounds = new AtomicReference<>(initialBounds);
 		Rocket rocket = mock(Rocket.class);

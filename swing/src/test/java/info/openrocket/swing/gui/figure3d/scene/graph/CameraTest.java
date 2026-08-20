@@ -67,4 +67,21 @@ class CameraTest {
 		assertEquals(sideDistance, endDistance, sideDistance * 0.0001f);
 		assertEquals(sideDistance, camera.getDistance(), sideDistance * 0.0001f);
 	}
+
+	@Test
+	void wheelZoomUsesTheSameRatioAtEveryDistance() {
+		Camera camera = Camera.builder().build();
+		camera.setZoomLimits(0.1f, 10_000.0f);
+
+		camera.setDistance(1_000.0f);
+		camera.dolly(1.0f);
+		float distantRatio = camera.getDistance() / 1_000.0f;
+
+		camera.setDistance(10.0f);
+		camera.dolly(1.0f);
+		float closeRatio = camera.getDistance() / 10.0f;
+
+		assertEquals(distantRatio, closeRatio, 1e-6f);
+		assertTrue(distantRatio < 0.95f, "One wheel notch should make a visible zoom change");
+	}
 }
