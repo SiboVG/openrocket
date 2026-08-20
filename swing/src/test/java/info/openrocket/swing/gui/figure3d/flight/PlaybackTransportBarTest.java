@@ -12,9 +12,40 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PlaybackTransportBarTest extends BaseTestCase {
+	@Test
+	void playbackButtonsRestartStepAndSwitchBetweenPlayAndPauseIcons() throws Exception {
+		SwingUtilities.invokeAndWait(() -> {
+			PlaybackTransportBar bar = new PlaybackTransportBar();
+			PlaybackClock clock = new PlaybackClock(0.0, 10.0);
+			clock.setRate(0.0);
+			clock.setTime(5.0);
+			bar.setReplay(clock, null);
+			try {
+				var playPressedIcon = bar.getPlayPauseButton().getPressedIcon();
+				bar.getPreviousFrameButton().doClick();
+				assertEquals(5.0 - 1.0 / 60.0, clock.getTime(), 1e-9);
+				assertEquals(0.0, clock.getRate(), 1e-9);
+
+				bar.getNextFrameButton().doClick();
+				assertEquals(5.0, clock.getTime(), 1e-9);
+
+				bar.getPlayPauseButton().doClick();
+				assertEquals(1.0, clock.getRate(), 1e-9);
+				assertNotSame(playPressedIcon, bar.getPlayPauseButton().getPressedIcon());
+
+				bar.getRestartButton().doClick();
+				assertEquals(clock.getStart(), clock.getTime(), 1e-9);
+				assertEquals(0.0, clock.getRate(), 1e-9);
+			} finally {
+				bar.dispose();
+			}
+		});
+	}
+
 	@Test
 	void viewButtonsDispatchActionsAndPadModeDisablesPan() throws Exception {
 		SwingUtilities.invokeAndWait(() -> {

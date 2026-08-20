@@ -289,6 +289,21 @@ public class Icons {
 			"pix/icons/sim-run.png",
 			"Run",
 			"OR.icons.play");
+	public static final Icon PLAYBACK_PLAY = loadSvgIcon(
+			"pix/icons/lucide/play-filled.svg",
+			"Play");
+	public static final Icon PLAYBACK_PAUSE = loadSvgIcon(
+			"pix/icons/lucide/pause.svg",
+			"Pause");
+	public static final Icon PLAYBACK_RESTART = loadSvgIcon(
+			"pix/icons/lucide/skip-back.svg",
+			"Back to beginning");
+	public static final Icon PLAYBACK_STEP_BACK = loadSvgIcon(
+			"pix/icons/lucide/step-back.svg",
+			"Previous frame");
+	public static final Icon PLAYBACK_STEP_FORWARD = loadSvgIcon(
+			"pix/icons/lucide/step-forward.svg",
+			"Next frame");
 	public static final Icon SIM_PLOT = loadIcon(
 			"pix/icons/lucide/chart-spline.svg",
 			"pix/icons/sim-plot.png",

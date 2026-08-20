@@ -38,6 +38,7 @@ class PlaybackTransportBar extends JPanel {
 	private static final Translator trans = Application.getTranslator();
 	private static final int SLIDER_STEPS = 10_000;
 	private static final int POLL_INTERVAL_MS = 100;
+	private static final double FRAME_STEP_SECONDS = 1.0 / 60.0;
 	private static final EnumSet<FlightEvent.Type> MARKER_TYPES = EnumSet.of(
 			FlightEvent.Type.IGNITION,
 			FlightEvent.Type.LAUNCHROD,
@@ -48,7 +49,10 @@ class PlaybackTransportBar extends JPanel {
 			FlightEvent.Type.RECOVERY_DEVICE_DEPLOYMENT,
 			FlightEvent.Type.GROUND_HIT);
 
-	private final JButton playPauseButton = new JButton(trans.get("Flight3DFrame.play"));
+	private final JButton restartButton = new IconButton(Icons.PLAYBACK_RESTART);
+	private final JButton previousFrameButton = new IconButton(Icons.PLAYBACK_STEP_BACK);
+	private final JButton playPauseButton = new IconButton(Icons.PLAYBACK_PLAY);
+	private final JButton nextFrameButton = new IconButton(Icons.PLAYBACK_STEP_FORWARD);
 	private final EventMarkerSlider scrubSlider = new EventMarkerSlider();
 	private final JComboBox<SpeedOption> speedCombo = new JComboBox<>(new SpeedOption[] {
 			new SpeedOption(0.25),
@@ -80,7 +84,16 @@ class PlaybackTransportBar extends JPanel {
 		setLayout(new BorderLayout(8, 0));
 
 		JPanel leftControls = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+		restartButton.setToolTipText(trans.get("Flight3DFrame.restart.ttip"));
+		restartButton.addActionListener(e -> restartPlayback());
+		leftControls.add(restartButton);
+		previousFrameButton.setToolTipText(trans.get("Flight3DFrame.previousFrame.ttip"));
+		previousFrameButton.addActionListener(e -> stepFrame(-1));
+		leftControls.add(previousFrameButton);
 		leftControls.add(playPauseButton);
+		nextFrameButton.setToolTipText(trans.get("Flight3DFrame.nextFrame.ttip"));
+		nextFrameButton.addActionListener(e -> stepFrame(1));
+		leftControls.add(nextFrameButton);
 		leftControls.add(speedCombo);
 		cameraModeCombo.setSelectedItem(FlightCameraMode.OVERVIEW);
 		cameraModeCombo.setToolTipText(trans.get("Flight3DFrame.cameraMode.ttip"));
@@ -140,6 +153,7 @@ class PlaybackTransportBar extends JPanel {
 			}
 		});
 		playPauseButton.addActionListener(e -> togglePlayback());
+		updatePlaybackButton();
 		setControlsEnabled(false);
 	}
 
@@ -175,6 +189,22 @@ class PlaybackTransportBar extends JPanel {
 		return cameraModeCombo;
 	}
 
+	JButton getRestartButton() {
+		return restartButton;
+	}
+
+	JButton getPreviousFrameButton() {
+		return previousFrameButton;
+	}
+
+	JButton getPlayPauseButton() {
+		return playPauseButton;
+	}
+
+	JButton getNextFrameButton() {
+		return nextFrameButton;
+	}
+
 	void setReplayChangeListener(Runnable listener) {
 		this.replayChangeListener = listener;
 	}
@@ -188,6 +218,7 @@ class PlaybackTransportBar extends JPanel {
 			updateTimeLabel(0.0, 0.0);
 			return;
 		}
+		updatePlaybackButton();
 		updateFromClock();
 		pollTimer.start();
 	}
@@ -199,7 +230,7 @@ class PlaybackTransportBar extends JPanel {
 		clock = null;
 		scrubSlider.setMarkers(List.of());
 		setControlsEnabled(false);
-		updateButtonText();
+		updatePlaybackButton();
 		updateTimeLabel(0.0, 0.0);
 	}
 
@@ -209,7 +240,10 @@ class PlaybackTransportBar extends JPanel {
 	}
 
 	private void setControlsEnabled(boolean enabled) {
+		restartButton.setEnabled(enabled);
+		previousFrameButton.setEnabled(enabled);
 		playPauseButton.setEnabled(enabled);
+		nextFrameButton.setEnabled(enabled);
 		speedCombo.setEnabled(enabled);
 		scrubSlider.setEnabled(enabled);
 		viewControlsEnabled = enabled;
@@ -254,7 +288,29 @@ class PlaybackTransportBar extends JPanel {
 		} else {
 			clock.setRate(0.0);
 		}
-		updateButtonText();
+		updatePlaybackButton();
+		updateFromClock();
+		notifyReplayChanged();
+	}
+
+	private void restartPlayback() {
+		if (clock == null) {
+			return;
+		}
+		clock.setRate(0.0);
+		clock.setTime(clock.getStart());
+		updatePlaybackButton();
+		updateFromClock();
+		notifyReplayChanged();
+	}
+
+	private void stepFrame(int direction) {
+		if (clock == null) {
+			return;
+		}
+		clock.setRate(0.0);
+		clock.setTime(clock.getTime() + direction * FRAME_STEP_SECONDS);
+		updatePlaybackButton();
 		updateFromClock();
 		notifyReplayChanged();
 	}
@@ -266,7 +322,7 @@ class PlaybackTransportBar extends JPanel {
 		if (clock.getRate() > 0.0 && clock.getTime() >= clock.getEnd()) {
 			clock.setRate(0.0);
 		}
-		updateButtonText();
+		updatePlaybackButton();
 		updateFromClock();
 	}
 
@@ -308,9 +364,10 @@ class PlaybackTransportBar extends JPanel {
 		updateTimeLabel(time, clock.getEnd());
 	}
 
-	private void updateButtonText() {
-		playPauseButton.setText(clock != null && clock.getRate() != 0.0
-				? trans.get("Flight3DFrame.pause") : trans.get("Flight3DFrame.play"));
+	private void updatePlaybackButton() {
+		boolean playing = clock != null && clock.getRate() != 0.0;
+		playPauseButton.setIcon(playing ? Icons.PLAYBACK_PAUSE : Icons.PLAYBACK_PLAY);
+		playPauseButton.setToolTipText(trans.get(playing ? "Flight3DFrame.pause" : "Flight3DFrame.play"));
 	}
 
 	private void updateTimeLabel(double time, double end) {
