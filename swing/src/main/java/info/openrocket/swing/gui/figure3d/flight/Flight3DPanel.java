@@ -1144,11 +1144,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		if (scene == null) {
 			return;
 		}
-		for (SceneObject trailObject : dynamicTrails) {
-			scene.getObjects().remove(trailObject);
-			trailObject.cleanup();
-		}
-		dynamicTrails.clear();
+		removeAndCleanupObjects(scene, dynamicTrails);
 
 		boolean visible = isDistantView();
 		for (TrailPath trail : trailPaths) {
@@ -1177,6 +1173,14 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 				addTrailSegment(scene, upcoming, trail.active() ? ACTIVE_FUTURE_COLOR : BOOSTER_FUTURE_COLOR, visible);
 			}
 		}
+	}
+
+	static void removeAndCleanupObjects(SceneView scene, List<SceneObject> objects) {
+		for (SceneObject object : objects) {
+			scene.removeObject(object);
+			object.cleanup();
+		}
+		objects.clear();
 	}
 
 	private void addTrailSegment(SceneView scene, List<Vector3f> points, Vector3f color, boolean visible) {

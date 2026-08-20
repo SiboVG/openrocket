@@ -1,14 +1,35 @@
 package info.openrocket.swing.gui.figure3d.flight;
 
+import info.openrocket.swing.gui.figure3d.scene.graph.SceneObject;
+import info.openrocket.swing.gui.figure3d.scene.graph.SceneView;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 class Flight3DPanelTest {
+	@Test
+	void dynamicTrailsAreRemovedThroughTheSceneMutationApi() {
+		SceneView scene = mock(SceneView.class);
+		SceneObject trail = mock(SceneObject.class);
+		List<SceneObject> trails = new ArrayList<>(List.of(trail));
+
+		Flight3DPanel.removeAndCleanupObjects(scene, trails);
+
+		verify(scene).removeObject(trail);
+		verify(scene, never()).getObjects();
+		verify(trail).cleanup();
+		assertTrue(trails.isEmpty());
+	}
 
 	@Test
 	void pausedPanelRendersOnlyWhenMarkedDirty() {
