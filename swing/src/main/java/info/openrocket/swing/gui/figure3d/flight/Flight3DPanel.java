@@ -85,6 +85,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private volatile long earliestRenderAtMs;
 	private volatile boolean renderLoopRunning = false;
 	private volatile FlightCameraMode cameraMode = FlightCameraMode.OVERVIEW;
+	private volatile boolean panModeEnabled = false;
 	private volatile Vector3f trajectoryCenter;
 	private volatile Vector3f trajectoryDimensions;
 
@@ -247,6 +248,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 	private void installCanvas(GLScenePanel panel) {
 		glPanel = panel;
+		panel.setPanModeEnabled(panModeEnabled && cameraMode != FlightCameraMode.PAD);
 		panel.setRenderActivityCallback(this::markDirty);
 		panel.setRenderRequestCallback(this::requestRenderNow);
 		long generation = replayGeneration.get();
@@ -495,6 +497,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	 */
 	void setCameraMode(FlightCameraMode mode) {
 		this.cameraMode = mode;
+		if (mode == FlightCameraMode.PAD) {
+			setPanModeEnabled(false);
+		}
 		GLScenePanel panel = glPanel;
 		if (panel == null) {
 			return;
@@ -509,6 +514,40 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		return cameraMode;
 	}
 
+	void zoomIn() {
+		zoomBy(1.0f);
+	}
+
+	void zoomOut() {
+		zoomBy(-1.0f);
+	}
+
+	private void zoomBy(float scrollAmount) {
+		Scene3DOrchestrator orchestrator = activeOrchestrator;
+		if (orchestrator != null) {
+			orchestrator.zoomFlightCamera(scrollAmount);
+			requestRenderNow();
+		}
+	}
+
+	void fitView() {
+		Scene3DOrchestrator orchestrator = activeOrchestrator;
+		if (orchestrator != null) {
+			applyCameraMode(orchestrator, cameraMode);
+			requestRenderNow();
+		}
+	}
+
+	void setPanModeEnabled(boolean enabled) {
+		boolean accepted = enabled && cameraMode != FlightCameraMode.PAD;
+		panModeEnabled = accepted;
+		GLScenePanel panel = glPanel;
+		if (panel != null) {
+			panel.setPanModeEnabled(accepted);
+		}
+		requestRenderNow();
+	}
+
 	private void applyCameraMode(Scene3DOrchestrator orchestrator, FlightCameraMode mode) {
 		// The path trail runs through the rocket's center, so it clips the rocket up close:
 		// show it only in the distant views, and the position marker only in the overview.
@@ -520,6 +559,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 				lastRebuildFraction = -1.0;
 			}
 		});
+		orchestrator.setFlightPanEnabled(mode != FlightCameraMode.PAD);
 
 		switch (mode) {
 			case FOLLOW -> orchestrator.setFollowFlightCamera(true);

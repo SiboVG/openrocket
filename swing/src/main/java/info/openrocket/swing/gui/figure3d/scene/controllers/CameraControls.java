@@ -25,6 +25,7 @@ public interface CameraControls {
 	}
 	void handleOrbit(float dx, float dy);
 	void handlePan(float dx, float dy, int viewportWidth, int viewportHeight);
+	void setPanEnabled(boolean enabled);
 	void resize(float newAspectRatio);
 	void update();
 	double getZoomScale();

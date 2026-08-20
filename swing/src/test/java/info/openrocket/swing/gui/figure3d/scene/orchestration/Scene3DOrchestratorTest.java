@@ -3,6 +3,8 @@ package info.openrocket.swing.gui.figure3d.scene.orchestration;
 import info.openrocket.core.motor.Motor;
 import info.openrocket.core.rocketcomponent.RocketComponent;
 import info.openrocket.swing.gui.figure3d.geometry.RocketSceneSnapshot;
+import info.openrocket.swing.gui.figure3d.scene.graph.Camera;
+import org.joml.Vector3f;
 import org.joml.Matrix4f;
 import org.junit.jupiter.api.Test;
 
@@ -10,10 +12,27 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class Scene3DOrchestratorTest {
+	@Test
+	void padCameraRetainsWheelZoomWhileFollowingTheRocket() {
+		Camera camera = Camera.builder().withFixedCenterOfInterest(false).build();
+		Vector3f eye = new Vector3f(20.0f, 4.0f, 20.0f);
+		float fittedDistance = Scene3DOrchestrator.lookFrom(camera, eye, new Vector3f(), 1.0f);
+
+		camera.dolly(1.0f);
+		float scale = Scene3DOrchestrator.updatedPadDistanceScale(
+				1.0f, camera.getDistance(), fittedDistance);
+		float zoomedDistance = Scene3DOrchestrator.lookFrom(
+				camera, eye, new Vector3f(0.0f, 5.0f, 0.0f), scale);
+
+		assertTrue(scale < 1.0f);
+		assertTrue(zoomedDistance < eye.distance(new Vector3f(0.0f, 5.0f, 0.0f)));
+	}
+
 
 	@Test
 	void derivesNozzlePositionAndDirectionFromRenderedMotorGeometry() {

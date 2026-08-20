@@ -8,6 +8,7 @@ import info.openrocket.core.util.CoordinateIF;
 import info.openrocket.core.startup.Application;
 import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
 import info.openrocket.swing.gui.figure3d.animation.PoseProvider;
+import info.openrocket.swing.gui.figure3d.constants.CameraConstants;
 import info.openrocket.swing.gui.figure3d.geometry.RocketMeshBuilder;
 import info.openrocket.swing.gui.figure3d.geometry.RocketSceneSnapshot;
 import info.openrocket.swing.gui.figure3d.math.DefaultRaycaster;
@@ -77,6 +78,9 @@ public class Scene3DOrchestrator {
 	private volatile FlightCameraBehavior flightCameraBehavior = FlightCameraBehavior.FREE;
 	// World-space eye position for the PAD behavior.
 	private volatile Vector3f flightPadEye = null;
+	private volatile boolean pendingPadZoomReset = false;
+	private float flightPadDistanceScale = 1.0f;
+	private float lastAppliedPadDistance = Float.NaN;
 	// Engine-CS offset from the rocket's origin (nose) to its geometric center, so the follow
 	// camera orbits the rocket's middle instead of its tip.
 	private volatile Vector3f flightRocketCenterOffset = null;
@@ -88,6 +92,8 @@ public class Scene3DOrchestrator {
 	private static final float FOLLOW_ZOOM_OUT_FACTOR = 1.8f;
 	private static final float OVERVIEW_CLOSEST_DISTANCE_FACTOR = 0.001f;
 	private static final float OVERVIEW_FARTHEST_DISTANCE_FACTOR = 20.0f;
+	private static final float PAD_MIN_DISTANCE_SCALE = 0.05f;
+	private static final float PAD_MAX_DISTANCE_SCALE = 20.0f;
 
 	/**
 	 * Updates the orchestrator's knowledge of the window and framebuffer dimensions.
@@ -219,10 +225,18 @@ public class Scene3DOrchestrator {
 					pivot.add(primaryProvider.getOrientation(t).transform(new Vector3f(centerOffset)));
 				}
 				if (behavior == FlightCameraBehavior.PAD) {
-					// A fixed eye that turns to keep the rocket centered.
+					// Track from the pad sightline. Wheel input adjusts the retained distance scale
+					// before this behavior reapplies its look-at transform.
 					Vector3f eye = flightPadEye;
 					if (eye != null) {
-						lookFrom(camera, eye, pivot);
+						if (pendingPadZoomReset) {
+							pendingPadZoomReset = false;
+							flightPadDistanceScale = 1.0f;
+							lastAppliedPadDistance = Float.NaN;
+						}
+						flightPadDistanceScale = updatedPadDistanceScale(flightPadDistanceScale,
+								camera.getDistance(), lastAppliedPadDistance);
+						lastAppliedPadDistance = lookFrom(camera, eye, pivot, flightPadDistanceScale);
 					}
 				} else {
 					if (pendingFollowFit) {
@@ -524,6 +538,7 @@ public class Scene3DOrchestrator {
 	}
 
 	public void setFollowFlightCamera(boolean followFlightCamera) {
+		lastAppliedPadDistance = Float.NaN;
 		if (followFlightCamera) {
 			this.pendingFollowFit = true;
 			this.flightCameraBehavior = FlightCameraBehavior.FOLLOW;
@@ -535,7 +550,18 @@ public class Scene3DOrchestrator {
 	/** Watches the rocket from a fixed eye position near the pad, like launch footage. */
 	public void setPadFlightCamera(Vector3f eyePosition) {
 		this.flightPadEye = eyePosition != null ? new Vector3f(eyePosition) : null;
+		this.pendingPadZoomReset = true;
 		this.flightCameraBehavior = FlightCameraBehavior.PAD;
+	}
+
+	/** Allows ordinary pan gestures in free/follow views and blocks every pan path at the pad. */
+	public void setFlightPanEnabled(boolean enabled) {
+		cameraController.setPanEnabled(enabled);
+	}
+
+	/** Applies a wheel-sized zoom step on the render thread. */
+	public void zoomFlightCamera(float scrollAmount) {
+		enqueueGlTask(() -> cameraController.handleScroll(scrollAmount));
 	}
 
 	/**
@@ -543,15 +569,27 @@ public class Scene3DOrchestrator {
 	 * interest, distance and angles, widening the zoom clamp so an earlier fit cannot
 	 * clip the computed distance.
 	 */
-	private static void lookFrom(Camera camera, Vector3f eye, Vector3f target) {
+	static float lookFrom(Camera camera, Vector3f eye, Vector3f target, float distanceScale) {
 		Vector3f toEye = new Vector3f(eye).sub(target);
-		float eyeDistance = Math.max(0.5f, toEye.length());
-		toEye.div(eyeDistance);
-		camera.setZoomLimits(Math.min(0.5f, eyeDistance * 0.5f), Math.max(eyeDistance * 2.0f, 10.0f));
+		float baseDistance = Math.max(0.5f, toEye.length());
+		toEye.div(baseDistance);
+		float eyeDistance = Math.max(CameraConstants.MIN_DISTANCE, baseDistance * distanceScale);
+		camera.setZoomLimits(Math.max(CameraConstants.MIN_DISTANCE, eyeDistance * 0.1f),
+				Math.max(eyeDistance * 10.0f, 10.0f));
 		camera.setDistance(eyeDistance);
 		camera.setAngleX((float) Math.atan2(toEye.x, toEye.z));
 		camera.setAngleY((float) Math.asin(Math.max(-1.0f, Math.min(1.0f, toEye.y))));
 		camera.setCenterOfInterest(target);
+		return camera.getDistance();
+	}
+
+	static float updatedPadDistanceScale(float currentScale, float cameraDistance, float lastAppliedDistance) {
+		if (!Float.isFinite(lastAppliedDistance) || lastAppliedDistance <= 0.0f
+				|| !Float.isFinite(cameraDistance) || cameraDistance <= 0.0f) {
+			return currentScale;
+		}
+		float scale = currentScale * cameraDistance / lastAppliedDistance;
+		return Math.max(PAD_MIN_DISTANCE_SCALE, Math.min(PAD_MAX_DISTANCE_SCALE, scale));
 	}
 
 	/** Invoked on the render thread each playback frame with the current playback time. */
@@ -573,6 +611,7 @@ public class Scene3DOrchestrator {
 		this.flightTrajectoryCenter = center != null ? new Vector3f(center) : null;
 		this.flightTrajectoryDimensions = dimensions != null ? new Vector3f(dimensions) : null;
 		this.flightCameraBehavior = FlightCameraBehavior.FREE;
+		this.lastAppliedPadDistance = Float.NaN;
 		this.pendingTrajectoryFit = true;
 	}
 }

@@ -1,15 +1,54 @@
 package info.openrocket.swing.gui.figure3d.flight;
 
 import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
+import info.openrocket.swing.util.BaseTestCase;
 import org.junit.jupiter.api.Test;
 
 import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class PlaybackTransportBarTest {
+class PlaybackTransportBarTest extends BaseTestCase {
+	@Test
+	void viewButtonsDispatchActionsAndPadModeDisablesPan() throws Exception {
+		SwingUtilities.invokeAndWait(() -> {
+			PlaybackTransportBar bar = new PlaybackTransportBar();
+			AtomicInteger zoomOut = new AtomicInteger();
+			AtomicInteger zoomIn = new AtomicInteger();
+			AtomicInteger fit = new AtomicInteger();
+			AtomicBoolean pan = new AtomicBoolean();
+			bar.setViewControlListeners(zoomOut::incrementAndGet, zoomIn::incrementAndGet,
+					fit::incrementAndGet, pan::set);
+			bar.setReplay(new PlaybackClock(0.0, 10.0), null);
+			try {
+				bar.getZoomOutButton().doClick();
+				bar.getZoomInButton().doClick();
+				bar.getZoomFitButton().doClick();
+				var panButton = bar.getPanButton();
+				panButton.doClick();
+
+				assertEquals(1, zoomOut.get());
+				assertEquals(1, zoomIn.get());
+				assertEquals(1, fit.get());
+				assertTrue(pan.get());
+
+				bar.getCameraModeCombo().setSelectedItem(FlightCameraMode.PAD);
+
+				assertFalse(panButton.isEnabled());
+				assertFalse(panButton.isSelected());
+				assertFalse(pan.get());
+			} finally {
+				bar.dispose();
+			}
+		});
+	}
+
 
 	@Test
 	void sliderModelChangesSeekWithoutMouseDragging() throws Exception {
@@ -32,4 +71,5 @@ class PlaybackTransportBarTest {
 			}
 		});
 	}
+
 }

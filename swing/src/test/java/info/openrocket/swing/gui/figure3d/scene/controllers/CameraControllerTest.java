@@ -88,6 +88,18 @@ class CameraControllerTest {
 		assertEquals(resizedFitDistance * 0.001f, context.camera.getDistance(), 1e-4f);
 	}
 
+	@Test
+	void disabledPanIgnoresPersistentAndModifierDrivenPanRequests() {
+		TestContext context = createContext(new BoundingBox(
+				new Coordinate(0.0, -1.0, -0.5), new Coordinate(10.0, 1.0, 0.5)));
+		Vector3f originalTarget = context.camera.getEffectiveLookAt();
+		context.controller.setPanEnabled(false);
+
+		context.controller.handlePan(120.0f, -80.0f, 1_000, 700);
+
+		assertEquals(originalTarget, context.camera.getEffectiveLookAt());
+	}
+
 	private static TestContext createContext(BoundingBox initialBounds) {
 		AtomicReference<BoundingBox> bounds = new AtomicReference<>(initialBounds);
 		Rocket rocket = mock(Rocket.class);

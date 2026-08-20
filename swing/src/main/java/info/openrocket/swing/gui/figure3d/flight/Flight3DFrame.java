@@ -54,6 +54,8 @@ public class Flight3DFrame extends JFrame {
 			metricsPanel.setReplay(currentSimulation, clock);
 		});
 		transportBar.setCameraModeListener(flightPanel::setCameraMode);
+		transportBar.setViewControlListeners(flightPanel::zoomOut, flightPanel::zoomIn,
+				flightPanel::fitView, flightPanel::setPanModeEnabled);
 		transportBar.setReplayChangeListener(flightPanel::requestRenderNow);
 		JPanel content = new JPanel(new BorderLayout());
 		content.add(metricsPanel, BorderLayout.NORTH);

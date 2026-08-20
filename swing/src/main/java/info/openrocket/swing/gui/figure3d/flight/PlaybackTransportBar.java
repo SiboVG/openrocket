@@ -4,6 +4,8 @@ import info.openrocket.core.l10n.Translator;
 import info.openrocket.core.simulation.FlightEvent;
 import info.openrocket.core.startup.Application;
 import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
+import info.openrocket.swing.gui.util.Icons;
+import info.openrocket.swing.gui.widgets.IconButton;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -13,6 +15,7 @@ import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.UIManager;
+import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -55,12 +58,21 @@ class PlaybackTransportBar extends JPanel {
 			new SpeedOption(4.0)
 	});
 	private final JComboBox<FlightCameraMode> cameraModeCombo = new JComboBox<>(FlightCameraMode.values());
+	private final JButton zoomOutButton = new IconButton(Icons.ZOOM_OUT);
+	private final JButton zoomInButton = new IconButton(Icons.ZOOM_IN);
+	private final JButton zoomFitButton = new IconButton(Icons.ZOOM_RESET);
+	private final JToggleButton panButton = new JToggleButton(Icons.PAN_VIEW);
 	private final JLabel timeLabel = new JLabel(formatTime(0.0, 0.0), SwingConstants.RIGHT);
 	private final Timer pollTimer = new Timer(POLL_INTERVAL_MS, e -> pollClock());
 
 	private PlaybackClock clock;
 	private Consumer<FlightCameraMode> cameraModeListener;
+	private Runnable zoomOutListener;
+	private Runnable zoomInListener;
+	private Runnable zoomFitListener;
+	private Consumer<Boolean> panModeListener;
 	private Runnable replayChangeListener;
+	private boolean viewControlsEnabled;
 	private boolean userIsDragging;
 	private boolean programmaticUpdate;
 
@@ -73,11 +85,29 @@ class PlaybackTransportBar extends JPanel {
 		cameraModeCombo.setSelectedItem(FlightCameraMode.OVERVIEW);
 		cameraModeCombo.setToolTipText(trans.get("Flight3DFrame.cameraMode.ttip"));
 		cameraModeCombo.addActionListener(e -> {
+			updatePanControlAvailability();
 			if (cameraModeListener != null) {
 				cameraModeListener.accept((FlightCameraMode) cameraModeCombo.getSelectedItem());
 			}
 		});
 		leftControls.add(cameraModeCombo);
+
+		zoomOutButton.setToolTipText(trans.get("ScaleSelector.btn.ZoomOut.ttip"));
+		zoomOutButton.addActionListener(e -> runViewAction(zoomOutListener));
+		leftControls.add(zoomOutButton);
+		zoomInButton.setToolTipText(trans.get("ScaleSelector.btn.ZoomIn.ttip"));
+		zoomInButton.addActionListener(e -> runViewAction(zoomInListener));
+		leftControls.add(zoomInButton);
+		zoomFitButton.setToolTipText(trans.get("ScaleSelector.btn.ZoomFit.ttip"));
+		zoomFitButton.addActionListener(e -> runViewAction(zoomFitListener));
+		leftControls.add(zoomFitButton);
+		panButton.setToolTipText(trans.get("Flight3DFrame.pan.ttip"));
+		panButton.addActionListener(e -> {
+			if (panModeListener != null) {
+				panModeListener.accept(panButton.isSelected());
+			}
+		});
+		leftControls.add(panButton);
 		add(leftControls, BorderLayout.WEST);
 
 		scrubSlider.setMinimum(0);
@@ -117,6 +147,34 @@ class PlaybackTransportBar extends JPanel {
 		this.cameraModeListener = listener;
 	}
 
+	void setViewControlListeners(Runnable zoomOutListener, Runnable zoomInListener,
+			Runnable zoomFitListener, Consumer<Boolean> panModeListener) {
+		this.zoomOutListener = zoomOutListener;
+		this.zoomInListener = zoomInListener;
+		this.zoomFitListener = zoomFitListener;
+		this.panModeListener = panModeListener;
+	}
+
+	JButton getZoomOutButton() {
+		return zoomOutButton;
+	}
+
+	JButton getZoomInButton() {
+		return zoomInButton;
+	}
+
+	JButton getZoomFitButton() {
+		return zoomFitButton;
+	}
+
+	JToggleButton getPanButton() {
+		return panButton;
+	}
+
+	JComboBox<FlightCameraMode> getCameraModeCombo() {
+		return cameraModeCombo;
+	}
+
 	void setReplayChangeListener(Runnable listener) {
 		this.replayChangeListener = listener;
 	}
@@ -154,6 +212,34 @@ class PlaybackTransportBar extends JPanel {
 		playPauseButton.setEnabled(enabled);
 		speedCombo.setEnabled(enabled);
 		scrubSlider.setEnabled(enabled);
+		viewControlsEnabled = enabled;
+		zoomOutButton.setEnabled(enabled);
+		zoomInButton.setEnabled(enabled);
+		zoomFitButton.setEnabled(enabled);
+		if (!enabled && panButton.isSelected()) {
+			panButton.setSelected(false);
+			if (panModeListener != null) {
+				panModeListener.accept(false);
+			}
+		}
+		updatePanControlAvailability();
+	}
+
+	private void updatePanControlAvailability() {
+		boolean allowed = cameraModeCombo.getSelectedItem() != FlightCameraMode.PAD;
+		if (!allowed && panButton.isSelected()) {
+			panButton.setSelected(false);
+			if (panModeListener != null) {
+				panModeListener.accept(false);
+			}
+		}
+		panButton.setEnabled(viewControlsEnabled && allowed);
+	}
+
+	private static void runViewAction(Runnable action) {
+		if (action != null) {
+			action.run();
+		}
 	}
 
 	private void togglePlayback() {

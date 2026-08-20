@@ -40,6 +40,7 @@ public class CameraController implements CameraControls {
 	private Vector3f fittedDimensions;
 	private float fittedClosestDistanceFactor = Float.NaN;
 	private float fittedFarthestDistanceFactor = Float.NaN;
+	private volatile boolean panEnabled = true;
 	// Whether the camera should track the fitted distance. This is explicit state
 	// rather than "distance ≈ fitted distance" so that a resize-triggered re-fit
 	// cannot race with (and overwrite) a manual zoom that was applied in between.
@@ -345,10 +346,18 @@ public class CameraController implements CameraControls {
 	 */
 	@Override
 	public void handlePan(float dx, float dy, int viewportWidth, int viewportHeight) {
+		if (!panEnabled) {
+			return;
+		}
 		camera.pan(dx, dy, viewportWidth, viewportHeight);
 		// Keep the rocket rotation pivot aligned with the horizontally panned focus point.
 		scene.updateRocketPivotFromCamera();
 		notifyCameraChanged();
+	}
+
+	@Override
+	public void setPanEnabled(boolean enabled) {
+		panEnabled = enabled;
 	}
 
 	/**
