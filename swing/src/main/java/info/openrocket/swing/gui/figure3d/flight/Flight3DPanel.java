@@ -33,6 +33,7 @@ import info.openrocket.swing.gui.figure3d.scene.controllers.CameraControls;
 import info.openrocket.swing.gui.figure3d.scene.graph.SceneObject;
 import info.openrocket.swing.gui.figure3d.scene.graph.SceneView;
 import info.openrocket.swing.gui.figure3d.scene.orchestration.Scene3DOrchestrator;
+import info.openrocket.swing.gui.figure3d.scene.orchestration.Scene3DOrchestrator.MotorExhaustMount;
 import info.openrocket.swing.gui.figure3d.scene.properties.DisplaySettings;
 import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguration;
 import info.openrocket.swing.gui.figure3d.ui.GLScenePanel;
@@ -433,7 +434,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		buildTrajectoryTrails(scene, groundedPoses, rocketCenterOffset,
 				replayData.getStartTime(), replayData.getEndTime());
 		addEventMarkers(scene, replayData, groundedPoses.primaryProvider(), rocketCenterOffset);
-		buildExhaustGeometry(scene, orchestrator.getCameraController(), config, groundedPoses,
+		buildExhaustGeometry(scene, orchestrator, config, groundedPoses,
 				replayData, burnTimeline, rocketCenterOffset);
 		applyCameraMode(orchestrator, cameraMode);
 
@@ -625,18 +626,14 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	 * lists each frame as a pure function of the playback time, so any scrub shows the
 	 * exact state continuous playback would have produced. Runs on the GL thread.
 	 */
-	private void buildExhaustGeometry(SceneView scene, CameraControls cameraControls,
+	private void buildExhaustGeometry(SceneView scene, Scene3DOrchestrator orchestrator,
 			RenderingConfiguration config, GroundedPoseProviders poses, FlightReplayData replayData,
 			Map<AxialStage, List<double[]>> burnTimeline, Vector3f centerOffset) {
 		smokePuffs.clear();
 		flameJets.clear();
-		Vector3f rocketSize = cameraControls.computeRocketSize();
+		Vector3f rocketSize = orchestrator.getCameraController().computeRocketSize();
 		// The rocket's long axis runs along X in the unposed scene (nose toward -X).
 		float rocketLength = rocketSize != null ? Math.max(rocketSize.x, 1.0f) : trailRadius;
-		// The exhaust originates at the motor nozzle: the rocket's rear end, half a length
-		// toward +X of the center.
-		Vector3f nozzleLocal = (centerOffset != null ? new Vector3f(centerOffset) : new Vector3f())
-				.add(rocketLength * 0.5f, 0.0f, 0.0f);
 		// The smoke renderer draws a particle at up to 4x its size; target a full-grown puff
 		// of ~2 trail radii so the column reads at the whole-flight zoom.
 		float puffSize = trailRadius * 0.5f;
@@ -651,17 +648,24 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		};
 		scene.addParticleEmitter(smokePuppet);
 
+		List<MotorExhaustMount> exhaustMounts = orchestrator.getMotorExhaustMounts();
 		for (Map.Entry<AxialStage, List<double[]>> entry : burnTimeline.entrySet()) {
 			PoseProvider provider = poses.providersByStage().getOrDefault(entry.getKey(), poses.primaryProvider());
 			if (provider == null || entry.getValue().isEmpty()) {
 				continue;
 			}
-			for (double[] window : entry.getValue()) {
-				addSmokeColumn(provider, nozzleLocal, window[0], window[1], puffSize, spacing);
+			List<MotorExhaustMount> stageMounts = exhaustMounts.stream()
+					.filter(mount -> stageFor(mount.mountComponent()) == entry.getKey())
+					.toList();
+			for (MotorExhaustMount mount : stageMounts) {
+				for (double[] window : entry.getValue()) {
+					addSmokeColumn(provider, mount.nozzlePosition(), window[0], window[1], puffSize, spacing);
+				}
+				addFlameJet(scene, config, provider, entry.getValue(), mount.nozzlePosition(),
+						mount.exhaustDirection(), rocketLength);
 			}
-			addFlameJet(scene, config, provider, entry.getValue(), nozzleLocal, rocketLength);
 		}
-		addEventBursts(replayData, poses.primaryProvider(), centerOffset, puffSize);
+		addEventBursts(replayData, poses, centerOffset, puffSize);
 		addParachutes(scene, replayData, poses, rocketLength);
 		addLaunchSiteReference(scene, flightData, rocketLength);
 		log.info("Flight replay exhaust: {} smoke puff(s), {} flame jet(s), {} parachute(s)",
@@ -791,27 +795,12 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private void addParachutes(SceneView scene, FlightReplayData replayData, GroundedPoseProviders poses,
 			float rocketLength) {
 		parachutes.clear();
-		List<Double> groundHits = new ArrayList<>();
-		for (var event : replayData.getAllEvents()) {
-			if (event.getType() == FlightEvent.Type.GROUND_HIT) {
-				groundHits.add(event.getTime());
-			}
-		}
-		Collections.sort(groundHits);
 		for (var event : replayData.getAllEvents()) {
 			if (event.getType() != FlightEvent.Type.RECOVERY_DEVICE_DEPLOYMENT) {
 				continue;
 			}
 			PoseProvider provider = providerForEventSource(event.getSource(), poses);
-			// The canopy disappears at the first touchdown after its deployment (each stage
-			// lands at its own time; without a per-branch mapping this is the best estimate).
-			double end = replayData.getEndTime();
-			for (double hit : groundHits) {
-				if (hit >= event.getTime()) {
-					end = hit;
-					break;
-				}
-			}
+			double end = replayData.getGroundHitTime(event, replayData.getEndTime());
 			Mesh mesh = SphereGenerator.create(rocketLength * 0.6f, 20, 12);
 			Appearance3D appearance = new Appearance3D(new Vector3f(0.9f, 0.3f, 0.2f));
 			SceneObject canopy = new SceneObject(mesh, new Vector3f(), appearance);
@@ -838,12 +827,23 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		return poses.primaryProvider();
 	}
 
+	private static AxialStage stageFor(RocketComponent component) {
+		if (component == null) {
+			return null;
+		}
+		try {
+			return component instanceof AxialStage stage ? stage : component.getStage();
+		} catch (IllegalStateException e) {
+			return null;
+		}
+	}
+
 	/**
 	 * Adds a burst of white smoke puffs where an ejection charge fires and a smaller one
 	 * where a stage separates, so the events read visually along the flight. The bursts ride
 	 * the same aging pipeline as the trail puffs.
 	 */
-	private void addEventBursts(FlightReplayData replayData, PoseProvider primary, Vector3f centerOffset,
+	private void addEventBursts(FlightReplayData replayData, GroundedPoseProviders poses, Vector3f centerOffset,
 			float puffSize) {
 		Vector3f burstColor = new Vector3f(0.96f, 0.96f, 0.97f);
 		for (var event : replayData.getAllEvents()) {
@@ -859,9 +859,10 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			if (t < replayData.getStartTime() || t > replayData.getEndTime()) {
 				continue;
 			}
-			Vector3f center = primary.getPosition(t);
+			PoseProvider provider = providerForEventSource(event.getSource(), poses);
+			Vector3f center = provider.getPosition(t);
 			if (centerOffset != null) {
-				center.add(primary.getOrientation(t).transform(new Vector3f(centerOffset)));
+				center.add(provider.getOrientation(t).transform(new Vector3f(centerOffset)));
 			}
 			Random jitter = new Random(Double.hashCode(t) * 127L + puffs);
 			float scatter = trailRadius * 1.5f;
@@ -884,7 +885,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	 * to the nozzle no matter how the rocket accelerates.
 	 */
 	private void addFlameJet(SceneView scene, RenderingConfiguration config, PoseProvider provider,
-			List<double[]> burnWindows, Vector3f nozzleLocal, float rocketLength) {
+			List<double[]> burnWindows, Vector3f nozzleLocal, Vector3f exhaustDirection, float rocketLength) {
 		float plumeLength = rocketLength * 0.9f;
 		float plumeRadius = rocketLength * 0.10f;
 		float particleSize = rocketLength * 0.09f;
@@ -893,14 +894,18 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		float plumeStart = -0.12f * plumeLength;
 
 		Random shapeRandom = new Random(31L * flameJets.size() + 17);
+		Vector3f axis = new Vector3f(exhaustDirection).normalize();
+		Vector3f side = new Vector3f(axis).cross(Math.abs(axis.y) < 0.9f
+				? new Vector3f(0.0f, 1.0f, 0.0f) : new Vector3f(0.0f, 0.0f, 1.0f)).normalize();
+		Vector3f up = new Vector3f(axis).cross(side).normalize();
 		List<FlameShapePoint> shape = new ArrayList<>(FLAME_PLUME_PARTICLES);
 		for (int i = 0; i < FLAME_PLUME_PARTICLES; i++) {
 			float along = (i + shapeRandom.nextFloat()) / FLAME_PLUME_PARTICLES;
 			float scatter = plumeRadius * (0.2f + 0.8f * along);
-			Vector3f offset = new Vector3f(nozzleLocal).add(
-					plumeStart + along * plumeLength,
-					(shapeRandom.nextFloat() - 0.5f) * scatter,
-					(shapeRandom.nextFloat() - 0.5f) * scatter);
+			Vector3f offset = new Vector3f(nozzleLocal)
+					.add(new Vector3f(axis).mul(plumeStart + along * plumeLength))
+					.add(new Vector3f(side).mul((shapeRandom.nextFloat() - 0.5f) * scatter))
+					.add(new Vector3f(up).mul((shapeRandom.nextFloat() - 0.5f) * scatter));
 			float size = particleSize * (0.8f + 0.4f * shapeRandom.nextFloat());
 			shape.add(new FlameShapePoint(offset, along, size));
 		}

@@ -76,6 +76,33 @@ class FlightReplayDataTest extends BaseTestCase {
 	}
 
 	@Test
+	void matchesRecoveryDeploymentToGroundHitOnTheSameBranch() {
+		Rocket rocket = new Rocket();
+		AxialStage sustainer = addStage(rocket);
+		AxialStage booster = addStage(rocket);
+		BodyTube sustainerRecovery = new BodyTube();
+		BodyTube boosterRecovery = new BodyTube();
+		sustainer.addChild(sustainerRecovery);
+		booster.addChild(boosterRecovery);
+
+		FlightDataBranch primary = branch("primary", 0.0, 12.0, 0.0, 0.0);
+		FlightDataBranch separated = branch("separated", 0.0, 12.0, 0.0, 0.0);
+		FlightEvent sustainerDeploy = new FlightEvent(
+				FlightEvent.Type.RECOVERY_DEVICE_DEPLOYMENT, 4.0, sustainerRecovery);
+		FlightEvent boosterDeploy = new FlightEvent(
+				FlightEvent.Type.RECOVERY_DEVICE_DEPLOYMENT, 2.0, boosterRecovery);
+		primary.addEvent(sustainerDeploy);
+		primary.addEvent(new FlightEvent(FlightEvent.Type.GROUND_HIT, 10.0));
+		separated.addEvent(boosterDeploy);
+		separated.addEvent(new FlightEvent(FlightEvent.Type.GROUND_HIT, 6.0));
+
+		FlightReplayData replay = new FlightReplayData(new FlightData(primary, separated), rocket);
+
+		assertEquals(10.0, replay.getGroundHitTime(sustainerDeploy, replay.getEndTime()));
+		assertEquals(6.0, replay.getGroundHitTime(boosterDeploy, replay.getEndTime()));
+	}
+
+	@Test
 	void extractsAndMergesBurnIntervalsByStage() {
 		Rocket rocket = new Rocket();
 		AxialStage stage = addStage(rocket);

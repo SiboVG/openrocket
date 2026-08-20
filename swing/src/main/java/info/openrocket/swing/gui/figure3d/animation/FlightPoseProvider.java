@@ -74,7 +74,7 @@ public final class FlightPoseProvider implements PoseProvider {
 				toPrimitive(northL, n),
 				toPrimitive(altL, n),
 				(thetaL != null ? toPrimitive(thetaL, n) : null),
-				(phiL   != null ? toPrimitive(phiL,   n) : null)
+				(phiL   != null ? unwrapAngles(toPrimitive(phiL, n)) : null)
 		);
 	}
 
@@ -146,6 +146,25 @@ public final class FlightPoseProvider implements PoseProvider {
 		double[] out = new double[n];
 		for (int i = 0; i < n; i++) out[i] = nz(src.get(i));
 		return out;
+	}
+
+	/** Keeps interpolation on the shortest path across the 0/2-pi azimuth boundary. */
+	private static double[] unwrapAngles(double[] angles) {
+		double[] result = angles.clone();
+		double previous = Double.NaN;
+		for (int i = 0; i < result.length; i++) {
+			double angle = result[i];
+			if (!Double.isFinite(angle)) {
+				previous = Double.NaN;
+				continue;
+			}
+			if (Double.isFinite(previous)) {
+				angle -= Math.rint((angle - previous) / (2.0 * Math.PI)) * (2.0 * Math.PI);
+				result[i] = angle;
+			}
+			previous = angle;
+		}
+		return result;
 	}
 
 	private static float sample(double[] ts, double[] vs, double t) {

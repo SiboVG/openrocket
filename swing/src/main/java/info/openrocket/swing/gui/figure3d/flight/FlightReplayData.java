@@ -27,6 +27,7 @@ public final class FlightReplayData {
 	private final double startTime;
 	private final double endTime;
 	private final List<FlightEvent> allEvents;
+	private final Map<UUID, Double> groundHitByDeploymentId;
 	private final Map<AxialStage, List<BurnInterval>> burnIntervalsByStage;
 	private final List<BurnInterval> burnIntervals;
 
@@ -53,6 +54,7 @@ public final class FlightReplayData {
 				.max()
 				.orElse(primaryProvider.getEndTime());
 		this.allEvents = List.copyOf(collectEvents(data));
+		this.groundHitByDeploymentId = Map.copyOf(collectDeploymentGroundHits(data));
 		this.burnIntervalsByStage = Collections.unmodifiableMap(collectBurnIntervalsByStage(rocket, allEvents, endTime));
 		this.burnIntervals = List.copyOf(mergeIntervals(
 				burnIntervalsByStage.values().stream().flatMap(List::stream).toList()));
@@ -76,6 +78,13 @@ public final class FlightReplayData {
 
 	public List<FlightEvent> getAllEvents() {
 		return allEvents;
+	}
+
+	public double getGroundHitTime(FlightEvent deployment, double fallback) {
+		if (deployment == null) {
+			return fallback;
+		}
+		return groundHitByDeploymentId.getOrDefault(deployment.getID(), fallback);
 	}
 
 	public Map<AxialStage, List<BurnInterval>> getBurnIntervalsByStage() {
@@ -128,6 +137,26 @@ public final class FlightReplayData {
 		List<FlightEvent> events = new ArrayList<>(byId.values());
 		events.sort(FlightEvent::compareTo);
 		return events;
+	}
+
+	private static Map<UUID, Double> collectDeploymentGroundHits(FlightData data) {
+		Map<UUID, Double> result = new LinkedHashMap<>();
+		for (FlightDataBranch branch : data.getBranches()) {
+			List<FlightEvent> events = new ArrayList<>(branch.getEvents());
+			events.sort(FlightEvent::compareTo);
+			for (FlightEvent event : events) {
+				if (event.getType() != FlightEvent.Type.RECOVERY_DEVICE_DEPLOYMENT) {
+					continue;
+				}
+				for (FlightEvent later : events) {
+					if (later.getType() == FlightEvent.Type.GROUND_HIT && later.getTime() >= event.getTime()) {
+						result.putIfAbsent(event.getID(), later.getTime());
+						break;
+					}
+				}
+			}
+		}
+		return result;
 	}
 
 	private static Map<AxialStage, List<BurnInterval>> collectBurnIntervalsByStage(Rocket rocket,

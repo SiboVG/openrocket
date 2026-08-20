@@ -100,6 +100,28 @@ class FlightPoseProviderTest {
 	}
 
 	@Test
+	void orientationAzimuthInterpolatesAcrossNorthWithoutFlippingSouth() {
+		FlightDataBranch branch = new FlightDataBranch("north crossing",
+				FlightDataType.TYPE_TIME,
+				FlightDataType.TYPE_POSITION_X,
+				FlightDataType.TYPE_POSITION_Y,
+				FlightDataType.TYPE_ALTITUDE,
+				FlightDataType.TYPE_ORIENTATION_THETA,
+				FlightDataType.TYPE_ORIENTATION_PHI);
+		addPoint(branch, 0.0, 0.0, 0.0, 0.0);
+		addOrientation(branch, 0.0, Math.toRadians(359.0));
+		addPoint(branch, 1.0, 0.0, 1.0, 0.0);
+		addOrientation(branch, 0.0, Math.toRadians(1.0));
+
+		Quaternionf orientation = FlightPoseProvider.fromFlightDataBranch(branch).getOrientation(0.5);
+		Vector3f noseAxis = orientation.transform(new Vector3f(-1.0f, 0.0f, 0.0f));
+
+		assertEquals(0.0f, noseAxis.x, 1e-4);
+		assertEquals(0.0f, noseAxis.y, 1e-4);
+		assertEquals(-1.0f, noseAxis.z, 1e-4);
+	}
+
+	@Test
 	void fallsBackToHorizontalDistanceAndDirectionWhenXYChannelsAreMissing() {
 		FlightDataBranch branch = new FlightDataBranch("xy",
 				FlightDataType.TYPE_TIME,

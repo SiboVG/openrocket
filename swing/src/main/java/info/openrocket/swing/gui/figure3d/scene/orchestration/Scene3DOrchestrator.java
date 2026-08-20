@@ -7,6 +7,7 @@ import info.openrocket.core.util.CoordinateIF;
 import info.openrocket.core.startup.Application;
 import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
 import info.openrocket.swing.gui.figure3d.animation.PoseProvider;
+import info.openrocket.swing.gui.figure3d.geometry.RocketSceneSnapshot;
 import info.openrocket.swing.gui.figure3d.math.DefaultRaycaster;
 import info.openrocket.swing.gui.figure3d.math.Raycaster;
 import info.openrocket.swing.gui.figure3d.input.InputState;
@@ -60,6 +61,15 @@ public class Scene3DOrchestrator {
 		ONBOARD,
 		/** Fixed eye position that turns to keep the rocket centered. */
 		PAD
+	}
+
+	/** Rocket-local motor nozzle geometry captured with the rendered rocket snapshot. */
+	public record MotorExhaustMount(RocketComponent mountComponent, Vector3f nozzlePosition,
+			Vector3f exhaustDirection) {
+		public MotorExhaustMount {
+			nozzlePosition = new Vector3f(nozzlePosition);
+			exhaustDirection = new Vector3f(exhaustDirection);
+		}
 	}
 
 	private long lastFrameTime;
@@ -503,6 +513,25 @@ public class Scene3DOrchestrator {
 
 	public PlaybackClock getPlaybackClock() {
 		return playbackClock;
+	}
+
+	/** Returns the actual rendered nozzle position and direction for each emitting motor instance. */
+	public List<MotorExhaustMount> getMotorExhaustMounts() {
+		return createMotorExhaustMounts(rocketSynchronizer.getMotorEmitterPlans());
+	}
+
+	static List<MotorExhaustMount> createMotorExhaustMounts(
+			List<RocketSceneSnapshot.ParticleEmitterPlan> plans) {
+		List<MotorExhaustMount> mounts = new ArrayList<>();
+		for (RocketSceneSnapshot.ParticleEmitterPlan plan : plans) {
+			Vector3f direction = new Vector3f(1.0f, 0.0f, 0.0f);
+			plan.motorRotationMatrix().transformDirection(direction);
+			direction.normalize();
+			Vector3f nozzle = new Vector3f(plan.motorCenterEngineCS())
+					.add(new Vector3f(direction).mul((float) plan.motor().getLength() * plan.worldScale() * 0.5f));
+			mounts.add(new MotorExhaustMount(plan.mountComponent(), nozzle, direction));
+		}
+		return List.copyOf(mounts);
 	}
 
 	public void setFollowFlightCamera(boolean followFlightCamera) {
