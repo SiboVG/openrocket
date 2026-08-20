@@ -36,6 +36,8 @@ public class CameraController implements CameraControls {
 	private final List<Consumer<Camera>> cameraChangeListeners = new CopyOnWriteArrayList<>();
 	private float focusedDistance;
 	private BoundingBox lastFittedRocketBounds;
+	private Vector3f fittedCenter;
+	private Vector3f fittedDimensions;
 	// Whether the camera should track the fitted distance. This is explicit state
 	// rather than "distance ≈ fitted distance" so that a resize-triggered re-fit
 	// cannot race with (and overwrite) a manual zoom that was applied in between.
@@ -124,17 +126,34 @@ public class CameraController implements CameraControls {
 				(float) ((minBounds.getY() + maxBounds.getY()) * 0.5),
 				(float) ((minBounds.getZ() + maxBounds.getZ()) * 0.5));
 		Vector3f rocketCenter = scene.transformRocketPoint(localCenter, new Vector3f());
-		camera.setCenterOfInterest(rocketCenter);
-
-		// 2. Calculate distance from model-space bounds so rocket drag rotation cannot alter 100% zoom.
+		// 2. Calculate dimensions from model-space bounds so rocket drag rotation cannot alter 100% zoom.
 		Vector3f dimensions = new Vector3f(
 				(float) (maxBounds.getX() - minBounds.getX()),
 				(float) (maxBounds.getY() - minBounds.getY()),
 				(float) (maxBounds.getZ() - minBounds.getZ()));
-		camera.fitBounds(dimensions);
+		focusOnBounds(rocketCenter, dimensions);
+		lastFittedRocketBounds = bounds.clone();
+	}
+
+	@Override
+	public void focusOnBounds(Vector3f center, Vector3f dimensions) {
+		if (center == null || dimensions == null) {
+			return;
+		}
+		fittedCenter = new Vector3f(center);
+		fittedDimensions = new Vector3f(dimensions);
+		lastFittedRocketBounds = null;
+		applyFittedBounds();
+	}
+
+	private void applyFittedBounds() {
+		if (fittedCenter == null || fittedDimensions == null) {
+			return;
+		}
+		camera.setCenterOfInterest(fittedCenter);
+		camera.fitBounds(fittedDimensions);
 		camera.resetViewOffset();
 		focusedDistance = camera.getDistance();
-		lastFittedRocketBounds = bounds.clone();
 		zoomFitting = true;
 		scene.updateRocketPivotFromCamera();
 		notifyCameraChanged();
@@ -354,6 +373,9 @@ public class CameraController implements CameraControls {
 	@Override
 	public void resize(float newAspectRatio) {
 		camera.setAspectRatio(newAspectRatio);
+		if (zoomFitting) {
+			applyFittedBounds();
+		}
 	}
 
 	/**

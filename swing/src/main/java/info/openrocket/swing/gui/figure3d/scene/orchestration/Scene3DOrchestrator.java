@@ -108,16 +108,11 @@ public class Scene3DOrchestrator {
 	 */
 	public void resize(int newWindowWidth, int newWindowHeight,
 			int newFramebufferWidth, int newFramebufferHeight) {
-		boolean wasZoomFitting = cameraController.isZoomFitting();
-
 		// Update viewport dimensions
 		viewport.update(newWindowWidth, newWindowHeight, newFramebufferWidth, newFramebufferHeight);
 
 		// Propagate resize event to relevant components
 		cameraController.resize(viewport.getAspectRatio());
-		if (wasZoomFitting) {
-			cameraController.focusOnRocket();
-		}
 		inputHandler.updateDimensions(viewport);
 		renderer.resize(viewport.getFramebufferWidth(), viewport.getFramebufferHeight());
 		renderer.setDisplayScale(getDisplayScale());
@@ -268,9 +263,7 @@ public class Scene3DOrchestrator {
 				Vector3f center = flightTrajectoryCenter;
 				Vector3f dimensions = flightTrajectoryDimensions;
 				if (center != null && dimensions != null) {
-					camera.setCenterOfInterest(center);
-					camera.fitBounds(dimensions);
-					camera.resetViewOffset();
+					cameraController.focusOnBounds(center, dimensions);
 				}
 			}
 			DoubleConsumer frameListener = flightFrameListener;

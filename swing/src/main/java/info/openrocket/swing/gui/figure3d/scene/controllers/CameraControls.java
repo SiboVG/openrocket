@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 public interface CameraControls {
 	void initialize(Rocket rocket, float aspectRatio);
 	void focusOnRocket();
+	void focusOnBounds(Vector3f center, Vector3f dimensions);
 	void refitOnRocketBoundsChange();
 	void resetView();
 	void handleScroll(float scrollDelta);

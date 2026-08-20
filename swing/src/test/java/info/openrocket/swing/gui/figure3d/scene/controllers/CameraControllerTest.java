@@ -6,6 +6,7 @@ import info.openrocket.core.util.Coordinate;
 import info.openrocket.swing.gui.figure3d.scene.graph.Camera;
 import info.openrocket.swing.gui.figure3d.scene.graph.Scene;
 import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguration;
+import org.joml.Vector3f;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -56,6 +57,21 @@ class CameraControllerTest {
 		context.controller.focusOnRocket();
 
 		assertEquals(sideDistance, context.camera.getDistance(), sideDistance * 0.0001f);
+	}
+
+	@Test
+	void resizeRefitsTheWholeFlightBoundsInsteadOfReturningToTheRocket() {
+		TestContext context = createContext(new BoundingBox(
+				new Coordinate(0.0, -1.0, -0.5), new Coordinate(10.0, 1.0, 0.5)));
+		Vector3f trajectoryCenter = new Vector3f(120.0f, 450.0f, -30.0f);
+		Vector3f trajectoryDimensions = new Vector3f(300.0f, 20.0f, 10.0f);
+		context.controller.focusOnBounds(trajectoryCenter, trajectoryDimensions);
+		float wideDistance = context.camera.getDistance();
+
+		context.controller.resize(0.5f);
+
+		assertEquals(trajectoryCenter, context.camera.getCenterOfInterest());
+		assertTrue(context.camera.getDistance() > wideDistance);
 	}
 
 	private static TestContext createContext(BoundingBox initialBounds) {
