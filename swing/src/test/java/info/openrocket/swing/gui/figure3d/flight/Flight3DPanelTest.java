@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 
 class Flight3DPanelTest {
 	@Test
-	void replaySmokeGrowsHoldsFadesAndRemovesExpiredParticles() {
+	void replaySmokeGrowsFadesVisiblyAndRemovesExpiredParticles() {
 		List<Particle> particles = new ArrayList<>();
 		List<Flight3DPanel.SmokePuff> puffs = List.of(new Flight3DPanel.SmokePuff(
 				new Vector3f(1.0f, 2.0f, 3.0f), 0.0, 4.0f, new Vector3f(0.8f)));
@@ -31,15 +31,21 @@ class Flight3DPanelTest {
 		assertEquals(1, particles.size());
 		assertEquals(1.0f, particles.get(0).getLife(), 1e-6f);
 
-		double fadeStart = Flight3DPanel.SMOKE_GROWTH_SECONDS + Flight3DPanel.SMOKE_HOLD_SECONDS;
 		Flight3DPanel.updateSmokeParticles(particles, puffs,
-				fadeStart + Flight3DPanel.SMOKE_FADE_SECONDS / 2.0, 1.0f);
-		assertEquals(0.1f, particles.get(0).getLife(), 1e-6f,
-				"Halfway through the renderer's final 20% age range, smoke must be halfway faded");
+				Flight3DPanel.SMOKE_LIFETIME_SECONDS / 2.0, 1.0f);
+		assertEquals(0.5f, particles.get(0).getOpacity(), 1e-6f,
+				"Replay smoke must visibly fade instead of only changing its size-age ratio");
 
 		Flight3DPanel.updateSmokeParticles(particles, puffs,
-				fadeStart + Flight3DPanel.SMOKE_FADE_SECONDS, 1.0f);
+				Flight3DPanel.SMOKE_LIFETIME_SECONDS, 1.0f);
 		assertTrue(particles.isEmpty(), "A fully transparent smoke puff must be removed");
+	}
+
+	@Test
+	void trailBoundaryRebuildsForEveryDistinctPlaybackFrame() {
+		assertTrue(Flight3DPanel.trailRebuildRequired(0.100_001, 0.1, false));
+		assertFalse(Flight3DPanel.trailRebuildRequired(0.1, 0.1, false));
+		assertTrue(Flight3DPanel.trailRebuildRequired(0.1, 0.1, true));
 	}
 
 	@Test

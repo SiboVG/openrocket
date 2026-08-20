@@ -90,9 +90,6 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private volatile Vector3f trajectoryDimensions;
 
 	private static final int TRAIL_SAMPLES = 240;
-	// Rebuild the elapsed/upcoming split when the playback fraction moves at least this much. Small
-	// enough that the boundary tracks the marker without a visible lag, large enough to bound churn.
-	private static final double TRAIL_REBUILD_THRESHOLD = 1.0 / TRAIL_SAMPLES;
 	private static final float MIN_DECORATION_SCALE = 0.04f;
 	private static final float DECORATION_SCALE_REBUILD_THRESHOLD = 0.06f;
 	private static final Vector3f ACTIVE_FUTURE_COLOR = new Vector3f(0.16f, 0.42f, 0.28f);
@@ -111,12 +108,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	// Puffs render small when fresh and expand to full size over this many seconds, so in
 	// follow mode the fresh smoke does not engulf the rocket.
 	static final double SMOKE_GROWTH_SECONDS = 5.0;
-	static final double SMOKE_HOLD_SECONDS = 10.0;
-	static final double SMOKE_FADE_SECONDS = 5.0;
-	private static final double SMOKE_LIFETIME_SECONDS =
-			SMOKE_GROWTH_SECONDS + SMOKE_HOLD_SECONDS + SMOKE_FADE_SECONDS;
-	// VolumetricSmokeRenderer begins fading at this particle age ratio. Reach it while
-	// growing, hold there, then advance through the renderer's fade range.
+	static final double SMOKE_LIFETIME_SECONDS = 10.0;
+	// Keep the renderer at the start of its built-in fade after growth; replay smoke uses
+	// explicit per-particle opacity so size and transparency can evolve independently.
 	private static final float SMOKE_FADE_START_RATIO = 0.8f;
 	// A slow buoyant rise of the hanging trail, in trail-radii per second.
 	private static final float SMOKE_RISE_RATE = 0.02f;
@@ -1115,21 +1109,19 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			particle.color.set(puff.color());
 			particle.size = puff.size();
 			particle.setLifetime(1.0f - smokeAgeRatio(age), 1.0f);
+			particle.setOpacity(smokeOpacity(age));
 			count++;
 		}
 		trim(particles, count);
 	}
 
 	static float smokeAgeRatio(double age) {
-		if (age <= SMOKE_GROWTH_SECONDS) {
-			return SMOKE_FADE_START_RATIO * (float) Math.max(0.0, age / SMOKE_GROWTH_SECONDS);
-		}
-		double fadeStart = SMOKE_GROWTH_SECONDS + SMOKE_HOLD_SECONDS;
-		if (age <= fadeStart) {
-			return SMOKE_FADE_START_RATIO;
-		}
-		float fadeProgress = (float) Math.min(1.0, (age - fadeStart) / SMOKE_FADE_SECONDS);
-		return SMOKE_FADE_START_RATIO + (1.0f - SMOKE_FADE_START_RATIO) * fadeProgress;
+		return SMOKE_FADE_START_RATIO
+				* (float) Math.max(0.0, Math.min(1.0, age / SMOKE_GROWTH_SECONDS));
+	}
+
+	static float smokeOpacity(double age) {
+		return (float) Math.max(0.0, Math.min(1.0, 1.0 - age / SMOKE_LIFETIME_SECONDS));
 	}
 
 	private static Particle appendBlank(List<Particle> particles) {
@@ -1237,9 +1229,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		return trailObject;
 	}
 
-	// Invoked on the render thread every playback frame. Rebuilds the elapsed/upcoming split only
-	// when the playback fraction has moved enough, so the boundary tracks the smoothly-moving
-	// marker without the lag of a fixed-interval timer, and without rebuilding every single frame.
+	// Invoked on the render thread every playback frame. The path boundary is rebuilt whenever
+	// playback time changes so its elapsed/upcoming split stays exactly aligned with the rocket.
 	private void onFlightFrame(double time) {
 		updateExhaust(time);
 		if (!isDistantView()) {
@@ -1260,8 +1251,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		float scale = decorationScale(cameraDistance, overviewFitDistance);
 		boolean scaleChanged = relativeDifference(scale, trailDecorationScale)
 				>= DECORATION_SCALE_REBUILD_THRESHOLD;
-		if (!scaleChanged && lastRebuildFraction >= 0.0
-				&& Math.abs(fraction - lastRebuildFraction) < TRAIL_REBUILD_THRESHOLD) {
+		if (!trailRebuildRequired(fraction, lastRebuildFraction, scaleChanged)) {
 			return;
 		}
 		if (scaleChanged) {
@@ -1283,6 +1273,10 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 	private static float relativeDifference(float first, float second) {
 		return Math.abs(first - second) / Math.max(Math.abs(second), 1.0e-6f);
+	}
+
+	static boolean trailRebuildRequired(double fraction, double previousFraction, boolean scaleChanged) {
+		return scaleChanged || previousFraction < 0.0 || Double.compare(fraction, previousFraction) != 0;
 	}
 
 	private void updateMarkerScale(float scale) {
