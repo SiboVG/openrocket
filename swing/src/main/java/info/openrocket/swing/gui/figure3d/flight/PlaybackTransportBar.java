@@ -7,6 +7,7 @@ import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
 import info.openrocket.swing.gui.util.Icons;
 import info.openrocket.swing.gui.widgets.IconButton;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -167,6 +168,7 @@ class PlaybackTransportBar extends JPanel {
 		scrubSlider.addChangeListener(this::handleSliderChanged);
 		add(scrubSlider, BorderLayout.CENTER);
 
+		timeLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 12));
 		timeLabel.setPreferredSize(new Dimension(110, timeLabel.getPreferredSize().height));
 		add(timeLabel, BorderLayout.EAST);
 
