@@ -14,12 +14,15 @@ import info.openrocket.swing.gui.figure3d.materials.Appearance3D;
 import info.openrocket.swing.gui.figure3d.materials.AppearanceFactory;
 import info.openrocket.swing.gui.figure3d.materials.AppearanceFactory.ComponentAppearanceRole;
 import info.openrocket.swing.gui.figure3d.materials.AppearanceFactory.ComponentAppearancesSnapshot;
+import info.openrocket.swing.gui.figure3d.materials.Texture;
 import info.openrocket.swing.gui.figure3d.scene.graph.SceneObject;
 import info.openrocket.swing.gui.figure3d.scene.graph.SceneView;
 import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguration;
 
 import javax.swing.SwingUtilities;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -185,6 +188,7 @@ public class RocketSceneSynchronizer implements ComponentChangeListener {
 			while ((update = pendingAppearanceUpdates.poll()) != null) {
 				updateComponentAppearance(update);
 			}
+			reclaimStaleDecalTextures();
 		} finally {
 			appearanceQueued.set(false);
 			if (!pendingAppearanceUpdates.isEmpty() && pendingSnapshot.get() == null) {
@@ -409,6 +413,7 @@ public class RocketSceneSynchronizer implements ComponentChangeListener {
 		scene.clearParticleEmitters();
 
 		prepared.commitTo(scene);
+		reclaimStaleDecalTextures();
 		scene3DOrchestrator.applyRocketRotationToScene();
 		restoreSelectionAfterRebuild(hadSelection, selectedRocketComponents, persistentSelection);
 		if (cameraUpdateBehavior == CameraUpdateBehavior.REFIT_IF_FIT
@@ -420,6 +425,22 @@ public class RocketSceneSynchronizer implements ComponentChangeListener {
 
 	List<RocketSceneSnapshot.ParticleEmitterPlan> getMotorEmitterPlans() {
 		return motorEmitterPlans;
+	}
+
+	private void reclaimStaleDecalTextures() {
+		AppearanceFactory.DecalTextureCache decalTextureCache = scene3DOrchestrator.getDecalTextureCache();
+		if (decalTextureCache == null) {
+			return;
+		}
+
+		Set<Texture> liveTextures = Collections.newSetFromMap(new IdentityHashMap<>());
+		for (SceneObject object : scene.getObjects()) {
+			Appearance3D appearance = object.getAppearance();
+			if (appearance != null && appearance.getTexture() != null) {
+				liveTextures.add(appearance.getTexture());
+			}
+		}
+		decalTextureCache.reclaimStaleTextures(liveTextures);
 	}
 
 	private Set<RocketComponent> captureSelectedRocketComponents() {

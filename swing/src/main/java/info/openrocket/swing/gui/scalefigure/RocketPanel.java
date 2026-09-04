@@ -80,7 +80,6 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 import javax.swing.JPopupMenu;
@@ -91,6 +90,7 @@ import javax.swing.JViewport;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -127,8 +127,6 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.image.BufferedImage;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -981,41 +979,7 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 		final ConfigurationComboBox configComboBox = new ConfigurationComboBox(rkt);
 		ribbon.add(configComboBox, "cell 8 1, width 16%, wmin 100");
 
-		JScrollPane ribbonScroll = new JScrollPane(ribbon,
-				JScrollPane.VERTICAL_SCROLLBAR_NEVER,
-				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED) {
-			private void applyBorderlessStyling() {
-				setBorder(null);
-				setViewportBorder(null);
-			}
-
-			@Override
-			public void updateUI() {
-				super.updateUI();
-				applyBorderlessStyling();
-			}
-
-			@Override
-			public Dimension getPreferredSize() {
-				Dimension d = super.getPreferredSize();
-				if (getHorizontalScrollBar().isVisible()) {
-					d.height += getHorizontalScrollBar().getPreferredSize().height;
-				}
-				return d;
-			}
-		};
-		ribbonScroll.setBorder(null);
-		ribbonScroll.setViewportBorder(null);
-		ribbonScroll.getHorizontalScrollBar().addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentShown(ComponentEvent e) {
-				RocketPanel.this.revalidate();
-			}
-			@Override
-			public void componentHidden(ComponentEvent e) {
-				RocketPanel.this.revalidate();
-			}
-		});
+		SingleRowScrollPane ribbonScroll = new SingleRowScrollPane(ribbon, this::revalidate);
 		add(ribbonScroll, "growx, span, wrap");
 
 		// Create rotation control
@@ -1037,7 +1001,7 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 
 			//// <html>Click to select &nbsp;&nbsp; Shift+click to select other &nbsp;&nbsp; Double-click to edit &nbsp;&nbsp; Click+drag to move
 			infoMessage = new StyledLabel(trans.get("RocketPanel.lbl.infoMessage"), -3);
-			bottomRow.add(infoMessage);
+			bottomRow.add(infoMessage, "wmin 0, growx, pushx");
 			refreshInfoMessage();
 
 		//// Configure display button
@@ -1045,7 +1009,7 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 				trans.get("RocketPanel.btn.configureDisplay"), Icons.CONFIGURE_DISPLAY);
 		configureDisplayButton.setToolTipText(trans.get("RocketPanel.btn.configureDisplay.ttip"));
 		configureDisplayButton.addActionListener(e -> showDisplaySettingsDialog());
-		bottomRow.add(configureDisplayButton, "pushx, right, gapright rel");
+		bottomRow.add(configureDisplayButton, "right, gapright rel");
 
 		//// Screenshot button
 		JButton screenshotButton = new JButton(
@@ -1069,8 +1033,8 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 				updateFigures();
 			}
 		});
-
-		add(bottomRow, "skip, growx, gapleft 25");
+		SingleRowScrollPane bottomRowScroll = new SingleRowScrollPane(bottomRow, this::revalidate);
+		add(bottomRowScroll, "skip, growx, gapleft 25");
 
 		addExtras();
 	}
@@ -2539,20 +2503,20 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 		unitsDistPanel.add(new JLabel(trans.get("RocketPanel.lbl.CaliperUnits")));
 		unitsDistPanel.add(caliperManager.getUnitSelector());
 
-		// Distance display
+		JPanel distancePanel = new JPanel(new MigLayout("ins 0", "[]2[]2[]2[]2[]", ""));
+		distancePanel.setOpaque(false);
+
+		// An opaque Swing component must have an opaque background or old glyph pixels can survive repaints.
 		JTextField distanceField = new JTextField("–", 6);
 		distanceField.setEditable(false);
 		distanceField.setOpaque(true);
-		distanceField.setBackground(valueBg);
+		distanceField.setBackground(ColorConversion.compositeColor(valueBg, UIManager.getColor("Panel.background")));
 		distanceField.setForeground(valueFg);
 		distanceField.setBorder(new CompoundBorder(
 				new LineBorder(caliperColor, 1, true),
 				new EmptyBorder(1, 4, 1, 4)));
 		distanceField.setFont(distanceField.getFont().deriveFont(Font.BOLD));
 		distanceField.setHorizontalAlignment(JTextField.CENTER);
-
-		JPanel distancePanel = new JPanel(new MigLayout("ins 0", "[]2[]2[]2[]2[]", ""));
-		distancePanel.setOpaque(false);
 
 		JButton diamond1Btn = new JButton(createCaliperDiamondIcon("1", caliperColor, diamondLabelColor));
 		diamond1Btn.setRolloverIcon(createCaliperDiamondIcon("1", caliperHoverColor, diamondLabelColor));
@@ -2639,7 +2603,8 @@ public class RocketPanel extends JPanel implements TreeSelectionListener, Change
 			leftArrow.setIcon(createCaliperSingleArrowIcon(true, newCaliperColor));
 			rightArrow.setIcon(createCaliperSingleArrowIcon(false, newCaliperColor));
 
-			distanceField.setBackground(newValueBg);
+			distanceField.setBackground(ColorConversion.compositeColor(
+					newValueBg, UIManager.getColor("Panel.background")));
 			distanceField.setForeground(newValueFg);
 			distanceField.setBorder(new CompoundBorder(
 					new LineBorder(newCaliperColor, 1, true),

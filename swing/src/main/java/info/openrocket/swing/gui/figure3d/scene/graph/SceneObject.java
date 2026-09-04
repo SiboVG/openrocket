@@ -3,7 +3,6 @@ package info.openrocket.swing.gui.figure3d.scene.graph;
 import info.openrocket.core.rocketcomponent.RocketComponent;
 import info.openrocket.swing.gui.figure3d.animation.PoseProvider;
 import info.openrocket.swing.gui.figure3d.geometry.Mesh;
-import info.openrocket.swing.gui.figure3d.input.DragListener;
 import info.openrocket.swing.gui.figure3d.materials.Appearance3D;
 import info.openrocket.swing.gui.figure3d.materials.AppearanceFactory.ComponentAppearanceRole;
 import info.openrocket.swing.gui.figure3d.rendering.Renderable;
@@ -45,8 +44,6 @@ public class SceneObject {
 	private boolean originAxis = false;
 	private volatile boolean visible = true;
 	private boolean cleaned = false;
-
-	private DragListener onDragListener = null;		// A listener that defines what happens when this object is dragged.
 
 	/**
 	 * Constructs a new SceneObject associated with an OpenRocket component.
@@ -200,42 +197,10 @@ public class SceneObject {
 	}
 
 	/**
-	 * Applies a rotation to the object's model matrix.
-	 * @param angle The angle of rotation in radians.
-	 * @param axis The axis of rotation.
-	 */
-	public void rotate(float angle, Vector3f axis) {
-		this.modelMatrix.rotate(angle, axis);
-	}
-
-	/**
 	 * Force-sets the position of this object by recreating its model matrix.
 	 */
 	public void setPosition(Vector3f position) {
 		this.modelMatrix.setTranslation(position);
-	}
-
-	/**
-	 * Checks if this object can be dragged by user interaction.
-	 *
-	 * @return true if the object has drag behavior configured, false otherwise
-	 */
-	public boolean isDraggable() {
-		return this.onDragListener != null;
-	}
-
-	/**
-	 * Makes this object draggable with a default behavior of updating its position.
-	 *
-	 * @param draggable True to make the object draggable, false otherwise.
-	 */
-	public void setDraggable(boolean draggable) {
-		if (draggable) {
-			// Assign a default drag listener that moves the object.
-			this.onDragListener = this::setPosition;
-		} else {
-			this.onDragListener = null;
-		}
 	}
 
 	public void setRenderOnTop(boolean renderOnTop) {
@@ -268,16 +233,6 @@ public class SceneObject {
 
 	public void setVisible(boolean visible) {
 		this.visible = visible;
-	}
-
-	public void setOnDragListener(DragListener listener) {
-		this.onDragListener = listener;
-	}
-
-	public void executeOnDrag(Vector3f newPosition) {
-		if (onDragListener != null) {
-			onDragListener.onDrag(newPosition);
-		}
 	}
 
 	/**
