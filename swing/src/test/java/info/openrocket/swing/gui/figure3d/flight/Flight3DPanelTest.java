@@ -25,6 +25,44 @@ import static org.mockito.ArgumentMatchers.anyDouble;
 
 class Flight3DPanelTest {
 	@Test
+	void smokeStationBudgetCoversTheEntireBurn() {
+		PoseProvider provider = mock(PoseProvider.class);
+		when(provider.getPosition(anyDouble())).thenAnswer(invocation ->
+				new Vector3f((float) (invocation.getArgument(0, Double.class) * 1_000.0), 0.0f, 0.0f));
+		when(provider.getOrientation(anyDouble())).thenReturn(new Quaternionf());
+		List<Flight3DPanel.SmokeStation> stations = Flight3DPanel.sampleSmokeStations(
+				provider, new Vector3f(), 0.0, 10.0, 1.0f, 100);
+		assertEquals(100, stations.size());
+		assertEquals(0.0, stations.get(0).time());
+		assertEquals(10.0, stations.get(99).time(), 1e-6);
+		assertEquals(10_000.0f, stations.get(99).position().x, 1e-3f);
+	}
+
+	@Test
+	void exhaustSizeStaysProportionalToTheRocketOnHighFlights() {
+		assertEquals(0.8f, Flight3DPanel.replaySmokeSize(100.0f, 10.0f), 1e-6f);
+		assertEquals(0.8f, Flight3DPanel.replaySmokeSize(1_000.0f, 10.0f), 1e-6f);
+		assertEquals(0.0f, Flight3DPanel.smokeOpacity(0.0));
+		assertTrue(Flight3DPanel.smokeOpacity(0.05) < Flight3DPanel.smokeOpacity(0.15));
+	}
+
+	@Test
+	void smokeScrubbingReconstructsTheSameParticlesAfterRewinding() {
+		List<Particle> particles = new ArrayList<>();
+		List<Flight3DPanel.SmokePuff> puffs = List.of(new Flight3DPanel.SmokePuff(
+				new Vector3f(1.0f, 2.0f, 3.0f), 1.0, 0.5f, new Vector3f(0.8f)));
+		Flight3DPanel.updateSmokeParticles(particles, puffs, 3.0);
+		Vector3f expectedPosition = new Vector3f(particles.get(0).position);
+		float expectedOpacity = particles.get(0).getOpacity();
+		Flight3DPanel.updateSmokeParticles(particles, puffs, 20.0);
+		assertTrue(particles.isEmpty());
+		Flight3DPanel.updateSmokeParticles(particles, puffs, 3.0);
+		assertEquals(expectedPosition, particles.get(0).position);
+		assertEquals(expectedOpacity, particles.get(0).getOpacity());
+		Flight3DPanel.updateSmokeParticles(particles, puffs, 0.0);
+		assertTrue(particles.isEmpty());
+	}
+	@Test
 	void smokeStationsRemainContinuousWhenSeveralIntervalsAreCrossedPerPathSample() {
 		PoseProvider provider = mock(PoseProvider.class);
 		when(provider.getPosition(anyDouble())).thenAnswer(invocation ->
@@ -47,17 +85,17 @@ class Flight3DPanelTest {
 		List<Flight3DPanel.SmokePuff> puffs = List.of(new Flight3DPanel.SmokePuff(
 				new Vector3f(1.0f, 2.0f, 3.0f), 0.0, 4.0f, new Vector3f(0.8f)));
 
-		Flight3DPanel.updateSmokeParticles(particles, puffs, 0.0, 1.0f);
+		Flight3DPanel.updateSmokeParticles(particles, puffs, 0.0);
 		assertEquals(1, particles.size());
 		assertEquals(1.0f, particles.get(0).getLife(), 1e-6f);
 
 		Flight3DPanel.updateSmokeParticles(particles, puffs,
-				Flight3DPanel.SMOKE_LIFETIME_SECONDS / 2.0, 1.0f);
+				Flight3DPanel.SMOKE_LIFETIME_SECONDS / 2.0);
 		assertEquals(0.5f, particles.get(0).getOpacity(), 1e-6f,
 				"Replay smoke must visibly fade instead of only changing its size-age ratio");
 
 		Flight3DPanel.updateSmokeParticles(particles, puffs,
-				Flight3DPanel.SMOKE_LIFETIME_SECONDS, 1.0f);
+				Flight3DPanel.SMOKE_LIFETIME_SECONDS);
 		assertTrue(particles.isEmpty(), "A fully transparent smoke puff must be removed");
 	}
 

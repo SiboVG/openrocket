@@ -6,6 +6,7 @@ import info.openrocket.core.util.MathUtil;
 public final class PlaybackClock {
 	private double time;
 	private double rate = 1.0;
+	private boolean looping;
 	private boolean discardElapsedTimeOnNextUpdate;
 	private final double start, end;
 
@@ -21,6 +22,10 @@ public final class PlaybackClock {
 			return;
 		}
 		time += rate * dtRealSeconds;
+		if (looping && rate != 0.0 && end > start && (time >= end || time < start)) {
+			double duration = end - start;
+			time = start + ((time - start) % duration + duration) % duration;
+		}
 		if (time < start) time = start;
 		if (time > end)   time = end;
 	}
@@ -28,6 +33,8 @@ public final class PlaybackClock {
 	public synchronized double getTime()        { return time; }
 	public synchronized void   setTime(double t){ time = MathUtil.clamp(t, start, end); }
 	public synchronized double getRate()        { return rate; }
+	public synchronized boolean isLooping() { return looping; }
+	public synchronized void setLooping(boolean looping) { this.looping = looping; }
 	public synchronized void setRate(double r) {
 		if (rate == 0.0 && r != 0.0) {
 			// Paused replay is rendered on demand, so the next frame's delta may include the

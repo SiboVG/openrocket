@@ -161,6 +161,7 @@ public class GLScenePanel extends AWTGLCanvas implements HUDUpdateListener {
 	private final FrameExportQueue frameExportQueue = new FrameExportQueue();
 	private volatile Consumer<Scene3DOrchestrator> initializationHook;
 	private volatile boolean panModeEnabled = false;
+	private boolean flightReplayInteraction;
 	private final AtomicBoolean fatalRenderExceptionReported = new AtomicBoolean(false);
 	// Distinguishes a context that initialized and later failed from one that could
 	// never initialize. The host may retry the former with a fresh canvas when the
@@ -603,6 +604,7 @@ public class GLScenePanel extends AWTGLCanvas implements HUDUpdateListener {
 
 		@Override
 		public void mousePressed(MouseEvent e) {
+			requestFocusInWindow();
 			// The canvas keeps receiving AWT events during teardown/rebuild,
 			// after cleanup() has released the orchestrator.
 			Scene3DOrchestrator orchestrator = scene3DOrchestrator;
@@ -688,8 +690,9 @@ public class GLScenePanel extends AWTGLCanvas implements HUDUpdateListener {
 			boolean isMiddleDrag = activeDragButton == MouseEvent.BUTTON2;
 			boolean isAltDown = (e.getModifiersEx() & MouseEvent.ALT_DOWN_MASK) != 0;
 			boolean isCtrlDown = (e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) != 0;
-			inputState.isLightDragging = isRightDrag || isAltDown;
-			inputState.isPanning = !inputState.isLightDragging && (panModeEnabled || isCtrlDown || isMiddleDrag);
+			inputState.isLightDragging = !flightReplayInteraction && (isRightDrag || isAltDown);
+			inputState.isPanning = !inputState.isLightDragging && (panModeEnabled || isCtrlDown || isMiddleDrag
+					|| (flightReplayInteraction && (isRightDrag || e.isShiftDown())));
 		}
 
 		private boolean isTrackedDragButton(MouseEvent e) {
@@ -710,7 +713,7 @@ public class GLScenePanel extends AWTGLCanvas implements HUDUpdateListener {
 			if (orchestrator == null) {
 				return;
 			}
-			orchestrator.getInputHandler().getInputState().addScroll(e.getWheelRotation() * -1.0f, e.getX(), e.getY());
+			orchestrator.getInputHandler().getInputState().addScroll((float) -e.getPreciseWheelRotation(), e.getX(), e.getY());
 			beginWheelInteraction();
 			markHudForUpdate(); // Mark HUD for update on zoom
 			markRenderActivity();
@@ -1263,6 +1266,11 @@ public class GLScenePanel extends AWTGLCanvas implements HUDUpdateListener {
 		setCursor(enabled
 				? Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR)
 				: Cursor.getDefaultCursor());
+	}
+
+	/** Uses replay gestures: right-drag or Shift-drag pans the camera. */
+	public void setFlightReplayInteraction(boolean enabled) {
+		flightReplayInteraction = enabled;
 	}
 
 	public void addSceneSelectionListener(SelectionListener listener) {

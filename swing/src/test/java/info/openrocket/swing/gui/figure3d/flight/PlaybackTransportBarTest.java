@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
 import java.awt.event.MouseEvent;
-import java.util.Arrays;
+import java.awt.event.KeyEvent;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -129,11 +129,7 @@ class PlaybackTransportBarTest extends BaseTestCase {
 			PlaybackClock clock = new PlaybackClock(0.0, 10.0);
 			bar.setReplay(clock, null);
 			try {
-				JSlider slider = Arrays.stream(bar.getComponents())
-						.filter(JSlider.class::isInstance)
-						.map(JSlider.class::cast)
-						.findFirst()
-						.orElseThrow();
+				JSlider slider = bar.getScrubSlider();
 
 				slider.setValue(5_000);
 
@@ -142,6 +138,77 @@ class PlaybackTransportBarTest extends BaseTestCase {
 				bar.dispose();
 			}
 		});
+	}
+
+	@Test
+	void scrubbingPausesAndResumesAtThePreviousRateWithoutLosingTheFinalPosition() throws Exception {
+		SwingUtilities.invokeAndWait(() -> {
+			PlaybackTransportBar bar = new PlaybackTransportBar();
+			PlaybackClock clock = new PlaybackClock(0.0, 10.0);
+			bar.setReplay(clock, null);
+			clock.setRate(2.0);
+			try {
+				JSlider slider = bar.getScrubSlider();
+				slider.setSize(600, 44);
+				slider.dispatchEvent(mouseEvent(slider, MouseEvent.MOUSE_PRESSED, 300, 18));
+				assertEquals(5.0, clock.getTime(), 1e-6);
+				assertEquals(0.0, clock.getRate());
+				clock.update(2.0);
+				assertEquals(5.0, clock.getTime(), 1e-6);
+				slider.dispatchEvent(mouseEvent(slider, MouseEvent.MOUSE_DRAGGED, 444, 18));
+				assertEquals(7.5, clock.getTime(), 1e-6);
+				slider.dispatchEvent(mouseEvent(slider, MouseEvent.MOUSE_RELEASED, 444, 18));
+				assertEquals(2.0, clock.getRate());
+				clock.update(3.0);
+				assertEquals(7.5, clock.getTime(), 1e-6, "Resuming must not charge the drag duration");
+				clock.update(0.1);
+				assertEquals(7.7, clock.getTime(), 1e-6);
+
+				clock.setRate(0.0);
+				slider.dispatchEvent(mouseEvent(slider, MouseEvent.MOUSE_PRESSED, 156, 18));
+				slider.dispatchEvent(mouseEvent(slider, MouseEvent.MOUSE_RELEASED, 156, 18));
+				assertEquals(2.5, clock.getTime(), 1e-6);
+				assertEquals(0.0, clock.getRate(), "Scrubbing a paused replay must leave it paused");
+			} finally {
+				bar.dispose();
+			}
+		});
+	}
+
+	@Test
+	void keyboardEventNavigationSkipsSimultaneousEventsAndPausesAtExactTimes() throws Exception {
+		SwingUtilities.invokeAndWait(() -> {
+			Rocket rocket = new Rocket();
+			rocket.addChild(new AxialStage());
+			FlightDataBranch branch = replayBranch(0.0, 10.0);
+			branch.addEvent(new FlightEvent(FlightEvent.Type.APOGEE, 10.0 / 3.0));
+			branch.addEvent(new FlightEvent(FlightEvent.Type.RECOVERY_DEVICE_DEPLOYMENT, 10.0 / 3.0));
+			branch.addEvent(new FlightEvent(FlightEvent.Type.GROUND_HIT, 9.0));
+			PlaybackTransportBar bar = new PlaybackTransportBar();
+			PlaybackClock clock = new PlaybackClock(0.0, 10.0);
+			bar.setReplay(clock, new FlightReplayData(new FlightData(branch), rocket));
+			try {
+				assertTrue(bar.handleReplayKey(keyEvent(bar, KeyEvent.VK_RIGHT, KeyEvent.SHIFT_DOWN_MASK)));
+				assertEquals(10.0 / 3.0, clock.getTime(), 1e-9);
+				assertEquals(0.0, clock.getRate());
+				bar.handleReplayKey(keyEvent(bar, KeyEvent.VK_RIGHT, KeyEvent.SHIFT_DOWN_MASK));
+				assertEquals(9.0, clock.getTime(), 1e-9);
+				bar.handleReplayKey(keyEvent(bar, KeyEvent.VK_LEFT, KeyEvent.SHIFT_DOWN_MASK));
+				assertEquals(10.0 / 3.0, clock.getTime(), 1e-9);
+				bar.handleReplayKey(keyEvent(bar, KeyEvent.VK_SPACE, 0));
+				assertEquals(1.0, clock.getRate());
+				assertFalse(bar.handleReplayKey(keyEvent(bar, KeyEvent.VK_LEFT, KeyEvent.META_DOWN_MASK)));
+				bar.clearReplay();
+				assertEquals(0, bar.getScrubSlider().getValue());
+				assertFalse(bar.handleReplayKey(keyEvent(bar, KeyEvent.VK_SPACE, 0)));
+			} finally {
+				bar.dispose();
+			}
+		});
+	}
+
+	private static KeyEvent keyEvent(PlaybackTransportBar bar, int key, int modifiers) {
+		return new KeyEvent(bar, KeyEvent.KEY_PRESSED, System.currentTimeMillis(), modifiers, key, KeyEvent.CHAR_UNDEFINED);
 	}
 
 	private static FlightDataBranch replayBranch(double start, double end) {
@@ -159,7 +226,8 @@ class PlaybackTransportBarTest extends BaseTestCase {
 	}
 
 	private static MouseEvent mouseEvent(JSlider slider, int id, int x, int y) {
-		return new MouseEvent(slider, id, System.currentTimeMillis(), 0, x, y, 1, false);
+		return new MouseEvent(slider, id, System.currentTimeMillis(), 0, x, y, 1, false,
+				id == MouseEvent.MOUSE_MOVED || id == MouseEvent.MOUSE_DRAGGED ? MouseEvent.NOBUTTON : MouseEvent.BUTTON1);
 	}
 
 }

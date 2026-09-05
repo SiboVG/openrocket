@@ -7,6 +7,42 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class PlaybackClockTest {
 
 	@Test
+	void loopingPreservesOvershootAndSupportsNonzeroStartAndReversePlayback() {
+		PlaybackClock clock = new PlaybackClock(2.0, 5.0);
+		clock.setLooping(true);
+		clock.setTime(4.5);
+		clock.update(1.0);
+		assertEquals(2.5, clock.getTime(), 1e-9);
+		clock.update(9.25);
+		assertEquals(2.75, clock.getTime(), 1e-9);
+		clock.setRate(-1.0);
+		clock.update(1.0);
+		assertEquals(4.75, clock.getTime(), 1e-9);
+		clock.setLooping(false);
+		clock.setRate(1.0);
+		clock.update(1.0);
+		assertEquals(5.0, clock.getTime(), 1e-9);
+	}
+
+	@Test
+	void loopingAnEmptyReplayDoesNotProduceAnInvalidTime() {
+		PlaybackClock clock = new PlaybackClock(4.0, 4.0);
+		clock.setLooping(true);
+		clock.update(100.0);
+		assertEquals(4.0, clock.getTime());
+	}
+
+	@Test
+	void aPausedLoopCanBeScrubbedToItsExactEnd() {
+		PlaybackClock clock = new PlaybackClock(2.0, 5.0);
+		clock.setLooping(true);
+		clock.setRate(0.0);
+		clock.setTime(5.0);
+		clock.update(0.5);
+		assertEquals(5.0, clock.getTime());
+	}
+
+	@Test
 	void clampsSetTimeToRange() {
 		PlaybackClock clock = new PlaybackClock(2.0, 5.0);
 

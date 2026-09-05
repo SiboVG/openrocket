@@ -9,6 +9,10 @@ import info.openrocket.swing.gui.widgets.IconButton;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -20,6 +24,7 @@ import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -29,6 +34,7 @@ import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -55,6 +61,10 @@ class PlaybackTransportBar extends JPanel {
 	private final JButton previousFrameButton = new IconButton(Icons.PLAYBACK_STEP_BACK);
 	private final JButton playPauseButton = new IconButton(Icons.PLAYBACK_PLAY);
 	private final JButton nextFrameButton = new IconButton(Icons.PLAYBACK_STEP_FORWARD);
+	private final JCheckBox loopButton = new JCheckBox(trans.get("Flight3DFrame.loop"));
+	private final JComboBox<EventMarker> eventCombo = new JComboBox<>();
+	private final JCheckBox trailButton = new JCheckBox(trans.get("Flight3DFrame.showTrail"), true);
+	private final JCheckBox exhaustButton = new JCheckBox(trans.get("Flight3DFrame.showExhaust"), true);
 	private final EventMarkerSlider scrubSlider = new EventMarkerSlider();
 	private final JComboBox<SpeedOption> speedCombo = new JComboBox<>(new SpeedOption[] {
 			new SpeedOption(0.25),
@@ -77,14 +87,18 @@ class PlaybackTransportBar extends JPanel {
 	private Runnable zoomInListener;
 	private Runnable zoomFitListener;
 	private Consumer<Boolean> panModeListener;
+	private Consumer<Boolean> trailVisibilityListener;
+	private Consumer<Boolean> exhaustVisibilityListener;
 	private Runnable replayChangeListener;
 	private boolean viewControlsEnabled;
 	private boolean userIsDragging;
 	private boolean programmaticUpdate;
-	private boolean eventMarkerClick;
+	private double rateBeforeScrub;
+	private boolean updatingEvents;
 
 	PlaybackTransportBar() {
-		setLayout(new BorderLayout(8, 0));
+		setLayout(new BorderLayout(8, 4));
+		setBorder(BorderFactory.createEmptyBorder(4, 6, 6, 6));
 
 		JPanel leftControls = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
 		restartButton.setToolTipText(trans.get("Flight3DFrame.restart.ttip"));
@@ -98,6 +112,31 @@ class PlaybackTransportBar extends JPanel {
 		nextFrameButton.addActionListener(e -> stepFrame(1));
 		leftControls.add(nextFrameButton);
 		leftControls.add(speedCombo);
+		speedCombo.setToolTipText(trans.get("Flight3DFrame.speed.ttip"));
+		loopButton.setToolTipText(trans.get("Flight3DFrame.loop.ttip"));
+		loopButton.addActionListener(e -> {
+			if (clock != null) clock.setLooping(loopButton.isSelected());
+		});
+		leftControls.add(loopButton);
+		eventCombo.setPrototypeDisplayValue(new EventMarker(999.99, trans.get("Flight3DFrame.events"), null));
+		eventCombo.setRenderer(new DefaultListCellRenderer() {
+			@Override
+			public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+					boolean selected, boolean focused) {
+				return super.getListCellRendererComponent(list,
+						value == null ? trans.get("Flight3DFrame.events") : value, index, selected, focused);
+			}
+		});
+		eventCombo.setToolTipText(trans.get("Flight3DFrame.events.ttip"));
+		eventCombo.addActionListener(e -> {
+			if (!updatingEvents && eventCombo.getSelectedItem() instanceof EventMarker marker) {
+				pauseAndSeek(marker.time());
+			}
+		});
+		leftControls.add(eventCombo);
+		add(leftControls, BorderLayout.NORTH);
+
+		JPanel viewControls = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
 		cameraModeCombo.setSelectedItem(FlightCameraMode.OVERVIEW);
 		cameraModeCombo.setToolTipText(trans.get("Flight3DFrame.cameraMode.ttip"));
 		cameraModeCombo.addActionListener(e -> {
@@ -106,25 +145,38 @@ class PlaybackTransportBar extends JPanel {
 				cameraModeListener.accept((FlightCameraMode) cameraModeCombo.getSelectedItem());
 			}
 		});
-		leftControls.add(cameraModeCombo);
+		viewControls.add(cameraModeCombo);
 
 		zoomOutButton.setToolTipText(trans.get("ScaleSelector.btn.ZoomOut.ttip"));
 		zoomOutButton.addActionListener(e -> runViewAction(zoomOutListener));
-		leftControls.add(zoomOutButton);
+		viewControls.add(zoomOutButton);
 		zoomInButton.setToolTipText(trans.get("ScaleSelector.btn.ZoomIn.ttip"));
 		zoomInButton.addActionListener(e -> runViewAction(zoomInListener));
-		leftControls.add(zoomInButton);
+		viewControls.add(zoomInButton);
 		zoomFitButton.setToolTipText(trans.get("ScaleSelector.btn.ZoomFit.ttip"));
 		zoomFitButton.addActionListener(e -> runViewAction(zoomFitListener));
-		leftControls.add(zoomFitButton);
+		viewControls.add(zoomFitButton);
 		panButton.setToolTipText(trans.get("Flight3DFrame.pan.ttip"));
 		panButton.addActionListener(e -> {
 			if (panModeListener != null) {
 				panModeListener.accept(panButton.isSelected());
 			}
 		});
-		leftControls.add(panButton);
-		add(leftControls, BorderLayout.WEST);
+		viewControls.add(panButton);
+		trailButton.addActionListener(e -> {
+			if (trailVisibilityListener != null) trailVisibilityListener.accept(trailButton.isSelected());
+		});
+		exhaustButton.addActionListener(e -> {
+			if (exhaustVisibilityListener != null) exhaustVisibilityListener.accept(exhaustButton.isSelected());
+		});
+		viewControls.add(trailButton);
+		viewControls.add(exhaustButton);
+		JButton help = new JButton(trans.get("Flight3DFrame.controls"), Icons.HELP);
+		help.setToolTipText(trans.get("Flight3DFrame.controls.ttip"));
+		help.addActionListener(e -> JOptionPane.showMessageDialog(this, trans.get("Flight3DFrame.controls.ttip"),
+				trans.get("Flight3DFrame.controls"), JOptionPane.INFORMATION_MESSAGE));
+		viewControls.add(help);
+		add(viewControls, BorderLayout.SOUTH);
 
 		scrubSlider.setMinimum(0);
 		scrubSlider.setMaximum(SLIDER_STEPS);
@@ -132,27 +184,6 @@ class PlaybackTransportBar extends JPanel {
 		scrubSlider.setPaintTicks(false);
 		scrubSlider.setEnabled(false);
 		MouseAdapter scrubMouseListener = new MouseAdapter() {
-			@Override
-			public void mousePressed(MouseEvent e) {
-				EventMarker marker = scrubSlider.findMarkerNear(e.getX(), e.getY());
-				if (marker != null) {
-					eventMarkerClick = true;
-					seekToTime(marker.time());
-					return;
-				}
-				userIsDragging = true;
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				if (eventMarkerClick) {
-					eventMarkerClick = false;
-					return;
-				}
-				seekToSliderValue();
-				userIsDragging = false;
-			}
-
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				scrubSlider.updateMarkerHover(e.getX(), e.getY());
@@ -166,11 +197,13 @@ class PlaybackTransportBar extends JPanel {
 		scrubSlider.addMouseListener(scrubMouseListener);
 		scrubSlider.addMouseMotionListener(scrubMouseListener);
 		scrubSlider.addChangeListener(this::handleSliderChanged);
-		add(scrubSlider, BorderLayout.CENTER);
+		JPanel timeline = new JPanel(new BorderLayout(8, 0));
+		timeline.add(scrubSlider, BorderLayout.CENTER);
+		add(timeline, BorderLayout.CENTER);
 
 		timeLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 12));
-		timeLabel.setPreferredSize(new Dimension(110, timeLabel.getPreferredSize().height));
-		add(timeLabel, BorderLayout.EAST);
+		timeLabel.setPreferredSize(new Dimension(160, timeLabel.getPreferredSize().height));
+		timeline.add(timeLabel, BorderLayout.EAST);
 
 		speedCombo.setSelectedIndex(2);
 		speedCombo.addActionListener(e -> {
@@ -211,6 +244,10 @@ class PlaybackTransportBar extends JPanel {
 		return panButton;
 	}
 
+	JCheckBox getTrailButton() {
+		return trailButton;
+	}
+
 	JComboBox<FlightCameraMode> getCameraModeCombo() {
 		return cameraModeCombo;
 	}
@@ -239,26 +276,53 @@ class PlaybackTransportBar extends JPanel {
 		this.replayChangeListener = listener;
 	}
 
+	void setVisibilityListeners(Consumer<Boolean> trailListener, Consumer<Boolean> exhaustListener) {
+		trailVisibilityListener = trailListener;
+		exhaustVisibilityListener = exhaustListener;
+	}
+
 	void setReplay(PlaybackClock clock, FlightReplayData replayData) {
+		clearReplay();
 		this.clock = clock;
-		scrubSlider.setMarkers(createMarkers(replayData));
+		List<EventMarker> markers = createMarkers(replayData);
+		scrubSlider.setMarkers(markers);
+		updatingEvents = true;
+		try {
+			eventCombo.removeAllItems();
+			markers.forEach(eventCombo::addItem);
+			eventCombo.setSelectedIndex(-1);
+		} finally {
+			updatingEvents = false;
+		}
 		setControlsEnabled(clock != null);
 		if (clock == null) {
 			pollTimer.stop();
 			updateTimeLabel(0.0, 0.0);
 			return;
 		}
+		clock.setLooping(loopButton.isSelected());
+		if (clock.getRate() != 0.0) clock.setRate(selectedSpeed());
 		updatePlaybackButton();
 		updateFromClock();
 		pollTimer.start();
 	}
 
 	void clearReplay() {
+		pollTimer.stop();
+		userIsDragging = false;
+		rateBeforeScrub = 0.0;
 		if (clock != null) {
 			clock.setRate(0.0);
 		}
 		clock = null;
+		updatingEvents = true;
+		try {
+			eventCombo.removeAllItems();
+		} finally {
+			updatingEvents = false;
+		}
 		scrubSlider.setMarkers(List.of());
+		scrubSlider.setValue(0);
 		setControlsEnabled(false);
 		updatePlaybackButton();
 		updateTimeLabel(0.0, 0.0);
@@ -275,6 +339,11 @@ class PlaybackTransportBar extends JPanel {
 		playPauseButton.setEnabled(enabled);
 		nextFrameButton.setEnabled(enabled);
 		speedCombo.setEnabled(enabled);
+		loopButton.setEnabled(enabled);
+		eventCombo.setEnabled(enabled && eventCombo.getItemCount() > 0);
+		cameraModeCombo.setEnabled(enabled);
+		trailButton.setEnabled(enabled);
+		exhaustButton.setEnabled(enabled);
 		scrubSlider.setEnabled(enabled);
 		viewControlsEnabled = enabled;
 		zoomOutButton.setEnabled(enabled);
@@ -345,11 +414,56 @@ class PlaybackTransportBar extends JPanel {
 		notifyReplayChanged();
 	}
 
+	private void pauseAndSeek(double time) {
+		if (clock == null) return;
+		clock.setRate(0.0);
+		seekToTime(time);
+		updatePlaybackButton();
+	}
+
+	private void jumpToEvent(int direction) {
+		if (clock == null) return;
+		double time = clock.getTime();
+		double target = direction < 0 ? clock.getStart() : clock.getEnd();
+		for (EventMarker marker : scrubSlider.markers) {
+			if (direction > 0 && marker.time() > time + 1e-6) {
+				target = marker.time();
+				break;
+			}
+			if (direction < 0 && marker.time() < time - 1e-6) target = marker.time();
+		}
+		pauseAndSeek(target);
+	}
+
+	/** Called on the EDT by the replay window, including when its heavyweight canvas has focus. */
+	boolean handleReplayKey(KeyEvent event) {
+		if (clock == null || userIsDragging || event.getID() != KeyEvent.KEY_PRESSED
+				|| event.isAltDown() || event.isControlDown() || event.isMetaDown()) return false;
+		switch (event.getKeyCode()) {
+			case KeyEvent.VK_SPACE -> togglePlayback();
+			case KeyEvent.VK_LEFT -> {
+				if (event.isShiftDown()) jumpToEvent(-1); else stepFrame(-1);
+			}
+			case KeyEvent.VK_RIGHT -> {
+				if (event.isShiftDown()) jumpToEvent(1); else stepFrame(1);
+			}
+			case KeyEvent.VK_HOME -> pauseAndSeek(clock.getStart());
+			case KeyEvent.VK_END -> pauseAndSeek(clock.getEnd());
+			case KeyEvent.VK_F -> runViewAction(zoomFitListener);
+			case KeyEvent.VK_1 -> cameraModeCombo.setSelectedItem(FlightCameraMode.OVERVIEW);
+			case KeyEvent.VK_2 -> cameraModeCombo.setSelectedItem(FlightCameraMode.FOLLOW);
+			case KeyEvent.VK_3 -> cameraModeCombo.setSelectedItem(FlightCameraMode.PAD);
+			default -> { return false; }
+		}
+		return true;
+	}
+
 	private void pollClock() {
 		if (clock == null) {
 			return;
 		}
-		if (clock.getRate() > 0.0 && clock.getTime() >= clock.getEnd()) {
+		if (clock.getRate() > 0.0 && clock.getTime() >= clock.getEnd()
+				&& (!clock.isLooping() || clock.getEnd() <= clock.getStart())) {
 			clock.setRate(0.0);
 		}
 		updatePlaybackButton();
@@ -404,7 +518,9 @@ class PlaybackTransportBar extends JPanel {
 	private void updatePlaybackButton() {
 		boolean playing = clock != null && clock.getRate() != 0.0;
 		playPauseButton.setIcon(playing ? Icons.PLAYBACK_PAUSE : Icons.PLAYBACK_PLAY);
-		playPauseButton.setToolTipText(trans.get(playing ? "Flight3DFrame.pause" : "Flight3DFrame.play"));
+		String label = trans.get(playing ? "Flight3DFrame.pause" : "Flight3DFrame.play");
+		playPauseButton.setToolTipText(label + " (Space)");
+		playPauseButton.getAccessibleContext().setAccessibleName(label);
 	}
 
 	private void updateTimeLabel(double time, double end) {
@@ -442,7 +558,8 @@ class PlaybackTransportBar extends JPanel {
 		}
 		List<EventMarker> markers = new ArrayList<>();
 		for (FlightEvent event : replayData.getAllEvents()) {
-			if (MARKER_TYPES.contains(event.getType())) {
+			if (MARKER_TYPES.contains(event.getType()) && Double.isFinite(event.getTime())
+					&& event.getTime() >= replayData.getStartTime() && event.getTime() <= replayData.getEndTime()) {
 				markers.add(new EventMarker(event.getTime(), event.getType().toString(), event.getType()));
 			}
 		}
@@ -467,18 +584,77 @@ class PlaybackTransportBar extends JPanel {
 	}
 
 	private record EventMarker(double time, String label, FlightEvent.Type type) {
+		@Override
+		public String toString() {
+			return String.format(trans.get("Flight3DFrame.eventTimeFormat"), label, time);
+		}
 	}
 
 	private final class EventMarkerSlider extends JSlider {
 		private List<EventMarker> markers = List.of();
 		private EventMarker hoveredMarker;
+		private boolean markerGesture;
 
 		private EventMarkerSlider() {
 			setToolTipText("");
+			setPreferredSize(new Dimension(300, 44));
+			getAccessibleContext().setAccessibleName(trans.get("Flight3DFrame.timeline"));
+		}
+
+		@Override
+		protected void processMouseEvent(MouseEvent event) {
+			if (isEnabled() && clock != null && javax.swing.SwingUtilities.isLeftMouseButton(event)) {
+				if (event.getID() == MouseEvent.MOUSE_PRESSED) {
+					requestFocusInWindow();
+					EventMarker marker = findMarkerNear(event.getX(), event.getY());
+					markerGesture = marker != null;
+					if (markerGesture) {
+						pauseAndSeek(marker.time());
+					} else {
+						rateBeforeScrub = clock.getRate();
+						clock.setRate(0.0);
+						userIsDragging = true;
+						seekAtX(event.getX());
+						updatePlaybackButton();
+					}
+					return;
+				}
+				if (event.getID() == MouseEvent.MOUSE_RELEASED) {
+					if (userIsDragging) {
+						seekAtX(event.getX());
+						userIsDragging = false;
+						clock.setRate(rateBeforeScrub);
+						updateFromClock();
+						updatePlaybackButton();
+						notifyReplayChanged();
+					}
+					markerGesture = false;
+					return;
+				}
+			}
+			super.processMouseEvent(event);
+		}
+
+		@Override
+		protected void processMouseMotionEvent(MouseEvent event) {
+			if (event.getID() == MouseEvent.MOUSE_DRAGGED && (userIsDragging || markerGesture)) {
+				if (userIsDragging) seekAtX(event.getX());
+				return;
+			}
+			super.processMouseMotionEvent(event);
+		}
+
+		private void seekAtX(int x) {
+			int left = getInsets().left + 12;
+			int width = Math.max(1, getWidth() - getInsets().right - 12 - left);
+			setValue((int) Math.round((x - left) * (double) SLIDER_STEPS / width));
+			seekToSliderValue();
 		}
 
 		private void setMarkers(List<EventMarker> markers) {
 			this.markers = markers != null ? markers : List.of();
+			hoveredMarker = null;
+			markerGesture = false;
 			repaint();
 		}
 
@@ -493,13 +669,24 @@ class PlaybackTransportBar extends JPanel {
 
 		@Override
 		protected void paintComponent(Graphics graphics) {
-			super.paintComponent(graphics);
-			if (clock == null || markers.isEmpty() || clock.getEnd() <= clock.getStart()) {
-				return;
-			}
 			Graphics2D g2 = (Graphics2D) graphics.create();
 			try {
+				g2.setColor(getBackground());
+				g2.fillRect(0, 0, getWidth(), getHeight());
 				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+				int left = getInsets().left + 12;
+				int right = Math.max(left, getWidth() - getInsets().right - 12);
+				int trackY = getHeight() / 2 - 4;
+				int thumbX = left + (int) Math.round((right - left) * getValue() / (double) SLIDER_STEPS);
+				Color trackColor = UIManager.getColor("Slider.trackColor");
+				g2.setColor(trackColor != null ? trackColor : Color.GRAY);
+				g2.fillRoundRect(left, trackY - 2, right - left, 4, 4, 4);
+				if (!isEnabled()) return;
+				g2.setColor(markerColor());
+				g2.fillRoundRect(left, trackY - 2, thumbX - left, 4, 4, 4);
+				g2.fillOval(thumbX - 6, trackY - 6, 12, 12);
+				if (hasFocus()) g2.drawOval(thumbX - 9, trackY - 9, 18, 18);
+				if (clock == null || clock.getEnd() <= clock.getStart()) return;
 				int y = markerY();
 				for (EventMarker marker : markers) {
 					// Match the trajectory's event marker colors, so the slider ticks and the

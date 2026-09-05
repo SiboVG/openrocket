@@ -9,8 +9,13 @@ import info.openrocket.swing.gui.util.GUIUtil;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.JComboBox;
+import javax.swing.text.JTextComponent;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Component;
+import java.awt.KeyboardFocusManager;
+import java.awt.KeyEventDispatcher;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -29,6 +34,7 @@ public class Flight3DFrame extends JFrame {
 	private final AtomicBoolean resourcesReleased = new AtomicBoolean(false);
 	private final Window ownerWindow;
 	private final WindowAdapter ownerWindowListener;
+	private final KeyEventDispatcher replayKeyDispatcher;
 	private volatile OpenRocketDocument currentDocument;
 	private volatile Simulation currentSimulation;
 
@@ -43,7 +49,7 @@ public class Flight3DFrame extends JFrame {
 		this.currentDocument = document;
 		this.currentSimulation = simulation;
 
-		setMinimumSize(new Dimension(320, 240));
+		setMinimumSize(new Dimension(760, 480));
 		setSize(1024, 768);
 		setTitle(createTitle(simulation));
 		flightPanel = new Flight3DPanel();
@@ -57,6 +63,15 @@ public class Flight3DFrame extends JFrame {
 		transportBar.setViewControlListeners(flightPanel::zoomOut, flightPanel::zoomIn,
 				flightPanel::fitView, flightPanel::setPanModeEnabled);
 		transportBar.setReplayChangeListener(flightPanel::requestRenderNow);
+		transportBar.setVisibilityListeners(flightPanel::setTrailVisible, flightPanel::setExhaustVisible);
+		replayKeyDispatcher = event -> {
+			Component source = event.getComponent();
+			if (source == null || SwingUtilities.getWindowAncestor(source) != this
+					|| source instanceof JTextComponent || source instanceof JComboBox<?>
+					|| SwingUtilities.getAncestorOfClass(JComboBox.class, source) != null) return false;
+			return transportBar.handleReplayKey(event);
+		};
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(replayKeyDispatcher);
 		JPanel content = new JPanel(new BorderLayout());
 		content.add(metricsPanel, BorderLayout.NORTH);
 		content.add(flightPanel, BorderLayout.CENTER);
@@ -114,6 +129,7 @@ public class Flight3DFrame extends JFrame {
 		if (resourcesReleased.get()) {
 			return;
 		}
+		if (document == currentDocument && simulation == currentSimulation) return;
 		this.currentDocument = document;
 		this.currentSimulation = simulation;
 		setTitle(createTitle(simulation));
@@ -149,6 +165,7 @@ public class Flight3DFrame extends JFrame {
 			return;
 		}
 		currentDocument = null;
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(replayKeyDispatcher);
 		currentSimulation = null;
 		if (ownerWindow != null) {
 			ownerWindow.removeWindowListener(ownerWindowListener);

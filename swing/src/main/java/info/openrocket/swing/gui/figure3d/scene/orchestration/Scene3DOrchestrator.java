@@ -75,6 +75,7 @@ public class Scene3DOrchestrator {
 	private long lastFrameTime;
 	private volatile PlaybackClock playbackClock = null;
 	private volatile PoseProvider flightPrimaryPoseProvider = null;
+	private final Vector3f followPanOffset = new Vector3f();
 	private volatile FlightCameraBehavior flightCameraBehavior = FlightCameraBehavior.FREE;
 	// World-space eye position for the PAD behavior.
 	private volatile Vector3f flightPadEye = null;
@@ -89,7 +90,7 @@ public class Scene3DOrchestrator {
 	private volatile boolean pendingTrajectoryFit = false;
 	private volatile boolean pendingFollowFit = false;
 	private volatile DoubleConsumer flightFrameListener = null;
-	private static final float FOLLOW_ZOOM_OUT_FACTOR = 1.8f;
+	private static final float FOLLOW_FRAME_MARGIN = 1.8f;
 	private static final float OVERVIEW_CLOSEST_DISTANCE_FACTOR = 0.001f;
 	private static final float OVERVIEW_FARTHEST_DISTANCE_FACTOR = 20.0f;
 	private static final float PAD_MIN_DISTANCE_SCALE = 0.05f;
@@ -201,6 +202,8 @@ public class Scene3DOrchestrator {
 		lastFrameTime = currentFrameTime;
 
 		// Process all input events
+		Vector3f centerBeforeInput = playbackClock != null
+				? new Vector3f(cameraController.getCamera().getCenterOfInterest()) : null;
 		inputHandler.processInput();
 
 		// Update camera and scene
@@ -210,6 +213,7 @@ public class Scene3DOrchestrator {
 		if (playbackClock != null) {
 			playbackClock.update(deltaTime);
 			double t = playbackClock.getTime();
+			scene.setAnimationTimeSeconds(t);
 			for (var obj : scene.getObjects()) {
 				if (obj.hasPoseProvider()) {
 					obj.applyPoseAtTime(t);
@@ -241,18 +245,22 @@ public class Scene3DOrchestrator {
 				} else {
 					if (pendingFollowFit) {
 						pendingFollowFit = false;
-						// Frame the rocket at a sensible distance when entering follow mode,
-						// otherwise the camera keeps the far-out zoom left over from the
-						// whole-flight overview. Pull back a bit past the exact fit so the
-						// whole rocket stays in frame as it rotates through flight.
-						cameraController.focusOnRocket();
-						camera.setDistance(camera.getDistance() * FOLLOW_ZOOM_OUT_FACTOR);
+						// Fit a rotation-independent envelope, including room for the exhaust.
+						// Fitting the unposed horizontal design crops a vertical rocket on wide windows.
+						float diameter = cameraController.computeRocketSize().length() * FOLLOW_FRAME_MARGIN;
+						cameraController.focusOnBounds(pivot, new Vector3f(diameter));
 						// The fit clamps the zoom range to the rocket; open it back up so the
 						// user can zoom well out while still tracking the flight.
 						camera.setZoomLimits(Math.max(0.01f, camera.getDistance() * 0.05f),
 								camera.getDistance() * 100.0f);
+						followPanOffset.zero();
+						centerBeforeInput.set(pivot);
+						camera.setCenterOfInterest(pivot);
 					}
-					camera.setCenterOfInterest(pivot);
+					// Retain only the user's input delta, so a resize refit cannot move the
+					// tracking target back to the location where follow mode was entered.
+					trackFlightPivot(camera, centerBeforeInput, new Vector3f(pivot).add(followPanOffset));
+					followPanOffset.set(camera.getCenterOfInterest()).sub(pivot);
 				}
 			} else if (pendingTrajectoryFit) {
 				pendingTrajectoryFit = false;
@@ -545,6 +553,11 @@ public class Scene3DOrchestrator {
 		} else {
 			this.flightCameraBehavior = FlightCameraBehavior.FREE;
 		}
+	}
+
+	/** Moves with the rocket while preserving the user's pan relative to it, including on seeks. */
+	static void trackFlightPivot(Camera camera, Vector3f previousPivot, Vector3f pivot) {
+		camera.setCenterOfInterest(new Vector3f(camera.getCenterOfInterest()).sub(previousPivot).add(pivot));
 	}
 
 	/** Watches the rocket from a fixed eye position near the pad, like launch footage. */

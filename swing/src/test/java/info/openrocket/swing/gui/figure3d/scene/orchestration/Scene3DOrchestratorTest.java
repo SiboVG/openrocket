@@ -18,6 +18,18 @@ import static org.mockito.Mockito.when;
 
 class Scene3DOrchestratorTest {
 	@Test
+	void followCameraPreservesPanWhenAdvancingAndScrubbingBackward() {
+		Camera camera = Camera.builder().withFixedCenterOfInterest(false).build();
+		Vector3f launch = new Vector3f(0.0f, 1.0f, 0.0f);
+		Vector3f apogee = new Vector3f(15.0f, 100.0f, -20.0f);
+		Vector3f pan = new Vector3f(3.0f, 0.0f, 0.0f);
+		camera.setCenterOfInterest(new Vector3f(launch).add(pan));
+		Scene3DOrchestrator.trackFlightPivot(camera, launch, apogee);
+		assertEquals(new Vector3f(apogee).add(pan), camera.getCenterOfInterest());
+		Scene3DOrchestrator.trackFlightPivot(camera, apogee, launch);
+		assertEquals(new Vector3f(launch).add(pan), camera.getCenterOfInterest());
+	}
+	@Test
 	void padCameraRetainsWheelZoomWhileFollowingTheRocket() {
 		Camera camera = Camera.builder().withFixedCenterOfInterest(false).build();
 		Vector3f eye = new Vector3f(20.0f, 4.0f, 20.0f);

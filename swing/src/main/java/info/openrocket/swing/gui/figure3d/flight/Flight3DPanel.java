@@ -24,8 +24,6 @@ import info.openrocket.swing.gui.figure3d.geometry.basic.PlaneGenerator;
 import info.openrocket.swing.gui.figure3d.geometry.basic.SphereGenerator;
 import info.openrocket.swing.gui.figure3d.geometry.basic.TrajectoryTrailGenerator;
 import info.openrocket.swing.gui.figure3d.particles.Particle;
-import info.openrocket.swing.gui.figure3d.particles.flame.FlameEmitter;
-import info.openrocket.swing.gui.figure3d.particles.flame.FlameSettings;
 import info.openrocket.swing.gui.figure3d.particles.smoke.SmokeEmitter;
 import info.openrocket.swing.gui.figure3d.particles.smoke.SmokeSettings;
 import info.openrocket.swing.gui.figure3d.materials.Appearance3D;
@@ -86,6 +84,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private volatile boolean renderLoopRunning = false;
 	private volatile FlightCameraMode cameraMode = FlightCameraMode.OVERVIEW;
 	private volatile boolean panModeEnabled = false;
+	private volatile boolean trailVisible = true;
+	private volatile boolean exhaustVisible = true;
 	private volatile Vector3f trajectoryCenter;
 	private volatile Vector3f trajectoryDimensions;
 
@@ -98,13 +98,11 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private static final Vector3f BOOSTER_PAST_COLOR = new Vector3f(1.0f, 0.55f, 0.18f);
 
 	// Deterministic exhaust rendered through the real particle renderers: puff positions and
-	// birth times are laid along the flown path up front, flame plume particles are posed
-	// rigidly against the current rocket pose, and "puppet" emitters (whose simulation is a
+	// birth times are laid along the flown path up front, flame particles stream out from
+	// their nozzles, and replay emitters (whose wall-clock simulation is a
 	// no-op) expose them to the volumetric smoke and flame renderers. Everything shown is a
 	// pure function of the playback time, so scrubbing is exact.
 	private static final Vector3f SMOKE_COLOR = new Vector3f(0.80f, 0.80f, 0.83f);
-	private static final Vector3f FLAME_CORE_COLOR = new Vector3f(1.0f, 0.95f, 0.75f);
-	private static final Vector3f FLAME_TIP_COLOR = new Vector3f(1.0f, 0.45f, 0.10f);
 	// Puffs render small when fresh and expand to full size over this many seconds, so in
 	// follow mode the fresh smoke does not engulf the rocket.
 	static final double SMOKE_GROWTH_SECONDS = 5.0;
@@ -115,9 +113,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	// A slow buoyant rise of the hanging trail, in trail-radii per second.
 	private static final float SMOKE_RISE_RATE = 0.02f;
 	private static final int SMOKE_PATH_SAMPLES = 256;
-	private static final int MAX_PUFFS_PER_BURN = 400;
-	private static final int SMOKE_PARTICLES_PER_PUFF = 3;
-	private static final int FLAME_PLUME_PARTICLES = 240;
+	private static final int MAX_PUFFS_PER_BURN = 800;
+	private static final int SMOKE_PARTICLES_PER_PUFF = 2;
 	// The default flame exposure is tuned for the pad view's tightly packed plume; the
 	// replay plume spreads its particles wider, so it needs more exposure to read as fire.
 	private static final float FLAME_EXPOSURE = 0.2f;
@@ -127,7 +124,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private final List<TrailPath> trailPaths = new ArrayList<>();
 	private final List<SceneObject> dynamicTrails = new ArrayList<>();
 	private final List<SmokePuff> smokePuffs = new ArrayList<>();
-	private final List<FlameJet> flameJets = new ArrayList<>();
+	private final List<ReplayFlameEmitter> flameJets = new ArrayList<>();
 	private final List<SceneObject> eventMarkers = new ArrayList<>();
 	private final List<ParachuteCanopy> parachutes = new ArrayList<>();
 	private final AtomicBoolean dirty = new AtomicBoolean(true);
@@ -151,14 +148,6 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 	/** One evenly spaced exhaust position and its interpolated flight time. */
 	record SmokeStation(Vector3f position, double time) {
-	}
-
-	/** One particle of a flame plume, in the rocket's local frame (nose toward -X). */
-	private record FlameShapePoint(Vector3f localOffset, float ageRatio, float size) {
-	}
-
-	private record FlameJet(FlameEmitter emitter, PoseProvider provider, List<double[]> burnWindows,
-			List<FlameShapePoint> shape) {
 	}
 
 	/** A canopy and its lines, shown above a descending stage between deployment and touchdown. */
@@ -253,6 +242,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 	private void installCanvas(GLScenePanel panel) {
 		glPanel = panel;
+		panel.setFlightReplayInteraction(true);
 		panel.setPanModeEnabled(panModeEnabled && cameraMode != FlightCameraMode.PAD);
 		panel.setRenderActivityCallback(this::markDirty);
 		panel.setRenderRequestCallback(this::requestRenderNow);
@@ -553,6 +543,21 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		requestRenderNow();
 	}
 
+	void setTrailVisible(boolean visible) {
+		trailVisible = visible;
+		Scene3DOrchestrator orchestrator = activeOrchestrator;
+		if (orchestrator != null) {
+			orchestrator.enqueueGlTask(() -> setTrailDecorationsVisible(isDistantView(),
+					cameraMode == FlightCameraMode.OVERVIEW));
+		}
+		requestRenderNow();
+	}
+
+	void setExhaustVisible(boolean visible) {
+		exhaustVisible = visible;
+		requestRenderNow();
+	}
+
 	private void applyCameraMode(Scene3DOrchestrator orchestrator, FlightCameraMode mode) {
 		// The path trail runs through the rocket's center, so it clips the rocket up close:
 		// show it only in the distant views, and the position marker only in the overview.
@@ -701,8 +706,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 	/**
 	 * Builds the replay's exhaust: for each stage's burn window, smoke puff positions laid
-	 * along the flown path at fixed spatial spacing, plus one flame plume shape per burning
-	 * stage. The visuals come from the real volumetric-smoke and flame renderers via
+	 * along the flown path at fixed spatial spacing, plus a streaming flame plume per motor.
+	 * The visuals come from the real volumetric-smoke and flame renderers via
 	 * "puppet" emitters that never simulate: {@link #updateExhaust} fills their particle
 	 * lists each frame as a pure function of the playback time, so any scrub shows the
 	 * exact state continuous playback would have produced. Runs on the GL thread.
@@ -715,10 +720,10 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		Vector3f rocketSize = orchestrator.getCameraController().computeRocketSize();
 		// The rocket's long axis runs along X in the unposed scene (nose toward -X).
 		float rocketLength = rocketSize != null ? Math.max(rocketSize.x, 1.0f) : trailRadius;
-		// The smoke renderer draws a particle at up to 4x its size; target a full-grown puff
-		// of ~2 trail radii so the column reads at the whole-flight zoom.
-		float puffSize = trailRadius * 0.5f;
-		float spacing = trailRadius * 0.9f;
+		// The smoke renderer draws a particle at up to 4x its size. Cap the trail-scaled
+		// size against the rocket so exhaust also reads naturally in the follow view.
+		float puffSize = replaySmokeSize(trailRadius, rocketLength);
+		float spacing = puffSize * 1.2f;
 
 		smokePuppet = new SmokeEmitter(new Vector3f(), new Vector3f(0.0f, 1.0f, 0.0f),
 				SmokeSettings.medium(config)) {
@@ -766,12 +771,17 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			for (int j = 0; j < SMOKE_PARTICLES_PER_PUFF; j++) {
 				float size = puffSize * (0.7f + 0.6f * jitter.nextFloat());
 				Vector3f puffCenter = new Vector3f(station.position()).add(
-						(jitter.nextFloat() - 0.5f) * spacing,
-						(jitter.nextFloat() - 0.5f) * spacing,
-						(jitter.nextFloat() - 0.5f) * spacing);
+						(jitter.nextFloat() - 0.5f) * puffSize * 0.4f,
+						(jitter.nextFloat() - 0.5f) * puffSize * 0.4f,
+						(jitter.nextFloat() - 0.5f) * puffSize * 0.4f);
 				smokePuffs.add(new SmokePuff(puffCenter, station.time(), size, SMOKE_COLOR));
 			}
 		}
+	}
+
+	static float replaySmokeSize(float pathRadius, float rocketLength) {
+		// A high apogee must not turn fresh exhaust into a cloud larger than the rocket.
+		return Math.max(0.01f, Math.min(pathRadius * 0.5f, rocketLength * 0.08f));
 	}
 
 	/**
@@ -781,31 +791,42 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	 */
 	static List<SmokeStation> sampleSmokeStations(PoseProvider provider, Vector3f nozzleLocal,
 			double burnStart, double burnEnd, float spacing, int maximumStations) {
-		if (spacing <= 0.0f || maximumStations <= 0) {
+		if (!Float.isFinite(spacing) || spacing <= 0.0f || maximumStations <= 0
+				|| !Double.isFinite(burnStart) || !Double.isFinite(burnEnd) || burnEnd < burnStart) {
 			return List.of();
 		}
 
+		// Fit the budget to the entire burn instead of silently cutting the plume off midway.
+		List<Vector3f> path = new ArrayList<>(SMOKE_PATH_SAMPLES + 1);
+		double length = 0.0;
+		for (int i = 0; i <= SMOKE_PATH_SAMPLES; i++) {
+			Vector3f position = nozzlePosition(provider, nozzleLocal,
+					burnStart + (burnEnd - burnStart) * i / SMOKE_PATH_SAMPLES);
+			if (!path.isEmpty()) length += position.distance(path.get(path.size() - 1));
+			path.add(position);
+		}
+		double interval = maximumStations > 1 ? Math.max(spacing, length / (maximumStations - 1)) : spacing;
 		List<SmokeStation> stations = new ArrayList<>(maximumStations);
 		double previousTime = burnStart;
-		Vector3f previousPosition = nozzlePosition(provider, nozzleLocal, previousTime);
+		Vector3f previousPosition = path.get(0);
 		stations.add(new SmokeStation(new Vector3f(previousPosition), previousTime));
 		double travelled = 0.0;
-		double nextStationDistance = spacing;
+		double nextStationDistance = interval;
 
 		for (int i = 1; i <= SMOKE_PATH_SAMPLES && stations.size() < maximumStations; i++) {
 			double time = burnStart + (burnEnd - burnStart) * i / SMOKE_PATH_SAMPLES;
-			Vector3f position = nozzlePosition(provider, nozzleLocal, time);
+			Vector3f position = path.get(i);
 			double segmentLength = position.distance(previousPosition);
 			double segmentEndDistance = travelled + segmentLength;
 
-			while (nextStationDistance <= segmentEndDistance && stations.size() < maximumStations) {
+			while (nextStationDistance <= segmentEndDistance + 1e-6 && stations.size() < maximumStations) {
 				double fraction = segmentLength > 0.0
-						? (nextStationDistance - travelled) / segmentLength : 0.0;
+						? Math.min(1.0, (nextStationDistance - travelled) / segmentLength) : 0.0;
 				Vector3f stationPosition = new Vector3f(previousPosition)
 						.lerp(position, (float) fraction);
 				double stationTime = previousTime + (time - previousTime) * fraction;
 				stations.add(new SmokeStation(stationPosition, stationTime));
-				nextStationDistance += spacing;
+				nextStationDistance += interval;
 			}
 
 			travelled = segmentEndDistance;
@@ -816,7 +837,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	}
 
 	private static Vector3f nozzlePosition(PoseProvider provider, Vector3f nozzleLocal, double time) {
-		Vector3f position = provider.getPosition(time);
+		Vector3f position = new Vector3f(provider.getPosition(time));
 		return position.add(provider.getOrientation(time).transform(new Vector3f(nozzleLocal)));
 	}
 
@@ -1019,7 +1040,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 				center.add(provider.getOrientation(t).transform(new Vector3f(centerOffset)));
 			}
 			Random jitter = new Random(Double.hashCode(t) * 127L + puffs);
-			float scatter = trailRadius * 1.5f;
+			float scatter = puffSize * 1.5f;
 			for (int i = 0; i < puffs; i++) {
 				Vector3f position = new Vector3f(center).add(
 						(jitter.nextFloat() - 0.5f) * 2.0f * scatter,
@@ -1032,54 +1053,22 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	}
 
 	/**
-	 * Builds one flame plume for a stage: a fixed cloud of particles distributed along the
-	 * plume axis in the rocket's local frame (throat at the nozzle, tapering tip), rendered
-	 * by the flame renderer whose size/temperature profile is driven by each particle's age
-	 * ratio. Posed rigidly against the stage's current pose every frame, so it stays glued
-	 * to the nozzle no matter how the rocket accelerates.
+	 * Builds a streaming flame plume for one motor, driven by replay emission times.
 	 */
 	private void addFlameJet(SceneView scene, RenderingConfiguration config, PoseProvider provider,
 			List<double[]> burnWindows, Vector3f nozzleLocal, Vector3f exhaustDirection, float rocketLength) {
-		float plumeLength = rocketLength * 0.9f;
-		float plumeRadius = rocketLength * 0.10f;
-		float particleSize = rocketLength * 0.09f;
-		// The renderer ramps size and alpha up over the first stretch of the plume, so start
-		// the shape inside the rocket: the visible flame then begins right at the motor.
-		float plumeStart = -0.12f * plumeLength;
-
-		Random shapeRandom = new Random(31L * flameJets.size() + 17);
-		Vector3f axis = new Vector3f(exhaustDirection).normalize();
-		Vector3f side = new Vector3f(axis).cross(Math.abs(axis.y) < 0.9f
-				? new Vector3f(0.0f, 1.0f, 0.0f) : new Vector3f(0.0f, 0.0f, 1.0f)).normalize();
-		Vector3f up = new Vector3f(axis).cross(side).normalize();
-		List<FlameShapePoint> shape = new ArrayList<>(FLAME_PLUME_PARTICLES);
-		for (int i = 0; i < FLAME_PLUME_PARTICLES; i++) {
-			float along = (i + shapeRandom.nextFloat()) / FLAME_PLUME_PARTICLES;
-			float scatter = plumeRadius * (0.2f + 0.8f * along);
-			Vector3f offset = new Vector3f(nozzleLocal)
-					.add(new Vector3f(axis).mul(plumeStart + along * plumeLength))
-					.add(new Vector3f(side).mul((shapeRandom.nextFloat() - 0.5f) * scatter))
-					.add(new Vector3f(up).mul((shapeRandom.nextFloat() - 0.5f) * scatter));
-			float size = particleSize * (0.8f + 0.4f * shapeRandom.nextFloat());
-			shape.add(new FlameShapePoint(offset, along, size));
-		}
-
-		FlameEmitter emitter = new FlameEmitter(new Vector3f(), new Vector3f(1.0f, 0.0f, 0.0f),
-				FlameSettings.normal(config)) {
-			@Override
-			public void update(float deltaTime) {
-				// Scripted: the replay fills the particles as a function of playback time.
-			}
-		};
+		ReplayFlameEmitter emitter = new ReplayFlameEmitter(config, provider, burnWindows,
+				nozzleLocal, exhaustDirection, rocketLength, 31L * flameJets.size() + 17);
 		scene.addParticleEmitter(emitter);
-		flameJets.add(new FlameJet(emitter, provider, burnWindows, shape));
+		flameJets.add(emitter);
 	}
 
 	/** Fills the puppet emitters with the exhaust state for the given playback time. */
 	private void updateExhaust(double time) {
 		SmokeEmitter smoke = smokePuppet;
 		if (smoke != null) {
-			updateSmokeParticles(smoke.getParticles(), smokePuffs, time, trailRadius);
+			if (exhaustVisible) updateSmokeParticles(smoke.getParticles(), smokePuffs, time);
+			else smoke.getParticles().clear();
 		}
 
 		for (ParachuteCanopy parachute : parachutes) {
@@ -1105,33 +1094,12 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			}
 		}
 
-		for (FlameJet jet : flameJets) {
-			List<Particle> particles = jet.emitter().getParticles();
-			if (!isWithinAnyWindow(jet.burnWindows(), time)) {
-				particles.clear();
-				continue;
-			}
-			Vector3f base = jet.provider().getPosition(time);
-			Quaternionf orientation = jet.provider().getOrientation(time);
-			int count = 0;
-			for (FlameShapePoint point : jet.shape()) {
-				Particle particle = count < particles.size() ? particles.get(count) : appendBlank(particles);
-				Vector3f local = new Vector3f(point.localOffset());
-				orientation.transform(local);
-				particle.position.set(base).add(local);
-				// Hot core at the throat, cooling toward the tip; the flame renderer derives
-				// its size and temperature profile from the age ratio.
-				particle.color.set(FLAME_CORE_COLOR).lerp(FLAME_TIP_COLOR, point.ageRatio());
-				particle.size = point.size();
-				particle.setLifetime(1.0f - point.ageRatio(), 1.0f);
-				count++;
-			}
-			trim(particles, count);
+		for (ReplayFlameEmitter jet : flameJets) {
+			jet.setReplayTime(time, exhaustVisible);
 		}
 	}
 
-	static void updateSmokeParticles(List<Particle> particles, List<SmokePuff> puffs,
-			double time, float radius) {
+	static void updateSmokeParticles(List<Particle> particles, List<SmokePuff> puffs, double time) {
 		int count = 0;
 		for (SmokePuff puff : puffs) {
 			double age = time - puff.birthTime();
@@ -1140,7 +1108,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			}
 			Particle particle = count < particles.size() ? particles.get(count) : appendBlank(particles);
 			particle.position.set(puff.position())
-					.add(0.0f, (float) Math.min(age, 30.0) * SMOKE_RISE_RATE * radius, 0.0f);
+					.add(0.0f, (float) age * SMOKE_RISE_RATE * puff.size(), 0.0f);
 			particle.color.set(puff.color());
 			particle.size = puff.size();
 			particle.setLifetime(1.0f - smokeAgeRatio(age), 1.0f);
@@ -1156,7 +1124,10 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	}
 
 	static float smokeOpacity(double age) {
-		return (float) Math.max(0.0, Math.min(1.0, 1.0 - age / SMOKE_LIFETIME_SECONDS));
+		double fadeIn = Math.max(0.0, Math.min(1.0, age / 0.15));
+		double remaining = Math.max(0.0, Math.min(1.0, 1.0 - age / SMOKE_LIFETIME_SECONDS));
+		return (float) (fadeIn * fadeIn * (3.0 - 2.0 * fadeIn)
+				* remaining * remaining * (3.0 - 2.0 * remaining));
 	}
 
 	private static Particle appendBlank(List<Particle> particles) {
@@ -1172,15 +1143,6 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		}
 	}
 
-	private static boolean isWithinAnyWindow(List<double[]> windows, double time) {
-		for (double[] window : windows) {
-			if (time >= window[0] && time <= window[1]) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	// The trajectory decorations show in the distant views; the rocket position marker only
 	// in the whole-flight overview (up close the rocket itself is visible and the marker,
 	// sized for the trajectory scale, would dwarf it).
@@ -1189,6 +1151,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	}
 
 	private void setTrailDecorationsVisible(boolean trailsVisible, boolean markerVisible) {
+		trailsVisible &= trailVisible;
 		for (SceneObject trailObject : dynamicTrails) {
 			trailObject.setVisible(trailsVisible);
 		}
@@ -1207,7 +1170,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private void addEventMarkers(SceneView scene, FlightReplayData replayData, PoseProvider primary,
 			Vector3f centerOffset) {
 		eventMarkers.clear();
-		boolean visible = isDistantView();
+		boolean visible = isDistantView() && trailVisible;
 		for (var event : FlightEventMarkers.selectDisplayEvents(replayData.getAllEvents())) {
 			double t = event.getTime();
 			if (t < replayData.getStartTime() || t > replayData.getEndTime()) {
@@ -1336,7 +1299,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		}
 		removeAndCleanupObjects(scene, dynamicTrails);
 
-		boolean visible = isDistantView();
+		boolean visible = isDistantView() && trailVisible;
 		for (TrailPath trail : trailPaths) {
 			List<Vector3f> points = trail.points();
 			int pointCount = points.size();

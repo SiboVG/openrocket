@@ -39,7 +39,7 @@ public final class FlightPoseProvider implements PoseProvider {
 
 		if (eastL == null || northL == null) {
 			List<Double> rXY  = branch.get(FlightDataType.TYPE_POSITION_XY);
-			List<Double> dirL = branch.get(FlightDataType.TYPE_POSITION_DIRECTION); // azimuth from east, radians
+			List<Double> dirL = branch.get(FlightDataType.TYPE_POSITION_DIRECTION); // azimuth from north, radians
 			if (rXY != null && dirL != null) {
 				eastL  = new ArrayList<>(rXY.size());
 				northL = new ArrayList<>(rXY.size());
