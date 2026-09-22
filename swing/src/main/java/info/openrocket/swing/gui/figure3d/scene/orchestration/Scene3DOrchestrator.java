@@ -52,6 +52,7 @@ public class Scene3DOrchestrator {
 	private final RocketSceneSynchronizer rocketSynchronizer;
 	private final AppearanceFactory.DecalTextureCache decalTextureCache = AppearanceFactory.createDecalTextureCache();
 	private volatile Runnable glTaskQueuedCallback;
+	private volatile Runnable rocketSceneRebuiltCallback;
 
 	/** How the replay camera tracks the rocket during playback. */
 	public enum FlightCameraBehavior {
@@ -332,6 +333,23 @@ public class Scene3DOrchestrator {
 		this.glTaskQueuedCallback = callback;
 	}
 
+	/**
+	 * Registers a callback invoked after a model-driven rocket scene rebuild has
+	 * committed its replacement objects.
+	 *
+	 * @param callback callback to invoke on the GL thread, or {@code null} to clear it
+	 */
+	public void setRocketSceneRebuiltCallback(Runnable callback) {
+		this.rocketSceneRebuiltCallback = callback;
+	}
+
+	void notifyRocketSceneRebuilt() {
+		Runnable callback = rocketSceneRebuiltCallback;
+		if (callback != null) {
+			callback.run();
+		}
+	}
+
 	private void runPendingGlTasks() {
 		Runnable task;
 		while ((task = glTaskQueue.poll()) != null) {
@@ -347,6 +365,7 @@ public class Scene3DOrchestrator {
 			return;
 		}
 		glTaskQueuedCallback = null;
+		rocketSceneRebuiltCallback = null;
 		glTaskQueue.clear();
 		if (rocketSynchronizer != null) {
 			rocketSynchronizer.dispose();

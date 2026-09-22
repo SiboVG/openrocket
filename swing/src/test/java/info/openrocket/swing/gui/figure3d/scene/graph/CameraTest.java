@@ -84,4 +84,30 @@ class CameraTest {
 		assertEquals(distantRatio, closeRatio, 1e-6f);
 		assertTrue(distantRatio < 0.95f, "One wheel notch should make a visible zoom change");
 	}
+
+	@Test
+	void orbitCanCrossVerticalPolesByDefault() {
+		Camera camera = Camera.builder().build();
+		camera.setSideView();
+
+		camera.orbit(0.0f, (float) Math.toRadians(100.0), 1.0f);
+		camera.update();
+
+		assertEquals(Math.toRadians(100.0), camera.getAngleY(), 0.0001);
+		assertTrue(camera.getPosition().z < 0.0f,
+				"Crossing 90 degrees should move the camera beyond the vertical pole");
+		assertTrue(camera.getViewMatrix().isFinite(),
+				"Crossing a vertical pole should keep the view transform valid");
+	}
+
+	@Test
+	void orbitHonorsExplicitPitchClamping() {
+		Camera camera = Camera.builder().build();
+		camera.setSideView();
+		camera.setPitchClampingEnabled(true);
+
+		camera.orbit(0.0f, (float) Math.toRadians(100.0), 1.0f);
+
+		assertEquals(CameraConstants.MAX_PITCH_ANGLE, camera.getAngleY(), 0.0001f);
+	}
 }
