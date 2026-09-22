@@ -16,13 +16,24 @@ final class ReplayFlameEmitter extends FlameEmitter {
 	private final List<double[]> burnWindows;
 	private final long seed;
 	private final float particleTimeScale;
+	private final Vector3f exhaustAxis;
+	private final Quaternionf roll = new Quaternionf();
 
 	ReplayFlameEmitter(RenderingConfiguration config, PoseProvider provider, List<double[]> burnWindows,
 			Vector3f nozzle, Vector3f direction, float rocketLength, long seed) {
 		// The pad/photo emitter's long lifetimes would leave burning particles far behind an
 		// accelerating rocket. Run the same particle lifecycle faster, preserving its plume length.
-		this(FlameSettings.normal(config, null, rocketLength * 0.03f, 3.0f),
-				provider, burnWindows, nozzle, direction, seed, 24.0f);
+		this(rocketScaledSettings(config, rocketLength * 0.03f), provider, burnWindows, nozzle, direction, seed, 24.0f);
+	}
+
+	/**
+	 * The stock settings scale velocity and size with the exhaust scale but keep an absolute
+	 * spread tuned for scale 1, which makes a small rocket's plume wide and a large one's a
+	 * needle. Scale the spread too, so every rocket gets the pad plume's proportions.
+	 */
+	static FlameSettings rocketScaledSettings(RenderingConfiguration config, float exhaustScale) {
+		FlameSettings settings = FlameSettings.normal(config, null, exhaustScale, 3.0f);
+		return settings.withSpread(settings.spread * exhaustScale);
 	}
 
 	ReplayFlameEmitter(FlameSettings settings, PoseProvider provider, List<double[]> burnWindows,
@@ -35,6 +46,7 @@ final class ReplayFlameEmitter extends FlameEmitter {
 		super(nozzle, direction, settings);
 		this.provider = provider;
 		this.burnWindows = burnWindows.stream().map(double[]::clone).toList();
+		this.exhaustAxis = new Vector3f(direction).normalize();
 		this.seed = seed;
 		this.particleTimeScale = particleTimeScale;
 	}
@@ -72,6 +84,8 @@ final class ReplayFlameEmitter extends FlameEmitter {
 					continue;
 				}
 
+				rollAroundExhaustAxis(particle, emissionSeed(~seed, windowIndex, index));
+
 				Quaternionf orientation = provider.getOrientation(birthTime);
 				orientation.transform(particle.position);
 				particle.position.add(provider.getPosition(birthTime));
@@ -84,6 +98,19 @@ final class ReplayFlameEmitter extends FlameEmitter {
 				}
 			}
 		}
+	}
+
+	/**
+	 * FlameEmitter biases particles toward its local +Y so pad flames rise; in the replay that
+	 * axis is fixed to the rocket and points sideways, skewing the plume. A deterministic roll
+	 * about the exhaust axis keeps each particle's spread but makes the plume symmetric.
+	 */
+	private void rollAroundExhaustAxis(Particle particle, long rollSeed) {
+		float angle = (float) ((rollSeed >>> 11) * 0x1.0p-53 * 2.0 * Math.PI);
+		roll.fromAxisAngleRad(exhaustAxis, angle);
+		particle.position.sub(emitterPosition);
+		roll.transform(particle.position).add(emitterPosition);
+		roll.transform(particle.velocity);
 	}
 
 	static long emissionSeed(long motorSeed, int windowIndex, long particleIndex) {

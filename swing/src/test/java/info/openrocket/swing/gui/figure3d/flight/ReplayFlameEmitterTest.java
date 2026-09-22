@@ -94,7 +94,53 @@ class ReplayFlameEmitterTest {
 			if (particle != null) expected.add(particle);
 		}
 		replay.setReplayTime(time, true);
-		assertParticlesEqual(expected, replay.getParticles());
+		// The replay only rolls each particle about the exhaust axis (+X through the nozzle at
+		// x=1), so everything that roll leaves unchanged must match the pad emitter exactly.
+		List<Particle> actual = replay.getParticles();
+		assertEquals(expected.size(), actual.size());
+		for (int i = 0; i < expected.size(); i++) {
+			Particle e = expected.get(i);
+			Particle a = actual.get(i);
+			assertEquals(e.color, a.color);
+			assertEquals(e.orientation, a.orientation);
+			assertEquals(e.size, a.size);
+			assertEquals(e.getLife(), a.getLife());
+			assertEquals(e.position.x, a.position.x, 1e-5f);
+			assertEquals(radial(e.position), radial(a.position), 1e-5f);
+			assertEquals(e.velocity.x, a.velocity.x, 1e-5f);
+			assertEquals(radial(e.velocity), radial(a.velocity), 1e-5f);
+		}
+	}
+
+	@Test
+	void plumeIsSymmetricAboutTheExhaustAxis() {
+		ReplayFlameEmitter emitter = emitter(new Vector3f(), new Quaternionf(), 17);
+		emitter.setReplayTime(0.999, true);
+		Vector3f lateralSum = new Vector3f();
+		float radialSum = 0.0f;
+		for (Particle particle : emitter.getParticles()) {
+			lateralSum.add(0.0f, particle.position.y, particle.position.z);
+			radialSum += radial(particle.position);
+		}
+		// The pad emitter pushes every particle toward +Y; unrolled, the mean offset would be
+		// roughly half the mean radius.
+		assertTrue(lateralSum.length() < 0.15f * radialSum,
+				"Replay flame must not lean to one side of the rocket: " + lateralSum.length() / radialSum);
+	}
+
+	@Test
+	void rocketScaledSettingsKeepThePadPlumeProportions() {
+		RenderingConfiguration config = new RenderingConfiguration();
+		FlameSettings pad = FlameSettings.normal(config, null, 1.0f, 3.0f);
+		for (float scale : new float[] { 0.1f, 1.0f, 12.0f }) {
+			FlameSettings scaled = ReplayFlameEmitter.rocketScaledSettings(config, scale);
+			assertEquals(pad.spread / pad.velocity, scaled.spread / scaled.velocity, 1e-6f);
+			assertEquals(pad.maxSize * scale, scaled.maxSize, 1e-5f);
+		}
+	}
+
+	private static float radial(Vector3f vector) {
+		return (float) Math.hypot(vector.y, vector.z);
 	}
 
 	@Test
