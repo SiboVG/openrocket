@@ -25,6 +25,7 @@ import info.openrocket.core.simulation.exception.SimulationException;
 import info.openrocket.core.simulation.extension.SimulationExtension;
 import info.openrocket.core.simulation.listeners.system.InterruptListener;
 import info.openrocket.core.util.BugException;
+import info.openrocket.core.util.MathUtil;
 
 /**
  * Runs a nominal baseline and a reproducible set of dispersed trajectory simulations.
@@ -303,9 +304,11 @@ public final class MonteCarloSimulationRunner {
 			}
 			putFinite(metrics, MonteCarloMetric.FLIGHT_TIME,
 					branch.getLast(FlightDataType.TYPE_TIME));
-			if (branch.getFirstEvent(FlightEvent.Type.GROUND_HIT) != null) {
+			FlightEvent groundHit = branch.getFirstEvent(FlightEvent.Type.GROUND_HIT);
+			if (groundHit != null) {
 				putFinite(metrics, MonteCarloMetric.LANDING_VELOCITY,
-						branch.getLast(FlightDataType.TYPE_VELOCITY_TOTAL));
+						MathUtil.interpolate(branch.getView(FlightDataType.TYPE_TIME),
+								branch.getView(FlightDataType.TYPE_VELOCITY_TOTAL), groundHit.getTime()));
 			}
 
 			FlightEvent abort = branch.getFirstEvent(FlightEvent.Type.SIM_ABORT);
