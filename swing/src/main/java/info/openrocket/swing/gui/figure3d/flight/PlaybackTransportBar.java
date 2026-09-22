@@ -1,6 +1,7 @@
 package info.openrocket.swing.gui.figure3d.flight;
 
 import info.openrocket.core.l10n.Translator;
+import info.openrocket.core.rocketcomponent.RocketComponent;
 import info.openrocket.core.simulation.FlightEvent;
 import info.openrocket.core.startup.Application;
 import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
@@ -18,6 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.JToggleButton;
@@ -35,7 +37,9 @@ import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.KeyEvent;
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
@@ -66,13 +70,11 @@ class PlaybackTransportBar extends JPanel {
 	private final JCheckBox trailButton = new JCheckBox(trans.get("Flight3DFrame.showTrail"), true);
 	private final JCheckBox exhaustButton = new JCheckBox(trans.get("Flight3DFrame.showExhaust"), true);
 	private final EventMarkerSlider scrubSlider = new EventMarkerSlider();
-	private final JComboBox<SpeedOption> speedCombo = new JComboBox<>(new SpeedOption[] {
-			new SpeedOption(0.25),
-			new SpeedOption(0.5),
-			new SpeedOption(1.0),
-			new SpeedOption(2.0),
-			new SpeedOption(4.0)
-	});
+	// Slow motion down to 0.1x makes a sub-second motor burn watchable; up to 16x shortens
+	// long recovery descents.
+	private static final double[] SPEEDS = { 0.1, 0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0 };
+	private final JComboBox<SpeedOption> speedCombo = new JComboBox<>(
+			Arrays.stream(SPEEDS).mapToObj(SpeedOption::new).toArray(SpeedOption[]::new));
 	private final JComboBox<FlightCameraMode> cameraModeCombo = new JComboBox<>(FlightCameraMode.values());
 	private final JButton zoomOutButton = new IconButton(Icons.ZOOM_OUT);
 	private final JButton zoomInButton = new IconButton(Icons.ZOOM_IN);
@@ -205,7 +207,7 @@ class PlaybackTransportBar extends JPanel {
 		timeLabel.setPreferredSize(new Dimension(160, timeLabel.getPreferredSize().height));
 		timeline.add(timeLabel, BorderLayout.EAST);
 
-		speedCombo.setSelectedIndex(2);
+		speedCombo.setSelectedItem(new SpeedOption(1.0));
 		speedCombo.addActionListener(e -> {
 			if (clock != null && clock.getRate() != 0.0) {
 				clock.setRate(selectedSpeed());
@@ -266,6 +268,14 @@ class PlaybackTransportBar extends JPanel {
 
 	JButton getNextFrameButton() {
 		return nextFrameButton;
+	}
+
+	JComboBox<?> getEventCombo() {
+		return eventCombo;
+	}
+
+	JComboBox<?> getSpeedCombo() {
+		return speedCombo;
 	}
 
 	JSlider getScrubSlider() {
@@ -447,6 +457,8 @@ class PlaybackTransportBar extends JPanel {
 			case KeyEvent.VK_RIGHT -> {
 				if (event.isShiftDown()) jumpToEvent(1); else stepFrame(1);
 			}
+			case KeyEvent.VK_UP -> changeSpeed(1);
+			case KeyEvent.VK_DOWN -> changeSpeed(-1);
 			case KeyEvent.VK_HOME -> pauseAndSeek(clock.getStart());
 			case KeyEvent.VK_END -> pauseAndSeek(clock.getEnd());
 			case KeyEvent.VK_F -> runViewAction(zoomFitListener);
@@ -456,6 +468,11 @@ class PlaybackTransportBar extends JPanel {
 			default -> { return false; }
 		}
 		return true;
+	}
+
+	private void changeSpeed(int direction) {
+		int index = Math.max(0, Math.min(speedCombo.getItemCount() - 1, speedCombo.getSelectedIndex() + direction));
+		speedCombo.setSelectedIndex(index);
 	}
 
 	private void pollClock() {
@@ -560,26 +577,32 @@ class PlaybackTransportBar extends JPanel {
 		for (FlightEvent event : replayData.getAllEvents()) {
 			if (MARKER_TYPES.contains(event.getType()) && Double.isFinite(event.getTime())
 					&& event.getTime() >= replayData.getStartTime() && event.getTime() <= replayData.getEndTime()) {
-				markers.add(new EventMarker(event.getTime(), event.getType().toString(), event.getType()));
+				EventMarker marker = new EventMarker(event.getTime(), eventLabel(event), event.getType());
+				// A clustered mount reports one event per motor; list the moment only once.
+				if (!markers.contains(marker)) {
+					markers.add(marker);
+				}
 			}
 		}
 		markers.sort(Comparator.comparingDouble(EventMarker::time));
 		return List.copyOf(markers);
 	}
 
+	/** Names the event's component (motor mount, stage, recovery device) so multi-stage events are distinguishable. */
+	static String eventLabel(FlightEvent event) {
+		RocketComponent source = event.getSource();
+		String type = event.getType().toString();
+		if (source == null || source == RocketComponent.REMOVED || source.getName() == null
+				|| source.getName().isBlank()) {
+			return type;
+		}
+		return String.format(trans.get("Flight3DFrame.eventSourceFormat"), type, source.getName());
+	}
+
 	private record SpeedOption(double rate) {
 		@Override
 		public String toString() {
-			if (rate == 0.25) {
-				return "0.25x";
-			}
-			if (rate == 0.5) {
-				return "0.5x";
-			}
-			if (rate == Math.rint(rate)) {
-				return String.format("%.0fx", rate);
-			}
-			return String.format("%.2fx", rate);
+			return BigDecimal.valueOf(rate).stripTrailingZeros().toPlainString() + "x";
 		}
 	}
 
@@ -603,7 +626,7 @@ class PlaybackTransportBar extends JPanel {
 
 		@Override
 		protected void processMouseEvent(MouseEvent event) {
-			if (isEnabled() && clock != null && javax.swing.SwingUtilities.isLeftMouseButton(event)) {
+			if (isEnabled() && clock != null && SwingUtilities.isLeftMouseButton(event)) {
 				if (event.getID() == MouseEvent.MOUSE_PRESSED) {
 					requestFocusInWindow();
 					EventMarker marker = findMarkerNear(event.getX(), event.getY());

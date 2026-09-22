@@ -600,12 +600,13 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		Vector3f min = new Vector3f(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
 		Vector3f max = new Vector3f(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
 
-		List<PoseProvider> providers = new ArrayList<>(poses.providersByStage().values());
+		// Stages share providers until they separate; sample each distinct trajectory once.
+		Set<PoseProvider> providers = Collections.newSetFromMap(new IdentityHashMap<>());
+		providers.addAll(poses.providersByStage().values());
 		providers.add(poses.primaryProvider());
-		int samples = 240;
 		for (PoseProvider provider : providers) {
-			for (int i = 0; i <= samples; i++) {
-				double t = startTime + (endTime - startTime) * i / samples;
+			for (int i = 0; i <= TRAIL_SAMPLES; i++) {
+				double t = startTime + (endTime - startTime) * i / TRAIL_SAMPLES;
 				Vector3f position = provider.getPosition(t);
 				min.min(position);
 				max.max(position);
@@ -736,7 +737,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 		List<MotorExhaustMount> exhaustMounts = orchestrator.getMotorExhaustMounts();
 		for (Map.Entry<AxialStage, List<double[]>> entry : burnTimeline.entrySet()) {
-			PoseProvider provider = poses.providersByStage().getOrDefault(entry.getKey(), poses.primaryProvider());
+			PoseProvider provider = providerForStage(entry.getKey(), poses.providersByStage(), poses.primaryProvider());
 			if (provider == null || entry.getValue().isEmpty()) {
 				continue;
 			}
@@ -988,18 +989,15 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	}
 
 	private static PoseProvider providerForEventSource(RocketComponent source, GroundedPoseProviders poses) {
-		if (source != null) {
-			try {
-				AxialStage stage = source instanceof AxialStage axialStage ? axialStage : source.getStage();
-				PoseProvider provider = poses.providersByStage().get(stage);
-				if (provider != null) {
-					return provider;
-				}
-			} catch (IllegalStateException e) {
-				// Component not attached to a stage; fall through to the primary trajectory.
-			}
-		}
-		return poses.primaryProvider();
+		return providerForStage(stageFor(source), poses.providersByStage(), poses.primaryProvider());
+	}
+
+	/** Components without a stage, or stages without their own branch, follow the primary trajectory. */
+	private static PoseProvider providerForStage(AxialStage stage, Map<AxialStage, PoseProvider> providersByStage,
+			PoseProvider primaryProvider) {
+		// The replay data's map is immutable and rejects null lookups.
+		PoseProvider provider = stage != null ? providersByStage.get(stage) : null;
+		return provider != null ? provider : primaryProvider;
 	}
 
 	private static AxialStage stageFor(RocketComponent component) {
@@ -1399,10 +1397,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			// Fall back to the primary (sustainer) trajectory when a component's stage has no
 			// dedicated provider, so the lift is always measured from real geometry and never
 			// silently collapses to zero (which would leave the rocket sunk into the ground).
-			PoseProvider provider = providerForComponent(component, providersByStage);
-			if (provider == null) {
-				provider = primaryProvider;
-			}
+			PoseProvider provider = providerForStage(stageFor(component), providersByStage, primaryProvider);
 			dynamicTransform.identity()
 					.translate(provider.getPosition(startTime))
 					.rotate(provider.getOrientation(startTime));
@@ -1440,17 +1435,6 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			}
 		}
 		return minY;
-	}
-
-	private PoseProvider providerForComponent(RocketComponent component, Map<AxialStage, PoseProvider> providersByStage) {
-		try {
-			AxialStage stage = component instanceof AxialStage
-					? (AxialStage) component
-					: component.getStage();
-			return providersByStage.get(stage);
-		} catch (IllegalStateException e) {
-			return null;
-		}
 	}
 
 	private float computeGroundSize(FlightData data) {
@@ -1499,7 +1483,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			Map<AxialStage, List<FlightReplayData.BurnInterval>> intervalsByStage) {
 		Map<AxialStage, List<double[]>> timeline = new LinkedHashMap<>();
 		for (Map.Entry<AxialStage, List<FlightReplayData.BurnInterval>> entry : intervalsByStage.entrySet()) {
-			List<double[]> stageIntervals = new java.util.ArrayList<>(entry.getValue().size());
+			List<double[]> stageIntervals = new ArrayList<>(entry.getValue().size());
 			for (FlightReplayData.BurnInterval interval : entry.getValue()) {
 				stageIntervals.add(new double[] { interval.start(), interval.end() });
 			}

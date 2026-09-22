@@ -3,6 +3,7 @@ package info.openrocket.swing.gui.figure3d.flight;
 import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
 import info.openrocket.swing.util.BaseTestCase;
 import info.openrocket.core.rocketcomponent.AxialStage;
+import info.openrocket.core.rocketcomponent.BodyTube;
 import info.openrocket.core.rocketcomponent.Rocket;
 import info.openrocket.core.simulation.FlightData;
 import info.openrocket.core.simulation.FlightDataBranch;
@@ -10,6 +11,7 @@ import info.openrocket.core.simulation.FlightDataType;
 import info.openrocket.core.simulation.FlightEvent;
 import org.junit.jupiter.api.Test;
 
+import javax.swing.JComboBox;
 import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
 import java.awt.event.MouseEvent;
@@ -201,6 +203,61 @@ class PlaybackTransportBarTest extends BaseTestCase {
 				bar.clearReplay();
 				assertEquals(0, bar.getScrubSlider().getValue());
 				assertFalse(bar.handleReplayKey(keyEvent(bar, KeyEvent.VK_SPACE, 0)));
+			} finally {
+				bar.dispose();
+			}
+		});
+	}
+
+	@Test
+	void speedKeysStepThroughTheSpeedsAndApplyWhilePlaying() throws Exception {
+		SwingUtilities.invokeAndWait(() -> {
+			PlaybackTransportBar bar = new PlaybackTransportBar();
+			PlaybackClock clock = new PlaybackClock(0.0, 10.0);
+			clock.setRate(0.0);
+			bar.setReplay(clock, null);
+			try {
+				assertEquals("1x", bar.getSpeedCombo().getSelectedItem().toString());
+				assertTrue(bar.handleReplayKey(keyEvent(bar, KeyEvent.VK_UP, 0)));
+				assertEquals(0.0, clock.getRate(), "Changing speed while paused must not start playback");
+
+				bar.handleReplayKey(keyEvent(bar, KeyEvent.VK_SPACE, 0));
+				assertEquals(2.0, clock.getRate(), 1e-9);
+				for (int i = 0; i < 10; i++) {
+					bar.handleReplayKey(keyEvent(bar, KeyEvent.VK_UP, 0));
+				}
+				assertEquals(16.0, clock.getRate(), 1e-9);
+				for (int i = 0; i < 10; i++) {
+					bar.handleReplayKey(keyEvent(bar, KeyEvent.VK_DOWN, 0));
+				}
+				assertEquals(0.1, clock.getRate(), 1e-9);
+				assertEquals("0.1x", bar.getSpeedCombo().getSelectedItem().toString());
+			} finally {
+				bar.dispose();
+			}
+		});
+	}
+
+	@Test
+	void eventListShowsClusteredMotorEventsOnce() throws Exception {
+		SwingUtilities.invokeAndWait(() -> {
+			Rocket rocket = new Rocket();
+			AxialStage stage = new AxialStage();
+			rocket.addChild(stage);
+			BodyTube boosterTube = new BodyTube();
+			boosterTube.setName("Booster tube");
+			stage.addChild(boosterTube);
+			FlightDataBranch branch = replayBranch(0.0, 10.0);
+			branch.addEvent(new FlightEvent(FlightEvent.Type.BURNOUT, 1.5, boosterTube));
+			branch.addEvent(new FlightEvent(FlightEvent.Type.BURNOUT, 1.5, boosterTube));
+			branch.addEvent(new FlightEvent(FlightEvent.Type.APOGEE, 5.0));
+			PlaybackTransportBar bar = new PlaybackTransportBar();
+			bar.setReplay(new PlaybackClock(0.0, 10.0), new FlightReplayData(new FlightData(branch), rocket));
+			try {
+				JComboBox<?> events = bar.getEventCombo();
+				assertEquals(2, events.getItemCount());
+				assertEquals(FlightEvent.Type.APOGEE.toString(),
+						PlaybackTransportBar.eventLabel(new FlightEvent(FlightEvent.Type.APOGEE, 5.0)));
 			} finally {
 				bar.dispose();
 			}
