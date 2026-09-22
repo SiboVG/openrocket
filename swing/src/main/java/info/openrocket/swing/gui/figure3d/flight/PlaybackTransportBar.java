@@ -32,6 +32,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
@@ -102,24 +103,27 @@ class PlaybackTransportBar extends JPanel {
 		setLayout(new BorderLayout(8, 4));
 		setBorder(BorderFactory.createEmptyBorder(4, 6, 6, 6));
 
-		JPanel leftControls = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+		// Rows: view controls right below the 3D view, then the transport buttons beside the
+		// timeline, then the less frequently used playback options.
+		JPanel playbackControls = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
 		restartButton.setToolTipText(trans.get("Flight3DFrame.restart.ttip"));
 		restartButton.addActionListener(e -> restartPlayback());
-		leftControls.add(restartButton);
+		playbackControls.add(restartButton);
 		previousFrameButton.setToolTipText(trans.get("Flight3DFrame.previousFrame.ttip"));
 		previousFrameButton.addActionListener(e -> stepFrame(-1));
-		leftControls.add(previousFrameButton);
-		leftControls.add(playPauseButton);
+		playbackControls.add(previousFrameButton);
+		playbackControls.add(playPauseButton);
 		nextFrameButton.setToolTipText(trans.get("Flight3DFrame.nextFrame.ttip"));
 		nextFrameButton.addActionListener(e -> stepFrame(1));
-		leftControls.add(nextFrameButton);
-		leftControls.add(speedCombo);
+		playbackControls.add(nextFrameButton);
+		playbackControls.add(speedCombo);
 		speedCombo.setToolTipText(trans.get("Flight3DFrame.speed.ttip"));
 		loopButton.setToolTipText(trans.get("Flight3DFrame.loop.ttip"));
 		loopButton.addActionListener(e -> {
 			if (clock != null) clock.setLooping(loopButton.isSelected());
 		});
-		leftControls.add(loopButton);
+		JPanel playbackOptions = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
+		playbackOptions.add(loopButton);
 		eventCombo.setPrototypeDisplayValue(new EventMarker(999.99, trans.get("Flight3DFrame.events"), null));
 		eventCombo.setRenderer(new DefaultListCellRenderer() {
 			@Override
@@ -135,8 +139,8 @@ class PlaybackTransportBar extends JPanel {
 				pauseAndSeek(marker.time());
 			}
 		});
-		leftControls.add(eventCombo);
-		add(leftControls, BorderLayout.NORTH);
+		playbackOptions.add(eventCombo);
+		add(playbackOptions, BorderLayout.SOUTH);
 
 		JPanel viewControls = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
 		cameraModeCombo.setSelectedItem(FlightCameraMode.OVERVIEW);
@@ -178,7 +182,7 @@ class PlaybackTransportBar extends JPanel {
 		help.addActionListener(e -> JOptionPane.showMessageDialog(this, trans.get("Flight3DFrame.controls.ttip"),
 				trans.get("Flight3DFrame.controls"), JOptionPane.INFORMATION_MESSAGE));
 		viewControls.add(help);
-		add(viewControls, BorderLayout.SOUTH);
+		add(viewControls, BorderLayout.NORTH);
 
 		scrubSlider.setMinimum(0);
 		scrubSlider.setMaximum(SLIDER_STEPS);
@@ -200,6 +204,10 @@ class PlaybackTransportBar extends JPanel {
 		scrubSlider.addMouseMotionListener(scrubMouseListener);
 		scrubSlider.addChangeListener(this::handleSliderChanged);
 		JPanel timeline = new JPanel(new BorderLayout(8, 0));
+		// Center the buttons vertically on the timeline track instead of pinning them to its top.
+		JPanel playbackButtonsCell = new JPanel(new GridBagLayout());
+		playbackButtonsCell.add(playbackControls);
+		timeline.add(playbackButtonsCell, BorderLayout.WEST);
 		timeline.add(scrubSlider, BorderLayout.CENTER);
 		add(timeline, BorderLayout.CENTER);
 
