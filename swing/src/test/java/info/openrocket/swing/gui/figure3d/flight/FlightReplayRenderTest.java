@@ -149,22 +149,15 @@ class FlightReplayRenderTest {
 	}
 
 	private static void assertTrailVisibility(GLScenePanel canvas, Flight3DPanel panel, boolean visible) throws Exception {
-		var field = Flight3DPanel.class.getDeclaredField("dynamicTrails");
-		field.setAccessible(true);
 		CompletableFuture<List<Boolean>> result = new CompletableFuture<>();
-		canvas.getScene3DOrchestrator().enqueueGlTask(() -> {
-			try {
-				List<?> trails = (List<?>) field.get(panel);
-				result.complete(trails.stream().map(object -> ((SceneObject) object).isVisible()).toList());
-			} catch (IllegalAccessException exception) {
-				result.completeExceptionally(exception);
-			}
-		});
+		canvas.getScene3DOrchestrator().enqueueGlTask(() ->
+				result.complete(panel.trailObjects().stream().map(SceneObject::isVisible).toList()));
 		panel.requestRenderNow();
 		List<Boolean> states = result.get(10, TimeUnit.SECONDS);
-		assertFalse(states.isEmpty(), "The test must exercise rebuilt trajectory meshes");
-		assertTrue(states.stream().allMatch(state -> state == visible),
-				"Every rebuilt segment must respect the trajectory checkbox during playback");
+		assertFalse(states.isEmpty(), "The test must exercise built trajectory meshes");
+		// Each chunk exists in both colors and only one shows, so a shown trail is a mix.
+		assertEquals(visible, states.contains(true),
+				"The trajectory must respect the trajectory checkbox during playback");
 	}
 
 	private static int exhaustCount(GLScenePanel canvas, Flight3DPanel panel) throws Exception {

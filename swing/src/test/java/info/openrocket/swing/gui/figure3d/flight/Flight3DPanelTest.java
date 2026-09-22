@@ -107,6 +107,28 @@ class Flight3DPanelTest {
 	}
 
 	@Test
+	void trailChunksCoverEverySegmentAndShareEndSamples() {
+		int points = 241;
+		int chunks = Flight3DPanel.trailChunkCount(points);
+		assertEquals(20, chunks);
+		assertEquals(0, Flight3DPanel.trailChunkCount(1));
+		assertEquals(1, Flight3DPanel.trailChunkCount(2));
+		assertEquals(Flight3DPanel.TRAIL_CHUNK_SAMPLES, Flight3DPanel.trailChunkEnd(0, points));
+		assertEquals(points - 1, Flight3DPanel.trailChunkEnd(chunks - 1, points));
+		// A short last chunk still ends on the final sample.
+		assertEquals(14, Flight3DPanel.trailChunkEnd(1, 15));
+
+		assertEquals(-1, Flight3DPanel.splitChunk(0.0, 0, chunks), "Nothing elapsed: every chunk is upcoming");
+		assertEquals(chunks, Flight3DPanel.splitChunk(1.0, points - 2, chunks), "Everything elapsed");
+		for (int segment = 0; segment < points - 1; segment++) {
+			int chunk = Flight3DPanel.splitChunk(0.5, segment, chunks);
+			int start = chunk * Flight3DPanel.TRAIL_CHUNK_SAMPLES;
+			assertTrue(segment >= start && segment + 1 <= Flight3DPanel.trailChunkEnd(chunk, points),
+					"Segment " + segment + " must lie inside its split chunk " + chunk);
+		}
+	}
+
+	@Test
 	void parachuteAnchorUsesTheRenderedRecoveryDevicePosition() {
 		SceneView scene = mock(SceneView.class);
 		SceneObject recoveryDeviceObject = mock(SceneObject.class);

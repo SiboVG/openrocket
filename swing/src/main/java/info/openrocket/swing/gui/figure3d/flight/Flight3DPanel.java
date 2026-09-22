@@ -54,6 +54,7 @@ import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -90,6 +91,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private volatile Vector3f trajectoryDimensions;
 
 	private static final int TRAIL_SAMPLES = 240;
+	// Paths are split into chunks built once per decoration scale. Playback only toggles chunk
+	// visibility and rebuilds the two short pieces either side of the playback position.
+	static final int TRAIL_CHUNK_SAMPLES = 12;
 	private static final float MIN_DECORATION_SCALE = 0.04f;
 	private static final float DECORATION_SCALE_REBUILD_THRESHOLD = 0.06f;
 	private static final Vector3f ACTIVE_FUTURE_COLOR = new Vector3f(0.16f, 0.42f, 0.28f);
@@ -122,7 +126,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private static final float PARACHUTE_CANOPY_FLATTENING = 0.42f;
 
 	private final List<TrailPath> trailPaths = new ArrayList<>();
-	private final List<SceneObject> dynamicTrails = new ArrayList<>();
+	private final List<TrailGeometry> trailGeometries = new ArrayList<>();
+	private boolean trailsShown;
 	private final List<SmokePuff> smokePuffs = new ArrayList<>();
 	private final List<ReplayFlameEmitter> flameJets = new ArrayList<>();
 	private final List<SceneObject> eventMarkers = new ArrayList<>();
@@ -139,7 +144,25 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private float overviewFitDistance = Float.NaN;
 	private double lastRebuildFraction = -1.0;
 
-	private record TrailPath(List<Vector3f> points, boolean active, double startFraction) {
+	private record TrailPath(List<Vector3f> points, List<Vector3f> ringFrames, boolean active,
+			double startFraction) {
+		private TrailPath(List<Vector3f> points, boolean active, double startFraction) {
+			this(points, TrajectoryTrailGenerator.ringFrames(points), active, startFraction);
+		}
+	}
+
+	/** One path's scene objects: per-chunk elapsed and upcoming tubes plus the split chunk's pieces. */
+	private static final class TrailGeometry {
+		private final TrailPath path;
+		// Indexed by chunk; null where a chunk produced no geometry.
+		private final List<SceneObject> elapsedChunks = new ArrayList<>();
+		private final List<SceneObject> upcomingChunks = new ArrayList<>();
+		private final List<SceneObject> splitPieces = new ArrayList<>();
+		private int splitChunk = -1;
+
+		private TrailGeometry(TrailPath path) {
+			this.path = path;
+		}
 	}
 
 	/** One smoke particle of the trail: a fixed world position revealed at its birth time. */
@@ -214,7 +237,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		}
 		pendingCanvasRebuild.set(null);
 		trailPaths.clear();
-		dynamicTrails.clear();
+		trailGeometries.clear();
 		smokePuffs.clear();
 		flameJets.clear();
 		eventMarkers.clear();
@@ -658,7 +681,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private void buildTrajectoryTrails(SceneView scene, GroundedPoseProviders poses, Vector3f centerOffset,
 			double startTime, double endTime) {
 		trailPaths.clear();
-		dynamicTrails.clear();
+		trailGeometries.clear();
 		positionMarker = null;
 		Vector3f dimensions = trajectoryDimensions;
 		if (dimensions == null) {
@@ -1150,9 +1173,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 	private void setTrailDecorationsVisible(boolean trailsVisible, boolean markerVisible) {
 		trailsVisible &= trailVisible;
-		for (SceneObject trailObject : dynamicTrails) {
-			trailObject.setVisible(trailsVisible);
-		}
+		trailsShown = trailsVisible;
+		applyTrailVisibility();
 		for (SceneObject marker : eventMarkers) {
 			marker.setVisible(trailsVisible);
 		}
@@ -1225,7 +1247,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		return trailObject;
 	}
 
-	// Invoked on the render thread every playback frame. The path boundary is rebuilt whenever
+	// Invoked on the render thread every playback frame. The path boundary moves whenever
 	// playback time changes so its elapsed/upcoming split stays exactly aligned with the rocket.
 	private void onFlightFrame(double time) {
 		updateExhaust(time);
@@ -1256,7 +1278,11 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			updateMarkerScale(scale);
 		}
 		lastRebuildFraction = fraction;
-		rebuildTrails(orchestrator.getScene(), fraction);
+		if (scaleChanged || trailGeometries.isEmpty()) {
+			rebuildTrails(orchestrator.getScene(), fraction);
+		} else {
+			updateTrailSplit(orchestrator.getScene(), fraction);
+		}
 	}
 
 	static float decorationScale(float cameraDistance, float overviewDistance) {
@@ -1285,66 +1311,169 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	}
 
 	/**
-	 * Rebuilds each path as two non-overlapping tubes meeting end-to-end at the current playback
-	 * time: a bright "elapsed" segment and a faded "still to come" segment. The join is an exact
-	 * interpolated point on the path (not a sample), so the boundary sits precisely under the
-	 * moving marker. Drawing them as separate segments (rather than overlaying a bright tube on a
-	 * faded full-length one) avoids coaxial z-fighting. Runs on the GL thread.
+	 * Rebuilds every path's chunk tubes at the current decoration radius, in both the bright
+	 * "elapsed" and faded "still to come" colors, then places the split at the playback time.
+	 * Drawing elapsed and upcoming as separate non-overlapping tubes (rather than overlaying a
+	 * bright tube on a faded full-length one) avoids coaxial z-fighting. Runs on the GL thread.
 	 */
 	private void rebuildTrails(SceneView scene, double fraction) {
 		if (scene == null) {
 			return;
 		}
-		removeAndCleanupObjects(scene, dynamicTrails);
+		for (TrailGeometry geometry : trailGeometries) {
+			removeAndCleanupObjects(scene, geometry.splitPieces);
+			removeAndCleanupObjects(scene, geometry.elapsedChunks);
+			removeAndCleanupObjects(scene, geometry.upcomingChunks);
+		}
+		trailGeometries.clear();
+		trailsShown = isDistantView() && trailVisible;
 
-		boolean visible = isDistantView() && trailVisible;
 		for (TrailPath trail : trailPaths) {
 			List<Vector3f> points = trail.points();
-			int pointCount = points.size();
-			if (pointCount < 2) {
+			if (points.size() < 2) {
 				continue;
 			}
+			TrailGeometry geometry = new TrailGeometry(trail);
+			for (int chunk = 0; chunk < trailChunkCount(points.size()); chunk++) {
+				int start = chunk * TRAIL_CHUNK_SAMPLES;
+				List<Vector3f> chunkPoints = points.subList(start, trailChunkEnd(chunk, points.size()) + 1);
+				Vector3f seed = trail.ringFrames().get(start);
+				geometry.elapsedChunks.add(addTrailPiece(scene, chunkPoints, seed, elapsedColor(trail)));
+				geometry.upcomingChunks.add(addTrailPiece(scene, chunkPoints, seed, upcomingColor(trail)));
+			}
+			trailGeometries.add(geometry);
+		}
+		updateTrailSplit(scene, fraction);
+	}
+
+	/**
+	 * Moves each path's elapsed/upcoming split to the playback fraction: whole chunks only
+	 * change visibility, and the chunk containing the split is replaced by two short pieces
+	 * meeting at the exact interpolated position (not a sample), so the boundary sits precisely
+	 * under the moving marker. Runs on the GL thread.
+	 */
+	private void updateTrailSplit(SceneView scene, double fraction) {
+		for (TrailGeometry geometry : trailGeometries) {
+			removeAndCleanupObjects(scene, geometry.splitPieces);
+			TrailPath trail = geometry.path;
+			List<Vector3f> points = trail.points();
+			int pointCount = points.size();
+			int chunkCount = trailChunkCount(pointCount);
 			double localFraction = (fraction - trail.startFraction())
 					/ Math.max(1.0e-9, 1.0 - trail.startFraction());
 			localFraction = Math.max(0.0, Math.min(1.0, localFraction));
 			double indexValue = localFraction * (pointCount - 1);
 			int index = Math.min((int) Math.floor(indexValue), pointCount - 2);
+			geometry.splitChunk = splitChunk(localFraction, index, chunkCount);
+			if (geometry.splitChunk < 0 || geometry.splitChunk >= chunkCount) {
+				continue;
+			}
+
 			Vector3f boundary = new Vector3f(points.get(index))
 					.lerp(points.get(index + 1), (float) (indexValue - index));
+			int chunkStart = geometry.splitChunk * TRAIL_CHUNK_SAMPLES;
+			List<Vector3f> elapsed = new ArrayList<>(points.subList(chunkStart, index + 1));
+			elapsed.add(boundary);
+			List<Vector3f> upcoming = new ArrayList<>();
+			upcoming.add(new Vector3f(boundary));
+			upcoming.addAll(points.subList(index + 1, trailChunkEnd(geometry.splitChunk, pointCount) + 1));
+			addSplitPiece(scene, geometry, elapsed, trail.ringFrames().get(chunkStart), elapsedColor(trail));
+			addSplitPiece(scene, geometry, upcoming, trail.ringFrames().get(index), upcomingColor(trail));
+		}
+		applyTrailVisibility();
+	}
 
-			if (localFraction > 0.0) {
-				List<Vector3f> elapsed = new ArrayList<>(points.subList(0, index + 1));
-				elapsed.add(boundary);
-				addTrailSegment(scene, elapsed, trail.active() ? ACTIVE_PAST_COLOR : BOOSTER_PAST_COLOR, visible);
+	/** Number of chunks covering a path of the given sample count; chunks share their end samples. */
+	static int trailChunkCount(int pointCount) {
+		return pointCount < 2 ? 0 : (pointCount - 2) / TRAIL_CHUNK_SAMPLES + 1;
+	}
+
+	/** Index of the last sample in the given chunk. */
+	static int trailChunkEnd(int chunk, int pointCount) {
+		return Math.min((chunk + 1) * TRAIL_CHUNK_SAMPLES, pointCount - 1);
+	}
+
+	/**
+	 * Returns the chunk the split falls in for a path segment index; -1 when nothing has elapsed
+	 * and the chunk count when everything has, so all chunks then show whole in one color.
+	 */
+	static int splitChunk(double localFraction, int segmentIndex, int chunkCount) {
+		if (localFraction <= 0.0) {
+			return -1;
+		}
+		if (localFraction >= 1.0) {
+			return chunkCount;
+		}
+		return Math.min(segmentIndex / TRAIL_CHUNK_SAMPLES, chunkCount - 1);
+	}
+
+	/** All trail tube objects, for tests; call on the GL thread. */
+	List<SceneObject> trailObjects() {
+		List<SceneObject> objects = new ArrayList<>();
+		for (TrailGeometry geometry : trailGeometries) {
+			geometry.elapsedChunks.stream().filter(Objects::nonNull).forEach(objects::add);
+			geometry.upcomingChunks.stream().filter(Objects::nonNull).forEach(objects::add);
+			objects.addAll(geometry.splitPieces);
+		}
+		return objects;
+	}
+
+	private void applyTrailVisibility() {
+		for (TrailGeometry geometry : trailGeometries) {
+			for (int chunk = 0; chunk < geometry.elapsedChunks.size(); chunk++) {
+				setVisibleIfPresent(geometry.elapsedChunks.get(chunk), trailsShown && chunk < geometry.splitChunk);
+				setVisibleIfPresent(geometry.upcomingChunks.get(chunk), trailsShown && chunk > geometry.splitChunk);
 			}
-			if (localFraction < 1.0) {
-				List<Vector3f> upcoming = new ArrayList<>();
-				upcoming.add(new Vector3f(boundary));
-				upcoming.addAll(points.subList(index + 1, pointCount));
-				addTrailSegment(scene, upcoming, trail.active() ? ACTIVE_FUTURE_COLOR : BOOSTER_FUTURE_COLOR, visible);
+			for (SceneObject piece : geometry.splitPieces) {
+				piece.setVisible(trailsShown);
 			}
 		}
+	}
+
+	private static void setVisibleIfPresent(SceneObject object, boolean visible) {
+		if (object != null) {
+			object.setVisible(visible);
+		}
+	}
+
+	private static Vector3f elapsedColor(TrailPath trail) {
+		return trail.active() ? ACTIVE_PAST_COLOR : BOOSTER_PAST_COLOR;
+	}
+
+	private static Vector3f upcomingColor(TrailPath trail) {
+		return trail.active() ? ACTIVE_FUTURE_COLOR : BOOSTER_FUTURE_COLOR;
 	}
 
 	static void removeAndCleanupObjects(SceneView scene, List<SceneObject> objects) {
 		for (SceneObject object : objects) {
-			scene.removeObject(object);
-			object.cleanup();
+			if (object != null) {
+				scene.removeObject(object);
+				object.cleanup();
+			}
 		}
 		objects.clear();
 	}
 
-	private void addTrailSegment(SceneView scene, List<Vector3f> points, Vector3f color, boolean visible) {
-		if (points.size() < 2) {
-			return;
+	private void addSplitPiece(SceneView scene, TrailGeometry geometry, List<Vector3f> points, Vector3f seed,
+			Vector3f color) {
+		SceneObject piece = addTrailPiece(scene, points, seed, color);
+		if (piece != null) {
+			geometry.splitPieces.add(piece);
 		}
-		Mesh mesh = TrajectoryTrailGenerator.create(points, trailDecorationRadius, 8);
+	}
+
+	/** Adds a hidden tube along the points, or returns null when they span no length. */
+	private SceneObject addTrailPiece(SceneView scene, List<Vector3f> points, Vector3f seed, Vector3f color) {
+		if (points.size() < 2) {
+			return null;
+		}
+		Mesh mesh = TrajectoryTrailGenerator.create(points, trailDecorationRadius, 8, seed);
 		if (mesh.getVertices().isEmpty()) {
-			return;
+			return null;
 		}
 		SceneObject trailObject = addTrailObject(scene, mesh, color);
-		trailObject.setVisible(visible);
-		dynamicTrails.add(trailObject);
+		trailObject.setVisible(false);
+		return trailObject;
 	}
 
 	private void addGroundReference(SceneView scene, FlightData data) {

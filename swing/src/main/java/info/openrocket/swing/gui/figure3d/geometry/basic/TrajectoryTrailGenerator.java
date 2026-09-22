@@ -21,6 +21,15 @@ public final class TrajectoryTrailGenerator {
 	}
 
 	public static Mesh create(List<Vector3f> pathPoints, float radius, int segments) {
+		return create(pathPoints, radius, segments, null);
+	}
+
+	/**
+	 * Builds the tube with its first ring oriented from {@code seedU} (projected onto the ring's
+	 * plane), so pieces of one path built separately line up where they meet. Take the seeds from
+	 * {@link #ringFrames} of the whole path.
+	 */
+	public static Mesh create(List<Vector3f> pathPoints, float radius, int segments, Vector3f seedU) {
 		List<Vertex> vertices = new ArrayList<>();
 		IntList indices = new IntList();
 
@@ -41,32 +50,10 @@ public final class TrajectoryTrailGenerator {
 		// reference axis. Re-deriving per point flips the basis ~90 degrees wherever the tangent
 		// crosses the reference-axis threshold, which pinches the tube (its connecting quads cross
 		// the axis). Propagating the frame keeps consecutive rings aligned, so the tube stays round.
-		Vector3f previousU = null;
+		Vector3f previousU = seedU;
 		for (int i = 0; i < ringCount; i++) {
-			Vector3f tangent = new Vector3f();
-			if (i == 0) {
-				points.get(1).sub(points.get(0), tangent);
-			} else if (i == ringCount - 1) {
-				points.get(ringCount - 1).sub(points.get(ringCount - 2), tangent);
-			} else {
-				points.get(i + 1).sub(points.get(i - 1), tangent);
-			}
-			if (tangent.lengthSquared() < 1.0e-12f) {
-				tangent.set(0.0f, 1.0f, 0.0f);
-			}
-			tangent.normalize();
-
-			Vector3f u;
-			if (previousU == null) {
-				u = new Vector3f(tangent).cross(referenceAxis(tangent));
-			} else {
-				// Remove the tangential component of the previous u to get the new perpendicular.
-				u = new Vector3f(previousU).sub(new Vector3f(tangent).mul(previousU.dot(tangent)));
-				if (u.lengthSquared() < 1.0e-10f) {
-					u = new Vector3f(tangent).cross(referenceAxis(tangent));
-				}
-			}
-			u.normalize();
+			Vector3f tangent = tangentAt(points, i);
+			Vector3f u = nextFrameU(previousU, tangent);
 			Vector3f v = new Vector3f(tangent).cross(u).normalize();
 			previousU = u;
 
@@ -101,6 +88,46 @@ public final class TrajectoryTrailGenerator {
 		}
 
 		return new Mesh(vertices, indices);
+	}
+
+	/**
+	 * Returns the rotation-minimizing ring axis at every point of the path, the same frame
+	 * {@link #create} carries along it. Consecutive duplicate points repeat the previous axis.
+	 */
+	public static List<Vector3f> ringFrames(List<Vector3f> points) {
+		List<Vector3f> frames = new ArrayList<>(points.size());
+		Vector3f previousU = null;
+		for (int i = 0; i < points.size(); i++) {
+			if (points.size() < 2 || (previousU != null
+					&& points.get(i).distanceSquared(points.get(i - 1)) <= 1.0e-6f)) {
+				frames.add(previousU != null ? new Vector3f(previousU) : new Vector3f(1, 0, 0));
+				continue;
+			}
+			previousU = nextFrameU(previousU, tangentAt(points, i));
+			frames.add(new Vector3f(previousU));
+		}
+		return frames;
+	}
+
+	private static Vector3f tangentAt(List<Vector3f> points, int i) {
+		int last = points.size() - 1;
+		Vector3f tangent = points.get(Math.min(i + 1, last)).sub(points.get(Math.max(i - 1, 0)), new Vector3f());
+		if (tangent.lengthSquared() < 1.0e-12f) {
+			tangent.set(0.0f, 1.0f, 0.0f);
+		}
+		return tangent.normalize();
+	}
+
+	private static Vector3f nextFrameU(Vector3f previousU, Vector3f tangent) {
+		Vector3f u = null;
+		if (previousU != null) {
+			// Remove the tangential component of the previous u to get the new perpendicular.
+			u = new Vector3f(previousU).sub(new Vector3f(tangent).mul(previousU.dot(tangent)));
+		}
+		if (u == null || u.lengthSquared() < 1.0e-10f) {
+			u = new Vector3f(tangent).cross(referenceAxis(tangent));
+		}
+		return u.normalize();
 	}
 
 	/** A world axis that is not near-parallel to the tangent, for seeding the initial ring frame. */
