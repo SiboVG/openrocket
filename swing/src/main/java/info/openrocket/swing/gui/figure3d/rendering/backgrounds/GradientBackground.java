@@ -9,6 +9,9 @@ public class GradientBackground implements Background {
 	private final Vector3f topColor;
 	private final Vector3f bottomColor;
 	private final boolean worldAligned;
+	// gradient_fragment.glsl blends world-aligned skies with smoothstep(-0.25, 0.35, elevation).
+	private static final float HORIZON_ELEVATION_START = -0.25f;
+	private static final float HORIZON_ELEVATION_END = 0.35f;
 
 	/**
 	 * Creates a new gradient background with specified top and bottom colors.
@@ -54,6 +57,22 @@ public class GradientBackground implements Background {
 	 */
 	public Vector3f getBottomColor() {
 		return bottomColor;
+	}
+
+	/**
+	 * The color the sky shows at the horizon, which distant hazed ground should fade into.
+	 * A screen-aligned gradient has no horizon; its bottom color is used.
+	 *
+	 * @param destination receives the linear RGB color
+	 * @return the destination
+	 */
+	public Vector3f getHorizonColor(Vector3f destination) {
+		destination.set(bottomColor);
+		if (worldAligned) {
+			float x = -HORIZON_ELEVATION_START / (HORIZON_ELEVATION_END - HORIZON_ELEVATION_START);
+			destination.lerp(topColor, x * x * (3.0f - 2.0f * x));
+		}
+		return destination;
 	}
 
 	public boolean isWorldAligned() {

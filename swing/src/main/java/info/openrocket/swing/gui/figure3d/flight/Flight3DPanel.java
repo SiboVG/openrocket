@@ -9,18 +9,15 @@ import info.openrocket.core.rocketcomponent.FlightConfigurationId;
 import info.openrocket.core.rocketcomponent.RocketComponent;
 import info.openrocket.core.simulation.FlightData;
 import info.openrocket.core.simulation.FlightDataBranch;
-import info.openrocket.core.simulation.FlightDataType;
 import info.openrocket.core.simulation.FlightEvent;
 import info.openrocket.core.startup.Application;
 import info.openrocket.swing.gui.figure3d.SharedCanvasRenderScheduler;
 import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
 import info.openrocket.swing.gui.figure3d.animation.PoseProvider;
-import info.openrocket.swing.gui.figure3d.constants.GeometryConstants;
 import info.openrocket.swing.gui.figure3d.constants.RenderingConstants;
 import info.openrocket.swing.gui.figure3d.geometry.IntList;
 import info.openrocket.swing.gui.figure3d.geometry.Mesh;
 import info.openrocket.swing.gui.figure3d.geometry.basic.AxesGenerator;
-import info.openrocket.swing.gui.figure3d.geometry.basic.PlaneGenerator;
 import info.openrocket.swing.gui.figure3d.geometry.basic.SphereGenerator;
 import info.openrocket.swing.gui.figure3d.geometry.basic.TrajectoryTrailGenerator;
 import info.openrocket.swing.gui.figure3d.particles.Particle;
@@ -31,6 +28,7 @@ import info.openrocket.swing.gui.figure3d.rendering.FrameOverlay;
 import info.openrocket.swing.gui.figure3d.rendering.backgrounds.GradientBackground;
 import info.openrocket.swing.gui.figure3d.scene.controllers.CameraControls;
 import info.openrocket.swing.gui.figure3d.scene.graph.Camera;
+import info.openrocket.swing.gui.figure3d.scene.graph.Scene;
 import info.openrocket.swing.gui.figure3d.scene.graph.SceneObject;
 import info.openrocket.swing.gui.figure3d.scene.graph.SceneView;
 import info.openrocket.swing.gui.figure3d.scene.orchestration.Scene3DOrchestrator;
@@ -73,7 +71,11 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private static final SharedCanvasRenderScheduler RENDER_SCHEDULER = SharedCanvasRenderScheduler.getInstance();
 	private static final long RENDER_SHUTDOWN_TIMEOUT_MS = 2_000;
 	private static final int STARTUP_RENDER_DELAY_MS = 120;
-	private static final float MIN_GROUND_SIZE = 500.0f;
+	// Haze and ground scale with the flight, but never below this much scenery around the pad.
+	private static final float MIN_SCENE_EXTENT_METERS = 100.0f;
+	private static final float HAZE_FRAMING_DISTANCES = 6.0f;
+	private static final float LAUNCH_FIELD_HALF_SIZE_METERS = 120.0f;
+	private static final float MOWN_STRIPE_WIDTH_METERS = 8.0f;
 
 	private OpenRocketDocument document;
 	private Simulation simulation;
@@ -499,7 +501,6 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		orchestrator.rebuildRocketScene(false);
 		scene = orchestrator.getScene();
 		keepRocketInForeground(scene);
-		addGroundReference(scene, data);
 		applyFlightBackground(scene);
 		disableComponentSelection(scene);
 
@@ -520,6 +521,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		orchestrator.setFlightRocketCenterOffset(trackedBodies.get(0).centerOffset());
 		computeTrajectoryBounds(orchestrator.getCameraController(), groundedPoses,
 				replayData.getStartTime(), replayData.getEndTime());
+		addGroundAndHaze(orchestrator.getScene(), orchestrator.getCameraController().getCamera().getFieldOfView());
 		buildTrajectoryTrails(scene, groundedPoses, rocketCenterOffset,
 				replayData.getStartTime(), replayData.getEndTime());
 		rocketLength = rocketLengthWorld(orchestrator);
@@ -1599,19 +1601,32 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		return trailObject;
 	}
 
-	private void addGroundReference(SceneView scene, FlightData data) {
-		float size = computeGroundSize(data);
-		// CLOCKWISE winding makes the plane's up-facing side the front face (same as
-		// TerrainGenerator). Double-sided so an orbit below the ground still shows it
-		// instead of culling it away.
-		Mesh groundMesh = doubleSided(PlaneGenerator.create(size, size, 1.0f, 1.0f,
-				GeometryConstants.WindingOrder.CLOCKWISE));
-		Appearance3D groundAppearance = new Appearance3D(new Vector3f(0.22f, 0.30f, 0.20f));
-		groundAppearance.setUnlit(true);
-		groundAppearance.setShine(0.05f);
-		SceneObject ground = new SceneObject(groundMesh, new Vector3f(0.0f, 0.0f, 0.0f), groundAppearance);
-		ground.setSelectable(false);
-		scene.addObject(ground);
+	/**
+	 * Adds the ground and a scale-aware haze. Fog reaches full density several times farther
+	 * than a camera framing the whole flight stands (the replay lens is narrow, so that is
+	 * already several flight sizes away), keeping the flight clear, while the ground, which
+	 * extends further still, fades into the horizon instead of ending at an edge.
+	 */
+	private void addGroundAndHaze(Scene scene, float fieldOfView) {
+		Vector3f dimensions = trajectoryDimensions;
+		float flightExtent = dimensions != null
+				? Math.max(dimensions.x, Math.max(dimensions.y, dimensions.z)) : 0.0f;
+		float extent = Math.max(flightExtent, MIN_SCENE_EXTENT_METERS * RenderingConstants.WORLD_SCALE);
+		float framingDistance = hazeFramingDistance(extent, fieldOfView);
+		float hazeDistance = framingDistance * HAZE_FRAMING_DISTANCES;
+		// exp(-(d * density)^2) falls to about 5% at the haze distance.
+		scene.setFogDensity(1.73f / hazeDistance);
+		scene.setFogEnabled(true);
+
+		for (LaunchFieldGround.Patch patch : LaunchFieldGround.create(hazeDistance * 1.5f,
+				LAUNCH_FIELD_HALF_SIZE_METERS * RenderingConstants.WORLD_SCALE,
+				MOWN_STRIPE_WIDTH_METERS * RenderingConstants.WORLD_SCALE)) {
+			Appearance3D appearance = new Appearance3D(patch.color());
+			appearance.setUnlit(true);
+			SceneObject ground = new SceneObject(patch.mesh(), new Vector3f(), appearance);
+			ground.setSelectable(false);
+			scene.addObject(ground);
+		}
 	}
 
 	private GroundedPoseProviders createGroundedPoseProviders(SceneView scene,
@@ -1693,42 +1708,6 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			}
 		}
 		return minY;
-	}
-
-	private float computeGroundSize(FlightData data) {
-		return Math.max(MIN_GROUND_SIZE,
-				(float) (computeMaxHorizontalMeters(data) * RenderingConstants.WORLD_SCALE * 3.0));
-	}
-
-	private static double computeMaxHorizontalMeters(FlightData data) {
-		double maxHorizontalMeters = 0.0;
-		for (FlightDataBranch branch : data.getBranches()) {
-			List<Double> east = branch.get(FlightDataType.TYPE_POSITION_X);
-			List<Double> north = branch.get(FlightDataType.TYPE_POSITION_Y);
-			if (east != null && north != null) {
-				int count = Math.min(east.size(), north.size());
-				for (int i = 0; i < count; i++) {
-					double x = valueOrZero(east.get(i));
-					double y = valueOrZero(north.get(i));
-					maxHorizontalMeters = Math.max(maxHorizontalMeters, Math.hypot(x, y));
-				}
-				continue;
-			}
-			List<Double> horizontal = branch.get(FlightDataType.TYPE_POSITION_XY);
-			if (horizontal != null) {
-				for (Double value : horizontal) {
-					maxHorizontalMeters = Math.max(maxHorizontalMeters, valueOrZero(value));
-				}
-			}
-		}
-		return maxHorizontalMeters;
-	}
-
-	private static double valueOrZero(Double value) {
-		if (value == null || Double.isNaN(value) || Double.isInfinite(value)) {
-			return 0.0;
-		}
-		return value;
 	}
 
 	private void applyFlightBackground(SceneView scene) {
@@ -1842,6 +1821,12 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			}
 		}
 		return fallback;
+	}
+
+	/** How far a camera stands to fit a flight of the given size through the given lens. */
+	static float hazeFramingDistance(float extent, float fieldOfView) {
+		float halfAngle = (float) Math.max(Math.toRadians(1.0), Math.min(Math.toRadians(80.0), fieldOfView / 2.0));
+		return extent * 0.5f / (float) Math.tan(halfAngle);
 	}
 
 	/** Tracks another flying body with the follow and pad cameras and the position marker. */
