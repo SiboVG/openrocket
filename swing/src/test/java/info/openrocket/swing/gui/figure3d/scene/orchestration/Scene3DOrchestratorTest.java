@@ -30,37 +30,48 @@ class Scene3DOrchestratorTest {
 		assertEquals(new Vector3f(launch).add(pan), camera.getCenterOfInterest());
 	}
 	@Test
-	void padCameraRetainsWheelZoomWhileFollowingTheRocket() {
+	void padCameraStaysAtThePadEyeWhileAimingAtTheRocket() {
 		Camera camera = Camera.builder().withFixedCenterOfInterest(false).build();
 		Vector3f eye = new Vector3f(20.0f, 4.0f, 20.0f);
-		float fittedDistance = Scene3DOrchestrator.lookFrom(camera, eye, new Vector3f(), 1.0f);
-
-		camera.dolly(1.0f);
-		float scale = Scene3DOrchestrator.updatedPadDistanceScale(
-				1.0f, camera.getDistance(), fittedDistance);
-		float zoomedDistance = Scene3DOrchestrator.lookFrom(
-				camera, eye, new Vector3f(0.0f, 5.0f, 0.0f), scale);
-
-		assertTrue(scale < 1.0f);
-		assertTrue(zoomedDistance < eye.distance(new Vector3f(0.0f, 5.0f, 0.0f)));
-	}
-
-
-	@Test
-	void padCameraZoomedOutStaysAboveTheGroundWhileTheRocketClimbs() {
-		Camera camera = Camera.builder().withFixedCenterOfInterest(false).build();
-		Vector3f eye = new Vector3f(20.0f, 4.0f, 20.0f);
-		for (float altitude : new float[] { 50.0f, 300.0f, 2_000.0f }) {
-			Vector3f rocket = new Vector3f(0.0f, altitude, 0.0f);
-			float requested = eye.distance(rocket) * 20.0f;
-			float distance = Scene3DOrchestrator.lookFrom(camera, eye, rocket, 20.0f);
+		for (float altitude : new float[] { 1.0f, 50.0f, 2_000.0f }) {
+			Vector3f rocket = new Vector3f(3.0f, altitude, -2.0f);
+			float distance = Scene3DOrchestrator.lookFrom(camera, eye, rocket);
 			camera.update();
 
-			assertEquals(requested, distance, requested * 1e-4f, "Zoom must keep the requested distance");
-			assertTrue(camera.getPosition().y >= eye.y - 1e-2f,
-					"Zoomed-out pad eye went below its height at altitude " + altitude + ": " + camera.getPosition());
-			assertEquals(0.0f, camera.getPosition().distance(rocket) - distance, distance * 1e-3f);
+			assertEquals(eye.distance(rocket), distance, distance * 1e-5f);
+			assertEquals(0.0f, camera.getPosition().distance(eye), distance * 1e-4f,
+					"The pad camera must not move at altitude " + altitude);
+			assertEquals(rocket, camera.getEffectiveLookAt());
 		}
+	}
+
+	@Test
+	void telephotoLensKeepsTheRocketAtItsLaunchSizeOnScreen() {
+		float baseFov = (float) Math.toRadians(45.0);
+		float launchDistance = 100.0f;
+		float launchTan = Scene3DOrchestrator.telephotoTanHalfFieldOfView(baseFov, launchDistance, launchDistance);
+		assertEquals(Math.tan(baseFov / 2.0), launchTan, 1e-6);
+		// On-screen size is proportional to 1 / (distance * tan(fov / 2)).
+		for (float distance : new float[] { 400.0f, 4_000.0f, 40_000.0f }) {
+			float tan = Scene3DOrchestrator.telephotoTanHalfFieldOfView(baseFov, launchDistance, distance);
+			assertEquals(launchDistance * launchTan, distance * tan, 1e-2f);
+		}
+		// Closer than at launch (e.g. landing near the pad) keeps the normal lens.
+		assertEquals(launchTan, Scene3DOrchestrator.telephotoTanHalfFieldOfView(baseFov, launchDistance, 30.0f));
+	}
+
+	@Test
+	void padWheelZoomScalesTheLensInsteadOfMovingTheEye() {
+		Camera camera = Camera.builder().withFixedCenterOfInterest(false).build();
+		Vector3f eye = new Vector3f(20.0f, 4.0f, 20.0f);
+		float applied = Scene3DOrchestrator.lookFrom(camera, eye, new Vector3f(0.0f, 50.0f, 0.0f));
+
+		camera.dolly(1.0f);
+		float zoomIn = Scene3DOrchestrator.updatedPadZoomScale(1.0f, camera.getDistance(), applied);
+		assertTrue(zoomIn < 1.0f, "Scrolling in must narrow the lens");
+		assertEquals(1.0f, Scene3DOrchestrator.updatedPadZoomScale(1.0f, applied, applied));
+		assertEquals(1.0f, Scene3DOrchestrator.updatedPadZoomScale(1.0f, camera.getDistance(), Float.NaN),
+				"A reset must not read the fitted distance as a zoom");
 	}
 
 	@Test
@@ -69,21 +80,9 @@ class Scene3DOrchestratorTest {
 		camera.pan(40.0f, 30.0f, 800, 600);
 		Vector3f rocket = new Vector3f(0.0f, 50.0f, 0.0f);
 
-		Scene3DOrchestrator.lookFrom(camera, new Vector3f(20.0f, 4.0f, 20.0f), rocket, 1.0f);
+		Scene3DOrchestrator.lookFrom(camera, new Vector3f(20.0f, 4.0f, 20.0f), rocket);
 
 		assertEquals(rocket, camera.getEffectiveLookAt(), "The pad view must aim exactly at the rocket");
-	}
-
-	@Test
-	void padCameraZoomsInTowardALandedRocketBelowTheEye() {
-		Camera camera = Camera.builder().withFixedCenterOfInterest(false).build();
-		Vector3f eye = new Vector3f(20.0f, 4.0f, 20.0f);
-		Vector3f rocket = new Vector3f(0.0f, 1.0f, 0.0f);
-		Scene3DOrchestrator.lookFrom(camera, eye, rocket, 0.25f);
-		camera.update();
-
-		assertTrue(camera.getPosition().y < eye.y, "Zooming in must still descend toward a rocket on the ground");
-		assertTrue(camera.getPosition().y > rocket.y);
 	}
 
 	@Test

@@ -147,6 +147,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	// The orbit angles the replay opened with, restored by the reset-view button.
 	private volatile float initialCameraAngleX;
 	private volatile float initialCameraAngleY;
+	private volatile float initialCameraFieldOfView = (float) Math.toRadians(45.0);
 	private double lastRebuildFraction = -1.0;
 
 	private record TrailPath(List<Vector3f> points, List<Vector3f> ringFrames, boolean active,
@@ -494,6 +495,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		Camera camera = orchestrator.getCameraController().getCamera();
 		initialCameraAngleX = camera.getAngleX();
 		initialCameraAngleY = camera.getAngleY();
+		initialCameraFieldOfView = camera.getFieldOfView();
 		applyCameraMode(orchestrator, cameraMode);
 
 		PlaybackClock clock = orchestrator.getPlaybackClock();
@@ -1265,13 +1267,17 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		double span = Math.max(1.0e-9, clock.getEnd() - clock.getStart());
 		double fraction = Math.max(0.0, Math.min(1.0, (time - clock.getStart()) / span));
 		CameraControls cameraControls = orchestrator.getCameraController();
-		float cameraDistance = cameraControls.getCamera().getDistance();
+		Camera camera = cameraControls.getCamera();
+		// A narrowed (telephoto) lens magnifies like moving closer; size decorations by that.
+		float cameraDistance = camera.getDistance() * (float) (Math.tan(camera.getFieldOfView() / 2.0)
+				/ Math.tan(initialCameraFieldOfView / 2.0));
 		if (cameraMode == FlightCameraMode.OVERVIEW && cameraControls.isZoomFitting()) {
 			overviewFitDistance = cameraDistance;
 		}
 		float scale = decorationScale(cameraDistance, overviewFitDistance);
-		if (cameraMode == FlightCameraMode.FOLLOW) {
-			// The trail runs through the rocket's center; up close keep it a thin guide line.
+		if (cameraMode != FlightCameraMode.OVERVIEW) {
+			// Follow and the pad telephoto are close-ups of the rocket, and the trail runs through
+			// its center: keep it a thin guide line.
 			scale = Math.min(scale, followTrailScale);
 		}
 		boolean scaleChanged = relativeDifference(scale, trailDecorationScale)
@@ -1292,7 +1298,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		}
 	}
 
-	/** Decoration scale that makes the trail about 1% of the rocket's length thick in the follow view. */
+	/** Decoration scale that makes the trail about 1% of the rocket's length thick in the close-up views. */
 	static float followTrailScale(float rocketLength, float trailRadius) {
 		if (!Float.isFinite(rocketLength) || rocketLength <= 0.0f || !Float.isFinite(trailRadius) || trailRadius <= 0.0f) {
 			return MIN_DECORATION_SCALE;

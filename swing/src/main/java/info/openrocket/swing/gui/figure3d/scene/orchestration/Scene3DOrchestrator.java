@@ -8,6 +8,7 @@ import info.openrocket.core.util.CoordinateIF;
 import info.openrocket.core.startup.Application;
 import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
 import info.openrocket.swing.gui.figure3d.animation.PoseProvider;
+import info.openrocket.core.util.MathUtil;
 import info.openrocket.swing.gui.figure3d.constants.CameraConstants;
 import info.openrocket.swing.gui.figure3d.geometry.RocketMeshBuilder;
 import info.openrocket.swing.gui.figure3d.geometry.RocketSceneSnapshot;
@@ -81,8 +82,12 @@ public class Scene3DOrchestrator {
 	// World-space eye position for the PAD behavior.
 	private volatile Vector3f flightPadEye = null;
 	private volatile boolean pendingPadZoomReset = false;
-	private float flightPadDistanceScale = 1.0f;
+	// The PAD view is a fixed telephoto camera: the lens narrows as the rocket climbs so it
+	// keeps its launch size on screen, and wheel zoom scales that lens instead of moving the eye.
+	private float flightPadZoomScale = 1.0f;
 	private float lastAppliedPadDistance = Float.NaN;
+	private float padReferenceDistance = Float.NaN;
+	private float flightBaseFieldOfView = Float.NaN;
 	// Engine-CS offset from the rocket's origin (nose) to its geometric center, so the follow
 	// camera orbits the rocket's middle instead of its tip.
 	private volatile Vector3f flightRocketCenterOffset = null;
@@ -94,8 +99,8 @@ public class Scene3DOrchestrator {
 	private static final float FOLLOW_FRAME_MARGIN = 1.8f;
 	private static final float OVERVIEW_CLOSEST_DISTANCE_FACTOR = 0.001f;
 	private static final float OVERVIEW_FARTHEST_DISTANCE_FACTOR = 20.0f;
-	private static final float PAD_MIN_DISTANCE_SCALE = 0.05f;
-	private static final float PAD_MAX_DISTANCE_SCALE = 20.0f;
+	private static final float PAD_MIN_FIELD_OF_VIEW = (float) Math.toRadians(0.5);
+	private static final float PAD_MAX_FIELD_OF_VIEW = (float) Math.toRadians(100.0);
 
 	/**
 	 * Updates the orchestrator's knowledge of the window and framebuffer dimensions.
@@ -223,25 +228,36 @@ public class Scene3DOrchestrator {
 			PoseProvider primaryProvider = flightPrimaryPoseProvider;
 			Camera camera = cameraController.getCamera();
 			FlightCameraBehavior behavior = flightCameraBehavior;
+			if (behavior != FlightCameraBehavior.PAD && Float.isFinite(flightBaseFieldOfView)
+					&& camera.getFieldOfView() != flightBaseFieldOfView) {
+				// Leaving the telephoto view: restore the lens before any fit uses it.
+				camera.setFieldOfView(flightBaseFieldOfView);
+			}
 			if (behavior != FlightCameraBehavior.FREE && primaryProvider != null) {
-				Vector3f pivot = primaryProvider.getPosition(t);
-				Vector3f centerOffset = flightRocketCenterOffset;
-				if (centerOffset != null) {
-					pivot.add(primaryProvider.getOrientation(t).transform(new Vector3f(centerOffset)));
-				}
+				Vector3f pivot = flightPivot(primaryProvider, t);
 				if (behavior == FlightCameraBehavior.PAD) {
-					// Track from the pad sightline. Wheel input adjusts the retained distance scale
-					// before this behavior reapplies its look-at transform.
 					Vector3f eye = flightPadEye;
 					if (eye != null) {
 						if (pendingPadZoomReset) {
 							pendingPadZoomReset = false;
-							flightPadDistanceScale = 1.0f;
+							flightPadZoomScale = 1.0f;
 							lastAppliedPadDistance = Float.NaN;
+							padReferenceDistance = eye.distance(flightPivot(primaryProvider, playbackClock.getStart()));
+							if (!Float.isFinite(flightBaseFieldOfView)) {
+								flightBaseFieldOfView = camera.getFieldOfView();
+							}
 						}
-						flightPadDistanceScale = updatedPadDistanceScale(flightPadDistanceScale,
+						// Wheel input changed the orbit distance since the last frame; read that
+						// ratio as a lens zoom, then put the eye back at the pad.
+						flightPadZoomScale = updatedPadZoomScale(flightPadZoomScale,
 								camera.getDistance(), lastAppliedPadDistance);
-						lastAppliedPadDistance = lookFrom(camera, eye, pivot, flightPadDistanceScale);
+						float distance = lookFrom(camera, eye, pivot);
+						float autoTan = telephotoTanHalfFieldOfView(flightBaseFieldOfView, padReferenceDistance, distance);
+						flightPadZoomScale = MathUtil.clamp(flightPadZoomScale,
+								(float) Math.tan(PAD_MIN_FIELD_OF_VIEW / 2.0) / autoTan,
+								(float) Math.tan(PAD_MAX_FIELD_OF_VIEW / 2.0) / autoTan);
+						camera.setFieldOfView(2.0 * Math.atan(autoTan * flightPadZoomScale));
+						lastAppliedPadDistance = distance;
 						// This behavior owns the distance; a resize refit to the last fitted
 						// bounds would otherwise be read as a huge wheel zoom on the next frame.
 						cameraController.setZoomFitting(false);
@@ -599,28 +615,25 @@ public class Scene3DOrchestrator {
 		enqueueGlTask(() -> cameraController.handleScroll(scrollAmount));
 	}
 
+	/** The tracked rocket's geometric center at the given time. */
+	private Vector3f flightPivot(PoseProvider provider, double time) {
+		Vector3f pivot = provider.getPosition(time);
+		Vector3f centerOffset = flightRocketCenterOffset;
+		if (centerOffset != null) {
+			pivot.add(provider.getOrientation(time).transform(new Vector3f(centerOffset)));
+		}
+		return pivot;
+	}
+
 	/**
 	 * Expresses a look-from-eye-to-target view through the orbit camera's center of
 	 * interest, distance and angles, widening the zoom clamp so an earlier fit cannot
-	 * clip the computed distance.
+	 * clip the computed distance. Returns the eye-to-target distance.
 	 */
-	static float lookFrom(Camera camera, Vector3f eye, Vector3f target, float distanceScale) {
+	static float lookFrom(Camera camera, Vector3f eye, Vector3f target) {
 		Vector3f toEye = new Vector3f(eye).sub(target);
-		float baseDistance = Math.max(0.5f, toEye.length());
-		toEye.div(baseDistance);
-		float eyeDistance = Math.max(CameraConstants.MIN_DISTANCE, baseDistance * distanceScale);
-		// Zooming out slides the eye down the sightline, so once the rocket is above the eye it
-		// would end up under the ground. Keep the eye no lower than the lower of its own height
-		// and the rocket's, backing away horizontally at that height by the same distance.
-		float drop = target.y - Math.min(eye.y, target.y);
-		if (target.y + toEye.y * eyeDistance < target.y - drop && eyeDistance > drop) {
-			Vector3f horizontal = new Vector3f(toEye.x, 0.0f, toEye.z);
-			if (horizontal.lengthSquared() < 1.0e-12f) {
-				horizontal.set(1.0f, 0.0f, 0.0f);
-			}
-			horizontal.normalize().mul((float) Math.sqrt(eyeDistance * eyeDistance - drop * drop));
-			toEye.set(horizontal.x, -drop, horizontal.z).div(eyeDistance);
-		}
+		float eyeDistance = Math.max(CameraConstants.MIN_DISTANCE, Math.max(0.5f, toEye.length()));
+		toEye.normalize();
 		camera.setZoomLimits(Math.max(CameraConstants.MIN_DISTANCE, eyeDistance * 0.1f),
 				Math.max(eyeDistance * 10.0f, 10.0f));
 		camera.setDistance(eyeDistance);
@@ -632,13 +645,25 @@ public class Scene3DOrchestrator {
 		return camera.getDistance();
 	}
 
-	static float updatedPadDistanceScale(float currentScale, float cameraDistance, float lastAppliedDistance) {
+	/** Applies the wheel's change of the orbit distance since the last frame as a lens zoom factor. */
+	static float updatedPadZoomScale(float currentScale, float cameraDistance, float lastAppliedDistance) {
 		if (!Float.isFinite(lastAppliedDistance) || lastAppliedDistance <= 0.0f
 				|| !Float.isFinite(cameraDistance) || cameraDistance <= 0.0f) {
 			return currentScale;
 		}
-		float scale = currentScale * cameraDistance / lastAppliedDistance;
-		return Math.max(PAD_MIN_DISTANCE_SCALE, Math.min(PAD_MAX_DISTANCE_SCALE, scale));
+		return currentScale * cameraDistance / lastAppliedDistance;
+	}
+
+	/**
+	 * Tangent of the half field of view that keeps the rocket at its launch size on screen: the
+	 * base lens until the rocket is farther than at launch, then narrowing in proportion.
+	 */
+	static float telephotoTanHalfFieldOfView(float baseFieldOfView, float referenceDistance, float distance) {
+		float baseTan = (float) Math.tan(baseFieldOfView / 2.0);
+		if (!Float.isFinite(referenceDistance) || referenceDistance <= 0.0f || distance <= referenceDistance) {
+			return baseTan;
+		}
+		return baseTan * referenceDistance / distance;
 	}
 
 	/** Invoked on the render thread each playback frame with the current playback time. */

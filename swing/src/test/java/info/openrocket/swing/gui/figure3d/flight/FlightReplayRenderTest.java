@@ -114,6 +114,22 @@ class FlightReplayRenderTest {
 			});
 			capture(canvas, "flight-overview.png");
 			assertTrue(exhaustCount(canvas, panel) > 0);
+			float baseFieldOfView = canvas.getScene3DOrchestrator().getCameraController().getCamera().getFieldOfView();
+			onEdt(() -> {
+				bar.getCameraModeCombo().setSelectedItem(FlightCameraMode.PAD);
+				clock.setTime(clock.getEnd() * 0.35);
+				panel.requestRenderNow();
+				return null;
+			});
+			// A capture can pick up a frame already in flight when the mode changed; skip one.
+			capture(canvas, "flight-pad-telephoto-settling.png");
+			capture(canvas, "flight-pad-telephoto.png");
+			assertTrue(canvas.getScene3DOrchestrator().getCameraController().getCamera().getFieldOfView()
+					< baseFieldOfView * 0.5f, "The pad camera must zoom its lens in on a climbing rocket");
+			onEdt(() -> { bar.getCameraModeCombo().setSelectedItem(FlightCameraMode.OVERVIEW); return null; });
+			capture(canvas, "flight-overview-after-pad.png");
+			assertEquals(baseFieldOfView, canvas.getScene3DOrchestrator().getCameraController().getCamera()
+					.getFieldOfView(), 1e-6f, "Leaving the pad view must restore the normal lens");
 			for (FlightCameraMode mode : List.of(FlightCameraMode.PAD, FlightCameraMode.FOLLOW, FlightCameraMode.OVERVIEW)) {
 				onEdt(() -> {
 					bar.getCameraModeCombo().setSelectedItem(mode);
