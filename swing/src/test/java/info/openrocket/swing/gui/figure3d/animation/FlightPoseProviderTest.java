@@ -172,6 +172,47 @@ class FlightPoseProviderTest {
 		assertEquals(0.2 * RenderingConstants.WORLD_SCALE, atEnd.y, 1e-3);
 	}
 
+	@Test
+	void rollsAboutTheLongAxisByTheIntegratedRollRate() {
+		FlightDataBranch branch = new FlightDataBranch("spinning",
+				FlightDataType.TYPE_TIME,
+				FlightDataType.TYPE_POSITION_X,
+				FlightDataType.TYPE_POSITION_Y,
+				FlightDataType.TYPE_ALTITUDE,
+				FlightDataType.TYPE_ORIENTATION_THETA,
+				FlightDataType.TYPE_ORIENTATION_PHI,
+				FlightDataType.TYPE_ROLL_RATE);
+		// Vertical flight spinning up linearly from 0 to 2 rad/s over 2 s: the angle is t^2 / 2.
+		for (double time : new double[] { 0.0, 1.0, 2.0 }) {
+			addPoint(branch, time, 0.0, 0.0, time);
+			addOrientation(branch, Math.PI / 2.0, 0.0);
+			branch.setValue(FlightDataType.TYPE_ROLL_RATE, time);
+		}
+		FlightPoseProvider provider = FlightPoseProvider.fromFlightDataBranch(branch);
+
+		Vector3f fin = new Vector3f(0.0f, 1.0f, 0.0f);
+		Vector3f startFin = provider.getOrientation(0.0).transform(new Vector3f(fin));
+		Vector3f laterFin = provider.getOrientation(2.0).transform(new Vector3f(fin));
+		Vector3f nose = provider.getOrientation(2.0).transform(new Vector3f(-1.0f, 0.0f, 0.0f));
+
+		assertEquals(1.0f, nose.y, 1e-5, "Rolling must not tip the nose");
+		assertEquals(0.0f, startFin.y, 1e-5);
+		assertEquals(0.0f, laterFin.y, 1e-5, "The fin stays perpendicular to the long axis");
+		// Trapezoid over the linear rate is exact: 0.5 + 1.5 = 2 rad.
+		assertEquals(2.0, startFin.angle(laterFin), 1e-4);
+	}
+
+	@Test
+	void missingRollRatesCountAsNoSpin() {
+		double[] angles = FlightPoseProvider.integrateRollRate(new double[] { 0.0, 1.0, 2.0, 3.0 },
+				new double[] { 1.0, Double.NaN, 1.0, 1.0 });
+
+		assertEquals(0.0, angles[0]);
+		assertEquals(0.5, angles[1], 1e-12);
+		assertEquals(1.0, angles[2], 1e-12);
+		assertEquals(2.0, angles[3], 1e-12);
+	}
+
 	private static FlightDataBranch branchWithOrientation() {
 		FlightDataBranch branch = new FlightDataBranch("pose",
 				FlightDataType.TYPE_TIME,

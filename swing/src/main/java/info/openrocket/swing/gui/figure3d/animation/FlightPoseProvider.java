@@ -11,7 +11,9 @@ import java.util.List;
 /**
  * Samples a {@link FlightDataBranch} as an engine-space position and orientation.
  * Position uses east, north, and altitude data; orientation uses elevation and
- * azimuth when available and otherwise follows the sampled velocity.
+ * azimuth when available and otherwise follows the sampled velocity. The roll about the
+ * long axis is the integral of the recorded roll rate, starting from zero at the first
+ * sample (the data holds no absolute roll angle).
  */
 public final class FlightPoseProvider implements PoseProvider {
 	private static final Vector3f LOCAL_NOSE_AXIS = new Vector3f(-1, 0, 0);
@@ -20,11 +22,13 @@ public final class FlightPoseProvider implements PoseProvider {
 	private final double[] east, north, alt;
 	private final double[] thetaElevation;  // optional
 	private final double[] phiAzimuth;      // optional
+	private final double[] rollAngle;       // optional
 
 	private FlightPoseProvider(double[] t, double[] east, double[] north, double[] alt,
-							   double[] thetaElevation, double[] phiAzimuth) {
+							   double[] thetaElevation, double[] phiAzimuth, double[] rollAngle) {
 		this.t = t; this.east = east; this.north = north; this.alt = alt;
 		this.thetaElevation = thetaElevation; this.phiAzimuth = phiAzimuth;
+		this.rollAngle = rollAngle;
 	}
 
 	// ---------- Factory ----------
@@ -62,19 +66,23 @@ public final class FlightPoseProvider implements PoseProvider {
 		// Optional orientation
 		List<Double> thetaL = branch.get(FlightDataType.TYPE_ORIENTATION_THETA); // elevation: 0 = horizontal, pi/2 = up
 		List<Double> phiL   = branch.get(FlightDataType.TYPE_ORIENTATION_PHI);   // 0 = north, positive toward east
+		List<Double> rollRateL = branch.get(FlightDataType.TYPE_ROLL_RATE);     // rad/s about the long axis
 
 		// Length align (defensive)
 		int n = minLen(tL, eastL, northL, altL);
 		if (thetaL != null) n = Math.min(n, thetaL.size());
 		if (phiL   != null) n = Math.min(n, phiL.size());
+		if (rollRateL != null && rollRateL.size() < n) rollRateL = null;
 
+		double[] times = toPrimitive(tL, n);
 		return new FlightPoseProvider(
-				toPrimitive(tL, n),
+				times,
 				toPrimitive(eastL, n),
 				toPrimitive(northL, n),
 				toPrimitive(altL, n),
 				(thetaL != null ? toPrimitive(thetaL, n) : null),
-				(phiL   != null ? unwrapAngles(toPrimitive(phiL, n)) : null)
+				(phiL   != null ? unwrapAngles(toPrimitive(phiL, n)) : null),
+				(rollRateL != null ? integrateRollRate(times, toPrimitive(rollRateL, n)) : null)
 		);
 	}
 
@@ -99,7 +107,7 @@ public final class FlightPoseProvider implements PoseProvider {
 					(float) Math.sin(th),
 					-horizontal * (float) Math.cos(ph))
 					.normalize();
-			return new Quaternionf().rotateTo(LOCAL_NOSE_AXIS, dir);
+			return withRoll(new Quaternionf().rotateTo(LOCAL_NOSE_AXIS, dir), time);
 		}
 
 		// Fallback: face the velocity (central difference of position)
@@ -107,9 +115,17 @@ public final class FlightPoseProvider implements PoseProvider {
 		Vector3f p0 = getPosition(Math.max(getStartTime(), time - eps));
 		Vector3f p1 = getPosition(Math.min(getEndTime(),   time + eps));
 		Vector3f v = p1.sub(p0, new Vector3f());
-		if (v.lengthSquared() < 1e-12f) return new Quaternionf(); // no rotation
+		if (v.lengthSquared() < 1e-12f) return withRoll(new Quaternionf(), time); // no rotation
 		v.normalize();
-		return new Quaternionf().rotateTo(LOCAL_NOSE_AXIS, v);
+		return withRoll(new Quaternionf().rotateTo(LOCAL_NOSE_AXIS, v), time);
+	}
+
+	/** Applies the roll about the rocket's own long axis before pointing that axis. */
+	private Quaternionf withRoll(Quaternionf pointing, double time) {
+		if (rollAngle == null) {
+			return pointing;
+		}
+		return pointing.rotateX(sample(t, rollAngle, time));
 	}
 
 	@Override
@@ -146,6 +162,21 @@ public final class FlightPoseProvider implements PoseProvider {
 		double[] out = new double[n];
 		for (int i = 0; i < n; i++) out[i] = nz(src.get(i));
 		return out;
+	}
+
+	/** Trapezoidal integral of the roll rate; missing rates count as no spin. */
+	static double[] integrateRollRate(double[] times, double[] rollRates) {
+		double[] angles = new double[times.length];
+		for (int i = 1; i < times.length; i++) {
+			double dt = times[i] - times[i - 1];
+			double average = 0.5 * (finiteOrZero(rollRates[i - 1]) + finiteOrZero(rollRates[i]));
+			angles[i] = angles[i - 1] + (Double.isFinite(dt) && dt > 0.0 ? average * dt : 0.0);
+		}
+		return angles;
+	}
+
+	private static double finiteOrZero(double value) {
+		return Double.isFinite(value) ? value : 0.0;
 	}
 
 	/** Keeps interpolation on the shortest path across the 0/2-pi azimuth boundary. */
