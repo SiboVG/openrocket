@@ -158,6 +158,28 @@ class ReplayFlameEmitterTest {
 		assertNotEquals(local.getParticles().get(30).position, secondMotor.getParticles().get(30).position);
 	}
 
+	@Test
+	void plumeGrowsAndBrightensWithThrust() {
+		FlameSettings settings = FlameSettings.normal(new RenderingConfiguration());
+		PoseProvider provider = stationaryProvider(new Vector3f(), new Quaternionf());
+		List<double[]> burn = List.<double[]>of(new double[] { 0.0, 1.0 });
+		Vector3f nozzle = new Vector3f(1, 0, 0);
+		ReplayFlameEmitter spike = new ReplayFlameEmitter(settings, provider, burn, nozzle, nozzle, 17, time -> 1.6);
+		ReplayFlameEmitter average = new ReplayFlameEmitter(settings, provider, burn, nozzle, nozzle, 17, time -> 1.0);
+		ReplayFlameEmitter tailOff = new ReplayFlameEmitter(settings, provider, burn, nozzle, nozzle, 17, time -> 0.1);
+		for (ReplayFlameEmitter emitter : List.of(spike, average, tailOff)) emitter.setReplayTime(0.5, true);
+
+		assertTrue(meanReach(spike, nozzle) > meanReach(average, nozzle));
+		assertTrue(meanReach(average, nozzle) > meanReach(tailOff, nozzle));
+		assertEquals(1.0f, average.getParticles().get(0).getOpacity(), 1e-6f, "Average thrust keeps the pad plume");
+		assertTrue(tailOff.getParticles().get(0).getOpacity() < 0.6f, "The tail-off fades");
+		assertTrue(spike.getParticles().get(0).size > average.getParticles().get(0).size);
+	}
+
+	private static float meanReach(ReplayFlameEmitter emitter, Vector3f nozzle) {
+		return (float) emitter.getParticles().stream().mapToDouble(p -> p.position.distance(nozzle)).average().orElse(0);
+	}
+
 	private static ReplayFlameEmitter emitter(Vector3f base, Quaternionf rotation, long seed) {
 		return new ReplayFlameEmitter(FlameSettings.normal(new RenderingConfiguration()), stationaryProvider(base, rotation),
 				List.of(new double[] { 0.0, 1.0 }, new double[] { 2.0, 3.0 }),

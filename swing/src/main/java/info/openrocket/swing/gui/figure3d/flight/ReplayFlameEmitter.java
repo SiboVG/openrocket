@@ -9,6 +9,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.List;
+import java.util.function.DoubleUnaryOperator;
 
 /** Adapts the existing flame emitter to absolute replay time and moving motor nozzles. */
 final class ReplayFlameEmitter extends FlameEmitter {
@@ -18,12 +19,14 @@ final class ReplayFlameEmitter extends FlameEmitter {
 	private final float particleTimeScale;
 	private final Vector3f exhaustAxis;
 	private final Quaternionf roll = new Quaternionf();
+	private final DoubleUnaryOperator relativeThrust;
 
 	ReplayFlameEmitter(RenderingConfiguration config, PoseProvider provider, List<double[]> burnWindows,
-			Vector3f nozzle, Vector3f direction, float rocketLength, long seed) {
+			Vector3f nozzle, Vector3f direction, float rocketLength, long seed, ThrustProfile thrust) {
 		// The pad/photo emitter's long lifetimes would leave burning particles far behind an
 		// accelerating rocket. Run the same particle lifecycle faster, preserving its plume length.
-		this(rocketScaledSettings(config, rocketLength * 0.03f), provider, burnWindows, nozzle, direction, seed, 24.0f);
+		this(rocketScaledSettings(config, rocketLength * 0.03f), provider, burnWindows, nozzle, direction, seed, 24.0f,
+				thrust::relativeThrustAt);
 	}
 
 	/**
@@ -38,17 +41,24 @@ final class ReplayFlameEmitter extends FlameEmitter {
 
 	ReplayFlameEmitter(FlameSettings settings, PoseProvider provider, List<double[]> burnWindows,
 			Vector3f nozzle, Vector3f direction, long seed) {
-		this(settings, provider, burnWindows, nozzle, direction, seed, 1.0f);
+		this(settings, provider, burnWindows, nozzle, direction, seed, 1.0f, time -> 1.0);
+	}
+
+	ReplayFlameEmitter(FlameSettings settings, PoseProvider provider, List<double[]> burnWindows,
+			Vector3f nozzle, Vector3f direction, long seed, DoubleUnaryOperator relativeThrust) {
+		this(settings, provider, burnWindows, nozzle, direction, seed, 1.0f, relativeThrust);
 	}
 
 	private ReplayFlameEmitter(FlameSettings settings, PoseProvider provider, List<double[]> burnWindows,
-			Vector3f nozzle, Vector3f direction, long seed, float particleTimeScale) {
+			Vector3f nozzle, Vector3f direction, long seed, float particleTimeScale,
+			DoubleUnaryOperator relativeThrust) {
 		super(nozzle, direction, settings);
 		this.provider = provider;
 		this.burnWindows = burnWindows.stream().map(double[]::clone).toList();
 		this.exhaustAxis = new Vector3f(direction).normalize();
 		this.seed = seed;
 		this.particleTimeScale = particleTimeScale;
+		this.relativeThrust = relativeThrust;
 	}
 
 	@Override
@@ -85,6 +95,7 @@ final class ReplayFlameEmitter extends FlameEmitter {
 				}
 
 				rollAroundExhaustAxis(particle, emissionSeed(~seed, windowIndex, index));
+				applyThrust(particle, relativeThrust.applyAsDouble(birthTime));
 
 				Quaternionf orientation = provider.getOrientation(birthTime);
 				orientation.transform(particle.position);
@@ -111,6 +122,20 @@ final class ReplayFlameEmitter extends FlameEmitter {
 		particle.position.sub(emitterPosition);
 		roll.transform(particle.position).add(emitterPosition);
 		roll.transform(particle.velocity);
+	}
+
+	/**
+	 * Scales a particle by the thrust when it left the nozzle, relative to the burn's average:
+	 * a longer, wider, brighter plume through the ignition spike, a short fading one in the
+	 * tail-off, and the unchanged pad plume at average thrust.
+	 */
+	private void applyThrust(Particle particle, double relative) {
+		float intensity = (float) Math.max(0.25, Math.min(1.6, Double.isFinite(relative) ? relative : 1.0));
+		float length = 0.4f + 0.6f * intensity;
+		particle.position.sub(emitterPosition).mul(length).add(emitterPosition);
+		particle.velocity.mul(length);
+		particle.size *= 0.6f + 0.4f * intensity;
+		particle.setOpacity(0.4f + 0.6f * intensity);
 	}
 
 	static long emissionSeed(long motorSeed, int windowIndex, long particleIndex) {

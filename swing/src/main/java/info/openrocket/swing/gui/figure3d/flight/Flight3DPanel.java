@@ -1167,7 +1167,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private void addFlameJet(SceneView scene, RenderingConfiguration config, PoseProvider provider,
 			List<double[]> burnWindows, Vector3f nozzleLocal, Vector3f exhaustDirection, float rocketLength) {
 		ReplayFlameEmitter emitter = new ReplayFlameEmitter(config, provider, burnWindows,
-				nozzleLocal, exhaustDirection, rocketLength, 31L * flameJets.size() + 17);
+				nozzleLocal, exhaustDirection, rocketLength, 31L * flameJets.size() + 17,
+				ThrustProfile.fromBranch(branchFor(provider), burnWindows));
 		scene.addParticleEmitter(emitter);
 		flameJets.add(emitter);
 	}
@@ -1792,8 +1793,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		for (int i = 0; i < bodies.size(); i++) {
 			PoseProvider provider = providerForStage(bodies.get(i).stages().get(0), poses.providersByStage(),
 					poses.primaryProvider());
-			trackedBodies.add(new TrackedBody(provider, bodyCenters.get(i),
-					WindField.fromBranch(data.getBranch(bodies.get(i).branchIndex()))));
+			FlightDataBranch branch = data.getBranch(bodies.get(i).branchIndex());
+			trackedBodies.add(new TrackedBody(provider, bodyCenters.get(i), WindField.fromBranch(branch), branch));
 		}
 		trackedBodyIndex = 0;
 	}
@@ -1866,7 +1867,18 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		}
 	}
 
-	private record TrackedBody(PoseProvider provider, Vector3f centerOffset, WindField wind) {
+	private record TrackedBody(PoseProvider provider, Vector3f centerOffset, WindField wind,
+			FlightDataBranch branch) {
+	}
+
+	/** The simulation branch of the body on the given trajectory, or the primary branch. */
+	private FlightDataBranch branchFor(PoseProvider provider) {
+		for (TrackedBody body : trackedBodies) {
+			if (body.provider() == provider) {
+				return body.branch();
+			}
+		}
+		return trackedBodies.isEmpty() ? null : trackedBodies.get(0).branch();
 	}
 
 	/** The wind recorded along the flight of the body on the given trajectory. */

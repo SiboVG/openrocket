@@ -180,7 +180,7 @@ public class FlameRenderer implements ParticleSystemRenderer {
 				vertexCount += createParticleBillboard(
 						particle.getPosition(),
 						size,
-						plumeAlpha(ageRatio),
+						plumeAlpha(ageRatio) * particle.getOpacity(),
 						particle.getColor(),
 						ageRatio,
 						cameraPos
