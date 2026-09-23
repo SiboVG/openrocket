@@ -9,6 +9,7 @@ import info.openrocket.swing.gui.util.Icons;
 import info.openrocket.swing.gui.widgets.IconButton;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.DefaultListCellRenderer;
@@ -106,8 +107,8 @@ class PlaybackTransportBar extends JPanel {
 		setLayout(new BorderLayout(8, 4));
 		setBorder(BorderFactory.createEmptyBorder(4, 6, 6, 6));
 
-		// Rows: view controls right below the 3D view, then the transport buttons beside the
-		// timeline, then event navigation.
+		// Rows: view controls and event navigation right below the 3D view, then the transport
+		// buttons beside the timeline.
 		JPanel playbackControls = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
 		restartButton.setToolTipText(trans.get("Flight3DFrame.restart.ttip"));
 		restartButton.addActionListener(e -> restartPlayback());
@@ -127,7 +128,6 @@ class PlaybackTransportBar extends JPanel {
 		});
 		loopButton.setBorder(BorderFactory.createEmptyBorder(0, OPTION_GAP, 0, 0));
 		playbackControls.add(loopButton);
-		JPanel playbackOptions = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
 		eventCombo.setPrototypeDisplayValue(new EventMarker(999.99, trans.get("Flight3DFrame.events"), null));
 		eventCombo.setRenderer(new DefaultListCellRenderer() {
 			@Override
@@ -143,8 +143,6 @@ class PlaybackTransportBar extends JPanel {
 				pauseAndSeek(marker.time());
 			}
 		});
-		playbackOptions.add(eventCombo);
-		add(playbackOptions, BorderLayout.SOUTH);
 
 		JPanel viewControls = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
 		cameraModeCombo.setSelectedItem(FlightCameraMode.OVERVIEW);
@@ -182,6 +180,9 @@ class PlaybackTransportBar extends JPanel {
 		trailButton.setBorder(BorderFactory.createEmptyBorder(0, OPTION_GAP, 0, 0));
 		viewControls.add(trailButton);
 		viewControls.add(exhaustButton);
+		// A strut rather than a border: an empty border would replace the combo box's own.
+		viewControls.add(Box.createHorizontalStrut(OPTION_GAP));
+		viewControls.add(eventCombo);
 		JButton help = new JButton(trans.get("Flight3DFrame.controls"), Icons.HELP);
 		help.setToolTipText(trans.get("Flight3DFrame.controls.ttip"));
 		help.addActionListener(e -> JOptionPane.showMessageDialog(this, trans.get("Flight3DFrame.controls.ttip"),

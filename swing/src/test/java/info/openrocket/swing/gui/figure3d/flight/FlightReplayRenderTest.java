@@ -138,7 +138,7 @@ class FlightReplayRenderTest {
 				// checkbox sharing the timeline row its real label so the width check is realistic.
 				bar.getLoopButton().setText("Loop");
 				bar.setSize(frame.getWidth(), bar.getPreferredSize().height);
-				bar.doLayout();
+				bar.validate();
 				BufferedImage image = new BufferedImage(bar.getWidth(), bar.getHeight(), BufferedImage.TYPE_INT_ARGB);
 				var graphics = image.createGraphics();
 				try { bar.printAll(graphics); } finally { graphics.dispose(); }
