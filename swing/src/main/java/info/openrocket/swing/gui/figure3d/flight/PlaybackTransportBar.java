@@ -21,6 +21,7 @@ import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
@@ -52,6 +53,8 @@ class PlaybackTransportBar extends JPanel {
 	private static final int SLIDER_STEPS = 10_000;
 	private static final int POLL_INTERVAL_MS = 100;
 	private static final double FRAME_STEP_SECONDS = 1.0 / 60.0;
+	// Separates an option checkbox from the controls before it in its row.
+	private static final int OPTION_GAP = 12;
 	private static final EnumSet<FlightEvent.Type> MARKER_TYPES = EnumSet.of(
 			FlightEvent.Type.IGNITION,
 			FlightEvent.Type.LAUNCHROD,
@@ -104,7 +107,7 @@ class PlaybackTransportBar extends JPanel {
 		setBorder(BorderFactory.createEmptyBorder(4, 6, 6, 6));
 
 		// Rows: view controls right below the 3D view, then the transport buttons beside the
-		// timeline, then the less frequently used playback options.
+		// timeline, then event navigation.
 		JPanel playbackControls = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
 		restartButton.setToolTipText(trans.get("Flight3DFrame.restart.ttip"));
 		restartButton.addActionListener(e -> restartPlayback());
@@ -122,8 +125,9 @@ class PlaybackTransportBar extends JPanel {
 		loopButton.addActionListener(e -> {
 			if (clock != null) clock.setLooping(loopButton.isSelected());
 		});
+		loopButton.setBorder(BorderFactory.createEmptyBorder(0, OPTION_GAP, 0, 0));
+		playbackControls.add(loopButton);
 		JPanel playbackOptions = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
-		playbackOptions.add(loopButton);
 		eventCombo.setPrototypeDisplayValue(new EventMarker(999.99, trans.get("Flight3DFrame.events"), null));
 		eventCombo.setRenderer(new DefaultListCellRenderer() {
 			@Override
@@ -175,14 +179,19 @@ class PlaybackTransportBar extends JPanel {
 		exhaustButton.addActionListener(e -> {
 			if (exhaustVisibilityListener != null) exhaustVisibilityListener.accept(exhaustButton.isSelected());
 		});
+		trailButton.setBorder(BorderFactory.createEmptyBorder(0, OPTION_GAP, 0, 0));
 		viewControls.add(trailButton);
 		viewControls.add(exhaustButton);
 		JButton help = new JButton(trans.get("Flight3DFrame.controls"), Icons.HELP);
 		help.setToolTipText(trans.get("Flight3DFrame.controls.ttip"));
 		help.addActionListener(e -> JOptionPane.showMessageDialog(this, trans.get("Flight3DFrame.controls.ttip"),
 				trans.get("Flight3DFrame.controls"), JOptionPane.INFORMATION_MESSAGE));
-		viewControls.add(help);
-		add(viewControls, BorderLayout.NORTH);
+		JPanel viewRow = new JPanel(new BorderLayout());
+		viewRow.add(viewControls, BorderLayout.CENTER);
+		JPanel helpCell = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
+		helpCell.add(help);
+		viewRow.add(helpCell, BorderLayout.EAST);
+		add(viewRow, BorderLayout.NORTH);
 
 		scrubSlider.setMinimum(0);
 		scrubSlider.setMaximum(SLIDER_STEPS);
@@ -191,6 +200,11 @@ class PlaybackTransportBar extends JPanel {
 		scrubSlider.setEnabled(false);
 		MouseAdapter scrubMouseListener = new MouseAdapter() {
 			@Override
+			public void mouseEntered(MouseEvent e) {
+				scrubSlider.showTooltipsInstantly(true);
+			}
+
+			@Override
 			public void mouseMoved(MouseEvent e) {
 				scrubSlider.updateMarkerHover(e.getX(), e.getY());
 			}
@@ -198,6 +212,7 @@ class PlaybackTransportBar extends JPanel {
 			@Override
 			public void mouseExited(MouseEvent e) {
 				scrubSlider.updateMarkerHover(-1, -1);
+				scrubSlider.showTooltipsInstantly(false);
 			}
 		};
 		scrubSlider.addMouseListener(scrubMouseListener);
@@ -252,6 +267,10 @@ class PlaybackTransportBar extends JPanel {
 
 	JToggleButton getPanButton() {
 		return panButton;
+	}
+
+	JCheckBox getLoopButton() {
+		return loopButton;
 	}
 
 	JCheckBox getTrailButton() {
@@ -348,6 +367,7 @@ class PlaybackTransportBar extends JPanel {
 
 	void dispose() {
 		pollTimer.stop();
+		scrubSlider.showTooltipsInstantly(false);
 		clearReplay();
 	}
 
@@ -625,6 +645,9 @@ class PlaybackTransportBar extends JPanel {
 		private List<EventMarker> markers = List.of();
 		private EventMarker hoveredMarker;
 		private boolean markerGesture;
+		// The tooltip manager is shared application-wide, so its delay is only shortened
+		// while the pointer is over the timeline and restored when it leaves.
+		private int savedInitialDelay = -1;
 
 		private EventMarkerSlider() {
 			setToolTipText("");
@@ -680,6 +703,17 @@ class PlaybackTransportBar extends JPanel {
 			int width = Math.max(1, getWidth() - getInsets().right - 12 - left);
 			setValue((int) Math.round((x - left) * (double) SLIDER_STEPS / width));
 			seekToSliderValue();
+		}
+
+		private void showTooltipsInstantly(boolean instant) {
+			ToolTipManager manager = ToolTipManager.sharedInstance();
+			if (instant && savedInitialDelay < 0) {
+				savedInitialDelay = manager.getInitialDelay();
+				manager.setInitialDelay(0);
+			} else if (!instant && savedInitialDelay >= 0) {
+				manager.setInitialDelay(savedInitialDelay);
+				savedInitialDelay = -1;
+			}
 		}
 
 		private void setMarkers(List<EventMarker> markers) {

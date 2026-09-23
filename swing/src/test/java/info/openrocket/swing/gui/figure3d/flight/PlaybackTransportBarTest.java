@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import javax.swing.JComboBox;
 import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
 import java.awt.event.MouseEvent;
 import java.awt.event.KeyEvent;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -210,6 +211,29 @@ class PlaybackTransportBarTest extends BaseTestCase {
 	}
 
 	@Test
+	void timelineShowsMarkerTooltipsInstantlyOnlyWhileHovered() throws Exception {
+		SwingUtilities.invokeAndWait(() -> {
+			ToolTipManager manager = ToolTipManager.sharedInstance();
+			int originalDelay = manager.getInitialDelay();
+			PlaybackTransportBar bar = new PlaybackTransportBar();
+			try {
+				JSlider slider = bar.getScrubSlider();
+				slider.dispatchEvent(mouseEvent(slider, MouseEvent.MOUSE_ENTERED, 10, 10));
+				assertEquals(0, manager.getInitialDelay());
+				slider.dispatchEvent(mouseEvent(slider, MouseEvent.MOUSE_EXITED, -1, -1));
+				assertEquals(originalDelay, manager.getInitialDelay());
+
+				slider.dispatchEvent(mouseEvent(slider, MouseEvent.MOUSE_ENTERED, 10, 10));
+				bar.dispose();
+				assertEquals(originalDelay, manager.getInitialDelay(), "Closing while hovered must restore the delay");
+			} finally {
+				manager.setInitialDelay(originalDelay);
+				bar.dispose();
+			}
+		});
+	}
+
+	@Test
 	void speedKeysStepThroughTheSpeedsAndApplyWhilePlaying() throws Exception {
 		SwingUtilities.invokeAndWait(() -> {
 			PlaybackTransportBar bar = new PlaybackTransportBar();
@@ -284,7 +308,7 @@ class PlaybackTransportBarTest extends BaseTestCase {
 
 	private static MouseEvent mouseEvent(JSlider slider, int id, int x, int y) {
 		return new MouseEvent(slider, id, System.currentTimeMillis(), 0, x, y, 1, false,
-				id == MouseEvent.MOUSE_MOVED || id == MouseEvent.MOUSE_DRAGGED ? MouseEvent.NOBUTTON : MouseEvent.BUTTON1);
+				id == MouseEvent.MOUSE_PRESSED || id == MouseEvent.MOUSE_RELEASED ? MouseEvent.BUTTON1 : MouseEvent.NOBUTTON);
 	}
 
 }
