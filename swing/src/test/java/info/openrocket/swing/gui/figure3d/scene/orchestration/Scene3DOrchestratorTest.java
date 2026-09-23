@@ -47,6 +47,46 @@ class Scene3DOrchestratorTest {
 
 
 	@Test
+	void padCameraZoomedOutStaysAboveTheGroundWhileTheRocketClimbs() {
+		Camera camera = Camera.builder().withFixedCenterOfInterest(false).build();
+		Vector3f eye = new Vector3f(20.0f, 4.0f, 20.0f);
+		for (float altitude : new float[] { 50.0f, 300.0f, 2_000.0f }) {
+			Vector3f rocket = new Vector3f(0.0f, altitude, 0.0f);
+			float requested = eye.distance(rocket) * 20.0f;
+			float distance = Scene3DOrchestrator.lookFrom(camera, eye, rocket, 20.0f);
+			camera.update();
+
+			assertEquals(requested, distance, requested * 1e-4f, "Zoom must keep the requested distance");
+			assertTrue(camera.getPosition().y >= eye.y - 1e-2f,
+					"Zoomed-out pad eye went below its height at altitude " + altitude + ": " + camera.getPosition());
+			assertEquals(0.0f, camera.getPosition().distance(rocket) - distance, distance * 1e-3f);
+		}
+	}
+
+	@Test
+	void padCameraDropsAPanOffsetLeftFromAnotherView() {
+		Camera camera = Camera.builder().withFixedCenterOfInterest(false).build();
+		camera.pan(40.0f, 30.0f, 800, 600);
+		Vector3f rocket = new Vector3f(0.0f, 50.0f, 0.0f);
+
+		Scene3DOrchestrator.lookFrom(camera, new Vector3f(20.0f, 4.0f, 20.0f), rocket, 1.0f);
+
+		assertEquals(rocket, camera.getEffectiveLookAt(), "The pad view must aim exactly at the rocket");
+	}
+
+	@Test
+	void padCameraZoomsInTowardALandedRocketBelowTheEye() {
+		Camera camera = Camera.builder().withFixedCenterOfInterest(false).build();
+		Vector3f eye = new Vector3f(20.0f, 4.0f, 20.0f);
+		Vector3f rocket = new Vector3f(0.0f, 1.0f, 0.0f);
+		Scene3DOrchestrator.lookFrom(camera, eye, rocket, 0.25f);
+		camera.update();
+
+		assertTrue(camera.getPosition().y < eye.y, "Zooming in must still descend toward a rocket on the ground");
+		assertTrue(camera.getPosition().y > rocket.y);
+	}
+
+	@Test
 	void derivesNozzlePositionAndDirectionFromRenderedMotorGeometry() {
 		RocketComponent mount = mock(RocketComponent.class);
 		Motor motor = mock(Motor.class);

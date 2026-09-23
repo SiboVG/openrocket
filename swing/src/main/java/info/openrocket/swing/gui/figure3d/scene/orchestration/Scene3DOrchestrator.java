@@ -242,6 +242,9 @@ public class Scene3DOrchestrator {
 						flightPadDistanceScale = updatedPadDistanceScale(flightPadDistanceScale,
 								camera.getDistance(), lastAppliedPadDistance);
 						lastAppliedPadDistance = lookFrom(camera, eye, pivot, flightPadDistanceScale);
+						// This behavior owns the distance; a resize refit to the last fitted
+						// bounds would otherwise be read as a huge wheel zoom on the next frame.
+						cameraController.setZoomFitting(false);
 					}
 				} else {
 					if (pendingFollowFit) {
@@ -606,12 +609,26 @@ public class Scene3DOrchestrator {
 		float baseDistance = Math.max(0.5f, toEye.length());
 		toEye.div(baseDistance);
 		float eyeDistance = Math.max(CameraConstants.MIN_DISTANCE, baseDistance * distanceScale);
+		// Zooming out slides the eye down the sightline, so once the rocket is above the eye it
+		// would end up under the ground. Keep the eye no lower than the lower of its own height
+		// and the rocket's, backing away horizontally at that height by the same distance.
+		float drop = target.y - Math.min(eye.y, target.y);
+		if (target.y + toEye.y * eyeDistance < target.y - drop && eyeDistance > drop) {
+			Vector3f horizontal = new Vector3f(toEye.x, 0.0f, toEye.z);
+			if (horizontal.lengthSquared() < 1.0e-12f) {
+				horizontal.set(1.0f, 0.0f, 0.0f);
+			}
+			horizontal.normalize().mul((float) Math.sqrt(eyeDistance * eyeDistance - drop * drop));
+			toEye.set(horizontal.x, -drop, horizontal.z).div(eyeDistance);
+		}
 		camera.setZoomLimits(Math.max(CameraConstants.MIN_DISTANCE, eyeDistance * 0.1f),
 				Math.max(eyeDistance * 10.0f, 10.0f));
 		camera.setDistance(eyeDistance);
 		camera.setAngleX((float) Math.atan2(toEye.x, toEye.z));
 		camera.setAngleY((float) Math.asin(Math.max(-1.0f, Math.min(1.0f, toEye.y))));
 		camera.setCenterOfInterest(target);
+		// A pan offset left over from another view would shift the fixed sightline.
+		camera.resetViewOffset();
 		return camera.getDistance();
 	}
 
