@@ -2,6 +2,7 @@ package info.openrocket.swing.gui.figure3d.flight;
 
 import info.openrocket.core.document.Simulation;
 import info.openrocket.core.l10n.Translator;
+import info.openrocket.core.rocketcomponent.AxialStage;
 import info.openrocket.core.simulation.FlightData;
 import info.openrocket.core.simulation.FlightDataBranch;
 import info.openrocket.core.simulation.FlightDataType;
@@ -46,6 +47,7 @@ class FlightMetricsPanel extends JPanel {
 
 	private PlaybackClock clock;
 	private FlightReplayData replayData;
+	private FlightData flightData;
 	private List<FlightReplayData.StageStatus> displayedStageStatuses;
 	private List<Double> times;
 	private List<Double> altitude;
@@ -85,23 +87,36 @@ class FlightMetricsPanel extends JPanel {
 		simulationLabel.setText(orEmpty(simulation.getName()));
 		configLabel.setText(orEmpty(configurationName(simulation)));
 
-		FlightData data = simulation.getSimulatedData();
-		FlightDataBranch branch = data.getBranch(0);
+		this.flightData = simulation.getSimulatedData();
+		loadBranch(0);
+		pollTimer.start();
+	}
+
+	/** Shows the telemetry of another flying body (its simulation branch). */
+	void setTrackedBody(int bodyIndex) {
+		if (flightData == null || replayData == null
+				|| bodyIndex < 0 || bodyIndex >= replayData.getFlightBodies().size()) {
+			return;
+		}
+		loadBranch(replayData.getFlightBodies().get(bodyIndex).branchIndex());
+	}
+
+	private void loadBranch(int branchIndex) {
+		FlightDataBranch branch = flightData.getBranch(branchIndex);
 		this.times = branch.get(FlightDataType.TYPE_TIME);
 		this.altitude = branch.get(FlightDataType.TYPE_ALTITUDE);
 		this.velocity = branch.get(FlightDataType.TYPE_VELOCITY_TOTAL);
 		this.acceleration = branch.get(FlightDataType.TYPE_ACCELERATION_TOTAL);
 		this.east = branch.get(FlightDataType.TYPE_POSITION_X);
 		this.north = branch.get(FlightDataType.TYPE_POSITION_Y);
-
 		refresh();
-		pollTimer.start();
 	}
 
 	void dispose() {
 		pollTimer.stop();
 		clock = null;
 		replayData = null;
+		flightData = null;
 		times = null;
 		altitude = null;
 		velocity = null;
@@ -173,7 +188,7 @@ class FlightMetricsPanel extends JPanel {
 		} else {
 			for (FlightReplayData.StageStatus status : statuses) {
 				JLabel chip = new JLabel(String.format(trans.get("Flight3DFrame.metrics.stageStatusFormat"),
-						stageGroupName(status), phaseName(status.phase())));
+						stageGroupName(status.stages()), phaseName(status.phase())));
 				chip.setOpaque(true);
 				chip.setBackground(phaseColor(status.phase()));
 				chip.setForeground(new Color(0xFFFFFF));
@@ -197,8 +212,9 @@ class FlightMetricsPanel extends JPanel {
 		metricsGrid.add(field);
 	}
 
-	private static String stageGroupName(FlightReplayData.StageStatus status) {
-		return status.stages().stream()
+	/** Names a group of stages, e.g. "Sustainer + Payload", numbering unnamed stages. */
+	static String stageGroupName(List<AxialStage> stages) {
+		return stages.stream()
 				.map(stage -> {
 					String name = stage.getName();
 					return name == null || name.isBlank()

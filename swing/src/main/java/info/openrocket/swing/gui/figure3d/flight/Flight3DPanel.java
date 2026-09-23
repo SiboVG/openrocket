@@ -95,6 +95,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	// Paths are split into chunks built once per decoration scale. Playback only toggles chunk
 	// visibility and rebuilds the two short pieces either side of the playback position.
 	static final int TRAIL_CHUNK_SAMPLES = 12;
+	private static final float SEPARATED_TRAIL_RADIUS_SCALE = 0.7f;
 	private static final float MIN_DECORATION_SCALE = 0.04f;
 	private static final float DECORATION_SCALE_REBUILD_THRESHOLD = 0.06f;
 	private static final Vector3f ACTIVE_FUTURE_COLOR = new Vector3f(0.16f, 0.42f, 0.28f);
@@ -133,6 +134,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private final List<ReplayFlameEmitter> flameJets = new ArrayList<>();
 	private final List<SceneObject> eventMarkers = new ArrayList<>();
 	private final List<ParachuteCanopy> parachutes = new ArrayList<>();
+	// Separately flying bodies the cameras can track, primary first. GL thread only.
+	private final List<TrackedBody> trackedBodies = new ArrayList<>();
+	private volatile int trackedBodyIndex = 0;
 	private final AtomicBoolean dirty = new AtomicBoolean(true);
 	private SmokeEmitter smokePuppet;
 	private SceneObject positionMarker;
@@ -150,10 +154,24 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private volatile float initialCameraFieldOfView = (float) Math.toRadians(45.0);
 	private double lastRebuildFraction = -1.0;
 
+	/**
+	 * One body's sampled center path. The provider and center offset let the elapsed/upcoming
+	 * split be placed at the exact current position: the samples are too sparse for linear
+	 * interpolation to keep up with a rocket accelerating at tens of g.
+	 */
 	private record TrailPath(List<Vector3f> points, List<Vector3f> ringFrames, boolean active,
-			double startFraction) {
-		private TrailPath(List<Vector3f> points, boolean active, double startFraction) {
-			this(points, TrajectoryTrailGenerator.ringFrames(points), active, startFraction);
+			double startFraction, PoseProvider provider, Vector3f centerOffset) {
+		private TrailPath(List<Vector3f> points, boolean active, double startFraction, PoseProvider provider,
+				Vector3f centerOffset) {
+			this(points, TrajectoryTrailGenerator.ringFrames(points), active, startFraction, provider, centerOffset);
+		}
+
+		private Vector3f positionAt(double time) {
+			Vector3f position = provider.getPosition(time);
+			if (centerOffset != null) {
+				position.add(provider.getOrientation(time).transform(new Vector3f(centerOffset)));
+			}
+			return position;
 		}
 	}
 
@@ -248,6 +266,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		flameJets.clear();
 		eventMarkers.clear();
 		parachutes.clear();
+		trackedBodies.clear();
 		smokePuppet = null;
 		positionMarker = null;
 		playbackClock = null;
@@ -473,23 +492,27 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		disableComponentSelection(scene);
 
 		FlightReplayData replayData = new FlightReplayData(data, doc.getRocket());
-		GroundedPoseProviders groundedPoses = createGroundedPoseProviders(scene, replayData);
+		// Reuse the design-view rocket-center computation as the fallback for body centers.
+		Vector3f rocketCenterOffset = orchestrator.getCameraController().computeRocketCenter();
+		CenteredPoses centeredPoses = centerBodiesOnThemselves(scene, replayData, rocketCenterOffset);
+		GroundedPoseProviders groundedPoses = createGroundedPoseProviders(scene, centeredPoses.providersByStage(),
+				centeredPoses.primaryProvider(), replayData.getStartTime());
 		orchestrator.bindFlightPosesToRocket(groundedPoses.providersByStage(), groundedPoses.primaryProvider(),
 				replayData.getStartTime(), replayData.getEndTime());
 		Map<AxialStage, List<double[]>> burnTimeline = toStageTimeline(replayData.getBurnIntervalsByStage());
 		int burnWindowCount = burnTimeline.values().stream().mapToInt(List::size).sum();
 		log.info("Flight replay: {} stage(s) with {} total motor burn window(s)", burnTimeline.size(), burnWindowCount);
 
-		// Reuse the design-view rocket-center computation so the follow camera orbits the
-		// rocket's middle, not its nose. Compute the whole-flight framing for the default view.
-		Vector3f rocketCenterOffset = orchestrator.getCameraController().computeRocketCenter();
-		orchestrator.setFlightRocketCenterOffset(rocketCenterOffset);
+		// The cameras orbit the tracked body's middle, not the rocket's nose.
+		collectTrackedBodies(replayData, groundedPoses, centeredPoses.bodyCenters());
+		orchestrator.setFlightRocketCenterOffset(trackedBodies.get(0).centerOffset());
 		computeTrajectoryBounds(orchestrator.getCameraController(), groundedPoses,
 				replayData.getStartTime(), replayData.getEndTime());
 		buildTrajectoryTrails(scene, groundedPoses, rocketCenterOffset,
 				replayData.getStartTime(), replayData.getEndTime());
 		followTrailScale = followTrailScale(rocketLengthWorld(orchestrator), trailRadius);
-		addEventMarkers(scene, replayData, groundedPoses.primaryProvider(), rocketCenterOffset);
+		addEventMarkers(scene, replayData, groundedPoses.primaryProvider(),
+				bodyCenterOffset(groundedPoses.primaryProvider(), rocketCenterOffset));
 		buildExhaustGeometry(scene, orchestrator, config, groundedPoses,
 				replayData, burnTimeline, rocketCenterOffset);
 		Camera camera = orchestrator.getCameraController().getCamera();
@@ -712,20 +735,26 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 		PoseProvider primary = poses.primaryProvider();
 		List<Vector3f> primaryPath = samplePath(primary, centerOffset, startTime, endTime);
-		trailPaths.add(new TrailPath(primaryPath, true, 0.0));
+		Vector3f primaryCenter = bodyCenterOffset(primary, centerOffset);
+		trailPaths.add(new TrailPath(samplePath(primary, primaryCenter, startTime, endTime), true, 0.0,
+				primary, primaryCenter));
 
 		Set<PoseProvider> boosters = Collections.newSetFromMap(new IdentityHashMap<>());
 		boosters.addAll(poses.providersByStage().values());
 		boosters.remove(primary);
 		for (PoseProvider booster : boosters) {
-			List<Vector3f> full = samplePath(booster, centerOffset, startTime, endTime);
 			// Only plot a booster from where its path diverges from the sustainer (post-separation),
 			// since before separation it rides the same path and would z-fight the active trail.
-			int from = firstDivergenceIndex(full, primaryPath, trailRadius * 3.0f);
+			// Compare through the same point on both so only the separation registers.
+			int from = firstDivergenceIndex(samplePath(booster, centerOffset, startTime, endTime),
+					primaryPath, trailRadius * 3.0f);
+			// Draw it through the booster's own center, where the booster flies.
+			Vector3f boosterCenter = bodyCenterOffset(booster, centerOffset);
+			List<Vector3f> full = samplePath(booster, boosterCenter, startTime, endTime);
 			List<Vector3f> divergent = new ArrayList<>(full.subList(Math.max(0, from), full.size()));
 			// The booster path covers global playback fractions [from/samples, 1], so elapsed
 			// coloring only starts once the flight passes its separation point.
-			trailPaths.add(new TrailPath(divergent, false, (double) from / TRAIL_SAMPLES));
+			trailPaths.add(new TrailPath(divergent, false, (double) from / TRAIL_SAMPLES, booster, boosterCenter));
 		}
 
 		// A bright marker at the rocket's current center — the rocket itself is sub-pixel at the
@@ -741,7 +770,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		positionMarker.setVisible(overviewVisible);
 		scene.addObject(positionMarker);
 
-		rebuildTrails(scene, 0.0);
+		rebuildTrails(scene, 0.0, startTime);
 	}
 
 	/**
@@ -1073,8 +1102,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			}
 			PoseProvider provider = providerForEventSource(event.getSource(), poses);
 			Vector3f center = provider.getPosition(t);
-			if (centerOffset != null) {
-				center.add(provider.getOrientation(t).transform(new Vector3f(centerOffset)));
+			Vector3f bodyCenter = bodyCenterOffset(provider, centerOffset);
+			if (bodyCenter != null) {
+				center.add(provider.getOrientation(t).transform(new Vector3f(bodyCenter)));
 			}
 			Random jitter = new Random(Double.hashCode(t) * 127L + puffs);
 			float scatter = puffSize * 1.5f;
@@ -1292,9 +1322,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		}
 		lastRebuildFraction = fraction;
 		if (scaleChanged || trailGeometries.isEmpty()) {
-			rebuildTrails(orchestrator.getScene(), fraction);
+			rebuildTrails(orchestrator.getScene(), fraction, time);
 		} else {
-			updateTrailSplit(orchestrator.getScene(), fraction);
+			updateTrailSplit(orchestrator.getScene(), fraction, time);
 		}
 	}
 
@@ -1337,7 +1367,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	 * Drawing elapsed and upcoming as separate non-overlapping tubes (rather than overlaying a
 	 * bright tube on a faded full-length one) avoids coaxial z-fighting. Runs on the GL thread.
 	 */
-	private void rebuildTrails(SceneView scene, double fraction) {
+	private void rebuildTrails(SceneView scene, double fraction, double time) {
 		if (scene == null) {
 			return;
 		}
@@ -1359,21 +1389,22 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 				int start = chunk * TRAIL_CHUNK_SAMPLES;
 				List<Vector3f> chunkPoints = points.subList(start, trailChunkEnd(chunk, points.size()) + 1);
 				Vector3f seed = trail.ringFrames().get(start);
-				geometry.elapsedChunks.add(addTrailPiece(scene, chunkPoints, seed, elapsedColor(trail)));
-				geometry.upcomingChunks.add(addTrailPiece(scene, chunkPoints, seed, upcomingColor(trail)));
+				geometry.elapsedChunks.add(addTrailPiece(scene, chunkPoints, seed, trailRadius(trail), elapsedColor(trail)));
+				geometry.upcomingChunks.add(addTrailPiece(scene, chunkPoints, seed, trailRadius(trail), upcomingColor(trail)));
 			}
 			trailGeometries.add(geometry);
 		}
-		updateTrailSplit(scene, fraction);
+		updateTrailSplit(scene, fraction, time);
 	}
 
 	/**
 	 * Moves each path's elapsed/upcoming split to the playback fraction: whole chunks only
 	 * change visibility, and the chunk containing the split is replaced by two short pieces
-	 * meeting at the exact interpolated position (not a sample), so the boundary sits precisely
-	 * under the moving marker. Runs on the GL thread.
+	 * meeting at the body's exact position at the playback time (not a sample or an
+	 * interpolation between samples), so the boundary sits precisely on the rocket. Runs on
+	 * the GL thread.
 	 */
-	private void updateTrailSplit(SceneView scene, double fraction) {
+	private void updateTrailSplit(SceneView scene, double fraction, double time) {
 		for (TrailGeometry geometry : trailGeometries) {
 			removeAndCleanupObjects(scene, geometry.splitPieces);
 			TrailPath trail = geometry.path;
@@ -1390,16 +1421,17 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 				continue;
 			}
 
-			Vector3f boundary = new Vector3f(points.get(index))
-					.lerp(points.get(index + 1), (float) (indexValue - index));
+			Vector3f boundary = trail.positionAt(time);
 			int chunkStart = geometry.splitChunk * TRAIL_CHUNK_SAMPLES;
 			List<Vector3f> elapsed = new ArrayList<>(points.subList(chunkStart, index + 1));
 			elapsed.add(boundary);
 			List<Vector3f> upcoming = new ArrayList<>();
 			upcoming.add(new Vector3f(boundary));
 			upcoming.addAll(points.subList(index + 1, trailChunkEnd(geometry.splitChunk, pointCount) + 1));
-			addSplitPiece(scene, geometry, elapsed, trail.ringFrames().get(chunkStart), elapsedColor(trail));
-			addSplitPiece(scene, geometry, upcoming, trail.ringFrames().get(index), upcomingColor(trail));
+			addSplitPiece(scene, geometry, elapsed, trail.ringFrames().get(chunkStart), trailRadius(trail),
+					elapsedColor(trail));
+			addSplitPiece(scene, geometry, upcoming, trail.ringFrames().get(index), trailRadius(trail),
+					upcomingColor(trail));
 		}
 		applyTrailVisibility();
 	}
@@ -1475,20 +1507,29 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		objects.clear();
 	}
 
+	/**
+	 * A separated body climbs along the path the sustainer just flew, so their tubes coincide
+	 * there; drawing it thinner lets the main trail cover it instead of the two flickering.
+	 */
+	private float trailRadius(TrailPath trail) {
+		return trail.active() ? trailDecorationRadius : trailDecorationRadius * SEPARATED_TRAIL_RADIUS_SCALE;
+	}
+
 	private void addSplitPiece(SceneView scene, TrailGeometry geometry, List<Vector3f> points, Vector3f seed,
-			Vector3f color) {
-		SceneObject piece = addTrailPiece(scene, points, seed, color);
+			float radius, Vector3f color) {
+		SceneObject piece = addTrailPiece(scene, points, seed, radius, color);
 		if (piece != null) {
 			geometry.splitPieces.add(piece);
 		}
 	}
 
 	/** Adds a hidden tube along the points, or returns null when they span no length. */
-	private SceneObject addTrailPiece(SceneView scene, List<Vector3f> points, Vector3f seed, Vector3f color) {
+	private SceneObject addTrailPiece(SceneView scene, List<Vector3f> points, Vector3f seed, float radius,
+			Vector3f color) {
 		if (points.size() < 2) {
 			return null;
 		}
-		Mesh mesh = TrajectoryTrailGenerator.create(points, trailDecorationRadius, 8, seed);
+		Mesh mesh = TrajectoryTrailGenerator.create(points, radius, 8, seed);
 		if (mesh.getVertices().isEmpty()) {
 			return null;
 		}
@@ -1512,19 +1553,24 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		scene.addObject(ground);
 	}
 
-	private GroundedPoseProviders createGroundedPoseProviders(SceneView scene, FlightReplayData replayData) {
-		float groundLift = computeStartGroundLift(scene, replayData.getProvidersByStage(),
-				replayData.getPrimaryProvider(), replayData.getStartTime());
+	private GroundedPoseProviders createGroundedPoseProviders(SceneView scene,
+			Map<AxialStage, PoseProvider> providersByStage, PoseProvider primaryProvider, double startTime) {
+		float groundLift = computeStartGroundLift(scene, providersByStage, primaryProvider, startTime);
 		if (groundLift <= 1.0e-4f) {
-			return new GroundedPoseProviders(replayData.getProvidersByStage(), replayData.getPrimaryProvider());
+			return new GroundedPoseProviders(providersByStage, primaryProvider);
 		}
 
+		// Wrap each trajectory once: stages flying together must keep sharing one provider,
+		// which is how the trails and tracked bodies tell the bodies apart.
 		Vector3f offset = new Vector3f(0.0f, groundLift, 0.0f);
+		Map<PoseProvider, PoseProvider> lifted = new IdentityHashMap<>();
 		Map<AxialStage, PoseProvider> adjusted = new LinkedHashMap<>();
-		for (Map.Entry<AxialStage, PoseProvider> entry : replayData.getProvidersByStage().entrySet()) {
-			adjusted.put(entry.getKey(), new OffsetPoseProvider(entry.getValue(), offset));
+		for (Map.Entry<AxialStage, PoseProvider> entry : providersByStage.entrySet()) {
+			adjusted.put(entry.getKey(),
+					lifted.computeIfAbsent(entry.getValue(), provider -> new OffsetPoseProvider(provider, offset)));
 		}
-		return new GroundedPoseProviders(adjusted, new OffsetPoseProvider(replayData.getPrimaryProvider(), offset));
+		return new GroundedPoseProviders(adjusted,
+				lifted.computeIfAbsent(primaryProvider, provider -> new OffsetPoseProvider(provider, offset)));
 	}
 
 	private float computeStartGroundLift(SceneView scene, Map<AxialStage, PoseProvider> providersByStage,
@@ -1641,6 +1687,125 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			timeline.put(entry.getKey(), stageIntervals);
 		}
 		return timeline;
+	}
+
+	/**
+	 * Wraps each flying body's trajectory so the body rotates about its own center (see
+	 * {@link BodyCenteredPoseProvider}), following which stages it is attached to over time.
+	 * Runs on the GL thread before the first posed frame, while object transforms are still
+	 * rocket-local.
+	 */
+	private static CenteredPoses centerBodiesOnThemselves(SceneView scene, FlightReplayData replayData,
+			Vector3f fallbackCenter) {
+		Map<PoseProvider, PoseProvider> centeredByOriginal = new IdentityHashMap<>();
+		List<Vector3f> bodyCenters = new ArrayList<>();
+		for (FlightReplayData.FlightBody body : replayData.getFlightBodies()) {
+			AxialStage stage = body.stages().get(0);
+			List<AxialStage> group = replayData.getAttachedStages(stage, replayData.getStartTime());
+			List<Double> switchTimes = new ArrayList<>();
+			List<Vector3f> centers = new ArrayList<>();
+			centers.add(stageGroupCenter(scene, Set.copyOf(group), fallbackCenter));
+			for (double time : replayData.getSeparationTimes()) {
+				List<AxialStage> attached = replayData.getAttachedStages(stage, time);
+				if (!attached.equals(group)) {
+					switchTimes.add(time);
+					centers.add(stageGroupCenter(scene, Set.copyOf(attached), fallbackCenter));
+					group = attached;
+				}
+			}
+			BodyCenteredPoseProvider centered = new BodyCenteredPoseProvider(body.provider(), switchTimes, centers);
+			centeredByOriginal.put(body.provider(), centered);
+			bodyCenters.add(centered.getBodyCenter());
+		}
+		Map<AxialStage, PoseProvider> byStage = new LinkedHashMap<>();
+		replayData.getProvidersByStage().forEach((stage, provider) ->
+				byStage.put(stage, centeredByOriginal.getOrDefault(provider, provider)));
+		PoseProvider primary = replayData.getPrimaryProvider();
+		return new CenteredPoses(byStage, centeredByOriginal.getOrDefault(primary, primary), bodyCenters);
+	}
+
+	/** Resolves each flying body to its ground-adjusted trajectory and its own center. */
+	private void collectTrackedBodies(FlightReplayData replayData, GroundedPoseProviders poses,
+			List<Vector3f> bodyCenters) {
+		trackedBodies.clear();
+		List<FlightReplayData.FlightBody> bodies = replayData.getFlightBodies();
+		for (int i = 0; i < bodies.size(); i++) {
+			PoseProvider provider = providerForStage(bodies.get(i).stages().get(0), poses.providersByStage(),
+					poses.primaryProvider());
+			trackedBodies.add(new TrackedBody(provider, bodyCenters.get(i)));
+		}
+		trackedBodyIndex = 0;
+	}
+
+	private record CenteredPoses(Map<AxialStage, PoseProvider> providersByStage, PoseProvider primaryProvider,
+			List<Vector3f> bodyCenters) {
+	}
+
+	/** Center of the rocket-local bounds of every object in the given stages, or the fallback. */
+	private static Vector3f stageGroupCenter(SceneView scene, Set<AxialStage> stages, Vector3f fallback) {
+		Vector3f min = new Vector3f(Float.POSITIVE_INFINITY);
+		Vector3f max = new Vector3f(Float.NEGATIVE_INFINITY);
+		Vector3f boundsMin = new Vector3f();
+		Vector3f boundsMax = new Vector3f();
+		Vector3f corner = new Vector3f();
+		for (SceneObject object : scene.getObjects()) {
+			Mesh mesh = object.getMesh();
+			// Scenery has no stage, and the immutable set rejects null lookups.
+			AxialStage stage = stageFor(object.getRocketComponent());
+			if (mesh == null || stage == null || !stages.contains(stage)) {
+				continue;
+			}
+			mesh.getBoundsMin(boundsMin);
+			mesh.getBoundsMax(boundsMax);
+			for (int i = 0; i < 8; i++) {
+				corner.set((i & 1) == 0 ? boundsMin.x : boundsMax.x,
+						(i & 2) == 0 ? boundsMin.y : boundsMax.y,
+						(i & 4) == 0 ? boundsMin.z : boundsMax.z);
+				object.getModelMatrix().transformPosition(corner);
+				min.min(corner);
+				max.max(corner);
+			}
+		}
+		if (!Float.isFinite(min.x) || !Float.isFinite(max.x)) {
+			return fallback;
+		}
+		return min.add(max).mul(0.5f);
+	}
+
+	/** The geometric center of the body flying on the given trajectory, or the fallback. */
+	private Vector3f bodyCenterOffset(PoseProvider provider, Vector3f fallback) {
+		for (TrackedBody body : trackedBodies) {
+			if (body.provider() == provider && body.centerOffset() != null) {
+				return body.centerOffset();
+			}
+		}
+		return fallback;
+	}
+
+	/** Tracks another flying body with the follow and pad cameras and the position marker. */
+	void setTrackedBody(int index) {
+		trackedBodyIndex = index;
+		Scene3DOrchestrator orchestrator = activeOrchestrator;
+		if (orchestrator != null) {
+			orchestrator.enqueueGlTask(() -> applyTrackedBody(orchestrator));
+		}
+		requestRenderNow();
+	}
+
+	private void applyTrackedBody(Scene3DOrchestrator orchestrator) {
+		int index = trackedBodyIndex;
+		if (index < 0 || index >= trackedBodies.size()) {
+			return;
+		}
+		TrackedBody body = trackedBodies.get(index);
+		orchestrator.setFlightTrackTarget(body.provider(), body.centerOffset());
+		if (positionMarker != null) {
+			positionMarker.setBasePosition(body.centerOffset() != null ? body.centerOffset() : new Vector3f());
+			positionMarker.setPoseProvider(body.provider());
+		}
+	}
+
+	private record TrackedBody(PoseProvider provider, Vector3f centerOffset) {
 	}
 
 	private record GroundedPoseProviders(Map<AxialStage, PoseProvider> providersByStage,

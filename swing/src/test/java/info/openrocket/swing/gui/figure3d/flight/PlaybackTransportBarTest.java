@@ -17,6 +17,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import java.awt.event.MouseEvent;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -228,6 +230,39 @@ class PlaybackTransportBarTest extends BaseTestCase {
 				assertEquals(originalDelay, manager.getInitialDelay(), "Closing while hovered must restore the delay");
 			} finally {
 				manager.setInitialDelay(originalDelay);
+				bar.dispose();
+			}
+		});
+	}
+
+	@Test
+	void trackedBodyChoiceAppearsOnlyForSeparatingFlightsAndReportsTheBody() throws Exception {
+		SwingUtilities.invokeAndWait(() -> {
+			Rocket rocket = new Rocket();
+			rocket.addChild(new AxialStage());
+			rocket.addChild(new AxialStage());
+			PlaybackTransportBar bar = new PlaybackTransportBar();
+			List<Integer> tracked = new ArrayList<>();
+			bar.setTrackedBodyListener(tracked::add);
+			try {
+				bar.setReplay(new PlaybackClock(0.0, 10.0),
+						new FlightReplayData(new FlightData(replayBranch(0.0, 10.0)), rocket));
+				assertFalse(bar.getTrackedBodyCombo().isVisible(), "A single flying body has nothing to choose");
+
+				FlightDataBranch booster = replayBranch(0.0, 6.0);
+				bar.setReplay(new PlaybackClock(0.0, 10.0),
+						new FlightReplayData(new FlightData(replayBranch(0.0, 10.0), booster), rocket));
+				JComboBox<?> bodies = bar.getTrackedBodyCombo();
+				assertTrue(bodies.isVisible());
+				assertEquals(2, bodies.getItemCount());
+				assertTrue(tracked.isEmpty(), "Loading a replay must not report a user choice");
+
+				bodies.setSelectedIndex(1);
+				assertEquals(List.of(1), tracked);
+
+				bar.clearReplay();
+				assertFalse(bodies.isVisible());
+			} finally {
 				bar.dispose();
 			}
 		});

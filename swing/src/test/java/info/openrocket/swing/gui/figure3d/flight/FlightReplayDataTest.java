@@ -39,6 +39,39 @@ class FlightReplayDataTest extends BaseTestCase {
 	}
 
 	@Test
+	void groupsStagesSharingABranchIntoOneFlightBody() {
+		Rocket rocket = new Rocket();
+		AxialStage stage0 = addStage(rocket);
+		AxialStage stage1 = addStage(rocket);
+		AxialStage stage2 = addStage(rocket);
+
+		FlightReplayData replay = new FlightReplayData(new FlightData(
+				branch("sustainer", 0.0, 10.0, 0.0, 10.0),
+				branch("booster", 2.0, 4.0, 20.0, 40.0)), rocket);
+
+		List<FlightReplayData.FlightBody> bodies = replay.getFlightBodies();
+		assertEquals(2, bodies.size());
+		assertEquals(0, bodies.get(0).branchIndex());
+		assertEquals(List.of(stage0), bodies.get(0).stages());
+		assertSame(replay.getPrimaryProvider(), bodies.get(0).provider());
+		assertEquals(1, bodies.get(1).branchIndex());
+		assertEquals(List.of(stage1, stage2), bodies.get(1).stages());
+		assertSame(replay.getProvidersByStage().get(stage1), bodies.get(1).provider());
+	}
+
+	@Test
+	void singleBranchFlightIsOneBodyWithEveryStage() {
+		Rocket rocket = new Rocket();
+		AxialStage stage0 = addStage(rocket);
+		AxialStage stage1 = addStage(rocket);
+
+		FlightReplayData replay = new FlightReplayData(new FlightData(branch("only", 0.0, 10.0, 0.0, 10.0)), rocket);
+
+		assertEquals(1, replay.getFlightBodies().size());
+		assertEquals(List.of(stage0, stage1), replay.getFlightBodies().get(0).stages());
+	}
+
+	@Test
 	void exposesTimeRangeAcrossAllBranchesAndProvidersClampAtBranchEnds() {
 		Rocket rocket = new Rocket();
 		AxialStage stage0 = addStage(rocket);

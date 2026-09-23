@@ -47,6 +47,7 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 @SuppressWarnings("serial")
 class PlaybackTransportBar extends JPanel {
@@ -81,6 +82,7 @@ class PlaybackTransportBar extends JPanel {
 	private final JComboBox<SpeedOption> speedCombo = new JComboBox<>(
 			Arrays.stream(SPEEDS).mapToObj(SpeedOption::new).toArray(SpeedOption[]::new));
 	private final JComboBox<FlightCameraMode> cameraModeCombo = new JComboBox<>(FlightCameraMode.values());
+	private final JComboBox<TrackedBodyOption> trackedBodyCombo = new JComboBox<>();
 	private final JButton zoomOutButton = new IconButton(Icons.ZOOM_OUT);
 	private final JButton zoomInButton = new IconButton(Icons.ZOOM_IN);
 	private final JButton zoomFitButton = new IconButton(Icons.ZOOM_RESET);
@@ -90,6 +92,7 @@ class PlaybackTransportBar extends JPanel {
 
 	private PlaybackClock clock;
 	private Consumer<FlightCameraMode> cameraModeListener;
+	private IntConsumer trackedBodyListener;
 	private Runnable zoomOutListener;
 	private Runnable zoomInListener;
 	private Runnable zoomFitListener;
@@ -102,6 +105,7 @@ class PlaybackTransportBar extends JPanel {
 	private boolean programmaticUpdate;
 	private double rateBeforeScrub;
 	private boolean updatingEvents;
+	private boolean updatingTrackedBodies;
 
 	PlaybackTransportBar() {
 		setLayout(new BorderLayout(8, 4));
@@ -154,6 +158,16 @@ class PlaybackTransportBar extends JPanel {
 			}
 		});
 		viewControls.add(cameraModeCombo);
+		// Only multi-stage flights have more than one body to choose from.
+		trackedBodyCombo.setVisible(false);
+		trackedBodyCombo.setToolTipText(trans.get("Flight3DFrame.trackedBody.ttip"));
+		trackedBodyCombo.addActionListener(e -> {
+			if (!updatingTrackedBodies && trackedBodyListener != null
+					&& trackedBodyCombo.getSelectedItem() instanceof TrackedBodyOption option) {
+				trackedBodyListener.accept(option.index());
+			}
+		});
+		viewControls.add(trackedBodyCombo);
 
 		zoomOutButton.setToolTipText(trans.get("ScaleSelector.btn.ZoomOut.ttip"));
 		zoomOutButton.addActionListener(e -> runViewAction(zoomOutListener));
@@ -246,6 +260,15 @@ class PlaybackTransportBar extends JPanel {
 		this.cameraModeListener = listener;
 	}
 
+	/** Receives the index into {@link FlightReplayData#getFlightBodies()} of the body to track. */
+	void setTrackedBodyListener(IntConsumer listener) {
+		this.trackedBodyListener = listener;
+	}
+
+	JComboBox<?> getTrackedBodyCombo() {
+		return trackedBodyCombo;
+	}
+
 	void setViewControlListeners(Runnable zoomOutListener, Runnable zoomInListener,
 			Runnable zoomFitListener, Consumer<Boolean> panModeListener) {
 		this.zoomOutListener = zoomOutListener;
@@ -332,6 +355,7 @@ class PlaybackTransportBar extends JPanel {
 		} finally {
 			updatingEvents = false;
 		}
+		setTrackedBodies(replayData != null ? replayData.getFlightBodies() : List.of());
 		setControlsEnabled(clock != null);
 		if (clock == null) {
 			pollTimer.stop();
@@ -361,6 +385,7 @@ class PlaybackTransportBar extends JPanel {
 		}
 		scrubSlider.setMarkers(List.of());
 		scrubSlider.setValue(0);
+		setTrackedBodies(List.of());
 		setControlsEnabled(false);
 		updatePlaybackButton();
 		updateTimeLabel(0.0, 0.0);
@@ -381,6 +406,7 @@ class PlaybackTransportBar extends JPanel {
 		loopButton.setEnabled(enabled);
 		eventCombo.setEnabled(enabled && eventCombo.getItemCount() > 0);
 		cameraModeCombo.setEnabled(enabled);
+		trackedBodyCombo.setEnabled(enabled);
 		trailButton.setEnabled(enabled);
 		exhaustButton.setEnabled(enabled);
 		scrubSlider.setEnabled(enabled);
@@ -395,6 +421,24 @@ class PlaybackTransportBar extends JPanel {
 			}
 		}
 		updatePanControlAvailability();
+	}
+
+	private void setTrackedBodies(List<FlightReplayData.FlightBody> bodies) {
+		updatingTrackedBodies = true;
+		try {
+			trackedBodyCombo.removeAllItems();
+			for (int i = 0; i < bodies.size(); i++) {
+				trackedBodyCombo.addItem(new TrackedBodyOption(i,
+						FlightMetricsPanel.stageGroupName(bodies.get(i).stages())));
+			}
+		} finally {
+			updatingTrackedBodies = false;
+		}
+		boolean visible = bodies.size() > 1;
+		if (trackedBodyCombo.isVisible() != visible) {
+			trackedBodyCombo.setVisible(visible);
+			revalidate();
+		}
 	}
 
 	private void updatePanControlAvailability() {
@@ -626,6 +670,13 @@ class PlaybackTransportBar extends JPanel {
 			return type;
 		}
 		return String.format(trans.get("Flight3DFrame.eventSourceFormat"), type, source.getName());
+	}
+
+	private record TrackedBodyOption(int index, String label) {
+		@Override
+		public String toString() {
+			return label;
+		}
 	}
 
 	private record SpeedOption(double rate) {

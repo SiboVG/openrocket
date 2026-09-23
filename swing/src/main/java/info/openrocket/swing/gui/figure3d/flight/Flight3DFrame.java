@@ -60,6 +60,10 @@ public class Flight3DFrame extends JFrame {
 			metricsPanel.setReplay(currentSimulation, clock, replayData);
 		});
 		transportBar.setCameraModeListener(flightPanel::setCameraMode);
+		transportBar.setTrackedBodyListener(index -> {
+			flightPanel.setTrackedBody(index);
+			metricsPanel.setTrackedBody(index);
+		});
 		transportBar.setViewControlListeners(flightPanel::zoomOut, flightPanel::zoomIn,
 				flightPanel::fitView, flightPanel::setPanModeEnabled);
 		transportBar.setReplayChangeListener(flightPanel::requestRenderNow);

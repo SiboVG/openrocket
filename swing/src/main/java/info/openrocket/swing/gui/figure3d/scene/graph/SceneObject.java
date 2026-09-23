@@ -288,6 +288,18 @@ public class SceneObject {
 		return poseProvider != null;
 	}
 
+	/**
+	 * Moves the object's unposed origin. A pose provider keeps applying on top of it, so an
+	 * animated object moves to the new offset on its next posed frame.
+	 */
+	public void setBasePosition(Vector3f position) {
+		if (baseModelSnapshot != null) {
+			baseModelSnapshot.setTranslation(position);
+		} else {
+			modelMatrix.setTranslation(position);
+		}
+	}
+
 	public void clearPoseProvider() {
 		this.poseProvider = null;
 		if (baseModelSnapshot != null) {

@@ -1,7 +1,14 @@
 package info.openrocket.swing.gui.figure3d.flight;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
+import info.openrocket.core.database.motor.MotorDatabase;
+import info.openrocket.core.database.motor.ThrustCurveMotorSQLiteDatabase;
+import info.openrocket.core.database.motor.ThrustCurveMotorSetDatabase;
+import info.openrocket.core.document.OpenRocketDocument;
 import info.openrocket.core.document.Simulation;
+import info.openrocket.core.file.GeneralRocketLoader;
+import info.openrocket.core.simulation.FlightEvent;
 import info.openrocket.core.plugin.PluginModule;
 import info.openrocket.core.startup.Application;
 import info.openrocket.swing.ServicesForTesting;
@@ -23,9 +30,13 @@ import java.awt.Container;
 import java.awt.GraphicsEnvironment;
 import java.awt.Window;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -47,37 +58,11 @@ class FlightReplayRenderTest {
 		Simulation simulation = new Simulation(document, document.getRocket());
 		simulation.setName("Alpha III replay");
 		simulation.simulate();
-		Flight3DFrame frame = onEdt(() -> {
-			Flight3DFrame.openForSimulation(document, simulation, null);
-			for (Window window : Window.getWindows()) {
-				if (window instanceof Flight3DFrame result && result.isShowing()) {
-					result.setSize(1024, 768);
-					return result;
-				}
-			}
-			throw new AssertionError("Replay window was not opened");
-		});
+		Flight3DFrame frame = openReplay(document, simulation);
 		try {
 			Flight3DPanel panel = onEdt(() -> find(frame, Flight3DPanel.class));
 			PlaybackTransportBar bar = onEdt(() -> find(frame, PlaybackTransportBar.class));
-			CompletableFuture<GLScenePanel> ready = new CompletableFuture<>();
-			Timer timer = onEdt(() -> {
-				Timer poll = new Timer(50, event -> {
-					if (bar.getPlayPauseButton().isEnabled()) {
-						((Timer) event.getSource()).stop();
-						ready.complete(find(panel, GLScenePanel.class));
-					}
-				});
-				poll.start();
-				return poll;
-			});
-			GLScenePanel canvas;
-			try {
-				canvas = ready.get(25, TimeUnit.SECONDS);
-			} finally {
-				onEdt(() -> { timer.stop(); return null; });
-			}
-			assertNotNull(canvas);
+			GLScenePanel canvas = awaitReplay(panel, bar);
 			PlaybackClock clock = canvas.getScene3DOrchestrator().getPlaybackClock();
 			onEdt(() -> {
 				clock.setRate(0.0);
@@ -187,6 +172,106 @@ class FlightReplayRenderTest {
 						.mapToInt(emitter -> emitter.getParticles().size()).sum()));
 		panel.requestRenderNow();
 		return result.get(10, TimeUnit.SECONDS);
+	}
+
+	@Test
+	void separatedBoosterCanBeTrackedInFollowView() throws Exception {
+		Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+		ThrustCurveMotorSetDatabase motors = bundledMotorDatabase();
+		Application.setInjector(Guice.createInjector(new ServicesForTesting(), new PluginModule(), new AbstractModule() {
+			@Override
+			protected void configure() {
+				bind(MotorDatabase.class).toInstance(motors);
+			}
+		}));
+		OpenRocketDocument document;
+		String resource = "/datafiles/examples/Two stage high power rocket.ork";
+		try (InputStream stream = Objects.requireNonNull(GeneralRocketLoader.class.getResourceAsStream(resource))) {
+			document = new GeneralRocketLoader(new File("Two stage high power rocket.ork"))
+					.load(stream, "Two stage high power rocket.ork");
+		}
+		Simulation simulation = document.getSimulation(0);
+		simulation.simulate();
+		var data = simulation.getSimulatedData();
+		double separation = data.getBranches().stream().flatMap(branch -> branch.getEvents().stream())
+				.filter(event -> event.getType() == FlightEvent.Type.STAGE_SEPARATION)
+				.mapToDouble(FlightEvent::getTime).min()
+				.orElseThrow(() -> new AssertionError("No separation in " + data.getBranchCount() + " branch(es) of "
+						+ simulation.getName() + ": " + data.getBranch(0).getEvents()));
+		Flight3DFrame frame = openReplay(document, simulation);
+		try {
+			Flight3DPanel panel = onEdt(() -> find(frame, Flight3DPanel.class));
+			PlaybackTransportBar bar = onEdt(() -> find(frame, PlaybackTransportBar.class));
+			GLScenePanel canvas = awaitReplay(panel, bar);
+			PlaybackClock clock = canvas.getScene3DOrchestrator().getPlaybackClock();
+			assertTrue(onEdt(() -> bar.getTrackedBodyCombo().isVisible()), "A two-stage flight must offer a choice");
+			for (int body = 0; body < 2; body++) {
+				int index = body;
+				onEdt(() -> {
+					clock.setRate(0.0);
+					clock.setTime(separation + 3.0);
+					bar.getCameraModeCombo().setSelectedItem(FlightCameraMode.FOLLOW);
+					bar.getTrackedBodyCombo().setSelectedIndex(index);
+					panel.requestRenderNow();
+					return null;
+				});
+				capture(canvas, "flight-track-settling-" + index + ".png");
+				capture(canvas, "flight-track-body-" + index + ".png");
+			}
+		} finally {
+			onEdt(() -> { frame.dispose(); return null; });
+		}
+	}
+
+	/** The motors bundled with OpenRocket, which the example rocket's configurations refer to. */
+	private static ThrustCurveMotorSetDatabase bundledMotorDatabase() throws Exception {
+		Path copy = Files.createTempFile("flight-replay-motors", ".db");
+		try {
+			try (InputStream stream = Objects.requireNonNull(
+					GeneralRocketLoader.class.getResourceAsStream("/datafiles/thrustcurves/initial_motors.db"))) {
+				Files.copy(stream, copy, StandardCopyOption.REPLACE_EXISTING);
+			}
+			ThrustCurveMotorSetDatabase database = new ThrustCurveMotorSetDatabase();
+			ThrustCurveMotorSQLiteDatabase.readDatabase(copy.toFile()).forEach(database::addMotor);
+			return database;
+		} finally {
+			Files.deleteIfExists(copy);
+		}
+	}
+
+	private static Flight3DFrame openReplay(OpenRocketDocument document, Simulation simulation) throws Exception {
+		return onEdt(() -> {
+			Flight3DFrame.openForSimulation(document, simulation, null);
+			for (Window window : Window.getWindows()) {
+				if (window instanceof Flight3DFrame result && result.isShowing()) {
+					result.setSize(1024, 768);
+					return result;
+				}
+			}
+			throw new AssertionError("Replay window was not opened");
+		});
+	}
+
+	/** Waits until the replay's transport is live and returns its canvas. */
+	private static GLScenePanel awaitReplay(Flight3DPanel panel, PlaybackTransportBar bar) throws Exception {
+		CompletableFuture<GLScenePanel> ready = new CompletableFuture<>();
+		Timer timer = onEdt(() -> {
+			Timer poll = new Timer(50, event -> {
+				if (bar.getPlayPauseButton().isEnabled()) {
+					((Timer) event.getSource()).stop();
+					ready.complete(find(panel, GLScenePanel.class));
+				}
+			});
+			poll.start();
+			return poll;
+		});
+		try {
+			GLScenePanel canvas = ready.get(25, TimeUnit.SECONDS);
+			assertNotNull(canvas);
+			return canvas;
+		} finally {
+			onEdt(() -> { timer.stop(); return null; });
+		}
 	}
 
 	private static BufferedImage capture(GLScenePanel canvas, String name) throws Exception {

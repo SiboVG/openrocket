@@ -32,6 +32,7 @@ public final class FlightReplayData {
 	private final Map<UUID, Double> groundHitByDeploymentId;
 	private final Map<AxialStage, List<BurnInterval>> burnIntervalsByStage;
 	private final List<BurnInterval> burnIntervals;
+	private final List<FlightBody> flightBodies;
 
 	public FlightReplayData(FlightData data, Rocket rocket) {
 		if (data == null) {
@@ -50,6 +51,7 @@ public final class FlightReplayData {
 		sortedStages.sort(Comparator.comparingInt(AxialStage::getStageNumber));
 		this.stages = List.copyOf(sortedStages);
 		this.providersByStage = Map.copyOf(mapProvidersToStages(stages, branchProviders));
+		this.flightBodies = List.copyOf(collectFlightBodies(stages, providersByStage, branchProviders));
 		this.eventsByBranchStage = Collections.unmodifiableMap(collectEventsByBranchStage(branchProviders));
 		this.startTime = branchProviders.stream()
 				.mapToDouble(branch -> branch.provider().getStartTime())
@@ -68,6 +70,11 @@ public final class FlightReplayData {
 
 	public Map<AxialStage, PoseProvider> getProvidersByStage() {
 		return providersByStage;
+	}
+
+	/** The separately flying bodies, primary (branch 0) first. A single-stage rocket has one. */
+	public List<FlightBody> getFlightBodies() {
+		return flightBodies;
 	}
 
 	public PoseProvider getPrimaryProvider() {
@@ -101,6 +108,26 @@ public final class FlightReplayData {
 		return burnIntervals;
 	}
 
+	/** Times at which a stage separates, ascending and without duplicates. */
+	public List<Double> getSeparationTimes() {
+		return allEvents.stream()
+				.filter(event -> event.getType() == FlightEvent.Type.STAGE_SEPARATION)
+				.map(FlightEvent::getTime)
+				.distinct()
+				.sorted()
+				.toList();
+	}
+
+	/** The stages attached to the given stage at the given time, including itself. */
+	public List<AxialStage> getAttachedStages(AxialStage stage, double time) {
+		for (List<AxialStage> group : connectedStageGroups(time)) {
+			if (group.contains(stage)) {
+				return group;
+			}
+		}
+		return List.of(stage);
+	}
+
 	/** Returns the current flight phase of each connected group of stages. */
 	public List<StageStatus> getStageStatuses(double time) {
 		List<StageStatus> statuses = new ArrayList<>();
@@ -127,6 +154,20 @@ public final class FlightReplayData {
 			result.put(stage, findProviderForStage(stage.getStageNumber(), branchProviders));
 		}
 		return result;
+	}
+
+	private static List<FlightBody> collectFlightBodies(List<AxialStage> stages,
+			Map<AxialStage, PoseProvider> providersByStage, List<BranchProvider> branchProviders) {
+		List<FlightBody> bodies = new ArrayList<>();
+		for (BranchProvider branch : branchProviders) {
+			List<AxialStage> members = stages.stream()
+					.filter(stage -> providersByStage.get(stage) == branch.provider())
+					.toList();
+			if (!members.isEmpty()) {
+				bodies.add(new FlightBody(branch.stageNumber(), members, branch.provider()));
+			}
+		}
+		return bodies;
 	}
 
 	private static Map<Integer, List<FlightEvent>> collectEventsByBranchStage(
@@ -383,6 +424,16 @@ public final class FlightReplayData {
 				intervals.add(new BurnInterval(activeStart, replayEndTime));
 				activeBurns = 0;
 			}
+		}
+	}
+
+	/**
+	 * A part of the rocket that flies on its own simulation branch after separation: the stages
+	 * sharing that branch's trajectory. Before separation every body rides the whole stack.
+	 */
+	public record FlightBody(int branchIndex, List<AxialStage> stages, PoseProvider provider) {
+		public FlightBody {
+			stages = List.copyOf(stages);
 		}
 	}
 

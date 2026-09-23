@@ -76,7 +76,10 @@ public class Scene3DOrchestrator {
 
 	private long lastFrameTime;
 	private volatile PlaybackClock playbackClock = null;
-	private volatile PoseProvider flightPrimaryPoseProvider = null;
+	// The body the follow and pad cameras track, with the offset from its pose origin to its
+	// geometric center, so the cameras aim at the body's middle instead of its nose. Published
+	// together so a switch never pairs one body's trajectory with another's center.
+	private volatile FlightTrackTarget flightTrackTarget = null;
 	private final Vector3f followPanOffset = new Vector3f();
 	private volatile FlightCameraBehavior flightCameraBehavior = FlightCameraBehavior.FREE;
 	// World-space eye position for the PAD behavior.
@@ -88,9 +91,6 @@ public class Scene3DOrchestrator {
 	private float lastAppliedPadDistance = Float.NaN;
 	private float padReferenceDistance = Float.NaN;
 	private float flightBaseFieldOfView = Float.NaN;
-	// Engine-CS offset from the rocket's origin (nose) to its geometric center, so the follow
-	// camera orbits the rocket's middle instead of its tip.
-	private volatile Vector3f flightRocketCenterOffset = null;
 	private volatile Vector3f flightTrajectoryCenter = null;
 	private volatile Vector3f flightTrajectoryDimensions = null;
 	private volatile boolean pendingTrajectoryFit = false;
@@ -225,7 +225,7 @@ public class Scene3DOrchestrator {
 					obj.applyPoseAtTime(t);
 				}
 			}
-			PoseProvider primaryProvider = flightPrimaryPoseProvider;
+			FlightTrackTarget target = flightTrackTarget;
 			Camera camera = cameraController.getCamera();
 			FlightCameraBehavior behavior = flightCameraBehavior;
 			if (behavior != FlightCameraBehavior.PAD && Float.isFinite(flightBaseFieldOfView)
@@ -233,8 +233,8 @@ public class Scene3DOrchestrator {
 				// Leaving the telephoto view: restore the lens before any fit uses it.
 				camera.setFieldOfView(flightBaseFieldOfView);
 			}
-			if (behavior != FlightCameraBehavior.FREE && primaryProvider != null) {
-				Vector3f pivot = flightPivot(primaryProvider, t);
+			if (behavior != FlightCameraBehavior.FREE && target != null) {
+				Vector3f pivot = target.pivotAt(t);
 				if (behavior == FlightCameraBehavior.PAD) {
 					Vector3f eye = flightPadEye;
 					if (eye != null) {
@@ -242,7 +242,7 @@ public class Scene3DOrchestrator {
 							pendingPadZoomReset = false;
 							flightPadZoomScale = 1.0f;
 							lastAppliedPadDistance = Float.NaN;
-							padReferenceDistance = eye.distance(flightPivot(primaryProvider, playbackClock.getStart()));
+							padReferenceDistance = eye.distance(target.pivotAt(playbackClock.getStart()));
 							if (!Float.isFinite(flightBaseFieldOfView)) {
 								flightBaseFieldOfView = camera.getFieldOfView();
 							}
@@ -533,7 +533,8 @@ public class Scene3DOrchestrator {
 				obj.setPoseProvider(providerOrPrimary(component, providersByStage, primaryProvider));
 			}
 		});
-		this.flightPrimaryPoseProvider = primaryProvider;
+		FlightTrackTarget current = flightTrackTarget;
+		this.flightTrackTarget = new FlightTrackTarget(primaryProvider, current != null ? current.centerOffset() : null);
 		this.playbackClock = new PlaybackClock(startTime, endTime);
 	}
 
@@ -615,14 +616,19 @@ public class Scene3DOrchestrator {
 		enqueueGlTask(() -> cameraController.handleScroll(scrollAmount));
 	}
 
-	/** The tracked rocket's geometric center at the given time. */
-	private Vector3f flightPivot(PoseProvider provider, double time) {
-		Vector3f pivot = provider.getPosition(time);
-		Vector3f centerOffset = flightRocketCenterOffset;
-		if (centerOffset != null) {
-			pivot.add(provider.getOrientation(time).transform(new Vector3f(centerOffset)));
+	private record FlightTrackTarget(PoseProvider provider, Vector3f centerOffset) {
+		private FlightTrackTarget {
+			centerOffset = centerOffset != null ? new Vector3f(centerOffset) : null;
 		}
-		return pivot;
+
+		/** The tracked body's geometric center at the given time. */
+		private Vector3f pivotAt(double time) {
+			Vector3f pivot = provider.getPosition(time);
+			if (centerOffset != null) {
+				pivot.add(provider.getOrientation(time).transform(new Vector3f(centerOffset)));
+			}
+			return pivot;
+		}
 	}
 
 	/**
@@ -673,7 +679,21 @@ public class Scene3DOrchestrator {
 
 	/** Engine-CS offset from the rocket origin to its geometric center for the follow-camera pivot. */
 	public void setFlightRocketCenterOffset(Vector3f offset) {
-		this.flightRocketCenterOffset = offset != null ? new Vector3f(offset) : null;
+		FlightTrackTarget current = flightTrackTarget;
+		if (current != null) {
+			this.flightTrackTarget = new FlightTrackTarget(current.provider(), offset);
+		}
+	}
+
+	/**
+	 * Points the follow and pad cameras at another flying body: its trajectory and the offset
+	 * from its pose origin to its geometric center. The follow view keeps its pan and zoom.
+	 */
+	public void setFlightTrackTarget(PoseProvider provider, Vector3f centerOffset) {
+		if (provider == null) {
+			throw new IllegalArgumentException("provider is null");
+		}
+		this.flightTrackTarget = new FlightTrackTarget(provider, centerOffset);
 	}
 
 	/**
