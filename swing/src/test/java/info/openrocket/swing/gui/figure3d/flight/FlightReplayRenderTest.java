@@ -114,7 +114,7 @@ class FlightReplayRenderTest {
 			});
 			capture(canvas, "flight-overview.png");
 			assertTrue(exhaustCount(canvas, panel) > 0);
-			for (FlightCameraMode mode : List.of(FlightCameraMode.PAD, FlightCameraMode.OVERVIEW)) {
+			for (FlightCameraMode mode : List.of(FlightCameraMode.PAD, FlightCameraMode.FOLLOW, FlightCameraMode.OVERVIEW)) {
 				onEdt(() -> {
 					bar.getCameraModeCombo().setSelectedItem(mode);
 					bar.getTrailButton().doClick();
@@ -134,6 +134,9 @@ class FlightReplayRenderTest {
 			}
 			onEdt(() -> {
 				clock.setRate(0.0);
+				// The test translator renders labels as long "[Class.key]" placeholders; give the
+				// checkbox sharing the timeline row its real label so the width check is realistic.
+				bar.getLoopButton().setText("Loop");
 				bar.setSize(frame.getWidth(), bar.getPreferredSize().height);
 				bar.doLayout();
 				BufferedImage image = new BufferedImage(bar.getWidth(), bar.getHeight(), BufferedImage.TYPE_INT_ARGB);

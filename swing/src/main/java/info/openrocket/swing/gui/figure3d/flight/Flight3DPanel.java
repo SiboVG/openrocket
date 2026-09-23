@@ -29,6 +29,7 @@ import info.openrocket.swing.gui.figure3d.particles.smoke.SmokeSettings;
 import info.openrocket.swing.gui.figure3d.materials.Appearance3D;
 import info.openrocket.swing.gui.figure3d.rendering.backgrounds.GradientBackground;
 import info.openrocket.swing.gui.figure3d.scene.controllers.CameraControls;
+import info.openrocket.swing.gui.figure3d.scene.graph.Camera;
 import info.openrocket.swing.gui.figure3d.scene.graph.SceneObject;
 import info.openrocket.swing.gui.figure3d.scene.graph.SceneView;
 import info.openrocket.swing.gui.figure3d.scene.orchestration.Scene3DOrchestrator;
@@ -142,6 +143,10 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private float trailDecorationScale = 1.0f;
 	private float trailDecorationRadius = 1.0f;
 	private float overviewFitDistance = Float.NaN;
+	private float followTrailScale = MIN_DECORATION_SCALE;
+	// The orbit angles the replay opened with, restored by the reset-view button.
+	private volatile float initialCameraAngleX;
+	private volatile float initialCameraAngleY;
 	private double lastRebuildFraction = -1.0;
 
 	private record TrailPath(List<Vector3f> points, List<Vector3f> ringFrames, boolean active,
@@ -482,9 +487,13 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 				replayData.getStartTime(), replayData.getEndTime());
 		buildTrajectoryTrails(scene, groundedPoses, rocketCenterOffset,
 				replayData.getStartTime(), replayData.getEndTime());
+		followTrailScale = followTrailScale(rocketLengthWorld(orchestrator), trailRadius);
 		addEventMarkers(scene, replayData, groundedPoses.primaryProvider(), rocketCenterOffset);
 		buildExhaustGeometry(scene, orchestrator, config, groundedPoses,
 				replayData, burnTimeline, rocketCenterOffset);
+		Camera camera = orchestrator.getCameraController().getCamera();
+		initialCameraAngleX = camera.getAngleX();
+		initialCameraAngleY = camera.getAngleY();
 		applyCameraMode(orchestrator, cameraMode);
 
 		PlaybackClock clock = orchestrator.getPlaybackClock();
@@ -548,9 +557,17 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		}
 	}
 
+	/** Resets the current camera mode's view, including any orbit the user applied. */
 	void fitView() {
 		Scene3DOrchestrator orchestrator = activeOrchestrator;
 		if (orchestrator != null) {
+			// Queued before the mode's refit, which then frames the view from the original angles.
+			orchestrator.enqueueGlTask(() -> {
+				Camera camera = orchestrator.getCameraController().getCamera();
+				camera.setAngleX(initialCameraAngleX);
+				camera.setAngleY(initialCameraAngleY);
+				camera.resetViewOffset();
+			});
 			applyCameraMode(orchestrator, cameraMode);
 			requestRenderNow();
 		}
@@ -570,8 +587,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		trailVisible = visible;
 		Scene3DOrchestrator orchestrator = activeOrchestrator;
 		if (orchestrator != null) {
-			orchestrator.enqueueGlTask(() -> setTrailDecorationsVisible(isDistantView(),
-					cameraMode == FlightCameraMode.OVERVIEW));
+			orchestrator.enqueueGlTask(() -> setTrailDecorationsVisible(cameraMode == FlightCameraMode.OVERVIEW));
 		}
 		requestRenderNow();
 	}
@@ -582,15 +598,13 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	}
 
 	private void applyCameraMode(Scene3DOrchestrator orchestrator, FlightCameraMode mode) {
-		// The path trail runs through the rocket's center, so it clips the rocket up close:
-		// show it only in the distant views, and the position marker only in the overview.
-		boolean distantView = mode == FlightCameraMode.OVERVIEW || mode == FlightCameraMode.PAD;
+		// The position marker is sized for the trajectory scale and would dwarf the rocket up
+		// close, so it shows only in the overview. The trail follows its checkbox in every mode;
+		// the next frame resizes it for the new camera.
 		boolean markerView = mode == FlightCameraMode.OVERVIEW;
 		orchestrator.enqueueGlTask(() -> {
-			setTrailDecorationsVisible(distantView, markerView);
-			if (distantView) {
-				lastRebuildFraction = -1.0;
-			}
+			setTrailDecorationsVisible(markerView);
+			lastRebuildFraction = -1.0;
 		});
 		orchestrator.setFlightPanEnabled(mode != FlightCameraMode.PAD);
 
@@ -1164,19 +1178,11 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		}
 	}
 
-	// The trajectory decorations show in the distant views; the rocket position marker only
-	// in the whole-flight overview (up close the rocket itself is visible and the marker,
-	// sized for the trajectory scale, would dwarf it).
-	private boolean isDistantView() {
-		return cameraMode == FlightCameraMode.OVERVIEW || cameraMode == FlightCameraMode.PAD;
-	}
-
-	private void setTrailDecorationsVisible(boolean trailsVisible, boolean markerVisible) {
-		trailsVisible &= trailVisible;
-		trailsShown = trailsVisible;
+	private void setTrailDecorationsVisible(boolean markerVisible) {
+		trailsShown = trailVisible;
 		applyTrailVisibility();
 		for (SceneObject marker : eventMarkers) {
-			marker.setVisible(trailsVisible);
+			marker.setVisible(trailVisible);
 		}
 		if (positionMarker != null) {
 			positionMarker.setVisible(markerVisible);
@@ -1190,7 +1196,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private void addEventMarkers(SceneView scene, FlightReplayData replayData, PoseProvider primary,
 			Vector3f centerOffset) {
 		eventMarkers.clear();
-		boolean visible = isDistantView() && trailVisible;
+		boolean visible = trailVisible;
 		for (var event : FlightEventMarkers.selectDisplayEvents(replayData.getAllEvents())) {
 			double t = event.getTime();
 			if (t < replayData.getStartTime() || t > replayData.getEndTime()) {
@@ -1251,9 +1257,6 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	// playback time changes so its elapsed/upcoming split stays exactly aligned with the rocket.
 	private void onFlightFrame(double time) {
 		updateExhaust(time);
-		if (!isDistantView()) {
-			return;
-		}
 		Scene3DOrchestrator orchestrator = activeOrchestrator;
 		PlaybackClock clock = playbackClock;
 		if (orchestrator == null || clock == null || trailPaths.isEmpty()) {
@@ -1267,6 +1270,10 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			overviewFitDistance = cameraDistance;
 		}
 		float scale = decorationScale(cameraDistance, overviewFitDistance);
+		if (cameraMode == FlightCameraMode.FOLLOW) {
+			// The trail runs through the rocket's center; up close keep it a thin guide line.
+			scale = Math.min(scale, followTrailScale);
+		}
 		boolean scaleChanged = relativeDifference(scale, trailDecorationScale)
 				>= DECORATION_SCALE_REBUILD_THRESHOLD;
 		if (!trailRebuildRequired(fraction, lastRebuildFraction, scaleChanged)) {
@@ -1283,6 +1290,14 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		} else {
 			updateTrailSplit(orchestrator.getScene(), fraction);
 		}
+	}
+
+	/** Decoration scale that makes the trail about 1% of the rocket's length thick in the follow view. */
+	static float followTrailScale(float rocketLength, float trailRadius) {
+		if (!Float.isFinite(rocketLength) || rocketLength <= 0.0f || !Float.isFinite(trailRadius) || trailRadius <= 0.0f) {
+			return MIN_DECORATION_SCALE;
+		}
+		return Math.min(1.0f, rocketLength * 0.01f / trailRadius);
 	}
 
 	static float decorationScale(float cameraDistance, float overviewDistance) {
@@ -1326,7 +1341,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			removeAndCleanupObjects(scene, geometry.upcomingChunks);
 		}
 		trailGeometries.clear();
-		trailsShown = isDistantView() && trailVisible;
+		trailsShown = trailVisible;
 
 		for (TrailPath trail : trailPaths) {
 			List<Vector3f> points = trail.points();
@@ -1479,9 +1494,10 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private void addGroundReference(SceneView scene, FlightData data) {
 		float size = computeGroundSize(data);
 		// CLOCKWISE winding makes the plane's up-facing side the front face (same as
-		// TerrainGenerator), so the ground is visible from above instead of culled.
-		Mesh groundMesh = PlaneGenerator.create(size, size, 1.0f, 1.0f,
-				GeometryConstants.WindingOrder.CLOCKWISE);
+		// TerrainGenerator). Double-sided so an orbit below the ground still shows it
+		// instead of culling it away.
+		Mesh groundMesh = doubleSided(PlaneGenerator.create(size, size, 1.0f, 1.0f,
+				GeometryConstants.WindingOrder.CLOCKWISE));
 		Appearance3D groundAppearance = new Appearance3D(new Vector3f(0.22f, 0.30f, 0.20f));
 		groundAppearance.setUnlit(true);
 		groundAppearance.setShine(0.05f);

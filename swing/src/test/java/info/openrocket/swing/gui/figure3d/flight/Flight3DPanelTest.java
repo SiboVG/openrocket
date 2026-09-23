@@ -107,6 +107,14 @@ class Flight3DPanelTest {
 	}
 
 	@Test
+	void followTrailIsAThinLineRelativeToTheRocket() {
+		// A 20-unit rocket on a flight whose trail is 18 units thick: 1% of the length is 0.2.
+		assertEquals(0.2f / 18.0f, Flight3DPanel.followTrailScale(20.0f, 18.0f), 1e-6f);
+		assertEquals(1.0f, Flight3DPanel.followTrailScale(20.0f, 0.05f), "Never thicken a thin trail");
+		assertTrue(Flight3DPanel.followTrailScale(Float.NaN, 18.0f) > 0.0f);
+	}
+
+	@Test
 	void trailChunksCoverEverySegmentAndShareEndSamples() {
 		int points = 241;
 		int chunks = Flight3DPanel.trailChunkCount(points);
