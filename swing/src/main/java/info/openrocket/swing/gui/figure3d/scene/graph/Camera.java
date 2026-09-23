@@ -3,6 +3,7 @@ package info.openrocket.swing.gui.figure3d.scene.graph;
 import info.openrocket.core.util.MathUtil;
 import info.openrocket.swing.gui.figure3d.constants.CameraConstants;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 /** Orbit camera supporting perspective and orthographic projection. */
@@ -283,6 +284,87 @@ public class Camera {
 		distance = MathUtil.clamp(distance, minZoom, maxZoom);
 
 		updateProjectionMatrix();
+	}
+
+	/**
+	 * A snapshot of the camera's placement, lens and zoom range, for animating between views.
+	 */
+	public record Pose(Vector3f centerOfInterest, Vector3f viewOffset, float distance, float angleX, float angleY,
+			float fieldOfView, float minZoom, float maxZoom) {
+		public Pose {
+			centerOfInterest = new Vector3f(centerOfInterest);
+			viewOffset = new Vector3f(viewOffset);
+		}
+
+		/**
+		 * Interpolates between two poses as a camera move: the look-at point travels in a straight
+		 * line, the viewing direction turns the shortest way, and the distance changes
+		 * geometrically so a zoom across orders of magnitude moves evenly. The eye never drops
+		 * below the lower of the two eye heights, so a move from a ground-level view to a view
+		 * from above cannot dip under the ground. The zoom range is the destination's.
+		 */
+		public static Pose blend(Pose from, Pose to, float amount) {
+			if (amount <= 0.0f) {
+				return from;
+			}
+			if (amount >= 1.0f) {
+				return to;
+			}
+			Vector3f lookAt = from.lookAt().lerp(to.lookAt(), amount);
+			Vector3f fromDirection = from.eyeDirection();
+			Quaternionf turn = new Quaternionf().slerp(new Quaternionf().rotationTo(fromDirection, to.eyeDirection()),
+					amount);
+			float distance = from.distance > 0.0f && to.distance > 0.0f
+					? (float) Math.exp(Math.log(from.distance) + (Math.log(to.distance) - Math.log(from.distance)) * amount)
+					: from.distance + (to.distance - from.distance) * amount;
+			Vector3f eye = turn.transform(fromDirection).mul(distance).add(lookAt);
+			eye.y = Math.max(eye.y, Math.min(from.eye().y, to.eye().y));
+
+			Vector3f toEye = eye.sub(lookAt);
+			float eyeDistance = Math.max(toEye.length(), 1.0e-4f);
+			toEye.div(eyeDistance);
+			Vector3f viewOffset = new Vector3f(from.viewOffset).lerp(to.viewOffset, amount);
+			return new Pose(lookAt.sub(viewOffset, new Vector3f()), viewOffset, eyeDistance,
+					(float) Math.atan2(toEye.x, toEye.z),
+					(float) Math.asin(Math.max(-1.0f, Math.min(1.0f, toEye.y))),
+					from.fieldOfView + (to.fieldOfView - from.fieldOfView) * amount,
+					to.minZoom, to.maxZoom);
+		}
+
+		private Vector3f lookAt() {
+			return new Vector3f(centerOfInterest).add(viewOffset);
+		}
+
+		/** Unit vector from the look-at point to the eye, as {@link Camera#update()} places it. */
+		private Vector3f eyeDirection() {
+			float cosPitch = (float) Math.cos(angleY);
+			return new Vector3f((float) Math.sin(angleX) * cosPitch, (float) Math.sin(angleY),
+					(float) Math.cos(angleX) * cosPitch);
+		}
+
+		private Vector3f eye() {
+			return eyeDirection().mul(distance).add(lookAt());
+		}
+	}
+
+	public Pose capturePose() {
+		return new Pose(centerOfInterest, viewOffset, distance, angleX, angleY, fov, minZoom, maxZoom);
+	}
+
+	/** Restores a captured pose exactly, without clamping its distance to the current zoom range. */
+	public void restorePose(Pose pose) {
+		if (!fixedCenterOfInterest) {
+			centerOfInterest.set(pose.centerOfInterest());
+		}
+		viewOffset.set(pose.viewOffset());
+		minZoom = pose.minZoom();
+		maxZoom = pose.maxZoom();
+		distance = pose.distance();
+		angleX = pose.angleX();
+		angleY = pose.angleY();
+		fov = pose.fieldOfView();
+		updateProjectionMatrix();
+		updateViewMatrix();
 	}
 
 	/**

@@ -368,7 +368,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	@Override
 	public boolean shouldRenderOnTick() {
 		PlaybackClock clock = playbackClock;
-		if (clock != null && clock.getRate() != 0.0) {
+		Scene3DOrchestrator orchestrator = activeOrchestrator;
+		if ((clock != null && clock.getRate() != 0.0)
+				|| (orchestrator != null && orchestrator.isFlightCameraTransitioning())) {
 			dirty.set(false);
 			return true;
 		}
@@ -525,6 +527,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		initialCameraAngleY = camera.getAngleY();
 		initialCameraFieldOfView = camera.getFieldOfView();
 		applyCameraMode(orchestrator, cameraMode);
+		orchestrator.skipFlightCameraTransition();
 
 		PlaybackClock clock = orchestrator.getPlaybackClock();
 		if (clock != null) {
@@ -568,6 +571,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	 * set volatile flags applied on the render thread.
 	 */
 	void setCameraMode(FlightCameraMode mode) {
+		FlightCameraMode previous = this.cameraMode;
 		this.cameraMode = mode;
 		if (mode == FlightCameraMode.PAD) {
 			setPanModeEnabled(false);
@@ -578,8 +582,23 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		}
 		Scene3DOrchestrator orchestrator = panel.getScene3DOrchestrator();
 		if (orchestrator != null) {
+			if (previous == FlightCameraMode.PAD && mode != FlightCameraMode.PAD) {
+				// The pad view's angles look steeply up from the ground; kept, they would put the
+				// orbiting views' eye far below it. Start them from the replay's opening angles.
+				restoreInitialCameraAngles(orchestrator);
+			}
 			applyCameraMode(orchestrator, mode);
 		}
+	}
+
+	/** Queued before a mode's refit, which then frames its view from the original angles. */
+	private void restoreInitialCameraAngles(Scene3DOrchestrator orchestrator) {
+		orchestrator.enqueueGlTask(() -> {
+			Camera camera = orchestrator.getCameraController().getCamera();
+			camera.setAngleX(initialCameraAngleX);
+			camera.setAngleY(initialCameraAngleY);
+			camera.resetViewOffset();
+		});
 	}
 
 	FlightCameraMode getCameraMode() {
@@ -606,13 +625,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	void fitView() {
 		Scene3DOrchestrator orchestrator = activeOrchestrator;
 		if (orchestrator != null) {
-			// Queued before the mode's refit, which then frames the view from the original angles.
-			orchestrator.enqueueGlTask(() -> {
-				Camera camera = orchestrator.getCameraController().getCamera();
-				camera.setAngleX(initialCameraAngleX);
-				camera.setAngleY(initialCameraAngleY);
-				camera.resetViewOffset();
-			});
+			restoreInitialCameraAngles(orchestrator);
 			applyCameraMode(orchestrator, cameraMode);
 			requestRenderNow();
 		}
@@ -1322,7 +1335,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		// A narrowed (telephoto) lens magnifies like moving closer; size decorations by that.
 		float cameraDistance = camera.getDistance() * (float) (Math.tan(camera.getFieldOfView() / 2.0)
 				/ Math.tan(initialCameraFieldOfView / 2.0));
-		if (cameraMode == FlightCameraMode.OVERVIEW && cameraControls.isZoomFitting()) {
+		// A camera transition shows interpolated distances, not the overview's fit.
+		if (cameraMode == FlightCameraMode.OVERVIEW && cameraControls.isZoomFitting()
+				&& !orchestrator.isFlightCameraTransitioning()) {
 			overviewFitDistance = cameraDistance;
 		}
 		float scale = decorationScale(cameraDistance, overviewFitDistance);

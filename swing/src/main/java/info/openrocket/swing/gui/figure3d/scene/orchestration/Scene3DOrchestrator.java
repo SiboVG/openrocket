@@ -96,6 +96,16 @@ public class Scene3DOrchestrator {
 	private volatile boolean pendingTrajectoryFit = false;
 	private volatile boolean pendingFollowFit = false;
 	private volatile DoubleConsumer flightFrameListener = null;
+	// View switches blend the camera from the pose last shown to the new view's pose. Each
+	// blended frame shows an interpolated pose; the next frame first restores the view's own
+	// pose, so the view's logic (and input) never sees the interpolation.
+	private static final float CAMERA_TRANSITION_SECONDS = 0.6f;
+	// A paused replay renders on demand, so the first frame's delta can span the whole pause.
+	private static final float MAX_TRANSITION_STEP_SECONDS = 1.0f / 30.0f;
+	private volatile boolean pendingCameraTransition = false;
+	private Camera.Pose transitionFrom = null;
+	private Camera.Pose transitionTarget = null;
+	private float transitionElapsed = 0.0f;
 	private static final float FOLLOW_FRAME_MARGIN = 1.8f;
 	private static final float OVERVIEW_CLOSEST_DISTANCE_FACTOR = 0.001f;
 	private static final float OVERVIEW_FARTHEST_DISTANCE_FACTOR = 20.0f;
@@ -202,6 +212,17 @@ public class Scene3DOrchestrator {
 	 * Runs one frame of non-render updates before the caller renders the scene.
 	 */
 	public void update() {
+		Camera flightCamera = cameraController.getCamera();
+		if (pendingCameraTransition) {
+			pendingCameraTransition = false;
+			// Start from what is on screen, which may itself be mid-transition.
+			transitionFrom = flightCamera.capturePose();
+			transitionElapsed = 0.0f;
+		}
+		if (transitionTarget != null) {
+			flightCamera.restorePose(transitionTarget);
+			transitionTarget = null;
+		}
 		runPendingGlTasks();
 		long currentFrameTime = System.nanoTime();
 		float deltaTime = (currentFrameTime - lastFrameTime) / 1e9f;
@@ -291,6 +312,7 @@ public class Scene3DOrchestrator {
 							OVERVIEW_CLOSEST_DISTANCE_FACTOR, OVERVIEW_FARTHEST_DISTANCE_FACTOR);
 				}
 			}
+			blendFlightCameraTransition(camera, deltaTime);
 			DoubleConsumer frameListener = flightFrameListener;
 			if (frameListener != null) {
 				frameListener.accept(t);
@@ -586,12 +608,39 @@ public class Scene3DOrchestrator {
 
 	public void setFollowFlightCamera(boolean followFlightCamera) {
 		lastAppliedPadDistance = Float.NaN;
+		pendingCameraTransition = true;
 		if (followFlightCamera) {
 			this.pendingFollowFit = true;
 			this.flightCameraBehavior = FlightCameraBehavior.FOLLOW;
 		} else {
 			this.flightCameraBehavior = FlightCameraBehavior.FREE;
 		}
+	}
+
+	private void blendFlightCameraTransition(Camera camera, float deltaTime) {
+		if (transitionFrom == null) {
+			return;
+		}
+		transitionElapsed += Math.min(Math.max(deltaTime, 0.0f), MAX_TRANSITION_STEP_SECONDS);
+		float progress = transitionElapsed / CAMERA_TRANSITION_SECONDS;
+		if (progress >= 1.0f) {
+			transitionFrom = null;
+			return;
+		}
+		transitionTarget = camera.capturePose();
+		float eased = progress * progress * (3.0f - 2.0f * progress);
+		camera.restorePose(Camera.Pose.blend(transitionFrom, transitionTarget, eased));
+	}
+
+	/** Whether a camera transition between flight views is still animating. */
+	public boolean isFlightCameraTransitioning() {
+		return pendingCameraTransition || transitionFrom != null;
+	}
+
+	/** Applies the requested flight view immediately, e.g. when a replay first opens. */
+	public void skipFlightCameraTransition() {
+		pendingCameraTransition = false;
+		transitionFrom = null;
 	}
 
 	/** Moves with the rocket while preserving the user's pan relative to it, including on seeks. */
@@ -603,6 +652,7 @@ public class Scene3DOrchestrator {
 	public void setPadFlightCamera(Vector3f eyePosition) {
 		this.flightPadEye = eyePosition != null ? new Vector3f(eyePosition) : null;
 		this.pendingPadZoomReset = true;
+		this.pendingCameraTransition = true;
 		this.flightCameraBehavior = FlightCameraBehavior.PAD;
 	}
 
@@ -694,6 +744,7 @@ public class Scene3DOrchestrator {
 			throw new IllegalArgumentException("provider is null");
 		}
 		this.flightTrackTarget = new FlightTrackTarget(provider, centerOffset);
+		this.pendingCameraTransition = true;
 	}
 
 	/**
@@ -707,5 +758,6 @@ public class Scene3DOrchestrator {
 		this.flightCameraBehavior = FlightCameraBehavior.FREE;
 		this.lastAppliedPadDistance = Float.NaN;
 		this.pendingTrajectoryFit = true;
+		this.pendingCameraTransition = true;
 	}
 }
