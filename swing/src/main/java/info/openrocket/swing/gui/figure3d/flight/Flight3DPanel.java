@@ -4,19 +4,24 @@ import info.openrocket.core.arch.SystemInfo;
 import info.openrocket.core.document.OpenRocketDocument;
 import info.openrocket.core.document.Simulation;
 import info.openrocket.core.l10n.Translator;
+import info.openrocket.core.appearance.Appearance;
 import info.openrocket.core.rocketcomponent.AxialStage;
+import info.openrocket.core.rocketcomponent.Parachute;
+import info.openrocket.core.rocketcomponent.Streamer;
 import info.openrocket.core.rocketcomponent.FlightConfigurationId;
 import info.openrocket.core.rocketcomponent.RocketComponent;
 import info.openrocket.core.simulation.FlightData;
 import info.openrocket.core.simulation.FlightDataBranch;
 import info.openrocket.core.simulation.FlightEvent;
 import info.openrocket.core.startup.Application;
+import info.openrocket.core.util.ORColor;
 import info.openrocket.swing.gui.figure3d.SharedCanvasRenderScheduler;
 import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
 import info.openrocket.swing.gui.figure3d.animation.PoseProvider;
 import info.openrocket.swing.gui.figure3d.constants.RenderingConstants;
 import info.openrocket.swing.gui.figure3d.geometry.IntList;
 import info.openrocket.swing.gui.figure3d.geometry.Mesh;
+import info.openrocket.swing.gui.figure3d.geometry.Vertex;
 import info.openrocket.swing.gui.figure3d.geometry.basic.AxesGenerator;
 import info.openrocket.swing.gui.figure3d.geometry.basic.SphereGenerator;
 import info.openrocket.swing.gui.figure3d.geometry.basic.TrajectoryTrailGenerator;
@@ -38,6 +43,7 @@ import info.openrocket.swing.gui.figure3d.scene.properties.RenderingConfiguratio
 import info.openrocket.swing.gui.figure3d.ui.GLScenePanel;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -129,6 +135,14 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private static final float FLAME_EXPOSURE = 0.2f;
 	private static final int PARACHUTE_PANEL_COUNT = 8;
 	private static final float PARACHUTE_CANOPY_FLATTENING = 0.42f;
+	// Deployment: the canopy or streamer opens over this long, overshooting slightly.
+	static final double RECOVERY_INFLATION_SECONDS = 0.6;
+	private static final float RECOVERY_PACKED_SCALE = 0.15f;
+	// A descending canopy swings like a pendulum under its lines; a streamer flutters.
+	private static final float RECOVERY_SWAY_DEGREES = 6.0f;
+	private static final double RECOVERY_SWAY_PERIOD_SECONDS = 2.4;
+	private static final double STREAMER_FLUTTER_PERIOD_SECONDS = 0.9;
+	private static final Vector3f DEFAULT_CANOPY_COLOR = new Vector3f(0.92f, 0.18f, 0.12f);
 
 	private final List<TrailPath> trailPaths = new ArrayList<>();
 	private final List<TrailGeometry> trailGeometries = new ArrayList<>();
@@ -136,7 +150,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private final List<SmokePuff> smokePuffs = new ArrayList<>();
 	private final List<ReplayFlameEmitter> flameJets = new ArrayList<>();
 	private final List<SceneObject> eventMarkers = new ArrayList<>();
-	private final List<ParachuteCanopy> parachutes = new ArrayList<>();
+	private final List<RecoveryVisual> recoveryVisuals = new ArrayList<>();
 	// Separately flying bodies the cameras can track, primary first. GL thread only.
 	private final List<TrackedBody> trackedBodies = new ArrayList<>();
 	private volatile int trackedBodyIndex = 0;
@@ -208,12 +222,20 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	record SmokeStation(Vector3f position, double time) {
 	}
 
-	/** A canopy and its lines, shown above a descending stage between deployment and touchdown. */
-	private record ParachuteCanopy(List<SceneObject> panels, List<SceneObject> suspensionLines,
-			PoseProvider provider, Vector3f packedLocation, double deployTime, double endTime, float lineLength) {
-		private ParachuteCanopy {
+	/**
+	 * A recovery device shown above a descending stage between deployment and touchdown: a
+	 * canopy with its lines, or a streamer ribbon (no lines).
+	 */
+	private record RecoveryVisual(boolean streamer, List<SceneObject> canopy, List<SceneObject> lines,
+			PoseProvider provider, Vector3f packedLocation, double deployTime, double endTime, float lineLength,
+			float swayPhase) {
+		private RecoveryVisual {
 			packedLocation = new Vector3f(packedLocation);
 		}
+	}
+
+	/** The rendered size of a recovery device: canopy radius and line length, or streamer width and length. */
+	record RecoverySize(boolean streamer, float width, float length) {
 	}
 
 	record ParachuteGeometry(List<Mesh> canopyPanels, List<Mesh> suspensionLines, float lineLength) {
@@ -277,7 +299,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		smokePuffs.clear();
 		flameJets.clear();
 		eventMarkers.clear();
-		parachutes.clear();
+		recoveryVisuals.clear();
 		trackedBodies.clear();
 		smokePuppet = null;
 		positionMarker = null;
@@ -865,7 +887,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		addParachutes(scene, replayData, poses, rocketLength);
 		addLaunchSiteReference(scene, rocketLength);
 		log.info("Flight replay exhaust: {} smoke puff(s), {} flame jet(s), {} parachute(s)",
-				smokePuffs.size(), flameJets.size(), parachutes.size());
+				smokePuffs.size(), flameJets.size(), recoveryVisuals.size());
 	}
 
 	/**
@@ -1009,41 +1031,85 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	}
 
 	/**
-	 * Adds a canopy above each stage with a recovery deployment event, shown from the moment
-	 * of deployment until touchdown so the slowed descent visually makes sense. The canopy
-	 * stays upright regardless of how the stage tumbles.
+	 * Adds each deployed recovery device above its stage, shown from deployment until touchdown
+	 * so the slowed descent visually makes sense: a canopy with lines for a parachute, a ribbon
+	 * for a streamer, sized from the device and in its color. It stays upright however the
+	 * stage tumbles.
 	 */
 	private void addParachutes(SceneView scene, FlightReplayData replayData, GroundedPoseProviders poses,
 			float rocketLength) {
-		parachutes.clear();
+		recoveryVisuals.clear();
 		for (var event : replayData.getAllEvents()) {
 			if (event.getType() != FlightEvent.Type.RECOVERY_DEVICE_DEPLOYMENT) {
 				continue;
 			}
-			PoseProvider provider = providerForEventSource(event.getSource(), poses);
-			Vector3f packedLocation = findComponentAnchor(scene, event.getSource());
+			RocketComponent device = event.getSource();
+			PoseProvider provider = providerForEventSource(device, poses);
+			Vector3f packedLocation = findComponentAnchor(scene, device);
 			double end = replayData.getGroundHitTime(event, replayData.getEndTime());
-			ParachuteGeometry geometry = createParachuteGeometry(rocketLength);
-			List<SceneObject> panels = new ArrayList<>(geometry.canopyPanels().size());
-			for (int i = 0; i < geometry.canopyPanels().size(); i++) {
-				Vector3f color = i % 2 == 0
-						? new Vector3f(0.92f, 0.18f, 0.12f)
-						: new Vector3f(1.0f, 0.82f, 0.56f);
+			RecoverySize size = recoverySize(device, rocketLength);
+			Vector3f color = recoveryColor(device);
+			// Deterministic per device, so two canopies do not swing in lockstep.
+			float swayPhase = (float) (2.0 * Math.PI * ((recoveryVisuals.size() * 0.37) % 1.0));
+
+			List<SceneObject> canopy = new ArrayList<>();
+			List<SceneObject> lines = new ArrayList<>();
+			if (size.streamer()) {
 				Appearance3D appearance = new Appearance3D(color);
 				appearance.setShine(0.08f);
-				SceneObject panel = addHiddenParachuteObject(scene, geometry.canopyPanels().get(i), appearance);
-				panels.add(panel);
+				canopy.add(addHiddenParachuteObject(scene, createStreamerGeometry(size.width(), size.length()),
+						appearance));
+			} else {
+				ParachuteGeometry geometry = createParachuteGeometry(size.width(), size.length());
+				Vector3f trim = new Vector3f(color).lerp(new Vector3f(1.0f, 0.95f, 0.85f), 0.65f);
+				for (int i = 0; i < geometry.canopyPanels().size(); i++) {
+					Appearance3D appearance = new Appearance3D(i % 2 == 0 ? color : trim);
+					appearance.setShine(0.08f);
+					canopy.add(addHiddenParachuteObject(scene, geometry.canopyPanels().get(i), appearance));
+				}
+				for (Mesh lineMesh : geometry.suspensionLines()) {
+					Appearance3D lineAppearance = new Appearance3D(new Vector3f(0.90f, 0.86f, 0.70f));
+					lineAppearance.setUnlit(true);
+					lines.add(addHiddenParachuteObject(scene, lineMesh, lineAppearance));
+				}
 			}
-
-			List<SceneObject> lines = new ArrayList<>(geometry.suspensionLines().size());
-			for (Mesh lineMesh : geometry.suspensionLines()) {
-				Appearance3D lineAppearance = new Appearance3D(new Vector3f(0.90f, 0.86f, 0.70f));
-				lineAppearance.setUnlit(true);
-				lines.add(addHiddenParachuteObject(scene, lineMesh, lineAppearance));
-			}
-			parachutes.add(new ParachuteCanopy(panels, lines, provider, packedLocation, event.getTime(), end,
-					geometry.lineLength()));
+			recoveryVisuals.add(new RecoveryVisual(size.streamer(), canopy, lines, provider, packedLocation,
+					event.getTime(), end, size.streamer() ? 0.0f : size.length(), swayPhase));
 		}
+	}
+
+	/**
+	 * Sizes a recovery device from its component: a parachute's diameter and shroud line
+	 * length, or a streamer's strip width and length. Kept within sensible multiples of the
+	 * rocket so an unusual design never hides the rocket or vanishes.
+	 */
+	static RecoverySize recoverySize(RocketComponent device, float rocketLength) {
+		float scale = RenderingConstants.WORLD_SCALE;
+		if (device instanceof Streamer streamer) {
+			return new RecoverySize(true,
+					clamp((float) streamer.getStripWidth() * scale, 0.02f * rocketLength, 0.5f * rocketLength),
+					clamp((float) streamer.getStripLength() * scale, 0.5f * rocketLength, 8.0f * rocketLength));
+		}
+		if (device instanceof Parachute parachute) {
+			return new RecoverySize(false,
+					clamp((float) parachute.getDiameter() * 0.5f * scale, 0.2f * rocketLength, 4.0f * rocketLength),
+					clamp((float) parachute.getLineLength() * scale, 0.3f * rocketLength, 4.0f * rocketLength));
+		}
+		return new RecoverySize(false, 0.6f * rocketLength, 0.9f * rocketLength);
+	}
+
+	private static float clamp(float value, float min, float max) {
+		return Float.isFinite(value) ? Math.max(min, Math.min(max, value)) : min;
+	}
+
+	/** The device's painted color, or a classic red canopy. */
+	private static Vector3f recoveryColor(RocketComponent device) {
+		Appearance appearance = device != null ? device.getAppearance() : null;
+		ORColor paint = appearance != null ? appearance.getPaint() : null;
+		if (paint == null) {
+			return new Vector3f(DEFAULT_CANOPY_COLOR);
+		}
+		return new Vector3f(paint.getRed() / 255.0f, paint.getGreen() / 255.0f, paint.getBlue() / 255.0f);
 	}
 
 	/** Returns the rendered component origin so the harness starts where the packed device sits. */
@@ -1069,8 +1135,10 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 	/** Builds an open, shallow canopy with radial suspension lines converging on the stage. */
 	static ParachuteGeometry createParachuteGeometry(float rocketLength) {
-		float radius = rocketLength * 0.6f;
-		float lineLength = rocketLength * 0.9f;
+		return createParachuteGeometry(rocketLength * 0.6f, rocketLength * 0.9f);
+	}
+
+	static ParachuteGeometry createParachuteGeometry(float radius, float lineLength) {
 		List<Mesh> panels = new ArrayList<>(PARACHUTE_PANEL_COUNT);
 		List<Mesh> lines = new ArrayList<>(PARACHUTE_PANEL_COUNT);
 		for (int i = 0; i < PARACHUTE_PANEL_COUNT; i++) {
@@ -1087,6 +1155,36 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			lines.add(TrajectoryTrailGenerator.create(List.of(rim, harness), radius * 0.008f, 5));
 		}
 		return new ParachuteGeometry(List.copyOf(panels), List.copyOf(lines), lineLength);
+	}
+
+	/**
+	 * A streamer ribbon rising from its attachment at the origin along +Y, with a gentle
+	 * S-curve so it reads as cloth; visible from both sides.
+	 */
+	static Mesh createStreamerGeometry(float width, float length) {
+		int segments = 16;
+		List<Vertex> vertices = new ArrayList<>((segments + 1) * 2);
+		IntList indices = new IntList(segments * 12);
+		for (int i = 0; i <= segments; i++) {
+			float along = (float) i / segments;
+			float wave = 0.35f * width * (float) Math.sin(3.0 * Math.PI * along) * along;
+			float y = along * length;
+			vertices.add(new Vertex(new Vector3f(-width * 0.5f, y, wave), new Vector3f(0, 0, 1), new Vector2f(),
+					RenderingConstants.SURFACE_ID_OUTSIDE));
+			vertices.add(new Vertex(new Vector3f(width * 0.5f, y, wave), new Vector3f(0, 0, 1), new Vector2f(),
+					RenderingConstants.SURFACE_ID_OUTSIDE));
+			if (i > 0) {
+				int a = 2 * (i - 1);
+				int b = a + 1;
+				int c = a + 2;
+				int d = a + 3;
+				indices.addTriangle(a, b, d);
+				indices.addTriangle(a, d, c);
+				indices.addTriangle(a, d, b);
+				indices.addTriangle(a, c, d);
+			}
+		}
+		return new Mesh(vertices, indices);
 	}
 
 	private static Mesh doubleSided(Mesh mesh) {
@@ -1183,32 +1281,70 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			else smoke.getParticles().clear();
 		}
 
-		for (ParachuteCanopy parachute : parachutes) {
-			boolean deployed = time >= parachute.deployTime() && time <= parachute.endTime();
-			parachute.panels().forEach(object -> object.setVisible(deployed));
-			parachute.suspensionLines().forEach(object -> object.setVisible(deployed));
-			if (!deployed) {
-				continue;
-			}
-			Quaternionf orientation = parachute.provider().getOrientation(time);
-			Vector3f position = parachute.provider().getPosition(time)
-					.add(orientation.transform(new Vector3f(parachute.packedLocation())));
-			for (SceneObject panel : parachute.panels()) {
-				panel.getModelMatrix()
-						.translation(position.x, position.y + parachute.lineLength(), position.z)
-						.rotateX((float) (-Math.PI / 2.0))
-						.scale(1.0f, 1.0f, PARACHUTE_CANOPY_FLATTENING);
-			}
-			for (SceneObject line : parachute.suspensionLines()) {
-				line.getModelMatrix()
-						.translation(position.x, position.y + parachute.lineLength(), position.z)
-						.rotateX((float) (-Math.PI / 2.0));
-			}
-		}
+		updateRecovery(time);
 
 		for (ReplayFlameEmitter jet : flameJets) {
 			jet.setReplayTime(time, exhaustVisible);
 		}
+	}
+
+	/**
+	 * Poses each deployed recovery device above its attachment: inflating after deployment,
+	 * swinging gently under its lines, and a streamer fluttering. Purely a function of the
+	 * playback time, so scrubbing is exact.
+	 */
+	private void updateRecovery(double time) {
+		Matrix4f swing = new Matrix4f();
+		for (RecoveryVisual visual : recoveryVisuals) {
+			boolean deployed = time >= visual.deployTime() && time <= visual.endTime();
+			visual.canopy().forEach(object -> object.setVisible(deployed));
+			visual.lines().forEach(object -> object.setVisible(deployed));
+			if (!deployed) {
+				continue;
+			}
+			Quaternionf orientation = visual.provider().getOrientation(time);
+			Vector3f anchor = visual.provider().getPosition(time)
+					.add(orientation.transform(new Vector3f(visual.packedLocation())));
+			double age = time - visual.deployTime();
+			float opening = recoveryOpening(age);
+			double swayCycle = 2.0 * Math.PI * age / RECOVERY_SWAY_PERIOD_SECONDS + visual.swayPhase();
+			float sway = (float) Math.toRadians(RECOVERY_SWAY_DEGREES);
+			// Swing about the attachment point, in two directions at slightly different rates.
+			swing.translation(anchor)
+					.rotateX(sway * (float) Math.sin(swayCycle))
+					.rotateZ(0.6f * sway * (float) Math.sin(1.3 * swayCycle + 1.0));
+			if (visual.streamer()) {
+				float flutter = (float) (2.0 * Math.PI * age / STREAMER_FLUTTER_PERIOD_SECONDS + visual.swayPhase());
+				for (SceneObject ribbon : visual.canopy()) {
+					ribbon.getModelMatrix().set(swing).rotateY(flutter).scale(1.0f, opening, 1.0f);
+				}
+				continue;
+			}
+			for (SceneObject panel : visual.canopy()) {
+				panel.getModelMatrix().set(swing)
+						.translate(0.0f, visual.lineLength(), 0.0f)
+						.rotateX((float) (-Math.PI / 2.0))
+						.scale(opening, opening, PARACHUTE_CANOPY_FLATTENING * opening);
+			}
+			for (SceneObject line : visual.lines()) {
+				line.getModelMatrix().set(swing)
+						.translate(0.0f, visual.lineLength(), 0.0f)
+						.rotateX((float) (-Math.PI / 2.0))
+						.scale(opening, opening, 1.0f);
+			}
+		}
+	}
+
+	/**
+	 * How far a recovery device has opened after deployment: packed small, then filling out
+	 * with a slight overshoot before settling at full size.
+	 */
+	static float recoveryOpening(double age) {
+		double progress = Math.max(0.0, Math.min(1.0, age / RECOVERY_INFLATION_SECONDS));
+		double c1 = 1.4;
+		double shifted = progress - 1.0;
+		double eased = 1.0 + (c1 + 1.0) * shifted * shifted * shifted + c1 * shifted * shifted;
+		return (float) (RECOVERY_PACKED_SCALE + (1.0 - RECOVERY_PACKED_SCALE) * eased);
 	}
 
 	static void updateSmokeParticles(List<Particle> particles, List<SmokePuff> puffs, double time) {
