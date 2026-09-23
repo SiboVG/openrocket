@@ -63,6 +63,21 @@ class Flight3DPanelTest {
 		assertTrue(particles.isEmpty());
 	}
 	@Test
+	void smokeDriftsWithTheWindRecordedAtItsRelease() {
+		List<Particle> particles = new ArrayList<>();
+		Vector3f wind = new Vector3f(10.0f, 0.0f, -5.0f);
+		List<Flight3DPanel.SmokePuff> puffs = List.of(new Flight3DPanel.SmokePuff(
+				new Vector3f(1.0f, 2.0f, 3.0f), 1.0, 0.5f, new Vector3f(0.8f), wind));
+
+		Flight3DPanel.updateSmokeParticles(particles, puffs, 4.0);
+
+		// Three seconds downwind; buoyancy only lifts it.
+		assertEquals(31.0f, particles.get(0).position.x, 1e-4f);
+		assertEquals(-12.0f, particles.get(0).position.z, 1e-4f);
+		assertTrue(particles.get(0).position.y > 2.0f);
+	}
+
+	@Test
 	void smokeStationsRemainContinuousWhenSeveralIntervalsAreCrossedPerPathSample() {
 		PoseProvider provider = mock(PoseProvider.class);
 		when(provider.getPosition(anyDouble())).thenAnswer(invocation ->

@@ -192,8 +192,14 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		}
 	}
 
-	/** One smoke particle of the trail: a fixed world position revealed at its birth time. */
-	record SmokePuff(Vector3f position, double birthTime, float size, Vector3f color) {
+	/**
+	 * One smoke particle of the trail: revealed at its birth time at a fixed world position,
+	 * then carried by the wind recorded at that moment (engine units per second).
+	 */
+	record SmokePuff(Vector3f position, double birthTime, float size, Vector3f color, Vector3f drift) {
+		SmokePuff(Vector3f position, double birthTime, float size, Vector3f color) {
+			this(position, birthTime, size, color, new Vector3f());
+		}
 	}
 
 	/** One evenly spaced exhaust position and its interpolated flight time. */
@@ -510,7 +516,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		log.info("Flight replay: {} stage(s) with {} total motor burn window(s)", burnTimeline.size(), burnWindowCount);
 
 		// The cameras orbit the tracked body's middle, not the rocket's nose.
-		collectTrackedBodies(replayData, groundedPoses, centeredPoses.bodyCenters());
+		collectTrackedBodies(data, replayData, groundedPoses, centeredPoses.bodyCenters());
 		orchestrator.setFlightRocketCenterOffset(trackedBodies.get(0).centerOffset());
 		computeTrajectoryBounds(orchestrator.getCameraController(), groundedPoses,
 				replayData.getStartTime(), replayData.getEndTime());
@@ -868,6 +874,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private void addSmokeColumn(PoseProvider provider, Vector3f nozzleLocal,
 			double burnStart, double burnEnd, float puffSize, float spacing) {
 		Random jitter = new Random(Double.hashCode(burnStart) * 31L + smokePuffs.size());
+		WindField wind = windFor(provider);
 		for (SmokeStation station : sampleSmokeStations(provider, nozzleLocal,
 				burnStart, burnEnd, spacing, MAX_PUFFS_PER_BURN)) {
 			for (int j = 0; j < SMOKE_PARTICLES_PER_PUFF; j++) {
@@ -876,7 +883,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 						(jitter.nextFloat() - 0.5f) * puffSize * 0.4f,
 						(jitter.nextFloat() - 0.5f) * puffSize * 0.4f,
 						(jitter.nextFloat() - 0.5f) * puffSize * 0.4f);
-				smokePuffs.add(new SmokePuff(puffCenter, station.time(), size, SMOKE_COLOR));
+				smokePuffs.add(new SmokePuff(puffCenter, station.time(), size, SMOKE_COLOR,
+						wind.velocityAt(station.time())));
 			}
 		}
 	}
@@ -1140,6 +1148,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 				center.add(provider.getOrientation(t).transform(new Vector3f(bodyCenter)));
 			}
 			Random jitter = new Random(Double.hashCode(t) * 127L + puffs);
+			Vector3f drift = windFor(provider).velocityAt(t);
 			float scatter = puffSize * 1.5f;
 			for (int i = 0; i < puffs; i++) {
 				Vector3f position = new Vector3f(center).add(
@@ -1147,7 +1156,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 						(jitter.nextFloat() - 0.5f) * 2.0f * scatter,
 						(jitter.nextFloat() - 0.5f) * 2.0f * scatter);
 				float size = puffSize * (0.8f + 0.6f * jitter.nextFloat());
-				smokePuffs.add(new SmokePuff(position, t, size, burstColor));
+				smokePuffs.add(new SmokePuff(position, t, size, burstColor, drift));
 			}
 		}
 	}
@@ -1208,6 +1217,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			}
 			Particle particle = count < particles.size() ? particles.get(count) : appendBlank(particles);
 			particle.position.set(puff.position())
+					.fma((float) age, puff.drift())
 					.add(0.0f, (float) age * SMOKE_RISE_RATE * puff.size(), 0.0f);
 			particle.color.set(puff.color());
 			particle.size = puff.size();
@@ -1775,14 +1785,15 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	}
 
 	/** Resolves each flying body to its ground-adjusted trajectory and its own center. */
-	private void collectTrackedBodies(FlightReplayData replayData, GroundedPoseProviders poses,
+	private void collectTrackedBodies(FlightData data, FlightReplayData replayData, GroundedPoseProviders poses,
 			List<Vector3f> bodyCenters) {
 		trackedBodies.clear();
 		List<FlightReplayData.FlightBody> bodies = replayData.getFlightBodies();
 		for (int i = 0; i < bodies.size(); i++) {
 			PoseProvider provider = providerForStage(bodies.get(i).stages().get(0), poses.providersByStage(),
 					poses.primaryProvider());
-			trackedBodies.add(new TrackedBody(provider, bodyCenters.get(i)));
+			trackedBodies.add(new TrackedBody(provider, bodyCenters.get(i),
+					WindField.fromBranch(data.getBranch(bodies.get(i).branchIndex()))));
 		}
 		trackedBodyIndex = 0;
 	}
@@ -1855,7 +1866,17 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		}
 	}
 
-	private record TrackedBody(PoseProvider provider, Vector3f centerOffset) {
+	private record TrackedBody(PoseProvider provider, Vector3f centerOffset, WindField wind) {
+	}
+
+	/** The wind recorded along the flight of the body on the given trajectory. */
+	private WindField windFor(PoseProvider provider) {
+		for (TrackedBody body : trackedBodies) {
+			if (body.provider() == provider) {
+				return body.wind();
+			}
+		}
+		return trackedBodies.isEmpty() ? WindField.calm() : trackedBodies.get(0).wind();
 	}
 
 	private record GroundedPoseProviders(Map<AxialStage, PoseProvider> providersByStage,
