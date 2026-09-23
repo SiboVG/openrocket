@@ -27,6 +27,7 @@ import info.openrocket.swing.gui.figure3d.particles.Particle;
 import info.openrocket.swing.gui.figure3d.particles.smoke.SmokeEmitter;
 import info.openrocket.swing.gui.figure3d.particles.smoke.SmokeSettings;
 import info.openrocket.swing.gui.figure3d.materials.Appearance3D;
+import info.openrocket.swing.gui.figure3d.rendering.FrameOverlay;
 import info.openrocket.swing.gui.figure3d.rendering.backgrounds.GradientBackground;
 import info.openrocket.swing.gui.figure3d.scene.controllers.CameraControls;
 import info.openrocket.swing.gui.figure3d.scene.graph.Camera;
@@ -141,6 +142,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	private SmokeEmitter smokePuppet;
 	private SceneObject positionMarker;
 	private FlightOrientationGizmo orientationGizmo;
+	private volatile FlightTargetMarker targetMarker;
+	private float rocketLength = 1.0f;
 	private volatile PlaybackClock playbackClock;
 	private volatile Scene3DOrchestrator activeOrchestrator;
 	private float trailRadius = 1.0f;
@@ -254,6 +257,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			orchestrator.setFlightFrameListener(null);
 		}
 		orientationGizmo = null;
+		targetMarker = null;
 		stopRenderLoop();
 		if (glPanel != null) {
 			RENDER_SCHEDULER.awaitQuiescence(RENDER_SHUTDOWN_TIMEOUT_MS);
@@ -510,7 +514,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 				replayData.getStartTime(), replayData.getEndTime());
 		buildTrajectoryTrails(scene, groundedPoses, rocketCenterOffset,
 				replayData.getStartTime(), replayData.getEndTime());
-		followTrailScale = followTrailScale(rocketLengthWorld(orchestrator), trailRadius);
+		rocketLength = rocketLengthWorld(orchestrator);
+		followTrailScale = followTrailScale(rocketLength, trailRadius);
 		addEventMarkers(scene, replayData, groundedPoses.primaryProvider(),
 				bodyCenterOffset(groundedPoses.primaryProvider(), rocketCenterOffset));
 		buildExhaustGeometry(scene, orchestrator, config, groundedPoses,
@@ -530,8 +535,23 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		this.lastRebuildFraction = -1.0;
 		orchestrator.setFlightFrameListener(this::onFlightFrame);
 
-		orientationGizmo = new FlightOrientationGizmo();
-		orchestrator.getRenderer().setFrameOverlay(orientationGizmo);
+		FlightOrientationGizmo gizmo = new FlightOrientationGizmo();
+		FlightTargetMarker marker = new FlightTargetMarker(orchestrator.getCameraController().getCamera());
+		orientationGizmo = gizmo;
+		targetMarker = marker;
+		orchestrator.getRenderer().setFrameOverlay(new FrameOverlay() {
+			@Override
+			public void render(Matrix4f cameraViewMatrix, int width, int height) {
+				marker.render(cameraViewMatrix, width, height);
+				gizmo.render(cameraViewMatrix, width, height);
+			}
+
+			@Override
+			public void cleanup() {
+				marker.cleanup();
+				gizmo.cleanup();
+			}
+		});
 
 		BiConsumer<PlaybackClock, FlightReplayData> callback = replayReadyCallback;
 		if (callback != null && clock != null) {
@@ -1289,6 +1309,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	// playback time changes so its elapsed/upcoming split stays exactly aligned with the rocket.
 	private void onFlightFrame(double time) {
 		updateExhaust(time);
+		updateTargetMarker(time);
 		Scene3DOrchestrator orchestrator = activeOrchestrator;
 		PlaybackClock clock = playbackClock;
 		if (orchestrator == null || clock == null || trailPaths.isEmpty()) {
@@ -1334,6 +1355,20 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			return MIN_DECORATION_SCALE;
 		}
 		return Math.min(1.0f, rocketLength * 0.01f / trailRadius);
+	}
+
+	private void updateTargetMarker(double time) {
+		FlightTargetMarker marker = targetMarker;
+		int index = trackedBodyIndex;
+		if (marker == null || index < 0 || index >= trackedBodies.size()) {
+			return;
+		}
+		TrackedBody body = trackedBodies.get(index);
+		Vector3f center = body.provider().getPosition(time);
+		if (body.centerOffset() != null) {
+			center.add(body.provider().getOrientation(time).transform(new Vector3f(body.centerOffset())));
+		}
+		marker.setTarget(center, rocketLength);
 	}
 
 	static float decorationScale(float cameraDistance, float overviewDistance) {

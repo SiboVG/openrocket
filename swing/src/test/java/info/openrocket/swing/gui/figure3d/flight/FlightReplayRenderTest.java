@@ -97,6 +97,7 @@ class FlightReplayRenderTest {
 				bar.getCameraModeCombo().setSelectedItem(FlightCameraMode.OVERVIEW);
 				return null;
 			});
+			capture(canvas, "flight-overview-settling.png");
 			capture(canvas, "flight-overview.png");
 			assertTrue(exhaustCount(canvas, panel) > 0);
 			float baseFieldOfView = canvas.getScene3DOrchestrator().getCameraController().getCamera().getFieldOfView();
