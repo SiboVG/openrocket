@@ -12,6 +12,7 @@ import info.openrocket.core.simulation.FlightEvent;
 import org.junit.jupiter.api.Test;
 
 import javax.swing.JComboBox;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
@@ -266,6 +267,50 @@ class PlaybackTransportBarTest extends BaseTestCase {
 				bar.dispose();
 			}
 		});
+	}
+
+	@Test
+	void viewControlsScrollInsteadOfOverflowingANarrowWindow() throws Exception {
+		SwingUtilities.invokeAndWait(() -> {
+			PlaybackTransportBar bar = new PlaybackTransportBar();
+			try {
+				JScrollPane scroll = bar.getViewControlsScroll();
+				java.awt.Component row = scroll.getViewport().getView();
+				int rowWidth = row.getPreferredSize().width;
+
+				layOut(bar, rowWidth + 300);
+				assertFalse(scroll.getHorizontalScrollBar().isVisible(), "Controls that fit need no scroll bar");
+				assertEquals(scroll.getViewport().getWidth(), row.getWidth(),
+						"A row that fits spans the width, keeping Controls at the right edge");
+
+				layOut(bar, rowWidth / 2);
+				assertTrue(scroll.getHorizontalScrollBar().isVisible());
+				assertTrue(scroll.getViewport().getHeight() >= row.getPreferredSize().height,
+						"The scroll bar must not cover the controls");
+				assertEquals(rowWidth, row.getWidth(), "A row that does not fit keeps its width and scrolls");
+			} finally {
+				bar.dispose();
+			}
+		});
+	}
+
+	/**
+	 * Lays the bar out at a width twice, as the resize listener's revalidation would. The bar
+	 * is not in a window, where validate() would do nothing, so lay the tree out directly.
+	 */
+	private static void layOut(PlaybackTransportBar bar, int width) {
+		bar.setSize(width, 400);
+		layOutTree(bar);
+		layOutTree(bar);
+	}
+
+	private static void layOutTree(java.awt.Container container) {
+		container.doLayout();
+		for (java.awt.Component child : container.getComponents()) {
+			if (child instanceof java.awt.Container nested) {
+				layOutTree(nested);
+			}
+		}
 	}
 
 	@Test

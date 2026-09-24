@@ -17,7 +17,10 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.Scrollable;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -36,6 +39,9 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -89,6 +95,7 @@ class PlaybackTransportBar extends JPanel {
 	private final JToggleButton panButton = new JToggleButton(Icons.PAN_VIEW);
 	private final JLabel timeLabel = new JLabel(formatTime(0.0, 0.0), SwingConstants.RIGHT);
 	private final Timer pollTimer = new Timer(POLL_INTERVAL_MS, e -> pollClock());
+	private final JScrollPane viewControlsScroll;
 
 	private PlaybackClock clock;
 	private Consumer<FlightCameraMode> cameraModeListener;
@@ -201,12 +208,13 @@ class PlaybackTransportBar extends JPanel {
 		help.setToolTipText(trans.get("Flight3DFrame.controls.ttip"));
 		help.addActionListener(e -> JOptionPane.showMessageDialog(this, trans.get("Flight3DFrame.controls.ttip"),
 				trans.get("Flight3DFrame.controls"), JOptionPane.INFORMATION_MESSAGE));
-		JPanel viewRow = new JPanel(new BorderLayout());
+		ScrollableRow viewRow = new ScrollableRow();
 		viewRow.add(viewControls, BorderLayout.CENTER);
 		JPanel helpCell = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
 		helpCell.add(help);
 		viewRow.add(helpCell, BorderLayout.EAST);
-		add(viewRow, BorderLayout.NORTH);
+		viewControlsScroll = new HorizontalScrollPane(viewRow);
+		add(viewControlsScroll, BorderLayout.NORTH);
 
 		scrubSlider.setMinimum(0);
 		scrubSlider.setMaximum(SLIDER_STEPS);
@@ -263,6 +271,10 @@ class PlaybackTransportBar extends JPanel {
 	/** Receives the index into {@link FlightReplayData#getFlightBodies()} of the body to track. */
 	void setTrackedBodyListener(IntConsumer listener) {
 		this.trackedBodyListener = listener;
+	}
+
+	JScrollPane getViewControlsScroll() {
+		return viewControlsScroll;
 	}
 
 	JComboBox<?> getTrackedBodyCombo() {
@@ -670,6 +682,81 @@ class PlaybackTransportBar extends JPanel {
 			return type;
 		}
 		return String.format(trans.get("Flight3DFrame.eventSourceFormat"), type, source.getName());
+	}
+
+	/**
+	 * A row that fills the available width while its controls fit, keeping the right-aligned
+	 * part at the edge, and keeps its preferred width (so it scrolls) once they no longer do.
+	 */
+	private static final class ScrollableRow extends JPanel implements Scrollable {
+		private ScrollableRow() {
+			super(new BorderLayout());
+		}
+
+		@Override
+		public Dimension getPreferredScrollableViewportSize() {
+			return getPreferredSize();
+		}
+
+		@Override
+		public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+			return 16;
+		}
+
+		@Override
+		public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+			return Math.max(16, visibleRect.width - 32);
+		}
+
+		@Override
+		public boolean getScrollableTracksViewportWidth() {
+			return getParent() == null || getParent().getWidth() >= getPreferredSize().width;
+		}
+
+		@Override
+		public boolean getScrollableTracksViewportHeight() {
+			return true;
+		}
+	}
+
+	/**
+	 * Scrolls a row horizontally when the window is too narrow for it. It grows by the scroll
+	 * bar's height while the bar shows, so the bar never covers the controls.
+	 */
+	private static final class HorizontalScrollPane extends JScrollPane {
+		private boolean scrollBarShown;
+
+		private HorizontalScrollPane(JComponent row) {
+			super(row, VERTICAL_SCROLLBAR_NEVER, HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			setBorder(BorderFactory.createEmptyBorder());
+			setViewportBorder(null);
+			getHorizontalScrollBar().setUnitIncrement(16);
+			addComponentListener(new ComponentAdapter() {
+				@Override
+				public void componentResized(ComponentEvent event) {
+					// The bar appearing or disappearing changes the height the layout must reserve.
+					if (needsScrollBar() != scrollBarShown) {
+						scrollBarShown = needsScrollBar();
+						revalidate();
+					}
+				}
+			});
+		}
+
+		private boolean needsScrollBar() {
+			Insets insets = getInsets();
+			int available = getWidth() - insets.left - insets.right;
+			return available > 0 && getViewport().getView().getPreferredSize().width > available;
+		}
+
+		@Override
+		public Dimension getPreferredSize() {
+			Dimension size = super.getPreferredSize();
+			if (needsScrollBar()) {
+				size.height += getHorizontalScrollBar().getPreferredSize().height;
+			}
+			return size;
+		}
 	}
 
 	private record TrackedBodyOption(int index, String label) {
