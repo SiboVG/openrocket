@@ -299,6 +299,9 @@ public class Icons {
 			"pix/icons/lucide/pause.svg",
 			"Pause",
 			"OR.colors.blue");
+	public static final Icon FLIGHT_REPLAY = loadSvgIcon(
+			"pix/icons/lucide/rocket.svg",
+			"Replay in 3D");
 	public static final Icon PLAYBACK_RESTART = loadSvgIcon(
 			"pix/icons/lucide/skip-back.svg",
 			"Back to beginning");

@@ -122,6 +122,7 @@ public class SimulationPanel extends JPanel {
 	private final JButton landingDispersionButton;
 	private final JButton deleteButton;
 	private final JButton plotButton;
+	private final JButton flight3DButton;
 	private final JButton simTableExportButton;
 	private final JPopupMenu pm;
 	private final ColumnVisibilityController columnVisibilityController;
@@ -194,7 +195,7 @@ public class SimulationPanel extends JPanel {
 	}
 
 	public SimulationPanel(Window parent, OpenRocketDocument doc) {
-		super(new MigLayout("fill", "[grow][][][][][][][grow]"));
+		super(new MigLayout("fill", "[grow][][][][][][][][grow]"));
 
 		this.document = doc;
 
@@ -250,7 +251,13 @@ public class SimulationPanel extends JPanel {
 		//// Plot / export button
 		plotButton = new IconButton();
 		RocketActions.tieActionToButton(plotButton, plotSimulationAction, trans.get("simpanel.but.plotexport"));
-		this.add(plotButton, "wrap para");
+		this.add(plotButton, "gapright para");
+
+		//// 3D flight replay button
+		flight3DButton = new IconButton();
+		RocketActions.tieActionToButton(flight3DButton, flight3DAction, trans.get("simpanel.but.flight3d"));
+		flight3DButton.setToolTipText(trans.get("simpanel.pop.flight3d.ttip"));
+		this.add(flight3DButton, "wrap para");
 
 		//// Run then Dump simulations
 		simTableExportButton = new IconButton();
@@ -1277,7 +1284,7 @@ public class SimulationPanel extends JPanel {
 		public Flight3DAction() {
 			this.putValue(NAME, trans.get("simpanel.pop.flight3d"));
 			this.putValue(SHORT_DESCRIPTION, trans.get("simpanel.pop.flight3d.ttip"));
-			this.putValue(SMALL_ICON, Icons.SIM_PLOT);
+			this.putValue(SMALL_ICON, Icons.FLIGHT_REPLAY);
 		}
 
 		@Override
