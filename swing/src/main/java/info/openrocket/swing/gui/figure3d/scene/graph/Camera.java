@@ -32,6 +32,9 @@ public class Camera {
 	// When true, uses a fixed world-up vector (0,1,0) instead of the continuous orbitUp,
 	// matching the legacy JOGL photo-studio camera behavior.
 	private boolean forceFixedUp = false;
+	// When true the near plane keeps scaling with the orbit distance instead of stopping at
+	// zNear, so a subject far from the eye keeps enough depth precision (see setter).
+	private boolean nearPlaneScalesWithDistance = false;
 
 	private float minZoom; // Minimum zoom distance
 	private float maxZoom; // Maximum zoom distance
@@ -143,7 +146,22 @@ public class Camera {
 	private float getEffectiveNearPlane() {
 		float effectiveDistance = distance > 0 ? distance : CameraConstants.DEFAULT_DISTANCE;
 		float dynamicNear = effectiveDistance * CameraConstants.DYNAMIC_Z_NEAR_DISTANCE_FACTOR;
+		if (nearPlaneScalesWithDistance) {
+			return Math.max(dynamicNear, CameraConstants.MIN_DYNAMIC_Z_NEAR);
+		}
 		return MathUtil.clamp(dynamicNear, CameraConstants.MIN_DYNAMIC_Z_NEAR, zNear);
+	}
+
+	/**
+	 * Lets the near plane follow the orbit distance past its usual cap. The cap suits close
+	 * inspection in the design view, but for a subject thousands of units away (a rocket seen
+	 * through the flight replay's telephoto lens) it leaves the depth buffer too coarse to keep
+	 * a motor behind its body tube. Everything nearer the eye than a small fraction of the
+	 * distance is clipped.
+	 */
+	public void setNearPlaneScalesWithDistance(boolean enabled) {
+		this.nearPlaneScalesWithDistance = enabled;
+		updateProjectionMatrix();
 	}
 
 	private float getEffectiveFarPlane() {

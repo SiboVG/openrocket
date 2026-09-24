@@ -103,6 +103,14 @@ class FlightReplayRenderTest {
 			float baseFieldOfView = canvas.getScene3DOrchestrator().getCameraController().getCamera().getFieldOfView();
 			onEdt(() -> {
 				bar.getCameraModeCombo().setSelectedItem(FlightCameraMode.PAD);
+				clock.setTime(1.5);
+				panel.requestRenderNow();
+				return null;
+			});
+			capture(canvas, "flight-pad-boost-settling.png");
+			capture(canvas, "flight-pad-boost.png");
+			onEdt(() -> {
+				bar.getCameraModeCombo().setSelectedItem(FlightCameraMode.PAD);
 				clock.setTime(clock.getEnd() * 0.35);
 				panel.requestRenderNow();
 				return null;

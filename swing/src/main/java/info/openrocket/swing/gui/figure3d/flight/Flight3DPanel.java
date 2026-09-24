@@ -553,6 +553,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		buildExhaustGeometry(scene, orchestrator, config, groundedPoses,
 				replayData, burnTimeline, rocketCenterOffset);
 		Camera camera = orchestrator.getCameraController().getCamera();
+		// Replay subjects can be thousands of units from the eye; keep depth precision there.
+		camera.setNearPlaneScalesWithDistance(true);
 		initialCameraAngleX = camera.getAngleX();
 		initialCameraAngleY = camera.getAngleY();
 		initialCameraFieldOfView = camera.getFieldOfView();

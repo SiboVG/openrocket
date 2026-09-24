@@ -172,4 +172,21 @@ class CameraTest {
 
 		assertEquals(far, camera.capturePose());
 	}
+
+	@Test
+	void distantSubjectsCanKeepANearPlaneProportionalToTheirDistance() {
+		Camera camera = Camera.builder().build();
+		camera.setZoomLimits(0.01f, 1.0e6f);
+		camera.setDistance(20_000.0f);
+		float cappedNear = camera.getProjectionMatrix().perspectiveNear();
+
+		camera.setNearPlaneScalesWithDistance(true);
+		float scaledNear = camera.getProjectionMatrix().perspectiveNear();
+
+		assertEquals(CameraConstants.DEFAULT_Z_NEAR, cappedNear, 1e-3f, "The design view keeps its capped near plane");
+		assertEquals(20_000.0f * CameraConstants.DYNAMIC_Z_NEAR_DISTANCE_FACTOR, scaledNear, 1.0f);
+		camera.setDistance(10.0f);
+		assertEquals(10.0f * CameraConstants.DYNAMIC_Z_NEAR_DISTANCE_FACTOR,
+				camera.getProjectionMatrix().perspectiveNear(), 1e-3f, "Up close it still follows the distance");
+	}
 }
