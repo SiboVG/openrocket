@@ -1,6 +1,7 @@
 package info.openrocket.swing.gui.figure3d.flight;
 
 import info.openrocket.swing.gui.figure3d.animation.PoseProvider;
+import info.openrocket.swing.gui.figure3d.flight.FlightReplayData.BurnInterval;
 import info.openrocket.swing.gui.figure3d.particles.Particle;
 import info.openrocket.swing.gui.figure3d.particles.flame.FlameEmitter;
 import info.openrocket.swing.gui.figure3d.particles.flame.FlameSettings;
@@ -14,14 +15,14 @@ import java.util.function.DoubleUnaryOperator;
 /** Adapts the existing flame emitter to absolute replay time and moving motor nozzles. */
 final class ReplayFlameEmitter extends FlameEmitter {
 	private final PoseProvider provider;
-	private final List<double[]> burnWindows;
+	private final List<BurnInterval> burnWindows;
 	private final long seed;
 	private final float particleTimeScale;
 	private final Vector3f exhaustAxis;
 	private final Quaternionf roll = new Quaternionf();
 	private final DoubleUnaryOperator relativeThrust;
 
-	ReplayFlameEmitter(RenderingConfiguration config, PoseProvider provider, List<double[]> burnWindows,
+	ReplayFlameEmitter(RenderingConfiguration config, PoseProvider provider, List<BurnInterval> burnWindows,
 			Vector3f nozzle, Vector3f direction, float rocketLength, long seed, ThrustProfile thrust) {
 		// The pad/photo emitter's long lifetimes would leave burning particles far behind an
 		// accelerating rocket. Run the same particle lifecycle faster, preserving its plume length.
@@ -39,22 +40,22 @@ final class ReplayFlameEmitter extends FlameEmitter {
 		return settings.withSpread(settings.spread * exhaustScale);
 	}
 
-	ReplayFlameEmitter(FlameSettings settings, PoseProvider provider, List<double[]> burnWindows,
+	ReplayFlameEmitter(FlameSettings settings, PoseProvider provider, List<BurnInterval> burnWindows,
 			Vector3f nozzle, Vector3f direction, long seed) {
 		this(settings, provider, burnWindows, nozzle, direction, seed, 1.0f, time -> 1.0);
 	}
 
-	ReplayFlameEmitter(FlameSettings settings, PoseProvider provider, List<double[]> burnWindows,
+	ReplayFlameEmitter(FlameSettings settings, PoseProvider provider, List<BurnInterval> burnWindows,
 			Vector3f nozzle, Vector3f direction, long seed, DoubleUnaryOperator relativeThrust) {
 		this(settings, provider, burnWindows, nozzle, direction, seed, 1.0f, relativeThrust);
 	}
 
-	private ReplayFlameEmitter(FlameSettings settings, PoseProvider provider, List<double[]> burnWindows,
+	private ReplayFlameEmitter(FlameSettings settings, PoseProvider provider, List<BurnInterval> burnWindows,
 			Vector3f nozzle, Vector3f direction, long seed, float particleTimeScale,
 			DoubleUnaryOperator relativeThrust) {
 		super(nozzle, direction, settings);
 		this.provider = provider;
-		this.burnWindows = burnWindows.stream().map(double[]::clone).toList();
+		this.burnWindows = List.copyOf(burnWindows);
 		this.exhaustAxis = new Vector3f(direction).normalize();
 		this.seed = seed;
 		this.particleTimeScale = particleTimeScale;
@@ -73,13 +74,13 @@ final class ReplayFlameEmitter extends FlameEmitter {
 		if (!visible || !Double.isFinite(time) || rate <= 0 || settings.maxLife <= 0) return;
 
 		for (int windowIndex = 0; windowIndex < burnWindows.size(); windowIndex++) {
-			double[] window = burnWindows.get(windowIndex);
-			if (time < window[0] || time >= window[1] + maximumAge || window[1] <= window[0]) continue;
+			BurnInterval window = burnWindows.get(windowIndex);
+			if (time < window.start() || time >= window.end() + maximumAge || window.end() <= window.start()) continue;
 			// Only the last maximum lifetime can affect this frame, even after a long seek.
-			long first = Math.max(1, (long) Math.floor((time - maximumAge - window[0]) * rate) + 1);
-			long last = (long) Math.floor((Math.min(time, Math.nextDown(window[1])) - window[0]) * rate);
+			long first = Math.max(1, (long) Math.floor((time - maximumAge - window.start()) * rate) + 1);
+			long last = (long) Math.floor((Math.min(time, Math.nextDown(window.end())) - window.start()) * rate);
 			for (long index = first; index <= last; index++) {
-				double birthTime = window[0] + index / rate;
+				double birthTime = window.start() + index / rate;
 				float age = (float) (time - birthTime);
 				if (age < 0) continue;
 

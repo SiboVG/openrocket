@@ -71,6 +71,8 @@ class FlightReplayRenderTest {
 				panel.requestRenderNow();
 				return null;
 			});
+			// Let the view switch settle before comparing frames.
+			capture(canvas, "flight-follow-exhaust-settling.png");
 			BufferedImage first = capture(canvas, "flight-follow-exhaust.png");
 			BufferedImage paused = capture(canvas, "flight-flame-paused.png");
 			assertTrue(GoldenImageTestSupport.compare(first, paused, 1).meanAbsoluteError() < 0.01,

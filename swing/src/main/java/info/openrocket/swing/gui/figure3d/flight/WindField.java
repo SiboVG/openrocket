@@ -3,6 +3,7 @@ package info.openrocket.swing.gui.figure3d.flight;
 import info.openrocket.core.simulation.FlightDataBranch;
 import info.openrocket.core.simulation.FlightDataType;
 import info.openrocket.swing.gui.figure3d.animation.SimToWorld;
+import info.openrocket.swing.gui.figure3d.animation.TimeSeries;
 import org.joml.Vector3f;
 
 import java.util.List;
@@ -63,28 +64,7 @@ final class WindField {
 
 	/** Wind velocity at the given flight time in engine units per second. */
 	Vector3f velocityAt(double time) {
-		// First sample strictly after the time.
-		int low = 0;
-		int upper = times.length;
-		while (low < upper) {
-			int middle = (low + upper) >>> 1;
-			if (times[middle] <= time) {
-				low = middle + 1;
-			} else {
-				upper = middle;
-			}
-		}
-		if (upper == 0) {
-			return toEngine(east[0], north[0]);
-		}
-		if (upper == times.length) {
-			return toEngine(east[times.length - 1], north[times.length - 1]);
-		}
-		int lower = upper - 1;
-		double span = times[upper] - times[lower];
-		double fraction = span > 0.0 ? (time - times[lower]) / span : 0.0;
-		return toEngine(east[lower] + (east[upper] - east[lower]) * fraction,
-				north[lower] + (north[upper] - north[lower]) * fraction);
+		return toEngine(TimeSeries.interpolate(times, east, time), TimeSeries.interpolate(times, north, time));
 	}
 
 	private static Vector3f toEngine(double east, double north) {

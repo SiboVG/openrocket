@@ -2,6 +2,8 @@ package info.openrocket.swing.gui.figure3d.flight;
 
 import info.openrocket.core.simulation.FlightDataBranch;
 import info.openrocket.core.simulation.FlightDataType;
+import info.openrocket.swing.gui.figure3d.animation.TimeSeries;
+import info.openrocket.swing.gui.figure3d.flight.FlightReplayData.BurnInterval;
 
 import java.util.List;
 
@@ -16,26 +18,26 @@ final class ThrustProfile {
 
 	private final double[] times;
 	private final double[] thrust;
-	private final List<double[]> windows;
+	private final List<BurnInterval> windows;
 	private final double[] windowAverages;
 
-	private ThrustProfile(double[] times, double[] thrust, List<double[]> windows) {
+	private ThrustProfile(double[] times, double[] thrust, List<BurnInterval> windows) {
 		this.times = times;
 		this.thrust = thrust;
-		this.windows = windows.stream().map(double[]::clone).toList();
+		this.windows = List.copyOf(windows);
 		this.windowAverages = new double[this.windows.size()];
 		for (int i = 0; i < windowAverages.length; i++) {
-			double[] window = this.windows.get(i);
+			BurnInterval window = this.windows.get(i);
 			double sum = 0.0;
 			for (int s = 0; s < AVERAGE_SAMPLES; s++) {
-				sum += thrustAt(window[0] + (window[1] - window[0]) * (s + 0.5) / AVERAGE_SAMPLES);
+				sum += thrustAt(window.start() + (window.end() - window.start()) * (s + 0.5) / AVERAGE_SAMPLES);
 			}
 			windowAverages[i] = sum / AVERAGE_SAMPLES;
 		}
 	}
 
-	/** Uses the branch's thrust over the given burn windows ({start, end} pairs). */
-	static ThrustProfile fromBranch(FlightDataBranch branch, List<double[]> burnWindows) {
+	/** Uses the branch's thrust over the given burn windows. */
+	static ThrustProfile fromBranch(FlightDataBranch branch, List<BurnInterval> burnWindows) {
 		if (branch == null) {
 			return STEADY;
 		}
@@ -59,8 +61,7 @@ final class ThrustProfile {
 	/** Thrust at the time relative to the average of the burn it falls in; 1 outside burns. */
 	double relativeThrustAt(double time) {
 		for (int i = 0; i < windows.size(); i++) {
-			double[] window = windows.get(i);
-			if (time >= window[0] && time <= window[1]) {
+			if (windows.get(i).contains(time)) {
 				return windowAverages[i] > 0.0 ? thrustAt(time) / windowAverages[i] : 1.0;
 			}
 		}
@@ -68,27 +69,6 @@ final class ThrustProfile {
 	}
 
 	private double thrustAt(double time) {
-		if (times.length == 0) {
-			return 0.0;
-		}
-		int low = 0;
-		int upper = times.length;
-		while (low < upper) {
-			int middle = (low + upper) >>> 1;
-			if (times[middle] <= time) {
-				low = middle + 1;
-			} else {
-				upper = middle;
-			}
-		}
-		if (upper == 0) {
-			return thrust[0];
-		}
-		if (upper == times.length) {
-			return thrust[times.length - 1];
-		}
-		double span = times[upper] - times[upper - 1];
-		double fraction = span > 0.0 ? (time - times[upper - 1]) / span : 0.0;
-		return thrust[upper - 1] + (thrust[upper] - thrust[upper - 1]) * fraction;
+		return TimeSeries.interpolate(times, thrust, time);
 	}
 }

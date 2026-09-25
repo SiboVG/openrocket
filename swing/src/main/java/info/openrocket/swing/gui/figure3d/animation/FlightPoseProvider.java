@@ -199,22 +199,6 @@ public final class FlightPoseProvider implements PoseProvider {
 	}
 
 	private static float sample(double[] ts, double[] vs, double t) {
-		if (t <= ts[0]) return (float)vs[0];
-		int hi = upperBound(ts, t);
-		if (hi <= 0) return (float)vs[0];
-		if (hi >= ts.length) return (float)vs[ts.length - 1];
-		int lo = hi - 1;
-		double a = ts[lo], b = ts[hi];
-		double u = (t - a) / Math.max(1e-9, (b - a));
-		return (float)((1.0 - u) * vs[lo] + u * vs[hi]);
-	}
-
-	private static int upperBound(double[] ts, double t) {
-		int lo = 0, hi = ts.length;
-		while (lo < hi) {
-			int mid = (lo + hi) >>> 1;
-			if (t >= ts[mid]) lo = mid + 1; else hi = mid;
-		}
-		return lo;
+		return (float) TimeSeries.interpolate(ts, vs, t);
 	}
 }

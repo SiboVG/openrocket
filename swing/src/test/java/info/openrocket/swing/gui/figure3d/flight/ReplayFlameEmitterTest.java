@@ -74,7 +74,7 @@ class ReplayFlameEmitterTest {
 		FlameSettings settings = FlameSettings.normal(new RenderingConfiguration());
 		PoseProvider provider = stationaryProvider(new Vector3f(), new Quaternionf());
 		ReplayFlameEmitter replay = new ReplayFlameEmitter(settings, provider,
-				List.of(new double[] { 0.0, 1.0 }), new Vector3f(1, 0, 0), new Vector3f(1, 0, 0), 17);
+				List.of(new FlightReplayData.BurnInterval(0.0, 1.0)), new Vector3f(1, 0, 0), new Vector3f(1, 0, 0), 17);
 		class ReferenceEmitter extends FlameEmitter {
 			ReferenceEmitter(FlameSettings config) { super(new Vector3f(1, 0, 0), new Vector3f(1, 0, 0), config); }
 			Particle emit(long index, double birthTime, float age) {
@@ -162,7 +162,7 @@ class ReplayFlameEmitterTest {
 	void plumeGrowsAndBrightensWithThrust() {
 		FlameSettings settings = FlameSettings.normal(new RenderingConfiguration());
 		PoseProvider provider = stationaryProvider(new Vector3f(), new Quaternionf());
-		List<double[]> burn = List.<double[]>of(new double[] { 0.0, 1.0 });
+		List<FlightReplayData.BurnInterval> burn = List.of(new FlightReplayData.BurnInterval(0.0, 1.0));
 		Vector3f nozzle = new Vector3f(1, 0, 0);
 		ReplayFlameEmitter spike = new ReplayFlameEmitter(settings, provider, burn, nozzle, nozzle, 17, time -> 1.6);
 		ReplayFlameEmitter average = new ReplayFlameEmitter(settings, provider, burn, nozzle, nozzle, 17, time -> 1.0);
@@ -182,7 +182,7 @@ class ReplayFlameEmitterTest {
 
 	private static ReplayFlameEmitter emitter(Vector3f base, Quaternionf rotation, long seed) {
 		return new ReplayFlameEmitter(FlameSettings.normal(new RenderingConfiguration()), stationaryProvider(base, rotation),
-				List.of(new double[] { 0.0, 1.0 }, new double[] { 2.0, 3.0 }),
+				List.of(new FlightReplayData.BurnInterval(0.0, 1.0), new FlightReplayData.BurnInterval(2.0, 3.0)),
 				new Vector3f(1, 0, 0), new Vector3f(1, 0, 0), seed);
 	}
 
@@ -198,7 +198,7 @@ class ReplayFlameEmitterTest {
 		};
 		ReplayFlameEmitter stationary = emitter(new Vector3f(), new Quaternionf(), 17);
 		ReplayFlameEmitter translated = new ReplayFlameEmitter(FlameSettings.normal(new RenderingConfiguration()),
-				moving, List.of(new double[] { 0, 1 }), new Vector3f(1, 0, 0), new Vector3f(1, 0, 0), 17);
+				moving, List.of(new FlightReplayData.BurnInterval(0, 1)), new Vector3f(1, 0, 0), new Vector3f(1, 0, 0), 17);
 		stationary.setReplayTime(0.5, true);
 		translated.setReplayTime(0.5, true);
 		assertEquals(stationary.getParticles().size(), translated.getParticles().size());

@@ -19,6 +19,7 @@ import info.openrocket.swing.gui.figure3d.SharedCanvasRenderScheduler;
 import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
 import info.openrocket.swing.gui.figure3d.animation.PoseProvider;
 import info.openrocket.swing.gui.figure3d.constants.RenderingConstants;
+import info.openrocket.swing.gui.figure3d.flight.FlightReplayData.BurnInterval;
 import info.openrocket.swing.gui.figure3d.geometry.IntList;
 import info.openrocket.swing.gui.figure3d.geometry.Mesh;
 import info.openrocket.swing.gui.figure3d.geometry.Vertex;
@@ -534,7 +535,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 				centeredPoses.primaryProvider(), replayData.getStartTime());
 		orchestrator.bindFlightPosesToRocket(groundedPoses.providersByStage(), groundedPoses.primaryProvider(),
 				replayData.getStartTime(), replayData.getEndTime());
-		Map<AxialStage, List<double[]>> burnTimeline = toStageTimeline(replayData.getBurnIntervalsByStage());
+		Map<AxialStage, List<BurnInterval>> burnTimeline = replayData.getBurnIntervalsByStage();
 		int burnWindowCount = burnTimeline.values().stream().mapToInt(List::size).sum();
 		log.info("Flight replay: {} stage(s) with {} total motor burn window(s)", burnTimeline.size(), burnWindowCount);
 
@@ -848,7 +849,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	 */
 	private void buildExhaustGeometry(SceneView scene, Scene3DOrchestrator orchestrator,
 			RenderingConfiguration config, GroundedPoseProviders poses, FlightReplayData replayData,
-			Map<AxialStage, List<double[]>> burnTimeline, Vector3f centerOffset) {
+			Map<AxialStage, List<BurnInterval>> burnTimeline, Vector3f centerOffset) {
 		smokePuffs.clear();
 		flameJets.clear();
 		Vector3f rocketSize = orchestrator.getCameraController().computeRocketSize();
@@ -869,7 +870,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		scene.addParticleEmitter(smokePuppet);
 
 		List<MotorExhaustMount> exhaustMounts = orchestrator.getMotorExhaustMounts();
-		for (Map.Entry<AxialStage, List<double[]>> entry : burnTimeline.entrySet()) {
+		for (Map.Entry<AxialStage, List<BurnInterval>> entry : burnTimeline.entrySet()) {
 			PoseProvider provider = providerForStage(entry.getKey(), poses.providersByStage(), poses.primaryProvider());
 			if (provider == null || entry.getValue().isEmpty()) {
 				continue;
@@ -878,8 +879,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 					.filter(mount -> stageFor(mount.mountComponent()) == entry.getKey())
 					.toList();
 			for (MotorExhaustMount mount : stageMounts) {
-				for (double[] window : entry.getValue()) {
-					addSmokeColumn(provider, mount.nozzlePosition(), window[0], window[1], puffSize, spacing);
+				for (BurnInterval window : entry.getValue()) {
+					addSmokeColumn(provider, mount.nozzlePosition(), window.start(), window.end(), puffSize, spacing);
 				}
 				addFlameJet(scene, config, provider, entry.getValue(), mount.nozzlePosition(),
 						mount.exhaustDirection(), rocketLength);
@@ -1267,7 +1268,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	 * Builds a streaming flame plume for one motor, driven by replay emission times.
 	 */
 	private void addFlameJet(SceneView scene, RenderingConfiguration config, PoseProvider provider,
-			List<double[]> burnWindows, Vector3f nozzleLocal, Vector3f exhaustDirection, float rocketLength) {
+			List<BurnInterval> burnWindows, Vector3f nozzleLocal, Vector3f exhaustDirection, float rocketLength) {
 		ReplayFlameEmitter emitter = new ReplayFlameEmitter(config, provider, burnWindows,
 				nozzleLocal, exhaustDirection, rocketLength, 31L * flameJets.size() + 17,
 				ThrustProfile.fromBranch(branchFor(provider), burnWindows));
@@ -1852,19 +1853,6 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		scene.setBackground(GradientBackground.worldAligned(
 				new Vector3f(0.18f, 0.48f, 0.82f),
 				new Vector3f(0.76f, 0.87f, 0.96f)));
-	}
-
-	private Map<AxialStage, List<double[]>> toStageTimeline(
-			Map<AxialStage, List<FlightReplayData.BurnInterval>> intervalsByStage) {
-		Map<AxialStage, List<double[]>> timeline = new LinkedHashMap<>();
-		for (Map.Entry<AxialStage, List<FlightReplayData.BurnInterval>> entry : intervalsByStage.entrySet()) {
-			List<double[]> stageIntervals = new ArrayList<>(entry.getValue().size());
-			for (FlightReplayData.BurnInterval interval : entry.getValue()) {
-				stageIntervals.add(new double[] { interval.start(), interval.end() });
-			}
-			timeline.put(entry.getKey(), stageIntervals);
-		}
-		return timeline;
 	}
 
 	/**

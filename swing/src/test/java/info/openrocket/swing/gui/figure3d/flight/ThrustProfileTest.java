@@ -20,7 +20,7 @@ class ThrustProfileTest {
 			branch.setValue(FlightDataType.TYPE_TIME, point[0]);
 			branch.setValue(FlightDataType.TYPE_THRUST_FORCE, point[1]);
 		}
-		ThrustProfile profile = ThrustProfile.fromBranch(branch, List.<double[]>of(new double[] { 0.0, 2.0 }));
+		ThrustProfile profile = ThrustProfile.fromBranch(branch, List.of(new FlightReplayData.BurnInterval(0.0, 2.0)));
 
 		assertTrue(profile.relativeThrustAt(0.1) > 2.0, "The ignition spike is well above average");
 		assertEquals(1.0, profile.relativeThrustAt(1.0), 0.15, "The sustain is about average");
@@ -34,7 +34,7 @@ class ThrustProfileTest {
 		branch.addPoint();
 		branch.setValue(FlightDataType.TYPE_TIME, 0.0);
 
-		assertEquals(1.0, ThrustProfile.fromBranch(branch, List.<double[]>of(new double[] { 0.0, 1.0 }))
+		assertEquals(1.0, ThrustProfile.fromBranch(branch, List.of(new FlightReplayData.BurnInterval(0.0, 1.0)))
 				.relativeThrustAt(0.5));
 		assertEquals(1.0, ThrustProfile.fromBranch(null, List.of()).relativeThrustAt(0.5));
 	}
