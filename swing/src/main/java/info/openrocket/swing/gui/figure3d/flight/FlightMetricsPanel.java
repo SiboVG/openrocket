@@ -25,8 +25,9 @@ import java.util.stream.Collectors;
 
 /**
  * A compact telemetry strip for the flight replay: shows the simulation, its flight configuration,
- * and the altitude/velocity/acceleration/position interpolated at the current playback time. Lives
- * beside the 3D view (a Swing component cannot overlay the heavyweight GL canvas).
+ * the tracked body's altitude, velocity, acceleration and position interpolated at the current
+ * playback time, and each group of stages' flight phase. Lives beside the 3D view (a Swing
+ * component cannot overlay the heavyweight GL canvas).
  */
 @SuppressWarnings("serial")
 class FlightMetricsPanel extends JPanel {

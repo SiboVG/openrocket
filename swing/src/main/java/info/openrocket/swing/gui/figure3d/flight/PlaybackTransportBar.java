@@ -39,6 +39,13 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
+/**
+ * The replay's controls, in two rows below the view plus the event list: camera mode, tracked
+ * stage, zoom, pan and visibility toggles (scrolling when the window is too narrow), then the
+ * transport buttons, speed and loop beside the timeline. It drives the {@link PlaybackClock}
+ * directly and polls it to keep the timeline and time label current during playback; view
+ * changes go to listeners. All methods run on the Swing thread.
+ */
 @SuppressWarnings("serial")
 class PlaybackTransportBar extends JPanel {
 	private static final Translator trans = Application.getTranslator();

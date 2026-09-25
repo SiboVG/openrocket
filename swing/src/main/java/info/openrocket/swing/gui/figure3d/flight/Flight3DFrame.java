@@ -23,6 +23,13 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * The 3D flight replay window: the telemetry strip above the {@link Flight3DPanel} view and the
+ * {@link PlaybackTransportBar} controls below it. Each main window has at most one replay
+ * window; opening a replay again shows the other simulation in it. Replay keyboard shortcuts
+ * work wherever focus is in the window, except in text fields and drop-down lists. The window
+ * releases its 3D resources when it or its owner closes.
+ */
 @SuppressWarnings("serial")
 public class Flight3DFrame extends JFrame {
 	private static final Map<Window, Flight3DFrame> activeFramesByOwner = new IdentityHashMap<>();
@@ -112,6 +119,7 @@ public class Flight3DFrame extends JFrame {
 		GUIUtil.setWindowIcons(this);
 	}
 
+	/** Shows the given simulation's replay, reusing the owner window's replay window if it has one. */
 	public static void openForSimulation(OpenRocketDocument document, Simulation simulation, Window parent) {
 		Flight3DFrame existingFrame = activeFramesByOwner.get(parent);
 		if (existingFrame != null && existingFrame.isDisplayable()) {

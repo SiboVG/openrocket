@@ -19,7 +19,12 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * UI-independent adapter from simulation output to replay providers.
+ * A simulation's flight data prepared for the replay, independent of any UI: a trajectory per
+ * simulation branch mapped to the stages it carries, the separately flying bodies, the flight
+ * events, each stage's motor burns, and which stages fly together and in what phase over time.
+ *
+ * <p>OpenRocket copies a branch's pre-separation history from its parent, so each branch
+ * describes its stages' whole flight and a stage can simply follow its branch throughout.
  */
 public final class FlightReplayData {
 	private final Map<AxialStage, PoseProvider> providersByStage;
@@ -68,6 +73,7 @@ public final class FlightReplayData {
 				burnIntervalsByStage.values().stream().flatMap(List::stream).toList()));
 	}
 
+	/** Each stage's trajectory: the branch of the nearest stage at or above it that has one. */
 	public Map<AxialStage, PoseProvider> getProvidersByStage() {
 		return providersByStage;
 	}
@@ -77,6 +83,7 @@ public final class FlightReplayData {
 		return flightBodies;
 	}
 
+	/** The first branch's trajectory: the sustainer's, which every stage rides until it separates. */
 	public PoseProvider getPrimaryProvider() {
 		return primaryProvider;
 	}
@@ -89,10 +96,12 @@ public final class FlightReplayData {
 		return endTime;
 	}
 
+	/** Every branch's events once each, in flight order. */
 	public List<FlightEvent> getAllEvents() {
 		return allEvents;
 	}
 
+	/** When the stage that deployed the given recovery device lands, or the fallback if it never does. */
 	public double getGroundHitTime(FlightEvent deployment, double fallback) {
 		if (deployment == null) {
 			return fallback;
@@ -100,6 +109,7 @@ public final class FlightReplayData {
 		return groundHitByDeploymentId.getOrDefault(deployment.getID(), fallback);
 	}
 
+	/** Each stage's motor burns, from ignition to burnout, overlapping burns merged. */
 	public Map<AxialStage, List<BurnInterval>> getBurnIntervalsByStage() {
 		return burnIntervalsByStage;
 	}

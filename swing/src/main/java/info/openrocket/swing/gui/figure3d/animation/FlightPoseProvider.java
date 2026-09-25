@@ -26,12 +26,20 @@ public final class FlightPoseProvider implements PoseProvider {
 
 	private FlightPoseProvider(double[] t, double[] east, double[] north, double[] alt,
 							   double[] thetaElevation, double[] phiAzimuth, double[] rollAngle) {
-		this.t = t; this.east = east; this.north = north; this.alt = alt;
-		this.thetaElevation = thetaElevation; this.phiAzimuth = phiAzimuth;
+		this.t = t;
+		this.east = east;
+		this.north = north;
+		this.alt = alt;
+		this.thetaElevation = thetaElevation;
+		this.phiAzimuth = phiAzimuth;
 		this.rollAngle = rollAngle;
 	}
 
-	// ---------- Factory ----------
+	/**
+	 * Reads a branch's time, position and (when recorded) attitude and roll rate.
+	 *
+	 * @throws IllegalArgumentException if the branch lacks time, lateral position or altitude data
+	 */
 	public static FlightPoseProvider fromFlightDataBranch(FlightDataBranch branch) {
 		// Required channels
 		List<Double> tL     = branch.get(FlightDataType.TYPE_TIME);
@@ -89,10 +97,7 @@ public final class FlightPoseProvider implements PoseProvider {
 	// ---------- PoseProvider ----------
 	@Override
 	public Vector3f getPosition(double time) {
-		float ex = sample(t, east,  time);
-		float no = sample(t, north, time);
-		float al = sample(t, alt,   time);
-		return SimToWorld.toEngine(ex, no, al);
+		return SimToWorld.toEngine(sample(t, east, time), sample(t, north, time), sample(t, alt, time));
 	}
 
 	@Override
@@ -100,7 +105,7 @@ public final class FlightPoseProvider implements PoseProvider {
 		// Preferred: explicit elevation/azimuth
 		if (thetaElevation != null && phiAzimuth != null) {
 			float th = sample(t, thetaElevation, time);
-			float ph = sample(t, phiAzimuth,  time);
+			float ph = sample(t, phiAzimuth, time);
 			float horizontal = (float) Math.cos(th);
 			Vector3f dir = new Vector3f(
 					horizontal * (float) Math.sin(ph),
