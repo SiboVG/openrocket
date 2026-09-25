@@ -400,7 +400,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		PlaybackClock clock = playbackClock;
 		Scene3DOrchestrator orchestrator = activeOrchestrator;
 		if ((clock != null && clock.getRate() != 0.0)
-				|| (orchestrator != null && orchestrator.isFlightCameraTransitioning())) {
+				|| (orchestrator != null && orchestrator.getFlightCamera().isTransitioning())) {
 			dirty.set(false);
 			return true;
 		}
@@ -540,7 +540,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 
 		// The cameras orbit the tracked body's middle, not the rocket's nose.
 		collectTrackedBodies(data, replayData, groundedPoses, centeredPoses.bodyCenters());
-		orchestrator.setFlightRocketCenterOffset(trackedBodies.get(0).centerOffset());
+		orchestrator.getFlightCamera().setTrackCenterOffset(trackedBodies.get(0).centerOffset());
 		computeTrajectoryBounds(orchestrator.getCameraController(), groundedPoses,
 				replayData.getStartTime(), replayData.getEndTime());
 		addGroundAndHaze(orchestrator.getScene(), orchestrator.getCameraController().getCamera().getFieldOfView());
@@ -559,7 +559,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		initialCameraAngleY = camera.getAngleY();
 		initialCameraFieldOfView = camera.getFieldOfView();
 		applyCameraMode(orchestrator, cameraMode);
-		orchestrator.skipFlightCameraTransition();
+		orchestrator.getFlightCamera().skipTransition();
 
 		PlaybackClock clock = orchestrator.getPlaybackClock();
 		if (clock != null) {
@@ -699,18 +699,18 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		orchestrator.setFlightPanEnabled(mode != FlightCameraMode.PAD);
 
 		switch (mode) {
-			case FOLLOW -> orchestrator.setFollowFlightCamera(true);
+			case FOLLOW -> orchestrator.getFlightCamera().follow();
 			case PAD -> {
 				// A launch-footage viewpoint: a few meters out from the pad at head height.
 				float away = Math.max(7.0f * RenderingConstants.WORLD_SCALE,
 						rocketLengthWorld(orchestrator) * 4.0f);
-				orchestrator.setPadFlightCamera(new Vector3f(away, 1.7f * RenderingConstants.WORLD_SCALE, away));
+				orchestrator.getFlightCamera().watchFromPad(new Vector3f(away, 1.7f * RenderingConstants.WORLD_SCALE, away));
 			}
 			default -> {
 				if (trajectoryCenter != null && trajectoryDimensions != null) {
-					orchestrator.fitFlightTrajectory(trajectoryCenter, trajectoryDimensions);
+					orchestrator.getFlightCamera().frameTrajectory(trajectoryCenter, trajectoryDimensions);
 				} else {
-					orchestrator.setFollowFlightCamera(false);
+					orchestrator.getFlightCamera().free();
 					orchestrator.focusOnRocket();
 				}
 			}
@@ -1488,7 +1488,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 				/ Math.tan(initialCameraFieldOfView / 2.0));
 		// A camera transition shows interpolated distances, not the overview's fit.
 		if (cameraMode == FlightCameraMode.OVERVIEW && cameraControls.isZoomFitting()
-				&& !orchestrator.isFlightCameraTransitioning()) {
+				&& !orchestrator.getFlightCamera().isTransitioning()) {
 			overviewFitDistance = cameraDistance;
 		}
 		float scale = decorationScale(cameraDistance, overviewFitDistance);
@@ -1983,7 +1983,7 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 			return;
 		}
 		TrackedBody body = trackedBodies.get(index);
-		orchestrator.setFlightTrackTarget(body.provider(), body.centerOffset());
+		orchestrator.getFlightCamera().setTrackTarget(body.provider(), body.centerOffset());
 		if (positionMarker != null) {
 			positionMarker.setBasePosition(body.centerOffset() != null ? body.centerOffset() : new Vector3f());
 			positionMarker.setPoseProvider(body.provider());

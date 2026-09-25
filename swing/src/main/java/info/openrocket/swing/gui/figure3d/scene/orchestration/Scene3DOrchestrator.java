@@ -8,8 +8,6 @@ import info.openrocket.core.util.CoordinateIF;
 import info.openrocket.core.startup.Application;
 import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
 import info.openrocket.swing.gui.figure3d.animation.PoseProvider;
-import info.openrocket.core.util.MathUtil;
-import info.openrocket.swing.gui.figure3d.constants.CameraConstants;
 import info.openrocket.swing.gui.figure3d.geometry.RocketMeshBuilder;
 import info.openrocket.swing.gui.figure3d.geometry.RocketSceneSnapshot;
 import info.openrocket.swing.gui.figure3d.math.DefaultRaycaster;
@@ -55,16 +53,6 @@ public class Scene3DOrchestrator {
 	private volatile Runnable glTaskQueuedCallback;
 	private volatile Runnable rocketSceneRebuiltCallback;
 
-	/** How the replay camera tracks the rocket during playback. */
-	public enum FlightCameraBehavior {
-		/** No tracking; the user (or a one-shot fit) controls the camera. */
-		FREE,
-		/** Orbit pivot follows the rocket, framed to fit it. */
-		FOLLOW,
-		/** Fixed eye position that turns to keep the rocket centered. */
-		PAD
-	}
-
 	/** Rocket-local motor nozzle geometry captured with the rendered rocket snapshot. */
 	public record MotorExhaustMount(RocketComponent mountComponent, Vector3f nozzlePosition,
 			Vector3f exhaustDirection) {
@@ -76,41 +64,8 @@ public class Scene3DOrchestrator {
 
 	private long lastFrameTime;
 	private volatile PlaybackClock playbackClock = null;
-	// The body the follow and pad cameras track, with the offset from its pose origin to its
-	// geometric center, so the cameras aim at the body's middle instead of its nose. Published
-	// together so a switch never pairs one body's trajectory with another's center.
-	private volatile FlightTrackTarget flightTrackTarget = null;
-	private final Vector3f followPanOffset = new Vector3f();
-	private volatile FlightCameraBehavior flightCameraBehavior = FlightCameraBehavior.FREE;
-	// World-space eye position for the PAD behavior.
-	private volatile Vector3f flightPadEye = null;
-	private volatile boolean pendingPadZoomReset = false;
-	// The PAD view is a fixed telephoto camera: the lens narrows as the rocket climbs so it
-	// keeps its launch size on screen, and wheel zoom scales that lens instead of moving the eye.
-	private float flightPadZoomScale = 1.0f;
-	private float lastAppliedPadDistance = Float.NaN;
-	private float padReferenceDistance = Float.NaN;
-	private float flightBaseFieldOfView = Float.NaN;
-	private volatile Vector3f flightTrajectoryCenter = null;
-	private volatile Vector3f flightTrajectoryDimensions = null;
-	private volatile boolean pendingTrajectoryFit = false;
-	private volatile boolean pendingFollowFit = false;
 	private volatile DoubleConsumer flightFrameListener = null;
-	// View switches blend the camera from the pose last shown to the new view's pose. Each
-	// blended frame shows an interpolated pose; the next frame first restores the view's own
-	// pose, so the view's logic (and input) never sees the interpolation.
-	private static final float CAMERA_TRANSITION_SECONDS = 0.6f;
-	// A paused replay renders on demand, so the first frame's delta can span the whole pause.
-	private static final float MAX_TRANSITION_STEP_SECONDS = 1.0f / 30.0f;
-	private volatile boolean pendingCameraTransition = false;
-	private Camera.Pose transitionFrom = null;
-	private Camera.Pose transitionTarget = null;
-	private float transitionElapsed = 0.0f;
-	private static final float FOLLOW_FRAME_MARGIN = 1.8f;
-	private static final float OVERVIEW_CLOSEST_DISTANCE_FACTOR = 0.001f;
-	private static final float OVERVIEW_FARTHEST_DISTANCE_FACTOR = 20.0f;
-	private static final float PAD_MIN_FIELD_OF_VIEW = (float) Math.toRadians(0.5);
-	private static final float PAD_MAX_FIELD_OF_VIEW = (float) Math.toRadians(100.0);
+	private final FlightCameraRig flightCamera;
 
 	/**
 	 * Updates the orchestrator's knowledge of the window and framebuffer dimensions.
@@ -212,25 +167,16 @@ public class Scene3DOrchestrator {
 	 * Runs one frame of non-render updates before the caller renders the scene.
 	 */
 	public void update() {
-		Camera flightCamera = cameraController.getCamera();
-		if (pendingCameraTransition) {
-			pendingCameraTransition = false;
-			// Start from what is on screen, which may itself be mid-transition.
-			transitionFrom = flightCamera.capturePose();
-			transitionElapsed = 0.0f;
-		}
-		if (transitionTarget != null) {
-			flightCamera.restorePose(transitionTarget);
-			transitionTarget = null;
-		}
+		flightCamera.beginFrame();
 		runPendingGlTasks();
 		long currentFrameTime = System.nanoTime();
 		float deltaTime = (currentFrameTime - lastFrameTime) / 1e9f;
 		lastFrameTime = currentFrameTime;
 
 		// Process all input events
-		Vector3f centerBeforeInput = playbackClock != null
-				? new Vector3f(cameraController.getCamera().getCenterOfInterest()) : null;
+		if (playbackClock != null) {
+			flightCamera.beforeInput();
+		}
 		inputHandler.processInput();
 
 		// Update camera and scene
@@ -246,73 +192,7 @@ public class Scene3DOrchestrator {
 					obj.applyPoseAtTime(t);
 				}
 			}
-			FlightTrackTarget target = flightTrackTarget;
-			Camera camera = cameraController.getCamera();
-			FlightCameraBehavior behavior = flightCameraBehavior;
-			if (behavior != FlightCameraBehavior.PAD && Float.isFinite(flightBaseFieldOfView)
-					&& camera.getFieldOfView() != flightBaseFieldOfView) {
-				// Leaving the telephoto view: restore the lens before any fit uses it.
-				camera.setFieldOfView(flightBaseFieldOfView);
-			}
-			if (behavior != FlightCameraBehavior.FREE && target != null) {
-				Vector3f pivot = target.pivotAt(t);
-				if (behavior == FlightCameraBehavior.PAD) {
-					Vector3f eye = flightPadEye;
-					if (eye != null) {
-						if (pendingPadZoomReset) {
-							pendingPadZoomReset = false;
-							flightPadZoomScale = 1.0f;
-							lastAppliedPadDistance = Float.NaN;
-							padReferenceDistance = eye.distance(target.pivotAt(playbackClock.getStart()));
-							if (!Float.isFinite(flightBaseFieldOfView)) {
-								flightBaseFieldOfView = camera.getFieldOfView();
-							}
-						}
-						// Wheel input changed the orbit distance since the last frame; read that
-						// ratio as a lens zoom, then put the eye back at the pad.
-						flightPadZoomScale = updatedPadZoomScale(flightPadZoomScale,
-								camera.getDistance(), lastAppliedPadDistance);
-						float distance = lookFrom(camera, eye, pivot);
-						float autoTan = telephotoTanHalfFieldOfView(flightBaseFieldOfView, padReferenceDistance, distance);
-						flightPadZoomScale = MathUtil.clamp(flightPadZoomScale,
-								(float) Math.tan(PAD_MIN_FIELD_OF_VIEW / 2.0) / autoTan,
-								(float) Math.tan(PAD_MAX_FIELD_OF_VIEW / 2.0) / autoTan);
-						camera.setFieldOfView(2.0 * Math.atan(autoTan * flightPadZoomScale));
-						lastAppliedPadDistance = distance;
-						// This behavior owns the distance; a resize refit to the last fitted
-						// bounds would otherwise be read as a huge wheel zoom on the next frame.
-						cameraController.setZoomFitting(false);
-					}
-				} else {
-					if (pendingFollowFit) {
-						pendingFollowFit = false;
-						// Fit a rotation-independent envelope, including room for the exhaust.
-						// Fitting the unposed horizontal design crops a vertical rocket on wide windows.
-						float diameter = cameraController.computeRocketSize().length() * FOLLOW_FRAME_MARGIN;
-						cameraController.focusOnBounds(pivot, new Vector3f(diameter));
-						// The fit clamps the zoom range to the rocket; open it back up so the
-						// user can zoom well out while still tracking the flight.
-						camera.setZoomLimits(Math.max(0.01f, camera.getDistance() * 0.05f),
-								camera.getDistance() * 100.0f);
-						followPanOffset.zero();
-						centerBeforeInput.set(pivot);
-						camera.setCenterOfInterest(pivot);
-					}
-					// Retain only the user's input delta, so a resize refit cannot move the
-					// tracking target back to the location where follow mode was entered.
-					trackFlightPivot(camera, centerBeforeInput, new Vector3f(pivot).add(followPanOffset));
-					followPanOffset.set(camera.getCenterOfInterest()).sub(pivot);
-				}
-			} else if (pendingTrajectoryFit) {
-				pendingTrajectoryFit = false;
-				Vector3f center = flightTrajectoryCenter;
-				Vector3f dimensions = flightTrajectoryDimensions;
-				if (center != null && dimensions != null) {
-					cameraController.focusOnBounds(center, dimensions,
-							OVERVIEW_CLOSEST_DISTANCE_FACTOR, OVERVIEW_FARTHEST_DISTANCE_FACTOR);
-				}
-			}
-			blendFlightCameraTransition(camera, deltaTime);
+			flightCamera.update(t, playbackClock.getStart(), deltaTime);
 			DoubleConsumer frameListener = flightFrameListener;
 			if (frameListener != null) {
 				frameListener.accept(t);
@@ -506,6 +386,7 @@ public class Scene3DOrchestrator {
 		this.cameraController = new CameraController(rocket, camera, scene, renderingConfiguration,
 				renderedConfigurationId);
 		this.cameraController.initialize(rocket, viewport.getAspectRatio());
+		this.flightCamera = new FlightCameraRig(cameraController);
 		this.cameraController.addCameraChangeListener(ignored -> {
 			LightController lightController = this.scene.getLightController();
 			if (!lightController.areVisualizersVisible()) {
@@ -555,8 +436,7 @@ public class Scene3DOrchestrator {
 				obj.setPoseProvider(providerOrPrimary(component, providersByStage, primaryProvider));
 			}
 		});
-		FlightTrackTarget current = flightTrackTarget;
-		this.flightTrackTarget = new FlightTrackTarget(primaryProvider, current != null ? current.centerOffset() : null);
+		flightCamera.setTrackProvider(primaryProvider);
 		this.playbackClock = new PlaybackClock(startTime, endTime);
 	}
 
@@ -606,54 +486,9 @@ public class Scene3DOrchestrator {
 		return List.copyOf(mounts);
 	}
 
-	public void setFollowFlightCamera(boolean followFlightCamera) {
-		lastAppliedPadDistance = Float.NaN;
-		pendingCameraTransition = true;
-		if (followFlightCamera) {
-			this.pendingFollowFit = true;
-			this.flightCameraBehavior = FlightCameraBehavior.FOLLOW;
-		} else {
-			this.flightCameraBehavior = FlightCameraBehavior.FREE;
-		}
-	}
-
-	private void blendFlightCameraTransition(Camera camera, float deltaTime) {
-		if (transitionFrom == null) {
-			return;
-		}
-		transitionElapsed += Math.min(Math.max(deltaTime, 0.0f), MAX_TRANSITION_STEP_SECONDS);
-		float progress = transitionElapsed / CAMERA_TRANSITION_SECONDS;
-		if (progress >= 1.0f) {
-			transitionFrom = null;
-			return;
-		}
-		transitionTarget = camera.capturePose();
-		float eased = progress * progress * (3.0f - 2.0f * progress);
-		camera.restorePose(Camera.Pose.blend(transitionFrom, transitionTarget, eased));
-	}
-
-	/** Whether a camera transition between flight views is still animating. */
-	public boolean isFlightCameraTransitioning() {
-		return pendingCameraTransition || transitionFrom != null;
-	}
-
-	/** Applies the requested flight view immediately, e.g. when a replay first opens. */
-	public void skipFlightCameraTransition() {
-		pendingCameraTransition = false;
-		transitionFrom = null;
-	}
-
-	/** Moves with the rocket while preserving the user's pan relative to it, including on seeks. */
-	static void trackFlightPivot(Camera camera, Vector3f previousPivot, Vector3f pivot) {
-		camera.setCenterOfInterest(new Vector3f(camera.getCenterOfInterest()).sub(previousPivot).add(pivot));
-	}
-
-	/** Watches the rocket from a fixed eye position near the pad, like launch footage. */
-	public void setPadFlightCamera(Vector3f eyePosition) {
-		this.flightPadEye = eyePosition != null ? new Vector3f(eyePosition) : null;
-		this.pendingPadZoomReset = true;
-		this.pendingCameraTransition = true;
-		this.flightCameraBehavior = FlightCameraBehavior.PAD;
+	/** The replay's camera behaviors (follow, pad, whole-flight framing and their transitions). */
+	public FlightCameraRig getFlightCamera() {
+		return flightCamera;
 	}
 
 	/** Allows ordinary pan gestures in free/follow views and blocks every pan path at the pad. */
@@ -666,98 +501,8 @@ public class Scene3DOrchestrator {
 		enqueueGlTask(() -> cameraController.handleScroll(scrollAmount));
 	}
 
-	private record FlightTrackTarget(PoseProvider provider, Vector3f centerOffset) {
-		private FlightTrackTarget {
-			centerOffset = centerOffset != null ? new Vector3f(centerOffset) : null;
-		}
-
-		/** The tracked body's geometric center at the given time. */
-		private Vector3f pivotAt(double time) {
-			Vector3f pivot = provider.getPosition(time);
-			if (centerOffset != null) {
-				pivot.add(provider.getOrientation(time).transform(new Vector3f(centerOffset)));
-			}
-			return pivot;
-		}
-	}
-
-	/**
-	 * Expresses a look-from-eye-to-target view through the orbit camera's center of
-	 * interest, distance and angles, widening the zoom clamp so an earlier fit cannot
-	 * clip the computed distance. Returns the eye-to-target distance.
-	 */
-	static float lookFrom(Camera camera, Vector3f eye, Vector3f target) {
-		Vector3f toEye = new Vector3f(eye).sub(target);
-		float eyeDistance = Math.max(CameraConstants.MIN_DISTANCE, Math.max(0.5f, toEye.length()));
-		toEye.normalize();
-		camera.setZoomLimits(Math.max(CameraConstants.MIN_DISTANCE, eyeDistance * 0.1f),
-				Math.max(eyeDistance * 10.0f, 10.0f));
-		camera.setDistance(eyeDistance);
-		camera.setAngleX((float) Math.atan2(toEye.x, toEye.z));
-		camera.setAngleY((float) Math.asin(Math.max(-1.0f, Math.min(1.0f, toEye.y))));
-		camera.setCenterOfInterest(target);
-		// A pan offset left over from another view would shift the fixed sightline.
-		camera.resetViewOffset();
-		return camera.getDistance();
-	}
-
-	/** Applies the wheel's change of the orbit distance since the last frame as a lens zoom factor. */
-	static float updatedPadZoomScale(float currentScale, float cameraDistance, float lastAppliedDistance) {
-		if (!Float.isFinite(lastAppliedDistance) || lastAppliedDistance <= 0.0f
-				|| !Float.isFinite(cameraDistance) || cameraDistance <= 0.0f) {
-			return currentScale;
-		}
-		return currentScale * cameraDistance / lastAppliedDistance;
-	}
-
-	/**
-	 * Tangent of the half field of view that keeps the rocket at its launch size on screen: the
-	 * base lens until the rocket is farther than at launch, then narrowing in proportion.
-	 */
-	static float telephotoTanHalfFieldOfView(float baseFieldOfView, float referenceDistance, float distance) {
-		float baseTan = (float) Math.tan(baseFieldOfView / 2.0);
-		if (!Float.isFinite(referenceDistance) || referenceDistance <= 0.0f || distance <= referenceDistance) {
-			return baseTan;
-		}
-		return baseTan * referenceDistance / distance;
-	}
-
 	/** Invoked on the render thread each playback frame with the current playback time. */
 	public void setFlightFrameListener(DoubleConsumer listener) {
 		this.flightFrameListener = listener;
-	}
-
-	/** Engine-CS offset from the rocket origin to its geometric center for the follow-camera pivot. */
-	public void setFlightRocketCenterOffset(Vector3f offset) {
-		FlightTrackTarget current = flightTrackTarget;
-		if (current != null) {
-			this.flightTrackTarget = new FlightTrackTarget(current.provider(), offset);
-		}
-	}
-
-	/**
-	 * Points the follow and pad cameras at another flying body: its trajectory and the offset
-	 * from its pose origin to its geometric center. The follow view keeps its pan and zoom.
-	 */
-	public void setFlightTrackTarget(PoseProvider provider, Vector3f centerOffset) {
-		if (provider == null) {
-			throw new IllegalArgumentException("provider is null");
-		}
-		this.flightTrackTarget = new FlightTrackTarget(provider, centerOffset);
-		this.pendingCameraTransition = true;
-	}
-
-	/**
-	 * Frames the whole flight: disables follow mode and requests a one-shot fit of the camera to
-	 * the given trajectory bounding box (applied on the render thread). The user can then orbit
-	 * and zoom freely around the entire flight.
-	 */
-	public void fitFlightTrajectory(Vector3f center, Vector3f dimensions) {
-		this.flightTrajectoryCenter = center != null ? new Vector3f(center) : null;
-		this.flightTrajectoryDimensions = dimensions != null ? new Vector3f(dimensions) : null;
-		this.flightCameraBehavior = FlightCameraBehavior.FREE;
-		this.lastAppliedPadDistance = Float.NaN;
-		this.pendingTrajectoryFit = true;
-		this.pendingCameraTransition = true;
 	}
 }

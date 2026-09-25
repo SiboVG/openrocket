@@ -286,7 +286,7 @@ class FlightReplayRenderTest {
 	private static BufferedImage capture(GLScenePanel canvas, String name) throws Exception {
 		// View switches animate the camera; capture the settled view.
 		long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
-		while (canvas.getScene3DOrchestrator().isFlightCameraTransitioning()) {
+		while (canvas.getScene3DOrchestrator().getFlightCamera().isTransitioning()) {
 			assertTrue(System.nanoTime() < deadline, "The camera transition never finished");
 			Thread.sleep(20);
 		}
