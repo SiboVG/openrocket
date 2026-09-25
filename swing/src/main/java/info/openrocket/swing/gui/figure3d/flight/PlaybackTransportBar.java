@@ -17,34 +17,18 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.Scrollable;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-import javax.swing.ToolTipManager;
-import javax.swing.UIManager;
 import javax.swing.JToggleButton;
 import javax.swing.event.ChangeEvent;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.Rectangle;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.RenderingHints;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.KeyEvent;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -58,7 +42,6 @@ import java.util.function.IntConsumer;
 @SuppressWarnings("serial")
 class PlaybackTransportBar extends JPanel {
 	private static final Translator trans = Application.getTranslator();
-	private static final int SLIDER_STEPS = 10_000;
 	private static final int POLL_INTERVAL_MS = 100;
 	private static final double FRAME_STEP_SECONDS = 1.0 / 60.0;
 	// Separates an option checkbox from the controls before it in its row.
@@ -78,10 +61,10 @@ class PlaybackTransportBar extends JPanel {
 	private final JButton playPauseButton = new IconButton(Icons.PLAYBACK_PLAY);
 	private final JButton nextFrameButton = new IconButton(Icons.PLAYBACK_STEP_FORWARD);
 	private final JCheckBox loopButton = new JCheckBox(trans.get("Flight3DFrame.loop"));
-	private final JComboBox<EventMarker> eventCombo = new JComboBox<>();
+	private final JComboBox<TimelineSlider.Marker> eventCombo = new JComboBox<>();
 	private final JCheckBox trailButton = new JCheckBox(trans.get("Flight3DFrame.showTrail"), true);
 	private final JCheckBox exhaustButton = new JCheckBox(trans.get("Flight3DFrame.showExhaust"), true);
-	private final EventMarkerSlider scrubSlider = new EventMarkerSlider();
+	private final TimelineSlider scrubSlider = new TimelineSlider();
 	// Slow motion down to 0.1x makes a sub-second motor burn watchable; up to 16x shortens
 	// long recovery descents.
 	private static final double[] SPEEDS = { 0.1, 0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0 };
@@ -108,7 +91,6 @@ class PlaybackTransportBar extends JPanel {
 	private Consumer<Boolean> exhaustVisibilityListener;
 	private Runnable replayChangeListener;
 	private boolean viewControlsEnabled;
-	private boolean userIsDragging;
 	private boolean programmaticUpdate;
 	private double rateBeforeScrub;
 	private boolean updatingEvents;
@@ -139,7 +121,7 @@ class PlaybackTransportBar extends JPanel {
 		});
 		loopButton.setBorder(BorderFactory.createEmptyBorder(0, OPTION_GAP, 0, 0));
 		playbackControls.add(loopButton);
-		eventCombo.setPrototypeDisplayValue(new EventMarker(999.99, trans.get("Flight3DFrame.events"), null));
+		eventCombo.setPrototypeDisplayValue(new TimelineSlider.Marker(999.99, trans.get("Flight3DFrame.events"), null));
 		eventCombo.setRenderer(new DefaultListCellRenderer() {
 			@Override
 			public Component getListCellRendererComponent(JList<?> list, Object value, int index,
@@ -150,7 +132,7 @@ class PlaybackTransportBar extends JPanel {
 		});
 		eventCombo.setToolTipText(trans.get("Flight3DFrame.events.ttip"));
 		eventCombo.addActionListener(e -> {
-			if (!updatingEvents && eventCombo.getSelectedItem() instanceof EventMarker marker) {
+			if (!updatingEvents && eventCombo.getSelectedItem() instanceof TimelineSlider.Marker marker) {
 				pauseAndSeek(marker.time());
 			}
 		});
@@ -208,7 +190,7 @@ class PlaybackTransportBar extends JPanel {
 		help.setToolTipText(trans.get("Flight3DFrame.controls.ttip"));
 		help.addActionListener(e -> JOptionPane.showMessageDialog(this, trans.get("Flight3DFrame.controls.ttip"),
 				trans.get("Flight3DFrame.controls"), JOptionPane.INFORMATION_MESSAGE));
-		ScrollableRow viewRow = new ScrollableRow();
+		HorizontalScrollPane.Row viewRow = new HorizontalScrollPane.Row();
 		viewRow.add(viewControls, BorderLayout.CENTER);
 		JPanel helpCell = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
 		helpCell.add(help);
@@ -216,30 +198,34 @@ class PlaybackTransportBar extends JPanel {
 		viewControlsScroll = new HorizontalScrollPane(viewRow);
 		add(viewControlsScroll, BorderLayout.NORTH);
 
-		scrubSlider.setMinimum(0);
-		scrubSlider.setMaximum(SLIDER_STEPS);
-		scrubSlider.setValue(0);
-		scrubSlider.setPaintTicks(false);
 		scrubSlider.setEnabled(false);
-		MouseAdapter scrubMouseListener = new MouseAdapter() {
+		scrubSlider.setListener(new TimelineSlider.Listener() {
 			@Override
-			public void mouseEntered(MouseEvent e) {
-				scrubSlider.showTooltipsInstantly(true);
+			public void markerClicked(TimelineSlider.Marker marker) {
+				pauseAndSeek(marker.time());
 			}
 
 			@Override
-			public void mouseMoved(MouseEvent e) {
-				scrubSlider.updateMarkerHover(e.getX(), e.getY());
+			public void scrubStarted() {
+				// Hold playback while scrubbing and resume at the same rate afterwards.
+				rateBeforeScrub = clock.getRate();
+				clock.setRate(0.0);
+				updatePlaybackButton();
 			}
 
 			@Override
-			public void mouseExited(MouseEvent e) {
-				scrubSlider.updateMarkerHover(-1, -1);
-				scrubSlider.showTooltipsInstantly(false);
+			public void scrubbedTo(int value) {
+				seekToSliderValue();
 			}
-		};
-		scrubSlider.addMouseListener(scrubMouseListener);
-		scrubSlider.addMouseMotionListener(scrubMouseListener);
+
+			@Override
+			public void scrubEnded() {
+				clock.setRate(rateBeforeScrub);
+				updateFromClock();
+				updatePlaybackButton();
+				notifyReplayChanged();
+			}
+		});
 		scrubSlider.addChangeListener(this::handleSliderChanged);
 		JPanel timeline = new JPanel(new BorderLayout(8, 0));
 		// Center the buttons vertically on the timeline track instead of pinning them to its top.
@@ -357,8 +343,8 @@ class PlaybackTransportBar extends JPanel {
 	void setReplay(PlaybackClock clock, FlightReplayData replayData) {
 		clearReplay();
 		this.clock = clock;
-		List<EventMarker> markers = createMarkers(replayData);
-		scrubSlider.setMarkers(markers);
+		List<TimelineSlider.Marker> markers = createMarkers(replayData);
+		scrubSlider.setEvents(markers, clock != null ? clock.getStart() : 0.0, clock != null ? clock.getEnd() : 0.0);
 		updatingEvents = true;
 		try {
 			eventCombo.removeAllItems();
@@ -383,7 +369,7 @@ class PlaybackTransportBar extends JPanel {
 
 	void clearReplay() {
 		pollTimer.stop();
-		userIsDragging = false;
+		scrubSlider.resetGesture();
 		rateBeforeScrub = 0.0;
 		if (clock != null) {
 			clock.setRate(0.0);
@@ -395,7 +381,7 @@ class PlaybackTransportBar extends JPanel {
 		} finally {
 			updatingEvents = false;
 		}
-		scrubSlider.setMarkers(List.of());
+		scrubSlider.setEvents(List.of(), 0.0, 0.0);
 		scrubSlider.setValue(0);
 		setTrackedBodies(List.of());
 		setControlsEnabled(false);
@@ -405,7 +391,7 @@ class PlaybackTransportBar extends JPanel {
 
 	void dispose() {
 		pollTimer.stop();
-		scrubSlider.showTooltipsInstantly(false);
+		scrubSlider.dispose();
 		clearReplay();
 	}
 
@@ -520,7 +506,7 @@ class PlaybackTransportBar extends JPanel {
 		if (clock == null) return;
 		double time = clock.getTime();
 		double target = direction < 0 ? clock.getStart() : clock.getEnd();
-		for (EventMarker marker : scrubSlider.markers) {
+		for (TimelineSlider.Marker marker : scrubSlider.getMarkers()) {
 			if (direction > 0 && marker.time() > time + 1e-6) {
 				target = marker.time();
 				break;
@@ -532,7 +518,7 @@ class PlaybackTransportBar extends JPanel {
 
 	/** Called on the EDT by the replay window, including when its heavyweight canvas has focus. */
 	boolean handleReplayKey(KeyEvent event) {
-		if (clock == null || userIsDragging || event.getID() != KeyEvent.KEY_PRESSED
+		if (clock == null || scrubSlider.isScrubbing() || event.getID() != KeyEvent.KEY_PRESSED
 				|| event.isAltDown() || event.isControlDown() || event.isMetaDown()) return false;
 		switch (event.getKeyCode()) {
 			case KeyEvent.VK_SPACE -> togglePlayback();
@@ -606,7 +592,7 @@ class PlaybackTransportBar extends JPanel {
 			return;
 		}
 		double time = clock.getTime();
-		if (!userIsDragging) {
+		if (!scrubSlider.isScrubbing()) {
 			programmaticUpdate = true;
 			try {
 				scrubSlider.setValue(timeToSliderValue(time));
@@ -638,14 +624,14 @@ class PlaybackTransportBar extends JPanel {
 			return 0;
 		}
 		double fraction = (time - clock.getStart()) / (clock.getEnd() - clock.getStart());
-		return (int) Math.round(Math.max(0.0, Math.min(1.0, fraction)) * SLIDER_STEPS);
+		return (int) Math.round(Math.max(0.0, Math.min(1.0, fraction)) * TimelineSlider.STEPS);
 	}
 
 	private double sliderValueToTime(int value) {
 		if (clock == null || clock.getEnd() <= clock.getStart()) {
 			return clock != null ? clock.getStart() : 0.0;
 		}
-		double fraction = Math.max(0.0, Math.min(1.0, value / (double) SLIDER_STEPS));
+		double fraction = Math.max(0.0, Math.min(1.0, value / (double) TimelineSlider.STEPS));
 		return clock.getStart() + fraction * (clock.getEnd() - clock.getStart());
 	}
 
@@ -654,22 +640,22 @@ class PlaybackTransportBar extends JPanel {
 		return selected instanceof SpeedOption option ? option.rate() : 1.0;
 	}
 
-	private List<EventMarker> createMarkers(FlightReplayData replayData) {
+	private List<TimelineSlider.Marker> createMarkers(FlightReplayData replayData) {
 		if (replayData == null) {
 			return List.of();
 		}
-		List<EventMarker> markers = new ArrayList<>();
+		List<TimelineSlider.Marker> markers = new ArrayList<>();
 		for (FlightEvent event : replayData.getAllEvents()) {
 			if (MARKER_TYPES.contains(event.getType()) && Double.isFinite(event.getTime())
 					&& event.getTime() >= replayData.getStartTime() && event.getTime() <= replayData.getEndTime()) {
-				EventMarker marker = new EventMarker(event.getTime(), eventLabel(event), event.getType());
+				TimelineSlider.Marker marker = new TimelineSlider.Marker(event.getTime(), eventLabel(event), event.getType());
 				// A clustered mount reports one event per motor; list the moment only once.
 				if (!markers.contains(marker)) {
 					markers.add(marker);
 				}
 			}
 		}
-		markers.sort(Comparator.comparingDouble(EventMarker::time));
+		markers.sort(Comparator.comparingDouble(TimelineSlider.Marker::time));
 		return List.copyOf(markers);
 	}
 
@@ -684,81 +670,6 @@ class PlaybackTransportBar extends JPanel {
 		return String.format(trans.get("Flight3DFrame.eventSourceFormat"), type, source.getName());
 	}
 
-	/**
-	 * A row that fills the available width while its controls fit, keeping the right-aligned
-	 * part at the edge, and keeps its preferred width (so it scrolls) once they no longer do.
-	 */
-	private static final class ScrollableRow extends JPanel implements Scrollable {
-		private ScrollableRow() {
-			super(new BorderLayout());
-		}
-
-		@Override
-		public Dimension getPreferredScrollableViewportSize() {
-			return getPreferredSize();
-		}
-
-		@Override
-		public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
-			return 16;
-		}
-
-		@Override
-		public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
-			return Math.max(16, visibleRect.width - 32);
-		}
-
-		@Override
-		public boolean getScrollableTracksViewportWidth() {
-			return getParent() == null || getParent().getWidth() >= getPreferredSize().width;
-		}
-
-		@Override
-		public boolean getScrollableTracksViewportHeight() {
-			return true;
-		}
-	}
-
-	/**
-	 * Scrolls a row horizontally when the window is too narrow for it. It grows by the scroll
-	 * bar's height while the bar shows, so the bar never covers the controls.
-	 */
-	private static final class HorizontalScrollPane extends JScrollPane {
-		private boolean scrollBarShown;
-
-		private HorizontalScrollPane(JComponent row) {
-			super(row, VERTICAL_SCROLLBAR_NEVER, HORIZONTAL_SCROLLBAR_AS_NEEDED);
-			setBorder(BorderFactory.createEmptyBorder());
-			setViewportBorder(null);
-			getHorizontalScrollBar().setUnitIncrement(16);
-			addComponentListener(new ComponentAdapter() {
-				@Override
-				public void componentResized(ComponentEvent event) {
-					// The bar appearing or disappearing changes the height the layout must reserve.
-					if (needsScrollBar() != scrollBarShown) {
-						scrollBarShown = needsScrollBar();
-						revalidate();
-					}
-				}
-			});
-		}
-
-		private boolean needsScrollBar() {
-			Insets insets = getInsets();
-			int available = getWidth() - insets.left - insets.right;
-			return available > 0 && getViewport().getView().getPreferredSize().width > available;
-		}
-
-		@Override
-		public Dimension getPreferredSize() {
-			Dimension size = super.getPreferredSize();
-			if (needsScrollBar()) {
-				size.height += getHorizontalScrollBar().getPreferredSize().height;
-			}
-			return size;
-		}
-	}
-
 	private record TrackedBodyOption(int index, String label) {
 		@Override
 		public String toString() {
@@ -770,193 +681,6 @@ class PlaybackTransportBar extends JPanel {
 		@Override
 		public String toString() {
 			return BigDecimal.valueOf(rate).stripTrailingZeros().toPlainString() + "x";
-		}
-	}
-
-	private record EventMarker(double time, String label, FlightEvent.Type type) {
-		@Override
-		public String toString() {
-			return String.format(trans.get("Flight3DFrame.eventTimeFormat"), label, time);
-		}
-	}
-
-	private final class EventMarkerSlider extends JSlider {
-		private List<EventMarker> markers = List.of();
-		private EventMarker hoveredMarker;
-		private boolean markerGesture;
-		// The tooltip manager is shared application-wide, so its delay is only shortened
-		// while the pointer is over the timeline and restored when it leaves.
-		private int savedInitialDelay = -1;
-
-		private EventMarkerSlider() {
-			setToolTipText("");
-			setPreferredSize(new Dimension(300, 44));
-			getAccessibleContext().setAccessibleName(trans.get("Flight3DFrame.timeline"));
-		}
-
-		@Override
-		protected void processMouseEvent(MouseEvent event) {
-			if (isEnabled() && clock != null && SwingUtilities.isLeftMouseButton(event)) {
-				if (event.getID() == MouseEvent.MOUSE_PRESSED) {
-					requestFocusInWindow();
-					EventMarker marker = findMarkerNear(event.getX(), event.getY());
-					markerGesture = marker != null;
-					if (markerGesture) {
-						pauseAndSeek(marker.time());
-					} else {
-						rateBeforeScrub = clock.getRate();
-						clock.setRate(0.0);
-						userIsDragging = true;
-						seekAtX(event.getX());
-						updatePlaybackButton();
-					}
-					return;
-				}
-				if (event.getID() == MouseEvent.MOUSE_RELEASED) {
-					if (userIsDragging) {
-						seekAtX(event.getX());
-						userIsDragging = false;
-						clock.setRate(rateBeforeScrub);
-						updateFromClock();
-						updatePlaybackButton();
-						notifyReplayChanged();
-					}
-					markerGesture = false;
-					return;
-				}
-			}
-			super.processMouseEvent(event);
-		}
-
-		@Override
-		protected void processMouseMotionEvent(MouseEvent event) {
-			if (event.getID() == MouseEvent.MOUSE_DRAGGED && (userIsDragging || markerGesture)) {
-				if (userIsDragging) seekAtX(event.getX());
-				return;
-			}
-			super.processMouseMotionEvent(event);
-		}
-
-		private void seekAtX(int x) {
-			int left = getInsets().left + 12;
-			int width = Math.max(1, getWidth() - getInsets().right - 12 - left);
-			setValue((int) Math.round((x - left) * (double) SLIDER_STEPS / width));
-			seekToSliderValue();
-		}
-
-		private void showTooltipsInstantly(boolean instant) {
-			ToolTipManager manager = ToolTipManager.sharedInstance();
-			if (instant && savedInitialDelay < 0) {
-				savedInitialDelay = manager.getInitialDelay();
-				manager.setInitialDelay(0);
-			} else if (!instant && savedInitialDelay >= 0) {
-				manager.setInitialDelay(savedInitialDelay);
-				savedInitialDelay = -1;
-			}
-		}
-
-		private void setMarkers(List<EventMarker> markers) {
-			this.markers = markers != null ? markers : List.of();
-			hoveredMarker = null;
-			markerGesture = false;
-			repaint();
-		}
-
-		@Override
-		public String getToolTipText(MouseEvent event) {
-			EventMarker marker = findMarkerNear(event.getX(), event.getY());
-			if (marker == null) {
-				return null;
-			}
-			return String.format(trans.get("Flight3DFrame.eventTimeFormat"), marker.label(), marker.time());
-		}
-
-		@Override
-		protected void paintComponent(Graphics graphics) {
-			Graphics2D g2 = (Graphics2D) graphics.create();
-			try {
-				g2.setColor(getBackground());
-				g2.fillRect(0, 0, getWidth(), getHeight());
-				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-				int left = getInsets().left + 12;
-				int right = Math.max(left, getWidth() - getInsets().right - 12);
-				int trackY = getHeight() / 2 - 4;
-				int thumbX = left + (int) Math.round((right - left) * getValue() / (double) SLIDER_STEPS);
-				Color trackColor = UIManager.getColor("Slider.trackColor");
-				g2.setColor(trackColor != null ? trackColor : Color.GRAY);
-				g2.fillRoundRect(left, trackY - 2, right - left, 4, 4, 4);
-				if (!isEnabled()) return;
-				g2.setColor(markerColor());
-				g2.fillRoundRect(left, trackY - 2, thumbX - left, 4, 4, 4);
-				g2.fillOval(thumbX - 6, trackY - 6, 12, 12);
-				if (hasFocus()) g2.drawOval(thumbX - 9, trackY - 9, 18, 18);
-				if (clock == null || clock.getEnd() <= clock.getStart()) return;
-				int y = markerY();
-				for (EventMarker marker : markers) {
-					// Match the trajectory's event marker colors, so the slider ticks and the
-					// 3D markers read as the same events.
-					g2.setColor(FlightEventMarkers.hasColor(marker.type())
-							? FlightEventMarkers.awtColorOf(marker.type()) : markerColor());
-					int x = xForTime(marker.time());
-					g2.drawLine(x, y - 6, x, y + 5);
-					int diameter = marker == hoveredMarker ? 8 : 6;
-					g2.fillOval(x - diameter / 2, y - diameter / 2, diameter, diameter);
-				}
-			} finally {
-				g2.dispose();
-			}
-		}
-
-		private EventMarker findMarkerNear(int x, int y) {
-			if (clock == null || markers.isEmpty()) {
-				return null;
-			}
-			if (Math.abs(markerY() - y) > 9) {
-				return null;
-			}
-			EventMarker nearest = null;
-			int nearestDistance = Integer.MAX_VALUE;
-			for (EventMarker marker : markers) {
-				int distance = Math.abs(xForTime(marker.time()) - x);
-				if (distance < nearestDistance) {
-					nearest = marker;
-					nearestDistance = distance;
-				}
-			}
-			return nearestDistance <= 8 ? nearest : null;
-		}
-
-		private void updateMarkerHover(int x, int y) {
-			EventMarker marker = findMarkerNear(x, y);
-			if (marker == hoveredMarker) {
-				return;
-			}
-			hoveredMarker = marker;
-			setCursor(marker != null
-					? Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-					: Cursor.getDefaultCursor());
-			repaint();
-		}
-
-		private int markerY() {
-			return getHeight() / 2 + 8;
-		}
-
-		private int xForTime(double time) {
-			Insets insets = getInsets();
-			int left = insets.left + 12;
-			int right = getWidth() - insets.right - 12;
-			if (right <= left || clock == null || clock.getEnd() <= clock.getStart()) {
-				return left;
-			}
-			double fraction = (time - clock.getStart()) / (clock.getEnd() - clock.getStart());
-			fraction = Math.max(0.0, Math.min(1.0, fraction));
-			return left + (int) Math.round(fraction * (right - left));
-		}
-
-		private Color markerColor() {
-			Color color = UIManager.getColor("Component.accentColor");
-			return color != null ? color : new Color(0xC35A00);
 		}
 	}
 }
