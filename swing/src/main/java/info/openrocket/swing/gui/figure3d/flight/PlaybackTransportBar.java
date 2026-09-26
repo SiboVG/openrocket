@@ -7,6 +7,7 @@ import info.openrocket.core.startup.Application;
 import info.openrocket.swing.gui.figure3d.animation.PlaybackClock;
 import info.openrocket.swing.gui.util.Icons;
 import info.openrocket.swing.gui.widgets.IconButton;
+import info.openrocket.swing.gui.widgets.SingleRowScrollPane;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -197,12 +198,12 @@ class PlaybackTransportBar extends JPanel {
 		help.setToolTipText(trans.get("Flight3DFrame.controls.ttip"));
 		help.addActionListener(e -> JOptionPane.showMessageDialog(this, trans.get("Flight3DFrame.controls.ttip"),
 				trans.get("Flight3DFrame.controls"), JOptionPane.INFORMATION_MESSAGE));
-		HorizontalScrollPane.Row viewRow = new HorizontalScrollPane.Row();
+		JPanel viewRow = new JPanel(new BorderLayout());
 		viewRow.add(viewControls, BorderLayout.CENTER);
 		JPanel helpCell = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 2));
 		helpCell.add(help);
 		viewRow.add(helpCell, BorderLayout.EAST);
-		viewControlsScroll = new HorizontalScrollPane(viewRow);
+		viewControlsScroll = new SingleRowScrollPane(viewRow, this::revalidate);
 		add(viewControlsScroll, BorderLayout.NORTH);
 
 		scrubSlider.setEnabled(false);
