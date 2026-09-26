@@ -181,6 +181,46 @@ public class MonteCarloSimulationRunnerTest extends BaseTestCase {
 	}
 
 	@Test
+	public void testLandingVelocityUsesImpactSampleBeforeLaterGroundEvents() {
+		FlightDataBranch branch = new FlightDataBranch("Stage", FlightDataType.TYPE_TIME,
+				FlightDataType.TYPE_VELOCITY_TOTAL);
+		branch.addPoint();
+		branch.setValue(FlightDataType.TYPE_TIME, 0);
+		branch.setValue(FlightDataType.TYPE_VELOCITY_TOTAL, 0);
+		branch.addPoint();
+		branch.setValue(FlightDataType.TYPE_TIME, 10);
+		branch.setValue(FlightDataType.TYPE_VELOCITY_TOTAL, 8);
+		branch.addEvent(new FlightEvent(FlightEvent.Type.GROUND_HIT, 10));
+		branch.addPoint();
+		branch.setValue(FlightDataType.TYPE_TIME, 20);
+		branch.setValue(FlightDataType.TYPE_VELOCITY_TOTAL, 0);
+		branch.addEvent(new FlightEvent(FlightEvent.Type.EJECTION_CHARGE, 20));
+
+		MonteCarloBranchResult result = MonteCarloSimulationRunner.extractBranchResults(
+				new FlightData(branch)).get(0);
+
+		assertEquals(8, result.getMetric(MonteCarloMetric.LANDING_VELOCITY));
+	}
+
+	@Test
+	public void testLandingVelocityInterpolatesAtGroundHitTime() {
+		FlightDataBranch branch = new FlightDataBranch("Stage", FlightDataType.TYPE_TIME,
+				FlightDataType.TYPE_VELOCITY_TOTAL);
+		branch.addPoint();
+		branch.setValue(FlightDataType.TYPE_TIME, 10);
+		branch.setValue(FlightDataType.TYPE_VELOCITY_TOTAL, 10);
+		branch.addPoint();
+		branch.setValue(FlightDataType.TYPE_TIME, 12);
+		branch.setValue(FlightDataType.TYPE_VELOCITY_TOTAL, 6);
+		branch.addEvent(new FlightEvent(FlightEvent.Type.GROUND_HIT, 11));
+
+		MonteCarloBranchResult result = MonteCarloSimulationRunner.extractBranchResults(
+				new FlightData(branch)).get(0);
+
+		assertEquals(8, result.getMetric(MonteCarloMetric.LANDING_VELOCITY));
+	}
+
+	@Test
 	public void testSeparatedBoostersAreSelectableLandingBodies() {
 		Rocket rocket = TestRockets.makeMultiStageEventTestRocket();
 		rocket.getSelectedConfiguration().setAllStages();
