@@ -2,6 +2,7 @@ package info.openrocket.swing.gui.figure3d.flight;
 
 import info.openrocket.core.simulation.FlightDataBranch;
 import info.openrocket.core.simulation.FlightDataType;
+import info.openrocket.core.util.MathUtil;
 import info.openrocket.swing.gui.figure3d.animation.SimToWorld;
 import info.openrocket.swing.gui.figure3d.animation.TimeSeries;
 import org.joml.Vector3f;
@@ -16,6 +17,9 @@ import java.util.List;
  * rocket was flying.
  */
 final class WindField {
+	/** Below this speed (m/s) the wind has no direction worth showing. */
+	static final double CALM_SPEED = 0.1;
+
 	private static final WindField CALM = new WindField(new double[] { 0.0 }, new double[] { 0.0 },
 			new double[] { 0.0 });
 
@@ -65,6 +69,21 @@ final class WindField {
 	/** Wind velocity at the given flight time in engine units per second. */
 	Vector3f velocityAt(double time) {
 		return toEngine(TimeSeries.interpolate(times, east, time), TimeSeries.interpolate(times, north, time));
+	}
+
+	/** Wind speed at the given flight time in meters per second. */
+	double speedAt(double time) {
+		return Math.hypot(TimeSeries.interpolate(times, east, time), TimeSeries.interpolate(times, north, time));
+	}
+
+	/**
+	 * The direction the wind blows from at the given flight time, in radians clockwise from north
+	 * within [0, 2π), as the simulator records it. Meaningless when the air is calm.
+	 */
+	double directionAt(double time) {
+		double e = TimeSeries.interpolate(times, east, time);
+		double n = TimeSeries.interpolate(times, north, time);
+		return MathUtil.reduce2Pi(Math.atan2(-e, -n));
 	}
 
 	private static Vector3f toEngine(double east, double north) {

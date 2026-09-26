@@ -75,8 +75,8 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 	 */
 	private record Replay(Scene3DOrchestrator orchestrator, PlaybackClock clock, ReplayPoses poses,
 			TrajectoryTrails trails, ReplayExhaust exhaust, RecoveryDevices recovery, FlightTargetMarker targetMarker,
-			ReplayPoses.Bounds bounds, float rocketLength, float initialAngleX, float initialAngleY,
-			float baseFieldOfView) {
+			WindIndicator windIndicator, ReplayPoses.Bounds bounds, float rocketLength, float initialAngleX,
+			float initialAngleY, float baseFieldOfView) {
 		private FlightCameraRig camera() {
 			return orchestrator.getFlightCamera();
 		}
@@ -409,24 +409,27 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		camera.setNearPlaneScalesWithDistance(true);
 		FlightTargetMarker targetMarker = new FlightTargetMarker(camera);
 		FlightOrientationGizmo gizmo = new FlightOrientationGizmo();
+		WindIndicator windIndicator = new WindIndicator(initializedPanel::getHeight);
 		orchestrator.getRenderer().setFrameOverlay(new FrameOverlay() {
 			@Override
 			public void render(Matrix4f cameraViewMatrix, int width, int height) {
 				targetMarker.render(cameraViewMatrix, width, height);
 				gizmo.render(cameraViewMatrix, width, height);
+				windIndicator.render(cameraViewMatrix, width, height);
 			}
 
 			@Override
 			public void cleanup() {
 				targetMarker.cleanup();
 				gizmo.cleanup();
+				windIndicator.cleanup();
 			}
 		});
 
 		PlaybackClock clock = orchestrator.getPlaybackClock();
 		clock.setRate(0.0);
-		Replay ready = new Replay(orchestrator, clock, poses, trails, exhaust, recovery, targetMarker, bounds,
-				rocketLength, camera.getAngleX(), camera.getAngleY(), camera.getFieldOfView());
+		Replay ready = new Replay(orchestrator, clock, poses, trails, exhaust, recovery, targetMarker, windIndicator,
+				bounds, rocketLength, camera.getAngleX(), camera.getAngleY(), camera.getFieldOfView());
 		trackedBodyIndex = 0;
 		replay = ready;
 		applyCameraMode(ready, cameraMode);
@@ -464,7 +467,9 @@ class Flight3DPanel extends JPanel implements SharedCanvasRenderScheduler.Client
 		current.recovery().update(time);
 		int bodyIndex = trackedBodyIndex;
 		if (bodyIndex >= 0 && bodyIndex < current.poses().bodies().size()) {
-			current.targetMarker().setTarget(current.poses().bodies().get(bodyIndex).centerAt(time), current.rocketLength());
+			ReplayPoses.TrackedBody body = current.poses().bodies().get(bodyIndex);
+			current.targetMarker().setTarget(body.centerAt(time), current.rocketLength());
+			current.windIndicator().setWind(body.wind(), time);
 		}
 
 		PlaybackClock clock = current.clock();

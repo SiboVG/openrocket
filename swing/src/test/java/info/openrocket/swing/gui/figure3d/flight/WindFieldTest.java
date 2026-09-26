@@ -31,6 +31,23 @@ class WindFieldTest {
 	}
 
 	@Test
+	void reportsTheSpeedAndTheDirectionTheWindBlowsFrom() {
+		WindField west = wind(6.0, Math.toRadians(270.0));
+		assertEquals(6.0, west.speedAt(0.0), 1e-9);
+		assertEquals(Math.toRadians(270.0), west.directionAt(0.0), 1e-9);
+		assertEquals(0.0, wind(3.0, 0.0).directionAt(0.0), 1e-9, "North must read 0, not 2π or -0");
+	}
+
+	@Test
+	void directionAcrossNorthStaysNorthward() {
+		FlightDataBranch branch = branch();
+		addSample(branch, 0.0, 4.0, Math.toRadians(350.0));
+		addSample(branch, 2.0, 4.0, Math.toRadians(20.0));
+
+		assertEquals(Math.toRadians(5.0), WindField.fromBranch(branch).directionAt(1.0), 1e-9);
+	}
+
+	@Test
 	void isCalmWithoutWindData() {
 		FlightDataBranch branch = new FlightDataBranch("no wind", FlightDataType.TYPE_TIME);
 		branch.addPoint();
