@@ -855,6 +855,9 @@ public class SimulationOptions implements ChangeSource, Cloneable, SimulationOpt
 				MathUtil.equals(this.timeStep, o.timeStep) &&
 				MathUtil.equals(this.maxSimulationTime, o.maxSimulationTime)) &&
 				this.stepperMethodChoice == o.stepperMethodChoice &&
+				this.useISA == o.useISA &&
+				this.launchIntoWind == o.launchIntoWind &&
+				this.geodeticComputation == o.geodeticComputation &&
 				this.dragLookupTable == o.dragLookupTable &&
 				this.stabilityLookupTable == o.stabilityLookupTable &&
 				this.windModelType == o.windModelType &&

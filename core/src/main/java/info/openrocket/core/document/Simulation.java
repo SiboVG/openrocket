@@ -517,6 +517,7 @@ public class Simulation implements ChangeSource, Cloneable {
 			throws SimulationException {
 		mutex.lock("simulate");
 		SimulationEngine simulator = null;
+		boolean completed = false;
 		simulatedData = null;
 		try {
 			
@@ -549,6 +550,7 @@ public class Simulation implements ChangeSource, Cloneable {
 			log.debug("Simulation: calling simulator");
 			t1 = System.currentTimeMillis();
 			simulator.simulate(simulationConditions);
+			completed = true;
 			t2 = System.currentTimeMillis();
 			log.debug("Simulation: returning from simulator, simulation took " + (t2 - t1) + "ms");
 
@@ -563,7 +565,7 @@ public class Simulation implements ChangeSource, Cloneable {
 				simulatedData = simulator.getFlightData();
 			}
 			
-			status = Status.UPTODATE;
+			status = completed ? Status.UPTODATE : Status.OUTDATED;
 			fireChangeEvent();
 
 			mutex.unlock("simulate");
