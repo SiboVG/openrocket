@@ -71,9 +71,11 @@ public class FlightConfiguration implements FlightConfigurableParameter<FlightCo
 	final protected Map<MotorConfigurationId, MotorConfiguration> motors = new HashMap<>();
 	private Map<Integer, Boolean> preloadStageActiveness = null;
 	final private Collection<MotorConfiguration> activeMotors = new ConcurrentLinkedQueue<>();
-	final private InstanceMap activeInstances = new InstanceMap();
-	final private InstanceMap extraRenderInstances = new InstanceMap(); // Extra instances to be rendered, besides the
-																		// active instances
+	// Rebuilt as new maps on every update and never modified afterwards, so that readers on other threads
+	// always iterate a complete snapshot
+	private volatile InstanceMap activeInstances = new InstanceMap();
+	// Extra instances to be rendered, besides the active instances
+	private volatile InstanceMap extraRenderInstances = new InstanceMap();
 
 	private ModID boundsModID = ModID.INVALID;
 	private BoundingBox cachedBoundsAerodynamic = new BoundingBox(); // Bounding box of all aerodynamic components
@@ -435,13 +437,15 @@ public class FlightConfiguration implements FlightConfigurableParameter<FlightCo
 	 * ONLY WHEN READY / MATURE!
 	 */
 	private void updateActiveInstances() {
-		activeInstances.clear();
-		extraRenderInstances.clear();
-		getActiveContextListAt(this.rocket, activeInstances, Transformation.IDENTITY);
+		InstanceMap newActiveInstances = new InstanceMap();
+		InstanceMap newExtraRenderInstances = new InstanceMap();
+		getActiveContextListAt(this.rocket, newActiveInstances, newExtraRenderInstances, Transformation.IDENTITY);
+		activeInstances = newActiveInstances;
+		extraRenderInstances = newExtraRenderInstances;
 	}
 
 	private InstanceMap getActiveContextListAt(final RocketComponent component, final InstanceMap results,
-			final Transformation parentTransform) {
+			final InstanceMap extraRenderResults, final Transformation parentTransform) {
 
 		final int instanceCount = component.getInstanceCount();
 		final CoordinateIF[] allOffsets = component.getInstanceOffsets();
@@ -465,11 +469,11 @@ public class FlightConfiguration implements FlightConfigurableParameter<FlightCo
 				// Boosters with no children are marked as inactive, but still need to be
 				// rendered.
 				// See GitHub issue #1980 for more information.
-				extraRenderInstances.emplace(component, currentInstanceNumber, currentTransform, parentTransform);
+				extraRenderResults.emplace(component, currentInstanceNumber, currentTransform, parentTransform);
 			}
 
 			for (RocketComponent child : component.getChildren()) {
-				getActiveContextListAt(child, results, currentTransform);
+				getActiveContextListAt(child, results, extraRenderResults, currentTransform);
 			}
 		}
 

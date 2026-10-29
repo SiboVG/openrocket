@@ -54,14 +54,12 @@ public class WindModelSeedReproducibilityTest extends BaseTestCase {
 	/**
 	 * Tolerance on "the same flight", in metres.
 	 * <p>
-	 * Not zero, because the simulator is not bit-reproducible even with no randomness
-	 * in play: identical seeded runs can differ by around 1.2e-4 m across supported
-	 * CI platforms and JVM execution modes. That floor is unrelated to the seed and
-	 * is not what this test is about. An unseeded wind model, by contrast, moves the
-	 * apogee by of the order of a metre, so this bound remains three orders of
-	 * magnitude below the effect being tested.
+	 * Zero: identical seeded runs must give bit-identical flights. This also guards
+	 * against the component forces being summed in an order that varies between runs,
+	 * such as the hash order of the components' random UUIDs, which made identical
+	 * runs differ in the last bits and their flights drift apart by around 1e-4 m.
 	 */
-	private static final double SAME_FLIGHT_TOLERANCE = 5.0e-4;
+	private static final double SAME_FLIGHT_TOLERANCE = 0;
 
 	@Test
 	public void testAverageWindModelIsReproducibleFromSeed() throws SimulationException {

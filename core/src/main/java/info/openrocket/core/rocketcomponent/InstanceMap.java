@@ -1,18 +1,22 @@
 package info.openrocket.core.rocketcomponent;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import info.openrocket.core.util.Transformation;
 
 /**
+ * Map of components to their instances, iterated in the order the components were added.
+ * <p>
+ * The order must not depend on the components' hash codes, which derive from random UUIDs: the aerodynamic
+ * calculators sum over this map, and a run-dependent summation order makes identical simulations diverge.
  *
  * @author teyrana (aka Daniel Williams) <equipoise@gmail.com>
  *
  */
-public class InstanceMap extends ConcurrentHashMap<RocketComponent, ArrayList<InstanceContext>> {
+public class InstanceMap extends LinkedHashMap<RocketComponent, ArrayList<InstanceContext>> {
 
 	// =========== Public Functions ========================
 
